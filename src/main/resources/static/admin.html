@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FITNESS PRO — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        :root{--acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--bg:#0A0A0A;--surface:#111111;--surface2:#1A1A1A;--border:#222222;--text:#F0F0F0;--muted:#666666;--font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;}
+        h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.02em;text-transform:uppercase;}
+        ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--red);}
+
+        .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+        .sidebar-logo{padding:1.8rem 1.5rem;border-bottom:1px solid var(--border);}
+        .sidebar-logo .logo{font-family:var(--font-d);font-size:1.7rem;font-weight:900;color:var(--red);letter-spacing:0.12em;}
+        .sidebar-logo .role-tag{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(255,45,85,0.12);color:var(--red);border:1px solid rgba(255,45,85,0.25);padding:0.18rem 0.7rem;border-radius:2px;margin-top:0.5rem;}
+        .sidebar-user{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.9rem;}
+        .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--orange));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:#fff;flex-shrink:0;}
+        .user-info .name{font-size:0.88rem;font-weight:500;}
+        .user-info .email{font-size:0.75rem;color:var(--muted);}
+        .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
+        .nav-section{padding:0.5rem 1.5rem 0.3rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+        .nav-item{display:flex;align-items:center;gap:0.9rem;padding:0.75rem 1.5rem;color:var(--muted);font-size:0.88rem;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent;text-decoration:none;}
+        .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+        .nav-item.active{color:var(--red);border-left-color:var(--red);background:rgba(255,45,85,0.05);}
+        .nav-item i{width:16px;text-align:center;font-size:0.9rem;}
+        .sidebar-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border);}
+        .logout-btn{display:flex;align-items:center;gap:0.8rem;color:var(--muted);font-size:0.85rem;cursor:pointer;transition:color 0.2s;background:none;border:none;width:100%;text-align:left;font-family:var(--font-b);}
+        .logout-btn:hover{color:var(--red);}
+
+        .main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+        .topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;position:sticky;top:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);z-index:50;}
+        .page-title{font-size:1.4rem;font-weight:800;letter-spacing:0.05em;}
+        .topbar-right{display:flex;align-items:center;gap:1rem;}
+        .admin-badge{background:rgba(255,45,85,0.12);color:var(--red);border:1px solid rgba(255,45,85,0.25);font-family:var(--font-d);font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.2rem 0.8rem;border-radius:2px;}
+        .content{padding:2.5rem;flex:1;}
+
+        .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .panel-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
+        .panel-title{font-size:1.1rem;font-weight:800;letter-spacing:0.05em;}
+        .panel-body{padding:1.5rem;}
+        .method{font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;padding:0.2rem 0.6rem;border-radius:2px;}
+        .m-get{background:rgba(0,255,209,0.12);color:var(--acid2);}
+        .m-post{background:rgba(200,255,0,0.12);color:var(--acid);}
+        .m-del{background:rgba(255,45,85,0.12);color:var(--red);}
+        .m-put{background:rgba(255,149,0,0.12);color:var(--orange);}
+
+        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .stat-card{background:var(--surface);padding:1.5rem 1.2rem;}
+        .stat-card-icon{font-size:1.2rem;color:var(--red);margin-bottom:0.7rem;}
+        .stat-card-val{font-family:var(--font-d);font-size:2.5rem;font-weight:900;line-height:1;}
+        .stat-card-lbl{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
+        .stat-card.accent .stat-card-icon{color:var(--acid);}
+        .stat-card.accent .stat-card-val{color:var(--acid);}
+
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+
+        .api-url{font-family:monospace;font-size:0.78rem;color:var(--muted);padding:0.45rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:2px;margin-bottom:1rem;word-break:break-all;}
+        .api-out{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1rem;font-family:monospace;font-size:0.75rem;color:#a0aec0;min-height:80px;max-height:220px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6;margin-top:0.8rem;}
+
+        .btn{font-family:var(--font-d);font-size:0.9rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.55rem 1.4rem;border:2px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.4rem;}
+        .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
+        .btn-acid:hover{background:transparent;color:var(--acid);}
+        .btn-red{background:var(--red);color:#fff;border-color:var(--red);}
+        .btn-red:hover{background:transparent;color:var(--red);}
+        .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+        .btn-ghost:hover{border-color:var(--red);color:var(--red);}
+        .btn-orange{background:transparent;color:var(--orange);border-color:var(--orange);}
+        .btn-orange:hover{background:var(--orange);color:#000;}
+        .btn-sm{font-size:0.75rem;padding:0.38rem 0.9rem;}
+        .btn-block{width:100%;justify-content:center;}
+
+        .form-group{margin-bottom:1rem;}
+        .form-label{display:block;font-size:0.68rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;}
+        .form-input{width:100%;padding:0.7rem 0.9rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.88rem;transition:border-color 0.2s;}
+        .form-input:focus{outline:none;border-color:var(--red);}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+        .form-msg{margin-top:0.7rem;padding:0.6rem 0.8rem;border-radius:3px;font-size:0.8rem;display:none;}
+        .form-msg.err{background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.3);display:block;}
+        .form-msg.ok{background:rgba(200,255,0,0.08);color:var(--acid);border:1px solid rgba(200,255,0,0.2);display:block;}
+
+        .data-table{width:100%;border-collapse:collapse;}
+        .data-table th{font-family:var(--font-d);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.8rem 1rem;text-align:left;border-bottom:1px solid var(--border);}
+        .data-table td{padding:0.9rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.87rem;vertical-align:middle;}
+        .data-table tr:hover td{background:var(--surface2);}
+        .badge{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.6rem;border-radius:2px;}
+        .b-acid{background:rgba(200,255,0,0.12);color:var(--acid);}
+        .b-cyan{background:rgba(0,255,209,0.12);color:var(--acid2);}
+        .b-red{background:rgba(255,45,85,0.12);color:var(--red);}
+        .b-orange{background:rgba(255,149,0,0.12);color:var(--orange);}
+        .b-grey{background:rgba(255,255,255,0.07);color:var(--muted);}
+
+        .page-section{display:none;}
+        .page-section.active{display:block;}
+        .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,45,85,0.3);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.85rem 1.3rem;font-size:0.85rem;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:280px;display:flex;align-items:center;gap:0.6rem;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast.t-ok{border-color:var(--acid);color:var(--acid);}
+        .toast.t-err{border-color:var(--red);color:var(--red);}
+        .empty-state{text-align:center;padding:3rem;color:var(--muted);}
+        .empty-state i{font-size:2.5rem;margin-bottom:1rem;display:block;}
+        .search-bar{display:flex;gap:0.8rem;margin-bottom:1.2rem;}
+        .search-bar .form-input{flex:1;}
+
+        /* STATS CHART mock */
+        .mini-chart{display:flex;align-items:flex-end;gap:4px;height:50px;margin-top:0.8rem;}
+        .bar{flex:1;background:rgba(200,255,0,0.3);border-radius:2px 2px 0 0;transition:height 0.5s;}
+        .bar:hover{background:var(--acid);}
+
+        @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stat-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo">FITNESS PRO</div>
+        <div class="role-tag"><i class="fas fa-shield-alt"></i> Admin</div>
+    </div>
+    <div class="sidebar-user">
+        <div class="avatar" id="sideAvatar">A</div>
+        <div class="user-info">
+            <div class="name" id="sideName">Admin</div>
+            <div class="email" id="sideEmail">—</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Prehľad</div>
+        <a class="nav-item active" onclick="showPage('overview')" href="#"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <div class="nav-section">Správa</div>
+        <a class="nav-item" onclick="showPage('users')" href="#"><i class="fas fa-users"></i> Správa užívateľov</a>
+        <a class="nav-item" onclick="showPage('classes-admin')" href="#"><i class="fas fa-calendar-alt"></i> Správa lekcií</a>
+        <a class="nav-item" onclick="showPage('create-class')" href="#"><i class="fas fa-plus-circle"></i> Vytvoriť lekciu</a>
+        <div class="nav-section">Nastavenia</div>
+        <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user-cog"></i> Môj profil</a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Odhlásiť sa</button>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="page-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-right">
+            <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin panel</span>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- OVERVIEW -->
+        <div class="page-section active" id="page-overview">
+            <div class="stat-row">
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-users"></i></div><div class="stat-card-val" id="stat-users">—</div><div class="stat-card-lbl">Celkovo užívateľov</div></div>
+                <div class="stat-card accent"><div class="stat-card-icon"><i class="fas fa-user-check"></i></div><div class="stat-card-val" id="stat-active-users">—</div><div class="stat-card-lbl">Aktívni členovia</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-calendar-check"></i></div><div class="stat-card-val" id="stat-classes">—</div><div class="stat-card-lbl">Lekcie celkovo</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-chalkboard-teacher"></i></div><div class="stat-card-val" id="stat-trainers">—</div><div class="stat-card-lbl">Tréneri</div></div>
+            </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Všetci užívatelia</span><span class="method m-get">GET /api/admin/users</span></div>
+                    <div class="panel-body">
+                        <div class="api-url">/api/admin/users</div>
+                        <button class="btn btn-ghost btn-sm" onclick="loadUsersOverview()"><i class="fas fa-sync-alt"></i> Načítať</button>
+                        <div class="api-out" id="ov-usersOut">Klikni pre načítanie...</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Štatistiky registrácií</span></div>
+                    <div class="panel-body">
+                        <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;">Nové registrácie za posledných 7 dní</p>
+                        <div class="mini-chart" id="miniChart"></div>
+                        <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
+                            <span style="font-size:0.7rem;color:var(--muted)">Po</span>
+                            <span style="font-size:0.7rem;color:var(--muted)">Ut</span>
+                            <span style="font-size:0.7rem;color:var(--muted)">St</span>
+                            <span style="font-size:0.7rem;color:var(--muted)">Šv</span>
+                            <span style="font-size:0.7rem;color:var(--muted)">Pi</span>
+                            <span style="font-size:0.7rem;color:var(--muted)">So</span>
+                            <span style="font-size:0.7rem;color:var(--muted)">Ne</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USERS -->
+        <div class="page-section" id="page-users">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Správa užívateľov</span>
+                    <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap">
+                        <span class="method m-get">GET /api/admin/users</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadUsers()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="search-bar">
+                        <input class="form-input" type="text" id="userSearch" placeholder="Hľadať podľa mena alebo emailu..." oninput="filterUsers()">
+                        <select class="form-input" id="roleFilter" onchange="filterUsers()" style="max-width:150px">
+                            <option value="">Všetky role</option>
+                            <option value="member">Member</option>
+                            <option value="trainer">Trainer</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div id="usersTable"><div class="empty-state"><i class="fas fa-users"></i><p>Klikni Obnoviť pre načítanie</p></div></div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Zmeniť rolu užívateľa</span><span class="method m-put">PUT /api/admin/users/{id}/role</span></div>
+                    <div class="panel-body">
+                        <div class="api-url">/api/admin/users/{id}/role</div>
+                        <div class="form-row">
+                            <div class="form-group"><label class="form-label">ID užívateľa</label><input class="form-input" type="number" id="roleUserId" placeholder="ID"></div>
+                            <div class="form-group">
+                                <label class="form-label">Nová rola</label>
+                                <select class="form-input" id="newRole">
+                                    <option value="member">member</option>
+                                    <option value="trainer">trainer</option>
+                                    <option value="admin">admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-orange" onclick="changeUserRole()"><i class="fas fa-user-tag"></i> Zmeniť rolu</button>
+                        <div class="api-out" id="roleOut" style="margin-top:0.8rem">Zadaj ID a rolu...</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Deaktivovať / Aktivovať</span><span class="method m-put">PUT /api/admin/users/{id}/status</span></div>
+                    <div class="panel-body">
+                        <div class="api-url">/api/admin/users/{id}/status</div>
+                        <div class="form-group"><label class="form-label">ID užívateľa</label><input class="form-input" type="number" id="statusUserId" placeholder="ID užívateľa"></div>
+                        <div style="display:flex;gap:0.8rem;margin-bottom:0.8rem">
+                            <button class="btn btn-ghost" onclick="setUserStatus(true)"><i class="fas fa-user-check"></i> Aktivovať</button>
+                            <button class="btn btn-red" onclick="setUserStatus(false)"><i class="fas fa-user-times"></i> Deaktivovať</button>
+                        </div>
+                        <div class="api-out" id="statusOut">Zadaj ID...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLASSES ADMIN -->
+        <div class="page-section" id="page-classes-admin">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Všetky lekcie</span>
+                    <div style="display:flex;gap:0.8rem">
+                        <span class="method m-get">GET /api/classes</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadAdminClasses()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
+                        <button class="btn btn-acid btn-sm" onclick="showPage('create-class')"><i class="fas fa-plus"></i> Nová lekcia</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="adminClassesTable"><div class="empty-state"><i class="fas fa-calendar-alt"></i><p>Klikni Obnoviť pre načítanie</p></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CREATE CLASS -->
+        <div class="page-section" id="page-create-class">
+            <div class="panel" style="max-width:600px">
+                <div class="panel-header"><span class="panel-title">Vytvoriť novú lekciu</span><span class="method m-post">POST /api/classes</span></div>
+                <div class="panel-body">
+                    <div class="api-url">/api/classes</div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label">Názov lekcie *</label><input class="form-input" type="text" id="c-name" placeholder="napr. CrossFit"></div>
+                        <div class="form-group">
+                            <label class="form-label">Typ</label>
+                            <select class="form-input" id="c-type">
+                                <option>CrossFit</option><option>Joga</option><option>Boxing</option><option>HIIT</option><option>Body Pump</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label">Dátum a čas *</label><input class="form-input" type="datetime-local" id="c-time"></div>
+                        <div class="form-group"><label class="form-label">Kapacita</label><input class="form-input" type="number" id="c-capacity" placeholder="20" min="1"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label">ID trénera</label><input class="form-input" type="number" id="c-trainer" placeholder="ID trénera"></div>
+                        <div class="form-group"><label class="form-label">Trvanie (min)</label><input class="form-input" type="number" id="c-duration" placeholder="60"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Popis</label><textarea class="form-input" id="c-desc" rows="3" placeholder="Popis lekcie..." style="resize:vertical;font-family:var(--font-b)"></textarea></div>
+                    <button class="btn btn-red btn-block" onclick="createClass()"><i class="fas fa-plus"></i> Vytvoriť lekciu</button>
+                    <div class="form-msg" id="createClassMsg"></div>
+                    <div class="api-out" id="createClassOut" style="margin-top:1rem">Výsledok sa zobrazí tu...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE ADMIN -->
+        <div class="page-section" id="page-profile">
+            <div class="panel" style="max-width:600px">
+                <div class="panel-header"><span class="panel-title">Admin profil</span><span class="method m-get">GET /api/auth/me</span></div>
+                <div class="panel-body">
+                    <button class="btn btn-ghost btn-sm" onclick="loadAdminProfile()" style="margin-bottom:1.5rem"><i class="fas fa-sync-alt"></i> Načítať profil</button>
+                    <div id="adminProfileData" style="display:none">
+                        <div class="form-row">
+                            <div class="form-group"><div class="form-label" style="display:block">Celé meno</div><div id="ap-name" style="padding:0.4rem 0">—</div></div>
+                            <div class="form-group"><div class="form-label" style="display:block">Email</div><div id="ap-email" style="padding:0.4rem 0">—</div></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><div class="form-label" style="display:block">Rola</div><div id="ap-role" style="padding:0.4rem 0">—</div></div>
+                            <div class="form-group"><div class="form-label" style="display:block">Status</div><div id="ap-active" style="padding:0.4rem 0">—</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    const API = 'http://localhost:8080';
+    let token = localStorage.getItem('fp_token');
+    let user = JSON.parse(localStorage.getItem('fp_user') || 'null');
+    let allUsersCache = [];
+
+    if (!token || !user) { window.location.href = 'index.html'; }
+    if (user && user.role !== 'admin') {
+        const map = { member: 'member.html', trainer: 'trainer.html' };
+        window.location.href = map[user.role] || 'index.html';
+    }
+
+    if (user) {
+        const initials = (user.fullName || 'A').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('sideAvatar').textContent = initials;
+        document.getElementById('sideName').textContent = user.fullName || 'Admin';
+        document.getElementById('sideEmail').textContent = user.email || '—';
+    }
+
+    // Generate mini chart
+    (function() {
+        const c = document.getElementById('miniChart');
+        if (!c) return;
+        const vals = [3,7,2,9,5,4,8];
+        const max = Math.max(...vals);
+        vals.forEach(v => {
+            const b = document.createElement('div');
+            b.className = 'bar';
+            b.style.height = Math.max(8, (v/max*46)) + 'px';
+            b.title = v + ' registrácií';
+            c.appendChild(b);
+        });
+    })();
+
+    const titles = { overview:'Dashboard', users:'Správa užívateľov', 'classes-admin':'Správa lekcií', 'create-class':'Nová lekcia', profile:'Admin profil' };
+    function showPage(id) {
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('page-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el => { if (el.getAttribute('onclick')?.includes(id)) el.classList.add('active'); });
+        document.getElementById('topbarTitle').textContent = titles[id] || id;
+    }
+
+    async function authFetch(url, opts={}) {
+        const res = await fetch(API + url, { ...opts, headers: {'Authorization':'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})} });
+        if (res.status === 401) { logout(); throw new Error('Session vypršala'); }
+        return res;
+    }
+    function setOut(id, text) { document.getElementById(id).textContent = text; }
+
+    // OVERVIEW
+    async function loadUsersOverview() {
+        setOut('ov-usersOut', 'Načítavam...');
+        try {
+            const res = await authFetch('/api/admin/users');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            setOut('ov-usersOut', JSON.stringify(data, null, 2));
+            if (Array.isArray(data)) {
+                document.getElementById('stat-users').textContent = data.length;
+                document.getElementById('stat-active-users').textContent = data.filter(u=>u.active).length;
+                document.getElementById('stat-trainers').textContent = data.filter(u=>u.role==='trainer').length;
+            }
+        } catch(e) { setOut('ov-usersOut', '❌ ' + e.message); }
+    }
+
+    // USERS
+    async function loadUsers() {
+        document.getElementById('usersTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/admin/users');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            allUsersCache = Array.isArray(data) ? data : [];
+            if (Array.isArray(data)) {
+                document.getElementById('stat-users').textContent = data.length;
+                document.getElementById('stat-active-users').textContent = data.filter(u=>u.active).length;
+                document.getElementById('stat-trainers').textContent = data.filter(u=>u.role==='trainer').length;
+            }
+            renderUsersTable(allUsersCache);
+        } catch(e) {
+            document.getElementById('usersTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+        }
+    }
+    function renderUsersTable(users) {
+        if (!users.length) {
+            document.getElementById('usersTable').innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni užívatelia</p></div>';
+            return;
+        }
+        let html = '<table class="data-table"><thead><tr><th>ID</th><th>Meno</th><th>Email</th><th>Rola</th><th>Status</th><th>Akcie</th></tr></thead><tbody>';
+        users.forEach(u => {
+            const roleCls = u.role==='admin'?'b-red':u.role==='trainer'?'b-orange':'b-cyan';
+            html += `<tr>
+      <td>#${u.id}</td>
+      <td>${u.fullName||'—'}</td>
+      <td style="color:var(--muted)">${u.email||'—'}</td>
+      <td><span class="badge ${roleCls}">${u.role||'—'}</span></td>
+      <td>${u.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-grey">Neaktívny</span>'}</td>
+      <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="quickSetRole(${u.id})"><i class="fas fa-user-tag"></i></button>
+        <button class="btn btn-${u.active?'red':'ghost'} btn-sm" onclick="quickToggle(${u.id},${u.active})">
+          <i class="fas fa-${u.active?'user-times':'user-check'}"></i>
+        </button>
+      </td>
+    </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('usersTable').innerHTML = html;
+    }
+    function filterUsers() {
+        const search = document.getElementById('userSearch').value.toLowerCase();
+        const role = document.getElementById('roleFilter').value;
+        const filtered = allUsersCache.filter(u =>
+            (!search || (u.fullName||'').toLowerCase().includes(search) || (u.email||'').toLowerCase().includes(search)) &&
+            (!role || u.role === role)
+        );
+        renderUsersTable(filtered);
+    }
+    function quickSetRole(id) {
+        document.getElementById('roleUserId').value = id;
+        showPage('users');
+    }
+    async function quickToggle(id, currentActive) {
+        try {
+            const res = await authFetch('/api/admin/users/'+id+'/status', { method:'PUT', body: JSON.stringify({active: !currentActive}) });
+            const d = await res.json();
+            if (res.ok) { toast(!currentActive ? 'Užívateľ aktivovaný' : 'Užívateľ deaktivovaný', 'ok'); loadUsers(); }
+            else toast(d.message || 'Chyba', 'err');
+        } catch(e) { toast(e.message, 'err'); }
+    }
+    async function changeUserRole() {
+        const id = document.getElementById('roleUserId').value;
+        const role = document.getElementById('newRole').value;
+        if (!id) return;
+        setOut('roleOut', 'Meniam rolu...');
+        try {
+            const res = await authFetch('/api/admin/users/'+id+'/role', { method:'PUT', body: JSON.stringify({role}) });
+            const d = await res.json();
+            setOut('roleOut', JSON.stringify(d, null, 2));
+            if (res.ok) { toast('Rola zmenená na ' + role, 'ok'); loadUsers(); }
+        } catch(e) { setOut('roleOut', '❌ ' + e.message); }
+    }
+    async function setUserStatus(active) {
+        const id = document.getElementById('statusUserId').value;
+        if (!id) return;
+        setOut('statusOut', 'Mením status...');
+        try {
+            const res = await authFetch('/api/admin/users/'+id+'/status', { method:'PUT', body: JSON.stringify({active}) });
+            const d = await res.json();
+            setOut('statusOut', JSON.stringify(d, null, 2));
+            if (res.ok) { toast(active ? 'Užívateľ aktivovaný' : 'Užívateľ deaktivovaný', 'ok'); loadUsers(); }
+        } catch(e) { setOut('statusOut', '❌ ' + e.message); }
+    }
+
+    // CLASSES
+    async function loadAdminClasses() {
+        document.getElementById('adminClassesTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/classes');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            if (!Array.isArray(data) || !data.length) {
+                document.getElementById('adminClassesTable').innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne lekcie</p></div>';
+                return;
+            }
+            document.getElementById('stat-classes').textContent = data.length;
+            let html = '<table class="data-table"><thead><tr><th>ID</th><th>Názov</th><th>Tréner</th><th>Čas</th><th>Kapacita</th><th>Akcia</th></tr></thead><tbody>';
+            data.forEach(c => {
+                html += `<tr><td>#${c.id}</td><td>${c.name||c.className||'—'}</td><td>${c.trainerName||'—'}</td><td>${c.time||c.startTime||'—'}</td><td>${c.capacity||'—'}</td><td><button class="btn btn-red btn-sm" onclick="deleteClass(${c.id})"><i class="fas fa-trash"></i> Zmazať</button></td></tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('adminClassesTable').innerHTML = html;
+        } catch(e) {
+            document.getElementById('adminClassesTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+        }
+    }
+    async function deleteClass(id) {
+        if (!confirm('Naozaj zmazať lekciu #' + id + '?')) return;
+        try {
+            const res = await authFetch('/api/classes/'+id, {method:'DELETE'});
+            if (res.ok) { toast('Lekcia zmazaná', 'ok'); loadAdminClasses(); }
+            else toast('Chyba pri mazaní', 'err');
+        } catch(e) { toast(e.message, 'err'); }
+    }
+    async function createClass() {
+        const name = document.getElementById('c-name').value.trim();
+        const type = document.getElementById('c-type').value;
+        const time = document.getElementById('c-time').value;
+        const capacity = document.getElementById('c-capacity').value;
+        const trainerId = document.getElementById('c-trainer').value;
+        const duration = document.getElementById('c-duration').value;
+        const description = document.getElementById('c-desc').value.trim();
+        if (!name || !time) return showMsg('createClassMsg', 'Vyplň povinné polia', 'err');
+        setOut('createClassOut', 'Vytváram...');
+        try {
+            const res = await authFetch('/api/classes', {
+                method:'POST',
+                body: JSON.stringify({name, type, startTime:time, capacity:+capacity||20, trainerId:+trainerId||null, durationMinutes:+duration||60, description})
+            });
+            const d = await res.json();
+            setOut('createClassOut', JSON.stringify(d, null, 2));
+            if (res.ok) { showMsg('createClassMsg', 'Lekcia vytvorená!', 'ok'); toast('Lekcia vytvorená!', 'ok'); }
+            else showMsg('createClassMsg', d.message||'Chyba', 'err');
+        } catch(e) { setOut('createClassOut', '❌ ' + e.message); showMsg('createClassMsg', e.message, 'err'); }
+    }
+
+    // ADMIN PROFILE
+    async function loadAdminProfile() {
+        try {
+            const res = await authFetch('/api/auth/me');
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
+            document.getElementById('adminProfileData').style.display = 'block';
+            document.getElementById('ap-name').textContent = d.fullName || '—';
+            document.getElementById('ap-email').textContent = d.email || '—';
+            document.getElementById('ap-role').innerHTML = `<span class="badge b-red">${d.role}</span>`;
+            document.getElementById('ap-active').innerHTML = d.active ? '<span class="badge b-acid">Aktívny</span>' : '<span class="badge b-red">Neaktívny</span>';
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    function showMsg(id, msg, type) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = 'form-msg ' + type;
+    }
+    function toast(msg, type='ok') {
+        const t = document.getElementById('toast');
+        t.className = 'toast t-' + type;
+        t.innerHTML = (type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>') + ' ' + msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+    }
+    function logout() {
+        localStorage.removeItem('fp_token');
+        localStorage.removeItem('fp_user');
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>

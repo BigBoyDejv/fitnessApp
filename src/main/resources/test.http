@@ -1,0 +1,19 @@
+### 2. Login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dpeto@test.sk",
+  "password": "heslo121231243"
+}
+
+> {%
+    client.global.set("token", response.body.token);
+    client.log("Token uložený: " + response.body.token.substring(0, 30) + "...");
+%}
+
+###
+
+### 4. Get profile with saved token
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer {{token}}

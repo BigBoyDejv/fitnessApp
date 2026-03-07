@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FITNESS PRO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        :root {
+            --acid: #C8FF00;
+            --acid2: #00FFD1;
+            --red: #FF2D55;
+            --bg: #0A0A0A;
+            --surface: #111111;
+            --surface2: #1A1A1A;
+            --border: #222222;
+            --text: #F0F0F0;
+            --muted: #666666;
+            --font-d: 'Barlow Condensed', sans-serif;
+            --font-b: 'DM Sans', sans-serif;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-b);overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.02em;text-transform:uppercase;}
+        ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--acid);}
+
+        /* NAV */
+        nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:68px;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+        .logo{font-family:var(--font-d);font-size:1.9rem;font-weight:900;color:var(--acid);letter-spacing:0.12em;}
+        .nav-links{display:flex;gap:2.5rem;}
+        .nav-links a{font-size:0.82rem;font-weight:500;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;transition:color 0.2s;}
+        .nav-links a:hover{color:var(--text);}
+        .nav-actions{display:flex;gap:0.8rem;align-items:center;}
+
+        /* BUTTONS */
+        .btn{font-family:var(--font-d);font-size:1rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.6rem 1.7rem;border:2px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;}
+        .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
+        .btn-acid:hover{background:transparent;color:var(--acid);}
+        .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+        .btn-ghost:hover{border-color:var(--acid);color:var(--acid);}
+        .btn-sm{font-size:0.78rem;padding:0.45rem 1.1rem;}
+        .btn-lg{font-size:1.25rem;padding:0.95rem 2.8rem;}
+        .btn-block{width:100%;justify-content:center;}
+
+        /* HERO */
+        .hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:6rem 3rem 4rem;position:relative;overflow:hidden;gap:4rem;}
+        .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#0A0A0A 50%,#0f1a00 100%);z-index:0;}
+        .hero-grid-bg{position:absolute;inset:0;z-index:1;background-image:linear-gradient(rgba(200,255,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,255,0,0.03) 1px,transparent 1px);background-size:55px 55px;}
+        .hero-glow{position:absolute;right:-150px;top:50%;transform:translateY(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(200,255,0,0.1) 0%,transparent 70%);z-index:1;pointer-events:none;}
+        .hero-left{position:relative;z-index:2;}
+        .hero-tag{display:inline-block;font-family:var(--font-d);font-size:0.82rem;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--acid);border:1px solid rgba(200,255,0,0.25);padding:0.28rem 0.9rem;border-radius:2px;margin-bottom:1.8rem;}
+        .hero h1{font-size:clamp(3.5rem,6vw,7.5rem);font-weight:900;line-height:0.92;margin-bottom:1.8rem;}
+        .hero h1 .line2{display:block;color:var(--acid);}
+        .hero h1 .line3{display:block;font-size:0.6em;color:var(--muted);font-weight:300;}
+        .hero-sub{font-size:1rem;color:var(--muted);max-width:440px;margin-bottom:2.5rem;line-height:1.75;}
+        .hero-cta{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3.5rem;}
+        .hero-stats{display:flex;gap:3rem;padding-top:2.5rem;border-top:1px solid var(--border);}
+        .stat-num{font-family:var(--font-d);font-size:2.6rem;font-weight:900;color:var(--acid);line-height:1;}
+        .stat-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
+
+        /* AUTH PANEL */
+        .auth-panel{position:relative;z-index:2;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2.5rem;max-width:420px;width:100%;}
+        .auth-panel-header{margin-bottom:1.8rem;}
+        .auth-panel-title{font-size:2.2rem;font-weight:900;margin-bottom:0.3rem;}
+        .auth-panel-sub{color:var(--muted);font-size:0.88rem;}
+        .tabs{display:flex;gap:0;margin-bottom:2rem;border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+        .tab-btn{flex:1;padding:0.65rem;text-align:center;font-family:var(--font-d);font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:none;border:none;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+        .tab-btn.active{background:var(--acid);color:#000;}
+        .form-group{margin-bottom:1.1rem;}
+        .form-label{display:block;font-size:0.7rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
+        .form-input{width:100%;padding:0.8rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.9rem;transition:border-color 0.2s;}
+        .form-input:focus{outline:none;border-color:var(--acid);}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+        .form-msg{margin-top:0.8rem;padding:0.7rem 0.9rem;border-radius:3px;font-size:0.82rem;display:none;}
+        .form-msg.show-err{background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.3);display:block;}
+        .form-msg.show-ok{background:rgba(200,255,0,0.08);color:var(--acid);border:1px solid rgba(200,255,0,0.25);display:block;}
+
+        /* PROGRAMS */
+        .section{padding:8rem 3rem;}
+        .section-label{font-family:var(--font-d);font-size:0.8rem;font-weight:600;letter-spacing:0.25em;color:var(--acid);text-transform:uppercase;display:block;margin-bottom:0.8rem;}
+        .section-title{font-size:clamp(2.5rem,4.5vw,5rem);font-weight:900;line-height:1;margin-bottom:1rem;}
+        .section-title em{font-style:normal;color:var(--acid);}
+        .container{max-width:1400px;margin:0 auto;}
+
+        .prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);margin-top:4rem;}
+        .prog-card{padding:3rem;border-right:1px solid var(--border);transition:background 0.3s;cursor:default;}
+        .prog-card:last-child{border-right:none;}
+        .prog-card:hover{background:var(--surface2);}
+        .prog-card:hover .prog-num{color:var(--acid);}
+        .prog-num{font-family:var(--font-d);font-size:4.5rem;font-weight:900;color:var(--border);line-height:1;margin-bottom:1.5rem;transition:color 0.3s;}
+        .prog-name{font-size:1.9rem;font-weight:800;margin-bottom:0.9rem;}
+        .prog-desc{color:var(--muted);font-size:0.88rem;line-height:1.8;margin-bottom:1.8rem;}
+        .prog-price{font-family:var(--font-d);font-size:2.3rem;font-weight:900;color:var(--acid);}
+        .prog-price span{font-size:0.9rem;color:var(--muted);font-family:var(--font-b);}
+
+        /* PRICING */
+        .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:4rem;}
+        .price-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2.8rem 2.2rem;position:relative;transition:border-color 0.3s;}
+        .price-card:hover{border-color:rgba(200,255,0,0.4);}
+        .price-card.featured{border-color:var(--acid);background:linear-gradient(180deg,rgba(200,255,0,0.05) 0%,var(--surface) 60%);}
+        .price-featured-tag{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--acid);color:#000;font-family:var(--font-d);font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.25rem 1rem;border-radius:0 0 3px 3px;}
+        .price-name{font-size:1.7rem;font-weight:800;margin-bottom:0.3rem;}
+        .price-amount{font-family:var(--font-d);font-size:4rem;font-weight:900;color:var(--acid);line-height:1;margin:1.2rem 0;}
+        .price-amount sup{font-size:1.4rem;vertical-align:top;margin-top:0.8rem;}
+        .price-amount sub{font-size:0.95rem;color:var(--muted);}
+        .price-features{list-style:none;margin:1.5rem 0 2rem;}
+        .price-features li{padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.88rem;color:var(--muted);display:flex;align-items:center;gap:0.6rem;}
+        .price-features li i{color:var(--acid);font-size:0.75rem;flex-shrink:0;}
+        .price-features li.off{opacity:0.35;}
+        .price-features li.off i{color:var(--muted);}
+
+        /* SCHEDULE */
+        .sched-table{width:100%;border-collapse:collapse;margin-top:3.5rem;}
+        .sched-table th{font-family:var(--font-d);font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);padding:0.9rem 1.2rem;text-align:left;border-bottom:1px solid var(--border);}
+        .sched-table td{padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.88rem;}
+        .sched-table tr:hover td{background:var(--surface2);}
+        .badge{display:inline-block;font-family:var(--font-d);font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.18rem 0.65rem;border-radius:2px;}
+        .b-acid{background:rgba(200,255,0,0.12);color:var(--acid);}
+        .b-cyan{background:rgba(0,255,209,0.12);color:var(--acid2);}
+        .b-red{background:rgba(255,45,85,0.12);color:var(--red);}
+
+        /* CONTACT */
+        .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;margin-top:4rem;align-items:start;}
+        .contact-items{display:flex;flex-direction:column;gap:2rem;}
+        .contact-item{display:flex;gap:1.2rem;align-items:flex-start;}
+        .c-icon{width:44px;height:44px;flex-shrink:0;background:rgba(200,255,0,0.08);border:1px solid rgba(200,255,0,0.18);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--acid);font-size:1rem;}
+        .c-text h4{font-size:1rem;margin-bottom:0.2rem;}
+        .c-text p{color:var(--muted);font-size:0.88rem;line-height:1.6;}
+        .contact-form{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+        .contact-form-header{padding:1.2rem 1.5rem;background:var(--surface2);border-bottom:1px solid var(--border);}
+        .contact-form-header h3{font-size:1.3rem;font-weight:700;}
+        .contact-form-body{padding:1.5rem;}
+        textarea.form-input{resize:vertical;font-family:var(--font-b);}
+
+        /* FOOTER */
+        footer{background:#000;border-top:1px solid var(--border);padding:4rem 3rem 2rem;}
+        .footer-grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:3rem;}
+        .footer-brand .logo{margin-bottom:1rem;}
+        .footer-brand p{color:var(--muted);font-size:0.88rem;line-height:1.8;max-width:260px;}
+        .footer-col h4{font-size:0.85rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1.3rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col ul li{margin-bottom:0.7rem;}
+        .footer-col ul li a{color:var(--muted);font-size:0.88rem;text-decoration:none;transition:color 0.2s;}
+        .footer-col ul li a:hover{color:var(--acid);}
+        .footer-bottom{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding-top:2rem;border-top:1px solid var(--border);}
+        .footer-bottom p{color:var(--muted);font-size:0.82rem;}
+        .socials{display:flex;gap:0.8rem;}
+        .socials a{width:36px;height:36px;border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.85rem;text-decoration:none;transition:all 0.2s;}
+        .socials a:hover{border-color:var(--acid);color:var(--acid);}
+
+        /* TOAST */
+        .toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:0.9rem 1.4rem;font-size:0.88rem;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:300px;display:flex;align-items:center;gap:0.7rem;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast.t-ok{border-color:var(--acid);color:var(--acid);}
+        .toast.t-err{border-color:var(--red);color:var(--red);}
+
+        .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(200,255,0,0.3);border-top-color:var(--acid);border-radius:50%;animation:spin 0.7s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .hidden{display:none!important;}
+
+        @media(max-width:1024px){
+            .hero{grid-template-columns:1fr;padding:5rem 1.5rem 3rem;}
+            .auth-panel{max-width:100%;}
+            .prog-grid{grid-template-columns:1fr;}
+            .prog-card{border-right:none;border-bottom:1px solid var(--border);}
+            .price-grid{grid-template-columns:1fr;}
+            .contact-grid{grid-template-columns:1fr;}
+            .footer-grid{grid-template-columns:1fr 1fr;}
+            nav{padding:0 1.5rem;}
+            .nav-links{display:none;}
+            .section{padding:5rem 1.5rem;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<nav>
+    <div class="logo">FITNESS PRO</div>
+    <div class="nav-links">
+        <a href="#programy">Programy</a>
+        <a href="#cennik">Cenník</a>
+        <a href="#rozvrh">Rozvrh</a>
+        <a href="#kontakt">Kontakt</a>
+    </div>
+    <div class="nav-actions">
+        <button class="btn btn-ghost btn-sm" onclick="focusLogin()">Prihlásiť</button>
+        <button class="btn btn-acid btn-sm" onclick="focusRegister()">Registrovať</button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-glow"></div>
+
+    <div class="hero-left">
+        <div class="hero-tag">Bratislava • Est. 2018</div>
+        <h1>
+            PREMEN SA<br>
+            <span class="line2">NA NAJLEPŠIU</span>
+            <span class="line3">VERZIU SEBA</span>
+        </h1>
+        <p class="hero-sub">Profesionálne vybavenie, špičkový tréning a komunita, ktorá ťa posunie ďalej. Prvý tréning úplne zdarma.</p>
+        <div class="hero-cta">
+            <button class="btn btn-acid btn-lg" onclick="focusRegister()">Začať zadarmo</button>
+            <a href="#programy" class="btn btn-ghost btn-lg">Naše programy</a>
+        </div>
+        <div class="hero-stats">
+            <div><div class="stat-num">1200+</div><div class="stat-label">Aktívnych členov</div></div>
+            <div><div class="stat-num">40+</div><div class="stat-label">Skupin. lekcií</div></div>
+            <div><div class="stat-num">12</div><div class="stat-label">Certif. tréneri</div></div>
+        </div>
+    </div>
+
+    <!-- AUTH PANEL -->
+    <div class="auth-panel" id="authPanel">
+        <div class="auth-panel-header">
+            <div class="auth-panel-title" id="authPanelTitle">Vitaj späť</div>
+            <div class="auth-panel-sub" id="authPanelSub">Prihlásiť sa do svojho účtu</div>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Prihlásiť sa</button>
+            <button class="tab-btn" id="tabReg" onclick="switchTab('register')">Registrácia</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" type="email" id="lEmail" placeholder="tvoj@email.sk" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Heslo</label>
+                <input class="form-input" type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+            </div>
+            <button class="btn btn-acid btn-block" id="loginBtn" onclick="doLogin()">Prihlásiť sa</button>
+            <div class="form-msg" id="loginMsg"></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="registerForm" class="hidden">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Celé meno *</label>
+                    <input class="form-input" type="text" id="rName" placeholder="Ján Novák">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefón</label>
+                    <input class="form-input" type="tel" id="rPhone" placeholder="+421...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input class="form-input" type="email" id="rEmail" placeholder="tvoj@email.sk">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Heslo *</label>
+                <input class="form-input" type="password" id="rPass" placeholder="Minimálne 6 znakov">
+            </div>
+            <button class="btn btn-acid btn-block" id="regBtn" onclick="doRegister()">Vytvoriť účet</button>
+            <div class="form-msg" id="regMsg"></div>
+        </div>
+    </div>
+</section>
+
+<!-- PROGRAMY -->
+<section class="section" id="programy">
+    <div class="container">
+        <span class="section-label">Čo ponúkame</span>
+        <h2 class="section-title">VYBER SI SVOJ <em>PROGRAM</em></h2>
+        <div class="prog-grid">
+            <div class="prog-card">
+                <div class="prog-num">01</div>
+                <div class="prog-name">Osobný tréning</div>
+                <p class="prog-desc">Individuálny plán navrhnutý presne pre tvoje ciele a fyzickú kondíciu. Korekcia techniky a garantované výsledky s certifikovaným trénerom.</p>
+                <div class="prog-price">35€ <span>/ 60 min</span></div>
+            </div>
+            <div class="prog-card">
+                <div class="prog-num">02</div>
+                <div class="prog-name">Skupinové lekcie</div>
+                <p class="prog-desc">CrossFit, Joga, Body Pump, HIIT, Boxing — každý deň nová výzva a energia. Tréning v skupinovej dynamike, ktorá ťa ťahá vpred.</p>
+                <div class="prog-price">49€ <span>/ mesiac</span></div>
+            </div>
+            <div class="prog-card">
+                <div class="prog-num">03</div>
+                <div class="prog-name">Online coaching</div>
+                <p class="prog-desc">Tréningový a stravovací plán na mieru, pravidelná kontrola pokroku a podpora 24/7 priamo na tvojom telefóne. Kdekoľvek, kedykoľvek.</p>
+                <div class="prog-price">79€ <span>/ mesiac</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ROZVRH -->
+<section class="section" style="padding-top:0" id="rozvrh">
+    <div class="container">
+        <span class="section-label">Týždenný plán</span>
+        <h2 class="section-title">ROZVRH <em>LEKCIÍ</em></h2>
+        <table class="sched-table">
+            <thead><tr><th>Čas</th><th>Pondelok</th><th>Utorok</th><th>Streda</th><th>Štvrtok</th><th>Piatok</th></tr></thead>
+            <tbody>
+            <tr><td>07:00</td><td><span class="badge b-acid">CrossFit</span></td><td>—</td><td><span class="badge b-acid">CrossFit</span></td><td>—</td><td><span class="badge b-acid">CrossFit</span></td></tr>
+            <tr><td>09:00</td><td>—</td><td><span class="badge b-cyan">Joga</span></td><td>—</td><td><span class="badge b-cyan">Joga</span></td><td>—</td></tr>
+            <tr><td>12:00</td><td><span class="badge b-red">Boxing</span></td><td><span class="badge b-red">Boxing</span></td><td>—</td><td><span class="badge b-red">Boxing</span></td><td><span class="badge b-red">Boxing</span></td></tr>
+            <tr><td>17:00</td><td><span class="badge b-cyan">Body Pump</span></td><td>—</td><td><span class="badge b-cyan">Body Pump</span></td><td>—</td><td><span class="badge b-cyan">Body Pump</span></td></tr>
+            <tr><td>19:00</td><td><span class="badge b-acid">HIIT</span></td><td><span class="badge b-acid">HIIT</span></td><td><span class="badge b-acid">HIIT</span></td><td><span class="badge b-acid">HIIT</span></td><td>—</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- CENNIK -->
+<section class="section" id="cennik">
+    <div class="container">
+        <span class="section-label">Investuj do seba</span>
+        <h2 class="section-title">CENNÍK <em>ČLENSTVA</em></h2>
+        <div class="price-grid">
+            <div class="price-card">
+                <div class="price-name">Základné</div>
+                <p style="color:var(--muted);font-size:0.85rem;">Pre tých, čo začínajú</p>
+                <div class="price-amount"><sup>€</sup>29<sub>/mes</sub></div>
+                <ul class="price-features">
+                    <li><i class="fas fa-check"></i> Prístup k fitnessu 6–22h</li>
+                    <li><i class="fas fa-check"></i> 4 skupinové lekcie / mes</li>
+                    <li><i class="fas fa-check"></i> Vstupná konzultácia</li>
+                    <li class="off"><i class="fas fa-times"></i> Osobný tréner</li>
+                    <li class="off"><i class="fas fa-times"></i> Výživový plán</li>
+                </ul>
+                <button class="btn btn-ghost btn-block" onclick="focusRegister()">Začať</button>
+            </div>
+            <div class="price-card featured">
+                <div class="price-featured-tag">Najpopulárnejší</div>
+                <div class="price-name">Pro</div>
+                <p style="color:var(--muted);font-size:0.85rem;">Pre serióznych atlétov</p>
+                <div class="price-amount"><sup>€</sup>59<sub>/mes</sub></div>
+                <ul class="price-features">
+                    <li><i class="fas fa-check"></i> Neobmedzený prístup 24/7</li>
+                    <li><i class="fas fa-check"></i> Neobmedzené skupinové lekcie</li>
+                    <li><i class="fas fa-check"></i> 2× osobný tréner / mes</li>
+                    <li><i class="fas fa-check"></i> Výživový plán</li>
+                    <li><i class="fas fa-check"></i> QR vstupný kód</li>
+                </ul>
+                <button class="btn btn-acid btn-block" onclick="focusRegister()">Začať</button>
+            </div>
+            <div class="price-card">
+                <div class="price-name">Elite</div>
+                <p style="color:var(--muted);font-size:0.85rem;">Ultimátny zážitok</p>
+                <div class="price-amount"><sup>€</sup>99<sub>/mes</sub></div>
+                <ul class="price-features">
+                    <li><i class="fas fa-check"></i> Všetko z Pro</li>
+                    <li><i class="fas fa-check"></i> 8× osobný tréner / mes</li>
+                    <li><i class="fas fa-check"></i> Dedikovaný tréner</li>
+                    <li><i class="fas fa-check"></i> Online coaching 24/7</li>
+                    <li><i class="fas fa-check"></i> Prioritná rezervácia</li>
+                </ul>
+                <button class="btn btn-ghost btn-block" onclick="focusRegister()">Začať</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- KONTAKT -->
+<section class="section" id="kontakt">
+    <div class="container">
+        <span class="section-label">Nájdi nás</span>
+        <h2 class="section-title">KONTAKT</h2>
+        <div class="contact-grid">
+            <div class="contact-items">
+                <div class="contact-item"><div class="c-icon"><i class="fas fa-map-marker-alt"></i></div><div class="c-text"><h4>Adresa</h4><p>Mlynské Nivy 123<br>821 09 Bratislava</p></div></div>
+                <div class="contact-item"><div class="c-icon"><i class="fas fa-clock"></i></div><div class="c-text"><h4>Otváracie hodiny</h4><p>Po – Pi: 6:00 – 22:00<br>So – Ne: 8:00 – 20:00</p></div></div>
+                <div class="contact-item"><div class="c-icon"><i class="fas fa-phone"></i></div><div class="c-text"><h4>Telefón</h4><p>+421 905 123 456</p></div></div>
+                <div class="contact-item"><div class="c-icon"><i class="fas fa-envelope"></i></div><div class="c-text"><h4>Email</h4><p>info@fitnesspro.sk</p></div></div>
+            </div>
+            <div class="contact-form">
+                <div class="contact-form-header"><h3>Napíšte nám</h3></div>
+                <div class="contact-form-body">
+                    <div class="form-group"><label class="form-label">Meno</label><input class="form-input" type="text" placeholder="Ján Novák"></div>
+                    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="jan@example.sk"></div>
+                    <div class="form-group"><label class="form-label">Správa</label><textarea class="form-input" rows="4" placeholder="Vaša správa..."></textarea></div>
+                    <button class="btn btn-acid btn-block" onclick="toast('Správa odoslaná!','ok')">Odoslať správu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <div class="logo">FITNESS PRO</div>
+            <p>Profesionálne fitness centrum v srdci Bratislavy. Tréningy, ktoré menia životy od roku 2018.</p>
+        </div>
+        <div class="footer-col"><h4>Navigácia</h4><ul><li><a href="#programy">Programy</a></li><li><a href="#cennik">Cenník</a></li><li><a href="#rozvrh">Rozvrh</a></li><li><a href="#kontakt">Kontakt</a></li></ul></div>
+        <div class="footer-col"><h4>Programy</h4><ul><li><a href="#">CrossFit</a></li><li><a href="#">Joga</a></li><li><a href="#">Boxing</a></li><li><a href="#">HIIT</a></li></ul></div>
+        <div class="footer-col"><h4>Účet</h4><ul><li><a href="#" onclick="focusLogin()">Prihlásiť sa</a></li><li><a href="#" onclick="focusRegister()">Registrácia</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 Fitness Pro. Všetky práva vyhradené.</p>
+        <div class="socials">
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-tiktok"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const API = 'http://localhost:8080';
+
+    // If already logged in, redirect
+    const existingToken = localStorage.getItem('fp_token');
+    const existingUser = JSON.parse(localStorage.getItem('fp_user') || 'null');
+    if (existingToken && existingUser) redirectByRole(existingUser.role);
+
+    function redirectByRole(role) {
+        const map = { admin: 'admin.html', trainer: 'trainer.html', member: 'member.html' };
+        const page = map[role] || 'member.html';
+        window.location.href = page;
+    }
+
+    function switchTab(tab) {
+        const isLogin = tab === 'login';
+        document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+        document.getElementById('registerForm').classList.toggle('hidden', isLogin);
+        document.getElementById('tabLogin').classList.toggle('active', isLogin);
+        document.getElementById('tabReg').classList.toggle('active', !isLogin);
+        document.getElementById('authPanelTitle').textContent = isLogin ? 'Vitaj späť' : 'Vytvor účet';
+        document.getElementById('authPanelSub').textContent = isLogin ? 'Prihlásiť sa do svojho účtu' : 'Registrácia je zadarmo';
+    }
+
+    function focusLogin() { switchTab('login'); document.getElementById('authPanel').scrollIntoView({behavior:'smooth'}); }
+    function focusRegister() { switchTab('register'); document.getElementById('authPanel').scrollIntoView({behavior:'smooth'}); }
+
+    function setBtn(id, loading, text) {
+        const b = document.getElementById(id);
+        b.disabled = loading;
+        b.innerHTML = loading ? '<span class="spinner"></span> Načítavam...' : text;
+    }
+    function showMsg(id, msg, type) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = 'form-msg ' + (type === 'err' ? 'show-err' : 'show-ok');
+    }
+
+    async function doLogin() {
+        const email = document.getElementById('lEmail').value.trim();
+        const pass = document.getElementById('lPass').value.trim();
+        if (!email || !pass) return showMsg('loginMsg', 'Vyplň email a heslo', 'err');
+        setBtn('loginBtn', true, '');
+        try {
+            const res = await fetch(API + '/api/auth/login', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({email, password: pass})
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || data.message || 'Prihlásenie zlyhalo');
+            localStorage.setItem('fp_token', data.token);
+            localStorage.setItem('fp_user', JSON.stringify(data));
+            toast('Vitaj, ' + data.fullName + '!', 'ok');
+            setTimeout(() => redirectByRole(data.role), 700);
+        } catch(e) {
+            showMsg('loginMsg', e.message, 'err');
+            setBtn('loginBtn', false, 'Prihlásiť sa');
+        }
+    }
+
+    async function doRegister() {
+        const fullName = document.getElementById('rName').value.trim();
+        const phone = document.getElementById('rPhone').value.trim();
+        const email = document.getElementById('rEmail').value.trim();
+        const password = document.getElementById('rPass').value.trim();
+        if (!fullName || !email || !password) return showMsg('regMsg', 'Vyplň povinné polia', 'err');
+        setBtn('regBtn', true, '');
+        try {
+            const res = await fetch(API + '/api/auth/register', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({email, password, fullName, phone})
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || data.message || 'Registrácia zlyhala');
+            localStorage.setItem('fp_token', data.token);
+            localStorage.setItem('fp_user', JSON.stringify(data));
+            toast('Účet vytvorený! Vitaj ' + data.fullName, 'ok');
+            setTimeout(() => redirectByRole(data.role), 700);
+        } catch(e) {
+            showMsg('regMsg', e.message, 'err');
+            setBtn('regBtn', false, 'Vytvoriť účet');
+        }
+    }
+
+    function toast(msg, type='ok') {
+        const t = document.getElementById('toast');
+        t.className = 'toast t-' + type;
+        t.innerHTML = (type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>') + ' ' + msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+    }
+</script>
+</body>
+</html>

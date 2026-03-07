@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FITNESS PRO — Môj Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        :root{--acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--bg:#0A0A0A;--surface:#111111;--surface2:#1A1A1A;--border:#222222;--text:#F0F0F0;--muted:#666666;--font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;}
+        h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.02em;text-transform:uppercase;}
+        ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--acid);}
+
+        /* SIDEBAR */
+        .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+        .sidebar-logo{padding:1.8rem 1.5rem;border-bottom:1px solid var(--border);}
+        .sidebar-logo .logo{font-family:var(--font-d);font-size:1.7rem;font-weight:900;color:var(--acid);letter-spacing:0.12em;}
+        .sidebar-logo .role-tag{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(200,255,0,0.12);color:var(--acid);border:1px solid rgba(200,255,0,0.25);padding:0.18rem 0.7rem;border-radius:2px;margin-top:0.5rem;}
+        .sidebar-user{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.9rem;}
+        .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--acid),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:#000;flex-shrink:0;}
+        .user-info .name{font-size:0.88rem;font-weight:500;}
+        .user-info .email{font-size:0.75rem;color:var(--muted);}
+        .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
+        .nav-section{padding:0.5rem 1.5rem 0.3rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+        .nav-item{display:flex;align-items:center;gap:0.9rem;padding:0.75rem 1.5rem;color:var(--muted);font-size:0.88rem;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent;text-decoration:none;}
+        .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+        .nav-item.active{color:var(--acid);border-left-color:var(--acid);background:rgba(200,255,0,0.05);}
+        .nav-item i{width:16px;text-align:center;font-size:0.9rem;}
+        .sidebar-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border);}
+        .logout-btn{display:flex;align-items:center;gap:0.8rem;color:var(--muted);font-size:0.85rem;cursor:pointer;transition:color 0.2s;background:none;border:none;width:100%;text-align:left;font-family:var(--font-b);}
+        .logout-btn:hover{color:var(--red);}
+
+        /* MAIN */
+        .main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+        .topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;position:sticky;top:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);z-index:50;}
+        .page-title{font-size:1.4rem;font-weight:800;letter-spacing:0.05em;}
+        .topbar-right{display:flex;align-items:center;gap:1rem;}
+        .status-dot{width:8px;height:8px;border-radius:50%;background:var(--acid);display:inline-block;margin-right:0.4rem;box-shadow:0 0 8px var(--acid);}
+
+        .content{padding:2.5rem;flex:1;}
+
+        /* PANELS */
+        .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .panel-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;}
+        .panel-title{font-size:1.1rem;font-weight:800;letter-spacing:0.05em;}
+        .panel-body{padding:1.5rem;}
+        .method{font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;padding:0.2rem 0.6rem;border-radius:2px;}
+        .m-get{background:rgba(0,255,209,0.12);color:var(--acid2);}
+        .m-post{background:rgba(200,255,0,0.12);color:var(--acid);}
+        .m-del{background:rgba(255,45,85,0.12);color:var(--red);}
+
+        /* STAT CARDS */
+        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .stat-card{background:var(--surface);padding:1.5rem 1.2rem;}
+        .stat-card-icon{font-size:1.2rem;color:var(--acid);margin-bottom:0.7rem;}
+        .stat-card-val{font-family:var(--font-d);font-size:2.5rem;font-weight:900;line-height:1;}
+        .stat-card-lbl{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
+
+        /* GRID */
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+
+        /* PROFILE */
+        .profile-field{margin-bottom:1rem;}
+        .field-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:0.3rem;}
+        .field-val{font-size:0.92rem;}
+        .profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+
+        /* API OUTPUT */
+        .api-url{font-family:monospace;font-size:0.78rem;color:var(--muted);padding:0.45rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:2px;margin-bottom:1rem;word-break:break-all;}
+        .api-out{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1rem;font-family:monospace;font-size:0.75rem;color:#a0aec0;min-height:80px;max-height:220px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6;margin-top:0.8rem;}
+
+        /* BUTTONS */
+        .btn{font-family:var(--font-d);font-size:0.9rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.55rem 1.4rem;border:2px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.4rem;}
+        .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
+        .btn-acid:hover{background:transparent;color:var(--acid);}
+        .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+        .btn-ghost:hover{border-color:var(--acid);color:var(--acid);}
+        .btn-red{background:transparent;color:var(--red);border-color:var(--red);}
+        .btn-red:hover{background:var(--red);color:#fff;}
+        .btn-sm{font-size:0.75rem;padding:0.38rem 0.9rem;}
+        .btn-block{width:100%;justify-content:center;}
+
+        /* FORM */
+        .form-group{margin-bottom:1rem;}
+        .form-label{display:block;font-size:0.68rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;}
+        .form-input{width:100%;padding:0.7rem 0.9rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.88rem;transition:border-color 0.2s;}
+        .form-input:focus{outline:none;border-color:var(--acid);}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+        .form-msg{margin-top:0.7rem;padding:0.6rem 0.8rem;border-radius:3px;font-size:0.8rem;display:none;}
+        .form-msg.err{background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.3);display:block;}
+        .form-msg.ok{background:rgba(200,255,0,0.08);color:var(--acid);border:1px solid rgba(200,255,0,0.2);display:block;}
+
+        /* TABLE */
+        .data-table{width:100%;border-collapse:collapse;}
+        .data-table th{font-family:var(--font-d);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.8rem 1rem;text-align:left;border-bottom:1px solid var(--border);}
+        .data-table td{padding:0.9rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.87rem;}
+        .data-table tr:hover td{background:var(--surface2);}
+        .badge{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.6rem;border-radius:2px;}
+        .b-acid{background:rgba(200,255,0,0.12);color:var(--acid);}
+        .b-cyan{background:rgba(0,255,209,0.12);color:var(--acid2);}
+        .b-red{background:rgba(255,45,85,0.12);color:var(--red);}
+        .b-grey{background:rgba(255,255,255,0.07);color:var(--muted);}
+
+        /* QR */
+        #qrImg{display:none;max-width:180px;border:3px solid var(--acid);border-radius:6px;margin:1rem auto;display:none;}
+
+        /* PAGE SECTIONS */
+        .page-section{display:none;}
+        .page-section.active{display:block;}
+
+        .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(200,255,0,0.3);border-top-color:var(--acid);border-radius:50%;animation:spin 0.7s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.85rem 1.3rem;font-size:0.85rem;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:280px;display:flex;align-items:center;gap:0.6rem;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast.t-ok{border-color:var(--acid);color:var(--acid);}
+        .toast.t-err{border-color:var(--red);color:var(--red);}
+        .empty-state{text-align:center;padding:3rem;color:var(--muted);}
+        .empty-state i{font-size:2.5rem;margin-bottom:1rem;display:block;}
+        .empty-state p{font-size:0.9rem;}
+
+        @media(max-width:900px){
+            .sidebar{transform:translateX(-100%);}
+            .main{margin-left:0;}
+            .stat-row{grid-template-columns:1fr 1fr;}
+            .grid-2{grid-template-columns:1fr;}
+            .profile-grid{grid-template-columns:1fr 1fr;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo">FITNESS PRO</div>
+        <div class="role-tag"><i class="fas fa-user"></i> Člen</div>
+    </div>
+    <div class="sidebar-user">
+        <div class="avatar" id="sideAvatar">?</div>
+        <div class="user-info">
+            <div class="name" id="sideName">Načítavam...</div>
+            <div class="email" id="sideEmail">—</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Hlavné</div>
+        <a class="nav-item active" onclick="showPage('overview')" href="#"><i class="fas fa-home"></i> Prehľad</a>
+        <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user"></i> Môj profil</a>
+        <div class="nav-section">Tréning</div>
+        <a class="nav-item" onclick="showPage('classes')" href="#"><i class="fas fa-calendar-alt"></i> Moje lekcie</a>
+        <a class="nav-item" onclick="showPage('book')" href="#"><i class="fas fa-plus-circle"></i> Rezervovať lekciu</a>
+        <div class="nav-section">Vstup</div>
+        <a class="nav-item" onclick="showPage('qr')" href="#"><i class="fas fa-qrcode"></i> QR Vstupný kód</a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Odhlásiť sa</button>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+    <div class="topbar">
+        <div class="page-title" id="topbarTitle">Prehľad</div>
+        <div class="topbar-right">
+            <span style="font-size:0.82rem;color:var(--muted)"><span class="status-dot"></span>Aktívny člen</span>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- OVERVIEW -->
+        <div class="page-section active" id="page-overview">
+            <div class="stat-row">
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-calendar-check"></i></div><div class="stat-card-val" id="ov-lessons">1</div><div class="stat-card-lbl">Lekcie tento mes.</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-fire"></i></div><div class="stat-card-val">2</div><div class="stat-card-lbl">Tréning streak</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-medal"></i></div><div class="stat-card-val">Pro</div><div class="stat-card-lbl">Členstvo</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-clock"></i></div><div class="stat-card-val">40h</div><div class="stat-card-lbl">Čas stráveny vo fitku</div></div>
+            </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Rýchly profil</span><span class="method m-get">GET /me</span></div>
+                    <div class="panel-body">
+                        <div class="api-url">/api/auth/me</div>
+                        <button class="btn btn-ghost btn-sm" onclick="loadMe()"><i class="fas fa-sync-alt"></i> Načítať</button>
+                        <div class="api-out" id="ov-meOut">Klikni na načítať...</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Nadchádzajúce lekcie</span><span class="method m-get">GET</span></div>
+                    <div class="panel-body">
+                        <div class="api-url">/api/classes/my</div>
+                        <button class="btn btn-ghost btn-sm" onclick="loadMyClassesOverview()"><i class="fas fa-calendar"></i> Načítať</button>
+                        <div class="api-out" id="ov-classOut">Klikni na načítať...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="page-section" id="page-profile">
+            <div class="panel">
+                <div class="panel-header"><span class="panel-title">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
+                <div class="panel-body" id="profileBody">
+                    <button class="btn btn-ghost btn-sm" onclick="loadFullProfile()" style="margin-bottom:1.5rem"><i class="fas fa-sync-alt"></i> Načítať profil</button>
+                    <div id="profileData" style="display:none">
+                        <div class="profile-grid">
+                            <div class="profile-field"><div class="field-label">Celé meno</div><div class="field-val" id="p-name">—</div></div>
+                            <div class="profile-field"><div class="field-label">Email</div><div class="field-val" id="p-email">—</div></div>
+                            <div class="profile-field"><div class="field-label">Telefón</div><div class="field-val" id="p-phone">—</div></div>
+                            <div class="profile-field"><div class="field-label">Rola</div><div class="field-val" id="p-role">—</div></div>
+                            <div class="profile-field"><div class="field-label">Status</div><div class="field-val" id="p-active">—</div></div>
+                            <div class="profile-field"><div class="field-label">Registrovaný</div><div class="field-val" id="p-created">—</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><span class="panel-title">Upraviť profil</span><span class="method m-post">PUT /api/users/{id}</span></div>
+                <div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label">Celé meno</label><input class="form-input" type="text" id="edit-name" placeholder="Ján Novák"></div>
+                        <div class="form-group"><label class="form-label">Telefón</label><input class="form-input" type="tel" id="edit-phone" placeholder="+421..."></div>
+                    </div>
+                    <button class="btn btn-acid btn-sm" onclick="updateProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
+                    <div class="form-msg" id="profileMsg"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MY CLASSES -->
+        <div class="page-section" id="page-classes">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Moje rezervácie</span>
+                    <div style="display:flex;gap:0.8rem;align-items:center">
+                        <span class="method m-get">GET /api/classes/my</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadMyClasses()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="api-url">/api/classes/my</div>
+                    <div id="myClassesTable">
+                        <div class="empty-state"><i class="fas fa-calendar-times"></i><p>Klikni Obnoviť pre načítanie lekcií</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOOK CLASS -->
+        <div class="page-section" id="page-book">
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Dostupné lekcie</span><span class="method m-get">GET /api/classes</span></div>
+                    <div class="panel-body">
+                        <div class="api-url">/api/classes</div>
+                        <button class="btn btn-ghost btn-sm" onclick="loadAllClasses()" style="margin-bottom:1rem"><i class="fas fa-list"></i> Načítať lekcie</button>
+                        <div id="allClassesTable"><div class="empty-state"><i class="fas fa-dumbbell"></i><p>Klikni pre načítanie dostupných lekcií</p></div></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Rezervovať / Zrušiť</span></div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label class="form-label">ID lekcie</label>
+                            <input class="form-input" type="number" id="bookId" placeholder="Zadaj ID lekcie">
+                        </div>
+                        <div style="display:flex;gap:0.8rem;margin-bottom:1rem">
+                            <button class="btn btn-acid" onclick="bookClass()"><i class="fas fa-plus"></i> Rezervovať</button>
+                            <button class="btn btn-red" onclick="cancelClass()"><i class="fas fa-times"></i> Zrušiť</button>
+                        </div>
+                        <div class="api-out" id="bookOut">Zadaj ID lekcie a klikni na akciu...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR -->
+        <div class="page-section" id="page-qr">
+            <div class="panel" style="max-width:500px;margin:0 auto;">
+                <div class="panel-header"><span class="panel-title">QR Vstupný kód</span><span class="method m-get">GET /api/auth/qr-code</span></div>
+                <div class="panel-body" style="text-align:center">
+                    <div class="api-url">/api/auth/qr-code</div>
+                    <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem;line-height:1.7">Vygeneruj jednorazový QR kód pre vstup do centra. Kód je platný 24 hodín a obsahuje tvoje unikátne ID spolu s časovým razítkom.</p>
+                    <button class="btn btn-acid" id="qrBtn" onclick="generateQR()"><i class="fas fa-qrcode"></i> Generovať QR kód</button>
+                    <div style="margin-top:1.5rem">
+                        <img id="qrImg" src="" alt="QR vstupný kód" style="display:none;max-width:200px;border:3px solid var(--acid);border-radius:6px;margin:0 auto;">
+                    </div>
+                    <p style="font-size:0.78rem;color:var(--muted);margin-top:1.2rem" id="qrNote"></p>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+</main>
+
+<script>
+    const API = 'http://localhost:8080';
+    let token = localStorage.getItem('fp_token');
+    let user = JSON.parse(localStorage.getItem('fp_user') || 'null');
+
+    // Auth guard
+    if (!token || !user) { window.location.href = 'index.html'; }
+    if (user && user.role !== 'member') {
+        const map = { admin: 'admin.html', trainer: 'trainer.html' };
+        window.location.href = map[user.role] || 'index.html';
+    }
+
+    // Init UI
+    if (user) {
+        const initials = (user.fullName || 'U').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('sideAvatar').textContent = initials;
+        document.getElementById('sideName').textContent = user.fullName || '—';
+        document.getElementById('sideEmail').textContent = user.email || '—';
+    }
+
+    // NAV
+    const titles = { overview:'Prehľad', profile:'Môj profil', classes:'Moje lekcie', book:'Rezervácia lekcií', qr:'QR Vstupný kód' };
+    function showPage(id) {
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('page-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el => { if (el.getAttribute('onclick')?.includes(id)) el.classList.add('active'); });
+        document.getElementById('topbarTitle').textContent = titles[id] || id;
+    }
+
+    // API helpers
+    async function authFetch(url, opts={}) {
+        const res = await fetch(API + url, { ...opts, headers: { 'Authorization':'Bearer '+token, 'Content-Type':'application/json', ...(opts.headers||{}) } });
+        if (res.status === 401) { logout(); throw new Error('Session vypršala'); }
+        return res;
+    }
+    function setOut(id, text) { document.getElementById(id).textContent = text; }
+
+    // ---- OVERVIEW ----
+    async function loadMe() {
+        setOut('ov-meOut', 'Načítavam...');
+        try {
+            const res = await authFetch('/api/auth/me');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            setOut('ov-meOut', JSON.stringify(data, null, 2));
+        } catch(e) { setOut('ov-meOut', '❌ ' + e.message); }
+    }
+    async function loadMyClassesOverview() {
+        setOut('ov-classOut', 'Načítavam...');
+        try {
+            const res = await authFetch('/api/classes/my');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            setOut('ov-classOut', JSON.stringify(data, null, 2));
+            if (Array.isArray(data)) document.getElementById('ov-lessons').textContent = data.length;
+        } catch(e) { setOut('ov-classOut', '❌ ' + e.message); }
+    }
+
+    // ---- PROFILE ----
+    async function loadFullProfile() {
+        try {
+            const res = await authFetch('/api/auth/me');
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
+            document.getElementById('profileData').style.display = 'block';
+            document.getElementById('p-name').textContent = d.fullName || '—';
+            document.getElementById('p-email').textContent = d.email || '—';
+            document.getElementById('p-phone').textContent = d.phone || '—';
+            document.getElementById('p-role').innerHTML = `<span class="badge b-acid">${d.role||'—'}</span>`;
+            document.getElementById('p-active').innerHTML = d.active ? '<span class="badge b-acid">Aktívny</span>' : '<span class="badge b-red">Neaktívny</span>';
+            document.getElementById('p-created').textContent = d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—';
+            if (d.fullName) document.getElementById('edit-name').value = d.fullName;
+            if (d.phone) document.getElementById('edit-phone').value = d.phone;
+        } catch(e) { showMsg('profileMsg', e.message, 'err'); }
+    }
+    async function updateProfile() {
+        const fullName = document.getElementById('edit-name').value.trim();
+        const phone = document.getElementById('edit-phone').value.trim();
+        if (!fullName) return showMsg('profileMsg', 'Meno je povinné', 'err');
+        try {
+            const res = await authFetch('/api/users/' + user.id, { method:'PUT', body: JSON.stringify({fullName, phone}) });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
+            showMsg('profileMsg', 'Profil aktualizovaný!', 'ok');
+            user.fullName = fullName;
+            localStorage.setItem('fp_user', JSON.stringify({...user, fullName, phone}));
+            document.getElementById('sideName').textContent = fullName;
+            toast('Profil uložený!', 'ok');
+        } catch(e) { showMsg('profileMsg', e.message, 'err'); }
+    }
+
+    // ---- MY CLASSES ----
+    async function loadMyClasses() {
+        document.getElementById('myClassesTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/classes/my');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            if (!Array.isArray(data) || data.length === 0) {
+                document.getElementById('myClassesTable').innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne rezervované lekcie</p></div>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr><th>ID</th><th>Názov</th><th>Tréner</th><th>Čas</th><th>Status</th><th>Akcia</th></tr></thead><tbody>';
+            data.forEach(c => {
+                html += `<tr><td>#${c.id||'—'}</td><td>${c.name||c.className||'—'}</td><td>${c.trainerName||'—'}</td><td>${c.time||c.startTime||'—'}</td><td><span class="badge b-acid">${c.status||'aktívna'}</span></td><td><button class="btn btn-red btn-sm" onclick="cancelClassById(${c.id})">Zrušiť</button></td></tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('myClassesTable').innerHTML = html;
+        } catch(e) {
+            document.getElementById('myClassesTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+        }
+    }
+    async function cancelClassById(id) {
+        try {
+            const res = await authFetch('/api/classes/'+id+'/cancel', {method:'DELETE'});
+            toast(res.ok ? 'Rezervácia zrušená' : 'Chyba', res.ok ? 'ok' : 'err');
+            if (res.ok) loadMyClasses();
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    // ---- ALL CLASSES ----
+    async function loadAllClasses() {
+        document.getElementById('allClassesTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/classes');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            if (!Array.isArray(data) || data.length === 0) {
+                document.getElementById('allClassesTable').innerHTML = '<div class="empty-state"><i class="fas fa-dumbbell"></i><p>Žiadne dostupné lekcie</p></div>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr><th>ID</th><th>Názov</th><th>Čas</th><th>Kapacita</th></tr></thead><tbody>';
+            data.forEach(c => {
+                html += `<tr onclick="document.getElementById('bookId').value='${c.id}'" style="cursor:pointer" title="Klikni pre výber"><td>#${c.id}</td><td>${c.name||c.className||'—'}</td><td>${c.time||c.startTime||'—'}</td><td>${c.capacity||'—'}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('allClassesTable').innerHTML = html;
+        } catch(e) {
+            document.getElementById('allClassesTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+        }
+    }
+    async function bookClass() {
+        const id = document.getElementById('bookId').value;
+        if (!id) return;
+        setOut('bookOut', 'Rezervujem...');
+        try {
+            const res = await authFetch('/api/classes/'+id+'/book', {method:'POST'});
+            const d = await res.json();
+            setOut('bookOut', JSON.stringify(d, null, 2));
+            if (res.ok) toast('Lekcia rezervovaná!', 'ok');
+        } catch(e) { setOut('bookOut', '❌ ' + e.message); }
+    }
+    async function cancelClass() {
+        const id = document.getElementById('bookId').value;
+        if (!id) return;
+        setOut('bookOut', 'Rušim rezerváciu...');
+        try {
+            const res = await authFetch('/api/classes/'+id+'/cancel', {method:'DELETE'});
+            const d = await res.json();
+            setOut('bookOut', JSON.stringify(d, null, 2));
+            if (res.ok) toast('Rezervácia zrušená', 'ok');
+        } catch(e) { setOut('bookOut', '❌ ' + e.message); }
+    }
+
+    // ---- QR ----
+    async function generateQR() {
+        const btn = document.getElementById('qrBtn');
+        btn.innerHTML = '<span class="spinner"></span> Generujem...';
+        btn.disabled = true;
+        document.getElementById('qrImg').style.display = 'none';
+        document.getElementById('qrNote').textContent = '';
+        try {
+            const res = await authFetch('/api/auth/qr-code');
+            if (!res.ok) throw new Error('Chyba pri generovaní');
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const img = document.getElementById('qrImg');
+            img.src = url;
+            img.style.display = 'block';
+            document.getElementById('qrNote').textContent = 'Kód vygenerovaný: ' + new Date().toLocaleString('sk-SK');
+            toast('QR kód vygenerovaný!', 'ok');
+        } catch(e) { toast(e.message, 'err'); }
+        finally {
+            btn.innerHTML = '<i class="fas fa-qrcode"></i> Generovať nový kód';
+            btn.disabled = false;
+        }
+    }
+
+    // UTILS
+    function showMsg(id, msg, type) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = 'form-msg ' + type;
+    }
+    function toast(msg, type='ok') {
+        const t = document.getElementById('toast');
+        t.className = 'toast t-' + type;
+        t.innerHTML = (type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>') + ' ' + msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+    }
+    function logout() {
+        localStorage.removeItem('fp_token');
+        localStorage.removeItem('fp_user');
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>
