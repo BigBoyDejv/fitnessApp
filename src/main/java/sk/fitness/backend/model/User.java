@@ -40,6 +40,9 @@ public class User {
     @Column(name = "is_active")
     private boolean isActive = true;
 
+    @Column(name = "specialization")
+    private String specialization;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
