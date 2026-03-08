@@ -113,7 +113,8 @@
         .client-sessions{margin-left:auto;font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:var(--blue);}
 
         .page-section{display:none;}
-        .page-section.active{display:block;}
+        .page-section.active{display:block;animation:fi 0.2s ease;}
+        @keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
         .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(10,132,255,0.3);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;}
         @keyframes spin{to{transform:rotate(360deg);}}
         .toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.85rem 1.3rem;font-size:0.85rem;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:280px;display:flex;align-items:center;gap:0.6rem;}
@@ -245,7 +246,6 @@
                         <div class="week-header">Streda</div>
                         <div class="week-header">Štvrtok</div>
                         <div class="week-header">Piatok</div>
-                        <!-- time slots -->
                         <div class="week-time">07:00</div>
                         <div class="week-cell"><div class="week-event acid">CrossFit<br>07:00–08:00</div></div>
                         <div class="week-cell"></div>
@@ -253,11 +253,7 @@
                         <div class="week-cell"></div>
                         <div class="week-cell"><div class="week-event acid">CrossFit<br>07:00–08:00</div></div>
                         <div class="week-time">09:00</div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"></div>
+                        <div class="week-cell"></div><div class="week-cell"></div><div class="week-cell"></div><div class="week-cell"></div><div class="week-cell"></div>
                         <div class="week-time">12:00</div>
                         <div class="week-cell"><div class="week-event red">Boxing<br>12:00–13:00</div></div>
                         <div class="week-cell"><div class="week-event red">Boxing<br>12:00–13:00</div></div>
@@ -343,28 +339,40 @@
 
         <!-- PROFILE -->
         <div class="page-section" id="page-profile">
-            <div class="grid-2">
-                <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
-                    <div class="panel-body">
-                        <div class="api-url">/api/auth/me</div>
-                        <button class="btn btn-ghost btn-sm" onclick="loadTrainerProfile()" style="margin-bottom:1.2rem"><i class="fas fa-sync-alt"></i> Načítať profil</button>
-                        <div id="trainerProfileData" style="display:none">
-                            <div class="form-group"><div class="form-label">Celé meno</div><div id="tp-name">—</div></div>
-                            <div class="form-group"><div class="form-label">Email</div><div id="tp-email">—</div></div>
-                            <div class="form-group"><div class="form-label">Telefón</div><div id="tp-phone">—</div></div>
-                            <div class="form-group"><div class="form-label">Rola</div><div id="tp-role">—</div></div>
-                        </div>
+            <!-- Zobrazenie profilu -->
+            <div class="panel">
+                <div class="panel-header"><span class="panel-title">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
+                <div class="panel-body">
+                    <div id="trainerProfileData" style="display:none;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.5rem">
+                        <div><div class="form-label">Celé meno</div><div id="tp-name" style="font-size:0.9rem">—</div></div>
+                        <div><div class="form-label">Email</div><div id="tp-email" style="font-size:0.9rem">—</div></div>
+                        <div><div class="form-label">Telefón</div><div id="tp-phone" style="font-size:0.9rem">—</div></div>
+                        <div><div class="form-label">Rola</div><div id="tp-role">—</div></div>
+                        <div><div class="form-label">Špecializácia</div><div id="tp-spec" style="font-size:0.9rem">—</div></div>
+                        <div><div class="form-label">Registrovaný</div><div id="tp-created" style="font-size:0.9rem">—</div></div>
                     </div>
                 </div>
+            </div>
+            <!-- Upraviť profil + heslo vedľa seba -->
+            <div class="grid-2">
                 <div class="panel">
                     <div class="panel-header"><span class="panel-title">Upraviť profil</span><span class="method m-put">PUT /api/users/{id}</span></div>
                     <div class="panel-body">
-                        <div class="form-group"><label class="form-label">Celé meno</label><input class="form-input" type="text" id="tp-edit-name" placeholder="Tvoje meno"></div>
+                        <div class="form-group"><label class="form-label">Celé meno *</label><input class="form-input" type="text" id="tp-edit-name" placeholder="Tvoje meno"></div>
                         <div class="form-group"><label class="form-label">Telefón</label><input class="form-input" type="tel" id="tp-edit-phone" placeholder="+421..."></div>
                         <div class="form-group"><label class="form-label">Špecializácia</label><input class="form-input" type="text" id="tp-edit-spec" placeholder="napr. CrossFit, Strength..."></div>
-                        <button class="btn btn-blue" onclick="updateTrainerProfile()"><i class="fas fa-save"></i> Uložiť</button>
+                        <button class="btn btn-blue" onclick="updateTrainerProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                         <div class="form-msg" id="trainerProfileMsg"></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">Zmena hesla</span><span class="method m-put">PUT /api/users/{id}/password</span></div>
+                    <div class="panel-body">
+                        <div class="form-group"><label class="form-label">Aktuálne heslo *</label><input class="form-input" type="password" id="tp-cur-pass" placeholder="Aktuálne heslo"></div>
+                        <div class="form-group"><label class="form-label">Nové heslo * (min 6 znakov)</label><input class="form-input" type="password" id="tp-new-pass" placeholder="Nové heslo"></div>
+                        <div class="form-group"><label class="form-label">Potvrdiť nové heslo *</label><input class="form-input" type="password" id="tp-new-pass2" placeholder="Zopakuj nové heslo"></div>
+                        <button class="btn btn-ghost" onclick="changeTrainerPassword()"><i class="fas fa-lock"></i> Zmeniť heslo</button>
+                        <div class="form-msg" id="trainerPassMsg"></div>
                     </div>
                 </div>
             </div>
@@ -392,12 +400,19 @@
     }
 
     const titles = { overview:'Prehľad', 'my-classes':'Moje tréningy', schedule:'Týždenný rozvrh', clients:'Moji klienti', 'client-detail':'Detail klienta', profile:'Môj profil' };
+
+    // ── FIX: auto-load pri otvorení sekcie (rovnako ako member.html) ──────────
     function showPage(id) {
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('page-' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(el => { if (el.getAttribute('onclick')?.includes(id)) el.classList.add('active'); });
         document.getElementById('topbarTitle').textContent = titles[id] || id;
+        // Auto-load pri otvorení sekcie
+        if (id === 'my-classes')    loadMyTrainerClasses();
+        if (id === 'clients')       loadClients();
+        if (id === 'profile')       loadTrainerProfile();
+        if (id === 'schedule')      loadSchedule();
     }
 
     async function authFetch(url, opts={}) {
@@ -407,7 +422,7 @@
     }
     function setOut(id, text) { document.getElementById(id).textContent = text; }
 
-    // OVERVIEW
+    // ── OVERVIEW ─────────────────────────────────────────────────────────────
     async function loadTrainerClassesOverview() {
         setOut('ov-classOut', 'Načítavam...');
         try {
@@ -429,7 +444,7 @@
         } catch(e) { setOut('ov-clientOut', '❌ ' + e.message); }
     }
 
-    // MY CLASSES
+    // ── MY CLASSES ────────────────────────────────────────────────────────────
     async function loadMyTrainerClasses() {
         document.getElementById('trainerClassesTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
         try {
@@ -440,10 +455,21 @@
                 document.getElementById('trainerClassesTable').innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne tréningy</p></div>';
                 return;
             }
-            let html = '<table class="data-table"><thead><tr><th>ID</th><th>Názov</th><th>Čas</th><th>Prihlásení</th><th>Kapacita</th><th>Akcia</th></tr></thead><tbody>';
+            document.getElementById('ov-classCount').textContent = data.length;
+            let html = '<table class="data-table"><thead><tr><th>ID</th><th>Názov</th><th>Čas</th><th>Miesto</th><th>Prihlásení</th><th>Kapacita</th><th>Akcia</th></tr></thead><tbody>';
             data.forEach(c => {
-                html += `<tr><td>#${c.id}</td><td>${c.name||c.className||'—'}</td><td>${c.time||c.startTime||'—'}</td><td>${c.enrolledCount||0}</td><td>${c.capacity||'—'}</td>
-        <td><button class="btn btn-blue btn-sm" onclick="document.getElementById('noteClassId').value='${c.id}';showPage('my-classes')"><i class="fas fa-edit"></i> Poznámka</button></td></tr>`;
+                const booked = c.booked ?? c.enrolledCount ?? 0;
+                const capacity = c.capacity ?? '—';
+                const full = booked >= capacity;
+                html += `<tr>
+                    <td>#${c.id}</td>
+                    <td>${c.name||c.className||'—'}</td>
+                    <td>${c.startTime ? new Date(c.startTime).toLocaleString('sk-SK',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : (c.time||'—')}</td>
+                    <td>${c.location||'—'}</td>
+                    <td><span class="badge ${full?'b-red':'b-acid'}">${booked}/${capacity}</span></td>
+                    <td>${capacity}</td>
+                    <td><button class="btn btn-blue btn-sm" onclick="document.getElementById('noteClassId').value='${c.id}'"><i class="fas fa-edit"></i> Poznámka</button></td>
+                </tr>`;
             });
             html += '</tbody></table>';
             document.getElementById('trainerClassesTable').innerHTML = html;
@@ -458,24 +484,30 @@
         setOut('noteOut', 'Ukladám...');
         try {
             const res = await authFetch('/api/classes/'+id+'/notes', {method:'PUT', body:JSON.stringify({note})});
-            const d = await res.json();
-            setOut('noteOut', JSON.stringify(d, null, 2));
-            if (res.ok) toast('Poznámka uložená', 'ok');
+            // ── FIX: rovnaký text() pattern ako member.html ──
+            const text = await res.text();
+            let d = {};
+            try { d = JSON.parse(text); } catch { d = {message: text||'OK'}; }
+            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
+            setOut('noteOut', d.message||'Poznámka uložená ✓');
+            toast('Poznámka uložená', 'ok');
         } catch(e) { setOut('noteOut', '❌ ' + e.message); }
     }
 
-    // SCHEDULE
+    // ── SCHEDULE ──────────────────────────────────────────────────────────────
     async function loadSchedule() {
         setOut('scheduleOut', 'Načítavam rozvrh...');
         try {
             const res = await authFetch('/api/trainer/schedule');
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
+            const text = await res.text();
+            let d = {};
+            try { d = JSON.parse(text); } catch { d = {message: text}; }
+            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera');
             setOut('scheduleOut', JSON.stringify(d, null, 2));
         } catch(e) { setOut('scheduleOut', '❌ ' + e.message + ' (rozvrh je zobrazený staticky vyššie)'); }
     }
 
-    // CLIENTS
+    // ── CLIENTS ───────────────────────────────────────────────────────────────
     async function loadClients() {
         document.getElementById('clientsList').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
         try {
@@ -491,13 +523,13 @@
             data.forEach(c => {
                 const initials = (c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
                 html += `<div class="client-card" onclick="document.getElementById('clientDetailId').value='${c.id}';showPage('client-detail')">
-        <div class="client-avatar">${initials}</div>
-        <div class="client-info">
-          <div class="client-name">${c.fullName||'—'}</div>
-          <div class="client-meta">${c.email||'—'} • <span class="badge b-blue">${c.role||'member'}</span></div>
-        </div>
-        <div class="client-sessions" title="Počet sedení">${c.sessionsCount||0}</div>
-      </div>`;
+                    <div class="client-avatar">${initials}</div>
+                    <div class="client-info">
+                        <div class="client-name">${c.fullName||'—'}</div>
+                        <div class="client-meta">${c.email||'—'} • <span class="badge b-blue">${c.role||'member'}</span></div>
+                    </div>
+                    <div class="client-sessions" title="Počet sedení">${c.sessionsCount||0}</div>
+                </div>`;
             });
             document.getElementById('clientsList').innerHTML = html;
         } catch(e) {
@@ -505,7 +537,7 @@
         }
     }
 
-    // CLIENT DETAIL
+    // ── CLIENT DETAIL ─────────────────────────────────────────────────────────
     async function loadClientDetail() {
         const id = document.getElementById('clientDetailId').value;
         if (!id) return;
@@ -513,8 +545,10 @@
         try {
             const res = await authFetch('/api/trainer/clients/'+id);
             const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
             setOut('clientDetailOut', JSON.stringify(d, null, 2));
             if (d.id) document.getElementById('clientClassesId').value = d.id;
+            if (d.id) document.getElementById('clientNoteId').value = d.id;
         } catch(e) { setOut('clientDetailOut', '❌ ' + e.message); }
     }
     async function loadClientClasses() {
@@ -524,6 +558,7 @@
         try {
             const res = await authFetch('/api/trainer/clients/'+id+'/classes');
             const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
             setOut('clientClassesOut', JSON.stringify(d, null, 2));
         } catch(e) { setOut('clientClassesOut', '❌ ' + e.message); }
     }
@@ -534,43 +569,86 @@
         setOut('clientNoteOut', 'Pridávam...');
         try {
             const res = await authFetch('/api/trainer/clients/'+id+'/notes', {method:'POST', body:JSON.stringify({note})});
-            const d = await res.json();
-            setOut('clientNoteOut', JSON.stringify(d, null, 2));
-            if (res.ok) toast('Poznámka pridaná', 'ok');
+            // ── FIX: text() pattern ──
+            const text = await res.text();
+            let d = {};
+            try { d = JSON.parse(text); } catch { d = {message: text||'OK'}; }
+            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
+            setOut('clientNoteOut', d.message||'Poznámka pridaná ✓');
+            toast('Poznámka pridaná', 'ok');
         } catch(e) { setOut('clientNoteOut', '❌ ' + e.message); }
     }
 
-    // PROFILE
+    // ── PROFILE ───────────────────────────────────────────────────────────────
     async function loadTrainerProfile() {
         try {
             const res = await authFetch('/api/auth/me');
             const d = await res.json();
             if (!res.ok) throw new Error(d.message);
-            document.getElementById('trainerProfileData').style.display = 'block';
-            document.getElementById('tp-name').textContent = d.fullName||'—';
-            document.getElementById('tp-email').textContent = d.email||'—';
-            document.getElementById('tp-phone').textContent = d.phone||'—';
-            document.getElementById('tp-role').innerHTML = `<span class="badge b-blue">${d.role}</span>`;
-            if (d.fullName) document.getElementById('tp-edit-name').value = d.fullName;
-            if (d.phone) document.getElementById('tp-edit-phone').value = d.phone;
+            const pd = document.getElementById('trainerProfileData');
+            pd.style.display = 'grid';
+            document.getElementById('tp-name').textContent    = d.fullName||'—';
+            document.getElementById('tp-email').textContent   = d.email||'—';
+            document.getElementById('tp-phone').textContent   = d.phone||'—';
+            document.getElementById('tp-role').innerHTML      = `<span class="badge b-blue">${d.role||'trainer'}</span>`;
+            document.getElementById('tp-spec').textContent    = d.specialization||'—';
+            document.getElementById('tp-created').textContent = d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—';
+            // Predvyplň formulár
+            document.getElementById('tp-edit-name').value  = d.fullName||'';
+            document.getElementById('tp-edit-phone').value = d.phone||'';
+            document.getElementById('tp-edit-spec').value  = d.specialization||'';
         } catch(e) { toast(e.message, 'err'); }
     }
+
     async function updateTrainerProfile() {
-        const fullName = document.getElementById('tp-edit-name').value.trim();
-        const phone = document.getElementById('tp-edit-phone').value.trim();
+        const fullName       = document.getElementById('tp-edit-name').value.trim();
+        const phone          = document.getElementById('tp-edit-phone').value.trim();
+        const specialization = document.getElementById('tp-edit-spec').value.trim();
         if (!fullName) return showMsg('trainerProfileMsg', 'Meno je povinné', 'err');
+        const uid = user?.id || user?.userId;
+        if (!uid) return showMsg('trainerProfileMsg', 'Chyba: ID nenájdené, odhláš sa a prihlás znova.', 'err');
         try {
-            const res = await authFetch('/api/users/'+user.id, {method:'PUT', body:JSON.stringify({fullName, phone})});
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
+            const res = await authFetch('/api/users/'+uid, {method:'PUT', body:JSON.stringify({fullName, phone, specialization})});
+            let d;
+            try { d = await res.json(); } catch { d = {}; }
+            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
             showMsg('trainerProfileMsg', 'Profil aktualizovaný!', 'ok');
-            user.fullName = fullName;
-            localStorage.setItem('fp_user', JSON.stringify({...user, fullName, phone}));
+            const upd = {...user, fullName, phone: phone||user.phone};
+            localStorage.setItem('fp_user', JSON.stringify(upd));
+            user = upd;
             document.getElementById('sideName').textContent = fullName;
+            document.getElementById('sideAvatar').textContent = fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
             toast('Profil uložený!', 'ok');
+            loadTrainerProfile();
         } catch(e) { showMsg('trainerProfileMsg', e.message, 'err'); }
     }
 
+    async function changeTrainerPassword() {
+        const cur  = document.getElementById('tp-cur-pass').value;
+        const np   = document.getElementById('tp-new-pass').value;
+        const np2  = document.getElementById('tp-new-pass2').value;
+        if (!cur)          return showMsg('trainerPassMsg', 'Zadaj aktuálne heslo', 'err');
+        if (np.length < 6) return showMsg('trainerPassMsg', 'Nové heslo musí mať aspoň 6 znakov', 'err');
+        if (np !== np2)    return showMsg('trainerPassMsg', 'Heslá sa nezhodujú', 'err');
+        const uid = user?.id || user?.userId;
+        if (!uid) return showMsg('trainerPassMsg', 'Chyba: ID nenájdené', 'err');
+        try {
+            const res = await authFetch('/api/users/'+uid+'/password', {
+                method: 'PUT',
+                body: JSON.stringify({currentPassword: cur, newPassword: np})
+            });
+            let d;
+            try { d = await res.json(); } catch { d = {}; }
+            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
+            showMsg('trainerPassMsg', 'Heslo úspešne zmenené!', 'ok');
+            document.getElementById('tp-cur-pass').value  = '';
+            document.getElementById('tp-new-pass').value  = '';
+            document.getElementById('tp-new-pass2').value = '';
+            toast('Heslo zmenené!', 'ok');
+        } catch(e) { showMsg('trainerPassMsg', e.message, 'err'); }
+    }
+
+    // ── UTILS ─────────────────────────────────────────────────────────────────
     function showMsg(id, msg, type) {
         const el = document.getElementById(id);
         el.textContent = msg;

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>FITNESS PRO</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>Fitness PRO  </title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -199,7 +200,7 @@
     <div class="hero-glow"></div>
 
     <div class="hero-left">
-        <div class="hero-tag">Bratislava • Est. 2018</div>
+        <div class="hero-tag">Košice • Est. 2026</div>
         <h1>
             PREMEN SA<br>
             <span class="line2">NA NAJLEPŠIU</span>
@@ -284,7 +285,7 @@
                 <div class="prog-num">02</div>
                 <div class="prog-name">Skupinové lekcie</div>
                 <p class="prog-desc">CrossFit, Joga, Body Pump, HIIT, Boxing — každý deň nová výzva a energia. Tréning v skupinovej dynamike, ktorá ťa ťahá vpred.</p>
-                <div class="prog-price">49€ <span>/ mesiac</span></div>
+                <div class="prog-price">od 29€ <span>/ mesiac</span></div>
             </div>
             <div class="prog-card">
                 <div class="prog-num">03</div>
@@ -321,13 +322,14 @@
         <h2 class="section-title">CENNÍK <em>ČLENSTVA</em></h2>
         <div class="price-grid">
             <div class="price-card">
-                <div class="price-name">Základné</div>
-                <p style="color:var(--muted);font-size:0.85rem;">Pre tých, čo začínajú</p>
+                <div class="price-name">Študentske</div>
+                <p style="color:var(--muted);font-size:0.85rem;">Zľavnené pre študentov ISIC</p>
                 <div class="price-amount"><sup>€</sup>29<sub>/mes</sub></div>
                 <ul class="price-features">
-                    <li><i class="fas fa-check"></i> Prístup k fitnessu 6–22h</li>
-                    <li><i class="fas fa-check"></i> 4 skupinové lekcie / mes</li>
-                    <li><i class="fas fa-check"></i> Vstupná konzultácia</li>
+                    <li><i class="fas fa-check"></i> Neobmedzený prístup 24/7</li>
+                    <li><i class="fas fa-check"></i> QR vstupný kód</li>
+                    <li class="off"><i class="fas fa-times"></i> 4 skupinové lekcie / mes</li>
+                    <li class="off"><i class="fas fa-times"></i> Vstupná konzultácia</li>
                     <li class="off"><i class="fas fa-times"></i> Osobný tréner</li>
                     <li class="off"><i class="fas fa-times"></i> Výživový plán</li>
                 </ul>
@@ -335,28 +337,31 @@
             </div>
             <div class="price-card featured">
                 <div class="price-featured-tag">Najpopulárnejší</div>
-                <div class="price-name">Pro</div>
-                <p style="color:var(--muted);font-size:0.85rem;">Pre serióznych atlétov</p>
-                <div class="price-amount"><sup>€</sup>59<sub>/mes</sub></div>
+                <div class="price-name">Štandard</div>
+                <p style="color:var(--muted);font-size:0.85rem;">Najpoužívanejšie členstvo</p>
+                <div class="price-amount"><sup>€</sup>49<sub>/mes</sub></div>
                 <ul class="price-features">
                     <li><i class="fas fa-check"></i> Neobmedzený prístup 24/7</li>
                     <li><i class="fas fa-check"></i> Neobmedzené skupinové lekcie</li>
                     <li><i class="fas fa-check"></i> 2× osobný tréner / mes</li>
-                    <li><i class="fas fa-check"></i> Výživový plán</li>
                     <li><i class="fas fa-check"></i> QR vstupný kód</li>
+                    <li class="off"><i class="fas fa-times"></i> Výživový plán</li>
+                    <br>
+                    <br>
                 </ul>
                 <button class="btn btn-acid btn-block" onclick="focusRegister()">Začať</button>
             </div>
             <div class="price-card">
-                <div class="price-name">Elite</div>
-                <p style="color:var(--muted);font-size:0.85rem;">Ultimátny zážitok</p>
-                <div class="price-amount"><sup>€</sup>99<sub>/mes</sub></div>
+                <div class="price-name">Premium</div>
+                <p style="color:var(--muted);font-size:0.85rem;">Neobmedzený vstup + sauna + solárium</p>
+                <div class="price-amount"><sup>€</sup>79<sub>/mes</sub></div>
                 <ul class="price-features">
-                    <li><i class="fas fa-check"></i> Všetko z Pro</li>
+                    <li><i class="fas fa-check"></i> Všetko z Štandard</li>
                     <li><i class="fas fa-check"></i> 8× osobný tréner / mes</li>
                     <li><i class="fas fa-check"></i> Dedikovaný tréner</li>
                     <li><i class="fas fa-check"></i> Online coaching 24/7</li>
                     <li><i class="fas fa-check"></i> Prioritná rezervácia</li>
+                    <li><i class="fas fa-check"></i> Výživový plán</li>
                 </ul>
                 <button class="btn btn-ghost btn-block" onclick="focusRegister()">Začať</button>
             </div>
@@ -371,7 +376,7 @@
         <h2 class="section-title">KONTAKT</h2>
         <div class="contact-grid">
             <div class="contact-items">
-                <div class="contact-item"><div class="c-icon"><i class="fas fa-map-marker-alt"></i></div><div class="c-text"><h4>Adresa</h4><p>Mlynské Nivy 123<br>821 09 Bratislava</p></div></div>
+                <div class="contact-item"><div class="c-icon"><i class="fas fa-map-marker-alt"></i></div><div class="c-text"><h4>Adresa</h4><p>Jedlíkova 9<br>040 01 Košice</p></div></div>
                 <div class="contact-item"><div class="c-icon"><i class="fas fa-clock"></i></div><div class="c-text"><h4>Otváracie hodiny</h4><p>Po – Pi: 6:00 – 22:00<br>So – Ne: 8:00 – 20:00</p></div></div>
                 <div class="contact-item"><div class="c-icon"><i class="fas fa-phone"></i></div><div class="c-text"><h4>Telefón</h4><p>+421 905 123 456</p></div></div>
                 <div class="contact-item"><div class="c-icon"><i class="fas fa-envelope"></i></div><div class="c-text"><h4>Email</h4><p>info@fitnesspro.sk</p></div></div>
@@ -394,7 +399,7 @@
     <div class="footer-grid">
         <div class="footer-brand">
             <div class="logo">FITNESS PRO</div>
-            <p>Profesionálne fitness centrum v srdci Bratislavy. Tréningy, ktoré menia životy od roku 2018.</p>
+            <p>Profesionálne fitness centrum na juhu Košíc. Tréningy, ktoré menia životy od roku 2026.</p>
         </div>
         <div class="footer-col"><h4>Navigácia</h4><ul><li><a href="#programy">Programy</a></li><li><a href="#cennik">Cenník</a></li><li><a href="#rozvrh">Rozvrh</a></li><li><a href="#kontakt">Kontakt</a></li></ul></div>
         <div class="footer-col"><h4>Programy</h4><ul><li><a href="#">CrossFit</a></li><li><a href="#">Joga</a></li><li><a href="#">Boxing</a></li><li><a href="#">HIIT</a></li></ul></div>

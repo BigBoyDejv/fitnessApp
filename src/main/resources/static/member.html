@@ -298,11 +298,11 @@
 
         <!-- PROFILE -->
         <div class="ps" id="pg-profile">
+            <!-- Zobrazenie profilu -->
             <div class="panel">
                 <div class="ph"><span class="pt">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
                 <div class="pb">
-                    <button class="btn btn-ghost btn-sm" onclick="loadProfile()" style="margin-bottom:1.2rem"><i class="fas fa-sync-alt"></i> Načítať profil</button>
-                    <div id="profileData" style="display:none;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.5rem">
+                    <div id="profileData" style="display:none;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.5rem">
                         <div><div class="fl">Celé meno</div><div id="p-name" style="font-size:0.9rem">—</div></div>
                         <div><div class="fl">Email</div><div id="p-email" style="font-size:0.9rem">—</div></div>
                         <div><div class="fl">Telefón</div><div id="p-phone" style="font-size:0.9rem">—</div></div>
@@ -312,10 +312,10 @@
                     </div>
                 </div>
             </div>
+            <!-- Upraviť profil -->
             <div class="panel">
                 <div class="ph"><span class="pt">Upraviť profil</span><span class="method m-put">PUT /api/users/{id}</span></div>
                 <div class="pb">
-                    <div class="api-url">/api/users/{id} — body: {fullName, phone, avatarUrl}</div>
                     <div class="fr">
                         <div class="form-group"><label class="fl">Celé meno *</label><input class="fi" type="text" id="e-name" placeholder="Ján Novák"></div>
                         <div class="form-group"><label class="fl">Telefón</label><input class="fi" type="tel" id="e-phone" placeholder="+421 9XX XXX XXX"></div>
@@ -323,6 +323,19 @@
                     <div class="form-group"><label class="fl">URL avatara</label><input class="fi" type="url" id="e-avatar" placeholder="https://..."></div>
                     <button class="btn btn-acid" onclick="saveProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                     <div class="fm" id="profMsg"></div>
+                </div>
+            </div>
+            <!-- Zmena hesla -->
+            <div class="panel">
+                <div class="ph"><span class="pt">Zmena hesla</span><span class="method m-put">PUT /api/users/{id}/password</span></div>
+                <div class="pb">
+                    <div class="fr">
+                        <div class="form-group"><label class="fl">Aktuálne heslo *</label><input class="fi" type="password" id="e-cur-pass" placeholder="Aktuálne heslo"></div>
+                        <div class="form-group"><label class="fl">Nové heslo * (min 6 znakov)</label><input class="fi" type="password" id="e-new-pass" placeholder="Nové heslo"></div>
+                    </div>
+                    <div class="form-group"><label class="fl">Potvrdiť nové heslo *</label><input class="fi" type="password" id="e-new-pass2" placeholder="Zopakuj nové heslo"></div>
+                    <button class="btn btn-ghost" onclick="changePassword()"><i class="fas fa-lock"></i> Zmeniť heslo</button>
+                    <div class="fm" id="passMsg"></div>
                 </div>
             </div>
         </div>
@@ -535,10 +548,10 @@
                     <div class="rule-sec"><h4><i class="fas fa-dumbbell"></i> Používanie zariadení</h4><ul class="rule-list"><li>Po každom cvičení utrieť zariadenie dezinfekčným prostriedkom.</li><li>Náradie vráť na pôvodné miesto po použití.</li><li>Počas špičky (17:00–20:00) max 20 min na každom stroji.</li><li>Mobily na foto/video len pre osobné účely bez cudzích osôb v zábere.</li></ul></div>
                     <div class="rule-sec"><h4><i class="fas fa-calendar-check"></i> Skupinové lekcie a rezervácie</h4><ul class="rule-list"><li>Rezerváciu urob najmenej 2 hodiny pred začiatkom lekcie.</li><li>Zrušenie najmenej 1 hodinu vopred — inak sa zaznamená no-show.</li><li>Po 3 no-show v mesiaci bude rezervácia zablokovaná na 7 dní.</li><li>Príď 5 minút pred začiatkom. Neskorší príchod o 10+ min nie je povolený.</li></ul></div>
                     <div class="rule-sec"><h4><i class="fas fa-tshirt"></i> Oblečenie a hygiena</h4><ul class="rule-list"><li>Povinné je športové oblečenie a čistá vnútorná obuv.</li><li>V posilňovni je povinný uterák na sedadle a záťaži.</li><li>Sprchy sú v šatniach — udržiavaj čistotu.</li></ul></div>
-                    <div class="rule-sec"><h4><i class="fas fa-credit-card"></i> Členstvo a platby</h4><ul class="rule-list"><li>Členstvo sa automaticky neobnovuje — predĺženie treba uhradiť včas.</li><li>Vrátenie poplatku nie je možné po 48 hodinách od zakúpenia.</li><li>Pri strate QR kódu kontaktuj recepciu alebo info@fitnesspro.sk.</li><li>Zľavy (študentská, seniorská) vyžadujú platný doklad.</li></ul></div>
+                    <div class="rule-sec"><h4><i class="fas fa-credit-card"></i> Členstvo a platby</h4><ul class="rule-list"><li>Členstvo sa automaticky neobnovuje — predĺženie treba uhradiť včas.</li><li>Vrátenie poplatku nie je možné po 48 hodinách od zakúpenia.</li><li>Pri strate QR kódu kontaktuj recepciu alebo <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e68f888089a6808f9288839595969489c8958d">[email&#160;protected]</a>.</li><li>Zľavy (študentská, seniorská) vyžadujú platný doklad.</li></ul></div>
                     <div class="rule-sec"><h4><i class="fas fa-exclamation-triangle"></i> Bezpečnosť</h4><ul class="rule-list"><li>Centrum nezodpovedá za odcudzené veci. Používaj uzamykateľné skrinky.</li><li>Cvičenie pod vplyvom alkoholu alebo drog je prísne zakázané.</li><li>Pri zdravotných problémoch informuj personál — prvá pomoc je na recepcii.</li><li>Porušenie pravidiel môže viesť k okamžitému vykázaniu a zrušeniu členstva.</li></ul></div>
                     <p style="font-size:0.78rem;color:var(--muted);margin-top:1.3rem;padding-top:1rem;border-top:1px solid var(--border)">
-                        Posledná aktualizácia: Január 2026 &nbsp;·&nbsp; <span style="color:var(--acid)">info@fitnesspro.sk</span> &nbsp;·&nbsp; +421 905 123 456
+                        Posledná aktualizácia: Január 2026 &nbsp;·&nbsp; <span style="color:var(--acid)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2e474048416e48475a404b5d5d5e5c41005d45">[email&#160;protected]</a></span> &nbsp;·&nbsp; +421 905 123 456
                     </p>
                 </div>
             </div>
@@ -547,7 +560,7 @@
     </div>
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     const API = 'http://localhost:8080';
     let token = localStorage.getItem('fp_token');
     let user  = JSON.parse(localStorage.getItem('fp_user') || 'null');
@@ -580,6 +593,16 @@
             if (el.getAttribute('onclick')?.includes("'"+id+"'")) el.classList.add('active');
         });
         document.getElementById('topTitle').textContent = titles[id]||id;
+        // Auto-load pri otvorení sekcie
+        if (id==='membership') { loadMembership(); loadMemHistory(); }
+        if (id==='profile')    loadProfile();
+        if (id==='classes')    loadMyClasses();
+        if (id==='book')       loadAllCl();
+        if (id==='trainers')   loadTrainers();
+        if (id==='checkin')    loadCheckins();
+        if (id==='stats')      loadStats();
+        if (id==='pricing')    loadPricing();
+        if (id==='qr')         genQR();
     }
 
     // ===== API =====
@@ -655,30 +678,50 @@
         const phone     = document.getElementById('e-phone').value.trim();
         const avatarUrl = document.getElementById('e-avatar').value.trim();
         if (!fullName) return showMsg('profMsg','Meno je povinné','err');
-        // Zisti ID: z user objektu, z /me alebo z URL
         const uid = user?.id || user?.userId;
-        if (!uid) return showMsg('profMsg','Chyba: ID používateľa nenájdené v localStorage. Odhláš sa a prihlás znova.','err');
+        if (!uid) return showMsg('profMsg','Chyba: ID nenájdené, odhláš sa a prihlás znova.','err');
         try {
             const res = await af('/api/users/'+uid, {
                 method: 'PUT',
                 body: JSON.stringify({fullName, phone, avatarUrl})
             });
-            // Niektoré backendy vrátia 200 s objektom, niektoré len string
             let d;
             try { d = await res.json(); } catch { d = {}; }
-            if (!res.ok) throw new Error(d.message||d||'Chyba servera ('+res.status+')');
+            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
             showMsg('profMsg','Profil úspešne aktualizovaný!','ok');
-            // Aktualizuj localStorage a sidebar
             const upd = {...user, fullName, phone: phone||user.phone, avatarUrl: avatarUrl||user.avatarUrl};
             localStorage.setItem('fp_user', JSON.stringify(upd));
             user = upd;
             document.getElementById('sideName').textContent = fullName;
-            const ini = fullName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-            document.getElementById('sideAvatar').textContent = ini;
+            document.getElementById('sideAvatar').textContent = fullName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
             toast('Profil uložený!','ok');
-            // Obnov zobrazenie profilu
             loadProfile();
         } catch(e) { showMsg('profMsg',e.message,'err'); }
+    }
+
+    async function changePassword() {
+        const cur  = document.getElementById('e-cur-pass').value;
+        const np   = document.getElementById('e-new-pass').value;
+        const np2  = document.getElementById('e-new-pass2').value;
+        if (!cur)          return showMsg('passMsg','Zadaj aktuálne heslo','err');
+        if (np.length < 6) return showMsg('passMsg','Nové heslo musí mať aspoň 6 znakov','err');
+        if (np !== np2)    return showMsg('passMsg','Heslá sa nezhodujú','err');
+        const uid = user?.id || user?.userId;
+        if (!uid) return showMsg('passMsg','Chyba: ID nenájdené','err');
+        try {
+            const res = await af('/api/users/'+uid+'/password', {
+                method: 'PUT',
+                body: JSON.stringify({currentPassword: cur, newPassword: np})
+            });
+            let d;
+            try { d = await res.json(); } catch { d = {}; }
+            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
+            showMsg('passMsg','Heslo úspešne zmenené!','ok');
+            document.getElementById('e-cur-pass').value = '';
+            document.getElementById('e-new-pass').value = '';
+            document.getElementById('e-new-pass2').value = '';
+            toast('Heslo zmenené!','ok');
+        } catch(e) { showMsg('passMsg',e.message,'err'); }
     }
 
     // ===== NOTIFICATIONS =====
@@ -774,7 +817,7 @@
             if(!res.ok) throw new Error(d.message||'Chyba');
             showMsg('buyMsg','Členstvo zakúpené! Platné do: '+d.endDate,'ok');
             toast('Členstvo aktivované!','ok');
-            setTimeout(()=>go('membership'),1400);
+            setTimeout(()=>{ go('membership'); loadMembership(); loadMemHistory(); },1400);
         } catch(e){showMsg('buyMsg',e.message,'err');}
     }
     async function loadPricing() {
@@ -824,6 +867,7 @@
         if(!confirm('Naozaj zrušiť rezerváciu?')) return;
         try {
             const res=await af('/api/classes/'+id+'/cancel',{method:'DELETE'});
+            await res.text(); // konzumuj body, vyhne sa JSON parse chybe
             toast(res.ok?'Rezervácia zrušená':'Chyba',res.ok?'ok':'err');
             if(res.ok) loadMyClasses();
         } catch(e){toast(e.message,'err');}
@@ -852,9 +896,13 @@
         setOut('bookOut','Rezervujem...');
         try {
             const res=await af('/api/classes/'+id+'/book',{method:'POST'});
-            const d=await res.json();
-            setOut('bookOut',JSON.stringify(d,null,2));
-            if(res.ok) toast(d.status==='waiting'?'Waitlist (poz. '+d.waitlistPosition+')':'Lekcia rezervovaná!','ok');
+            const text=await res.text();
+            let d={};
+            try { d=JSON.parse(text); } catch { d={message:text||'OK'}; }
+            if(!res.ok) throw new Error(d.message||text||'Chyba servera ('+res.status+')');
+            setOut('bookOut', d.message||'Rezervácia potvrdená ✓');
+            toast(d.status==='waiting'?'Waitlist (poz. '+d.waitlistPosition+')':'Lekcia rezervovaná!','ok');
+            loadMyClasses();
         } catch(e){setOut('bookOut','❌ '+e.message);}
     }
     async function cancelCl() {
@@ -863,9 +911,13 @@
         setOut('bookOut','Rušim...');
         try {
             const res=await af('/api/classes/'+id+'/cancel',{method:'DELETE'});
-            const d=await res.json();
-            setOut('bookOut',JSON.stringify(d,null,2));
-            if(res.ok) toast('Rezervácia zrušená','ok');
+            const text=await res.text();
+            let d={};
+            try { d=JSON.parse(text); } catch { d={message:text||'OK'}; }
+            if(!res.ok) throw new Error(d.message||text||'Chyba servera ('+res.status+')');
+            setOut('bookOut', d.message||'Rezervácia zrušená ✓');
+            toast('Rezervácia zrušená','ok');
+            loadMyClasses();
         } catch(e){setOut('bookOut','❌ '+e.message);}
     }
 
@@ -943,6 +995,8 @@
             setOut('statsOut',JSON.stringify(d,null,2));
         } catch(e){setOut('statsOut','❌ '+e.message+'\n(endpoint /api/stats/my bude dostupný po implementácii StatsService)');}
     }
+
+
 
     // ===== UTILS =====
     function showMsg(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='fm '+type;}
