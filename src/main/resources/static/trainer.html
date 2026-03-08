@@ -5,170 +5,219 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>FITNESS PRO — Tréner</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <style>
-        :root{--acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;--bg:#0A0A0A;--surface:#111111;--surface2:#1A1A1A;--border:#222222;--text:#F0F0F0;--muted:#666666;--font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;}
+        :root{
+            --acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;
+            --bg:#070708;--surface:#0F0F11;--surface2:#171719;--surface3:#1E1E21;
+            --border:#252528;--border2:#2E2E32;--text:#F2F2F7;--muted:#6E6E73;--muted2:#48484D;
+            --font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;
+        }
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;}
-        h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.02em;text-transform:uppercase;}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.03em;text-transform:uppercase;}
         ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--blue);}
 
-        .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
-        .sidebar-logo{padding:1.8rem 1.5rem;border-bottom:1px solid var(--border);}
-        .sidebar-logo .logo{font-family:var(--font-d);font-size:1.7rem;font-weight:900;color:var(--blue);letter-spacing:0.12em;}
-        .sidebar-logo .role-tag{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(10,132,255,0.12);color:var(--blue);border:1px solid rgba(10,132,255,0.25);padding:0.18rem 0.7rem;border-radius:2px;margin-top:0.5rem;}
-        .sidebar-user{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.9rem;}
-        .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:#fff;flex-shrink:0;}
-        .user-info .name{font-size:0.88rem;font-weight:500;}
-        .user-info .email{font-size:0.75rem;color:var(--muted);}
-        .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
-        .nav-section{padding:0.5rem 1.5rem 0.3rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
-        .nav-item{display:flex;align-items:center;gap:0.9rem;padding:0.75rem 1.5rem;color:var(--muted);font-size:0.88rem;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent;text-decoration:none;}
+        .sidebar{width:256px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+        .sb-logo{padding:1.6rem 1.5rem 1.2rem;border-bottom:1px solid var(--border);}
+        .sb-logo .logo{font-family:var(--font-d);font-size:1.6rem;font-weight:900;color:var(--blue);letter-spacing:0.15em;display:flex;align-items:center;gap:0.5rem;}
+        .sb-logo .logo span{color:var(--text);}
+        .sb-logo .role-tag{display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.18em;background:rgba(10,132,255,0.1);color:var(--blue);border:1px solid rgba(10,132,255,0.2);padding:0.2rem 0.7rem;border-radius:2px;margin-top:0.6rem;}
+        .sb-user{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.85rem;}
+        .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.2rem;font-weight:900;color:#fff;flex-shrink:0;}
+        .sb-user .name{font-size:0.85rem;font-weight:500;}
+        .sb-user .email{font-size:0.72rem;color:var(--muted);}
+        .sb-nav{flex:1;padding:0.8rem 0;overflow-y:auto;}
+        .nav-section{padding:0.8rem 1.5rem 0.25rem;font-family:var(--font-d);font-size:0.6rem;font-weight:700;letter-spacing:0.25em;color:var(--muted2);}
+        .nav-item{display:flex;align-items:center;gap:0.85rem;padding:0.65rem 1.5rem;color:var(--muted);font-size:0.85rem;cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;text-decoration:none;}
         .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
-        .nav-item.active{color:var(--blue);border-left-color:var(--blue);background:rgba(10,132,255,0.05);}
-        .nav-item i{width:16px;text-align:center;font-size:0.9rem;}
-        .sidebar-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border);}
-        .logout-btn{display:flex;align-items:center;gap:0.8rem;color:var(--muted);font-size:0.85rem;cursor:pointer;transition:color 0.2s;background:none;border:none;width:100%;text-align:left;font-family:var(--font-b);}
+        .nav-item.active{color:var(--text);border-left-color:var(--blue);background:rgba(10,132,255,0.06);}
+        .nav-item i{width:15px;text-align:center;font-size:0.85rem;opacity:0.7;}
+        .nav-item.active i{opacity:1;color:var(--blue);}
+        .sb-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);}
+        .logout-btn{display:flex;align-items:center;gap:0.75rem;color:var(--muted);font-size:0.82rem;cursor:pointer;transition:color 0.15s;background:none;border:none;width:100%;font-family:var(--font-b);}
         .logout-btn:hover{color:var(--red);}
 
-        .main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
-        .topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;position:sticky;top:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);z-index:50;}
-        .page-title{font-size:1.4rem;font-weight:800;letter-spacing:0.05em;}
-        .trainer-badge{background:rgba(10,132,255,0.12);color:var(--blue);border:1px solid rgba(10,132,255,0.25);font-family:var(--font-d);font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.2rem 0.8rem;border-radius:2px;}
-        .content{padding:2.5rem;flex:1;}
+        .main{margin-left:256px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+        .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;background:rgba(7,7,8,0.92);backdrop-filter:blur(16px);z-index:50;}
+        .page-title{font-size:1.25rem;font-weight:800;letter-spacing:0.06em;}
+        .trainer-badge{background:rgba(10,132,255,0.1);color:var(--blue);border:1px solid rgba(10,132,255,0.2);font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.2rem 0.75rem;border-radius:2px;}
+        .content{padding:2rem;flex:1;}
 
-        .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
-        .panel-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
-        .panel-title{font-size:1.1rem;font-weight:800;letter-spacing:0.05em;}
-        .panel-body{padding:1.5rem;}
-        .method{font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;padding:0.2rem 0.6rem;border-radius:2px;}
-        .m-get{background:rgba(0,255,209,0.12);color:var(--acid2);}
-        .m-post{background:rgba(200,255,0,0.12);color:var(--acid);}
-        .m-del{background:rgba(255,45,85,0.12);color:var(--red);}
-        .m-put{background:rgba(255,149,0,0.12);color:var(--orange);}
-        .m-blue{background:rgba(10,132,255,0.12);color:var(--blue);}
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .kpi-card{background:var(--surface);padding:1.3rem 1.2rem;position:relative;overflow:hidden;}
+        .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--border2));}
+        .kpi-icon{font-size:1rem;color:var(--kpi-color,var(--muted));margin-bottom:0.6rem;opacity:0.8;}
+        .kpi-val{font-family:var(--font-d);font-size:2.2rem;font-weight:900;line-height:1;color:var(--kpi-color,var(--text));}
+        .kpi-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.25rem;}
 
-        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
-        .stat-card{background:var(--surface);padding:1.5rem 1.2rem;}
-        .stat-card-icon{font-size:1.2rem;color:var(--blue);margin-bottom:0.7rem;}
-        .stat-card-val{font-family:var(--font-d);font-size:2.5rem;font-weight:900;line-height:1;}
-        .stat-card-lbl{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
-        .stat-card.accent .stat-card-icon{color:var(--acid);}
-        .stat-card.accent .stat-card-val{color:var(--acid);}
+        .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.5rem;}
+        .ph{padding:1rem 1.4rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
+        .pt{font-size:1rem;font-weight:800;letter-spacing:0.05em;}
+        .pb{padding:1.4rem;}
+        .method{font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;padding:0.18rem 0.55rem;border-radius:2px;}
+        .m-get{background:rgba(0,255,209,0.1);color:var(--acid2);}
+        .m-post{background:rgba(200,255,0,0.1);color:var(--acid);}
+        .m-del{background:rgba(255,45,85,0.1);color:var(--red);}
+        .m-put{background:rgba(255,149,0,0.1);color:var(--orange);}
+        .m-blue{background:rgba(10,132,255,0.1);color:var(--blue);}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+        .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;}
 
-        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
-
-        .api-url{font-family:monospace;font-size:0.78rem;color:var(--muted);padding:0.45rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:2px;margin-bottom:1rem;word-break:break-all;}
-        .api-out{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1rem;font-family:monospace;font-size:0.75rem;color:#a0aec0;min-height:80px;max-height:220px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6;margin-top:0.8rem;}
-
-        .btn{font-family:var(--font-d);font-size:0.9rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.55rem 1.4rem;border:2px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.4rem;}
-        .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
-        .btn-acid:hover{background:transparent;color:var(--acid);}
+        .btn{font-family:var(--font-d);font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.5rem 1.2rem;border:1.5px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:0.4rem;}
         .btn-blue{background:var(--blue);color:#fff;border-color:var(--blue);}
         .btn-blue:hover{background:transparent;color:var(--blue);}
-        .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+        .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
+        .btn-acid:hover{background:transparent;color:var(--acid);}
+        .btn-ghost{background:transparent;color:var(--text);border-color:var(--border2);}
         .btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
         .btn-red{background:transparent;color:var(--red);border-color:var(--red);}
         .btn-red:hover{background:var(--red);color:#fff;}
-        .btn-sm{font-size:0.75rem;padding:0.38rem 0.9rem;}
+        .btn-sm{font-size:0.72rem;padding:0.32rem 0.8rem;}
         .btn-block{width:100%;justify-content:center;}
 
-        .form-group{margin-bottom:1rem;}
-        .form-label{display:block;font-size:0.68rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;}
-        .form-input{width:100%;padding:0.7rem 0.9rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.88rem;transition:border-color 0.2s;}
-        .form-input:focus{outline:none;border-color:var(--blue);}
-        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
-        .form-msg{margin-top:0.7rem;padding:0.6rem 0.8rem;border-radius:3px;font-size:0.8rem;display:none;}
-        .form-msg.err{background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.3);display:block;}
-        .form-msg.ok{background:rgba(200,255,0,0.08);color:var(--acid);border:1px solid rgba(200,255,0,0.2);display:block;}
+        .fg{margin-bottom:1rem;}
+        .fl{display:block;font-size:0.65rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem;}
+        .fi{width:100%;padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.85rem;transition:border-color 0.15s;}
+        .fi:focus{outline:none;border-color:var(--blue);}
+        select.fi option{background:var(--surface2);}
+        textarea.fi{resize:vertical;font-family:var(--font-b);}
+        .fr{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+        .fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;}
+        .fm{margin-top:0.65rem;padding:0.55rem 0.8rem;border-radius:3px;font-size:0.78rem;display:none;}
+        .fm.err{background:rgba(255,45,85,0.08);color:var(--red);border:1px solid rgba(255,45,85,0.2);display:block;}
+        .fm.ok{background:rgba(200,255,0,0.07);color:var(--acid);border:1px solid rgba(200,255,0,0.18);display:block;}
 
-        .data-table{width:100%;border-collapse:collapse;}
-        .data-table th{font-family:var(--font-d);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.8rem 1rem;text-align:left;border-bottom:1px solid var(--border);}
-        .data-table td{padding:0.9rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.87rem;vertical-align:middle;}
-        .data-table tr:hover td{background:var(--surface2);}
-        .badge{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.6rem;border-radius:2px;}
-        .b-acid{background:rgba(200,255,0,0.12);color:var(--acid);}
-        .b-cyan{background:rgba(0,255,209,0.12);color:var(--acid2);}
-        .b-red{background:rgba(255,45,85,0.12);color:var(--red);}
-        .b-blue{background:rgba(10,132,255,0.12);color:var(--blue);}
-        .b-grey{background:rgba(255,255,255,0.07);color:var(--muted);}
+        .dt{width:100%;border-collapse:collapse;}
+        .dt th{font-family:var(--font-d);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.75rem 0.9rem;text-align:left;border-bottom:1px solid var(--border);}
+        .dt td{padding:0.8rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.84rem;vertical-align:middle;}
+        .dt tr:hover td{background:var(--surface2);}
 
-        /* SCHEDULE CALENDAR */
-        .week-grid{display:grid;grid-template-columns:80px repeat(5,1fr);gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:1rem;}
-        .week-header{background:var(--surface2);padding:0.7rem;text-align:center;font-family:var(--font-d);font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--border);}
-        .week-time{background:var(--surface);padding:0.7rem;text-align:right;font-family:var(--font-d);font-size:0.72rem;color:var(--muted);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
-        .week-cell{padding:0.4rem;border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:52px;background:var(--surface);}
-        .week-event{background:rgba(10,132,255,0.2);border:1px solid rgba(10,132,255,0.4);border-radius:3px;padding:0.3rem 0.5rem;font-size:0.72rem;color:var(--blue);font-weight:500;cursor:pointer;transition:background 0.2s;}
-        .week-event:hover{background:rgba(10,132,255,0.35);}
-        .week-event.acid{background:rgba(200,255,0,0.12);border-color:rgba(200,255,0,0.3);color:var(--acid);}
-        .week-event.red{background:rgba(255,45,85,0.12);border-color:rgba(255,45,85,0.3);color:var(--red);}
+        .badge{display:inline-flex;align-items:center;gap:0.3rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.55rem;border-radius:2px;}
+        .b-acid{background:rgba(200,255,0,0.1);color:var(--acid);}
+        .b-cyan{background:rgba(0,255,209,0.1);color:var(--acid2);}
+        .b-red{background:rgba(255,45,85,0.1);color:var(--red);}
+        .b-blue{background:rgba(10,132,255,0.1);color:var(--blue);}
+        .b-orange{background:rgba(255,149,0,0.1);color:var(--orange);}
+        .b-grey{background:rgba(255,255,255,0.06);color:var(--muted);}
+
+        /* PICKER */
+        .user-picker{position:relative;}
+        .picker-row{display:flex;align-items:center;gap:0.5rem;}
+        .picker-row .fi{flex:1;}
+        .picker-dd{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:3px;z-index:200;max-height:200px;overflow-y:auto;display:none;margin-top:2px;}
+        .picker-dd.open{display:block;}
+        .picker-opt{padding:0.6rem 0.9rem;cursor:pointer;font-size:0.83rem;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}
+        .picker-opt:hover{background:rgba(10,132,255,0.08);color:var(--blue);}
+        .sel-badge{display:none;align-items:center;gap:0.6rem;padding:0.45rem 0.8rem;background:rgba(10,132,255,0.07);border:1px solid rgba(10,132,255,0.2);border-radius:3px;margin-top:0.35rem;font-size:0.8rem;}
+        .sel-badge.vis{display:flex;}
+        .sel-badge .sbn{font-weight:500;color:var(--blue);}
+        .sel-badge .sbe{color:var(--muted);font-size:0.72rem;}
+        .sel-clear{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;font-size:0.85rem;}
+        .sel-clear:hover{color:var(--red);}
+
+        /* SCHEDULE */
+        .schedule-wrap{overflow-x:auto;margin-top:1rem;}
+        .week-grid{display:grid;grid-template-columns:60px repeat(7,1fr);min-width:720px;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+        .wh{background:var(--surface2);padding:0.6rem 0.4rem;text-align:center;font-family:var(--font-d);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--border);border-bottom:1px solid var(--border);line-height:1.4;}
+        .wh.today-hdr{color:var(--blue);background:rgba(10,132,255,0.06);}
+        .wt{background:var(--surface);padding:0.5rem 0.35rem;text-align:right;font-family:var(--font-d);font-size:0.65rem;color:var(--muted2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+        .wc{padding:0.3rem;border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:52px;background:var(--surface);}
+        .wc.today-col{background:rgba(10,132,255,0.025);}
+        .we{border-radius:3px;padding:0.25rem 0.4rem;font-size:0.68rem;font-weight:500;cursor:default;margin-bottom:2px;line-height:1.35;}
+        .we.c-blue{background:rgba(10,132,255,0.18);border-left:2px solid var(--blue);color:#a8cfff;}
+        .we.c-acid{background:rgba(200,255,0,0.1);border-left:2px solid var(--acid);color:#d6ff5e;}
+        .we.c-red{background:rgba(255,45,85,0.12);border-left:2px solid var(--red);color:#ff8099;}
+        .we.c-orange{background:rgba(255,149,0,0.12);border-left:2px solid var(--orange);color:#ffc266;}
+        .we.c-cyan{background:rgba(0,255,209,0.1);border-left:2px solid var(--acid2);color:#66ffe8;}
 
         /* CLIENT CARD */
-        .client-card{display:flex;align-items:center;gap:1rem;padding:1rem;border:1px solid var(--border);border-radius:4px;margin-bottom:0.7rem;transition:border-color 0.2s;cursor:default;}
-        .client-card:hover{border-color:rgba(10,132,255,0.4);}
-        .client-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#333,#555);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.1rem;font-weight:700;color:var(--text);flex-shrink:0;}
-        .client-info .client-name{font-size:0.88rem;font-weight:500;}
-        .client-info .client-meta{font-size:0.75rem;color:var(--muted);}
-        .client-sessions{margin-left:auto;font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:var(--blue);}
+        .client-card{display:flex;align-items:center;gap:0.9rem;padding:0.9rem 1rem;border:1px solid var(--border);border-radius:4px;margin-bottom:0.6rem;transition:border-color 0.15s;cursor:pointer;}
+        .client-card:hover{border-color:rgba(10,132,255,0.35);background:rgba(10,132,255,0.02);}
+        .ca{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--border2),var(--surface3));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1rem;font-weight:700;flex-shrink:0;}
+        .ci-name{font-size:0.85rem;font-weight:500;}
+        .ci-meta{font-size:0.73rem;color:var(--muted);}
+        .ci-actions{margin-left:auto;display:flex;gap:0.4rem;align-items:center;}
 
+        /* DRAWER */
+        .drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;backdrop-filter:blur(4px);}
+        .drawer-overlay.open{display:block;}
+        .drawer{position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--surface);border-left:1px solid var(--border);z-index:301;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
+        .drawer.open{transform:translateX(0);}
+        .drawer-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .drawer-head h3{font-size:1rem;}
+        .drawer-close{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;}
+        .drawer-close:hover{color:var(--red);}
+        .drawer-body{flex:1;overflow-y:auto;padding:1.4rem;}
+        .drawer-actions{padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:0.6rem;flex-wrap:wrap;}
+        .ds-title{font-family:var(--font-d);font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem;padding-bottom:0.35rem;border-bottom:1px solid var(--border);margin-top:1rem;}
+        .ds-title:first-child{margin-top:0;}
+        .drow{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:0.4rem;}
+        .df{font-size:0.83rem;}
+        .df .dk{font-size:0.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.1rem;}
+
+        /* MISC */
         .page-section{display:none;}
         .page-section.active{display:block;animation:fi 0.2s ease;}
-        @keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-        .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(10,132,255,0.3);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;}
+        @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(10,132,255,0.25);border-top-color:var(--blue);border-radius:50%;animation:spin 0.65s linear infinite;}
         @keyframes spin{to{transform:rotate(360deg);}}
-        .toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.85rem 1.3rem;font-size:0.85rem;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:280px;display:flex;align-items:center;gap:0.6rem;}
+        .toast{position:fixed;bottom:1.8rem;right:1.8rem;z-index:9999;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:0.75rem 1.1rem;font-size:0.83rem;transform:translateY(70px);opacity:0;transition:all 0.28s;max-width:260px;display:flex;align-items:center;gap:0.55rem;}
         .toast.show{transform:translateY(0);opacity:1;}
-        .toast.t-ok{border-color:var(--acid);color:var(--acid);}
-        .toast.t-err{border-color:var(--red);color:var(--red);}
-        .empty-state{text-align:center;padding:3rem;color:var(--muted);}
-        .empty-state i{font-size:2.5rem;margin-bottom:1rem;display:block;}
+        .toast.t-ok{border-color:rgba(200,255,0,0.3);color:var(--acid);}
+        .toast.t-err{border-color:rgba(255,45,85,0.3);color:var(--red);}
+        .empty-state{text-align:center;padding:2.5rem;color:var(--muted);}
+        .empty-state i{font-size:2rem;margin-bottom:0.8rem;display:block;opacity:0.4;}
+        .search-bar{display:flex;gap:0.7rem;margin-bottom:1rem;}
+        .search-bar .fi{flex:1;}
+        .occ-bar{display:flex;align-items:center;gap:0.5rem;}
+        .occ-track{flex:1;height:4px;background:var(--border2);border-radius:2px;}
+        .occ-fill{height:4px;border-radius:2px;}
 
-        @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stat-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.week-grid{grid-template-columns:60px repeat(3,1fr)}}
-
-        /* User picker */
-        .user-picker{position:relative;}
-        .picker-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:3px;z-index:200;max-height:220px;overflow-y:auto;display:none;}
-        .picker-dropdown.open{display:block;}
-        .picker-option{padding:0.65rem 1rem;cursor:pointer;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:space-between;}
-        .picker-option:hover{background:rgba(0,212,180,0.08);color:var(--cyan);}
-        .selected-user-badge{display:none;align-items:center;gap:0.6rem;padding:0.5rem 0.8rem;background:rgba(0,212,180,0.07);border:1px solid rgba(0,212,180,0.2);border-radius:3px;margin-top:0.4rem;font-size:0.82rem;}
-        .selected-user-badge.visible{display:flex;}
-        .selected-user-badge .sub-name{font-weight:500;color:var(--cyan);}
-        .selected-user-badge .sub-email{color:var(--muted);font-size:0.75rem;}
-        .sub-clear{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;font-size:0.9rem;}
-        .sub-clear:hover{color:var(--red);}
+        @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.grid-2,.grid-3{grid-template-columns:1fr}.drawer{width:100%}}
     </style>
 </head>
 <body>
 
 <div class="toast" id="toast"></div>
 
+<!-- CLIENT DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="clientDrawer">
+    <div class="drawer-head">
+        <h3 id="drawerTitle">Detail klienta</h3>
+        <button class="drawer-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="drawer-body" id="drawerBody"><div class="empty-state"><span class="spinner"></span></div></div>
+    <div class="drawer-actions" id="drawerActions"></div>
+</div>
+
 <aside class="sidebar">
-    <div class="sidebar-logo">
-        <div class="logo">FITNESS PRO</div>
+    <div class="sb-logo">
+        <div class="logo">FITNESS<span>PRO</span></div>
         <div class="role-tag"><i class="fas fa-dumbbell"></i> Tréner</div>
     </div>
-    <div class="sidebar-user">
+    <div class="sb-user">
         <div class="avatar" id="sideAvatar">T</div>
-        <div class="user-info">
+        <div>
             <div class="name" id="sideName">Tréner</div>
             <div class="email" id="sideEmail">—</div>
         </div>
     </div>
-    <nav class="sidebar-nav">
+    <nav class="sb-nav">
         <div class="nav-section">Hlavné</div>
         <a class="nav-item active" onclick="showPage('overview')" href="#"><i class="fas fa-home"></i> Prehľad</a>
         <div class="nav-section">Tréningy</div>
-        <a class="nav-item" onclick="showPage('my-classes')" href="#"><i class="fas fa-calendar-alt"></i> Moje tréningy</a>
+        <a class="nav-item" onclick="showPage('my-classes')" href="#"><i class="fas fa-calendar-alt"></i> Moje lekcie</a>
         <a class="nav-item" onclick="showPage('schedule')" href="#"><i class="fas fa-clock"></i> Týždenný rozvrh</a>
         <div class="nav-section">Klienti</div>
         <a class="nav-item" onclick="showPage('clients')" href="#"><i class="fas fa-users"></i> Moji klienti</a>
-        <a class="nav-item" onclick="showPage('client-detail')" href="#"><i class="fas fa-user-circle"></i> Detail klienta</a>
         <div class="nav-section">Účet</div>
         <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user"></i> Môj profil</a>
     </nav>
-    <div class="sidebar-footer">
+    <div class="sb-footer">
         <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Odhlásiť sa</button>
     </div>
 </aside>
@@ -180,239 +229,168 @@
             <span class="trainer-badge"><i class="fas fa-dumbbell"></i> Tréner panel</span>
         </div>
     </div>
-
     <div class="content">
 
-        <!-- OVERVIEW -->
+        <!-- ═══ OVERVIEW ═══ -->
         <div class="page-section active" id="page-overview">
-            <div class="stat-row">
-                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-calendar-check"></i></div><div class="stat-card-val" id="ov-classCount">—</div><div class="stat-card-lbl">Tréningy tento mes.</div></div>
-                <div class="stat-card accent"><div class="stat-card-icon"><i class="fas fa-users"></i></div><div class="stat-card-val" id="ov-clientCount">—</div><div class="stat-card-lbl">Aktívni klienti</div></div>
-                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-star"></i></div><div class="stat-card-val">4.9</div><div class="stat-card-lbl">Hodnotenie</div></div>
-                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-fire"></i></div><div class="stat-card-val">0h</div><div class="stat-card-lbl">Odpracovaných</div></div>
+            <div class="kpi-grid">
+                <div class="kpi-card" style="--kpi-color:var(--blue)">
+                    <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="kpi-val" id="kpi-classes">—</div>
+                    <div class="kpi-lbl">Lekcie celkovo</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color:var(--acid)">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div class="kpi-val" id="kpi-clients">—</div>
+                    <div class="kpi-lbl">Priradení klienti</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color:var(--acid2)">
+                    <div class="kpi-icon"><i class="fas fa-user-check"></i></div>
+                    <div class="kpi-val" id="kpi-booked">—</div>
+                    <div class="kpi-lbl">Prihlásení na lekcie</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color:var(--orange)">
+                    <div class="kpi-icon"><i class="fas fa-fire"></i></div>
+                    <div class="kpi-val" id="kpi-hours">—</div>
+                    <div class="kpi-lbl">Hodín tento týždeň</div>
+                </div>
             </div>
             <div class="grid-2">
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Moje tréningy</span><span class="method m-blue">GET /api/trainer/classes</span></div>
-                    <div class="panel-body">
-                        <div class="api-url">/api/trainer/classes</div>
-                        <button class="btn btn-ghost btn-sm" onclick="loadTrainerClassesOverview()"><i class="fas fa-sync-alt"></i> Načítať</button>
-                        <div class="api-out" id="ov-classOut">Klikni pre načítanie...</div>
+                    <div class="ph">
+                        <span class="pt">Najbližšie lekcie</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadOverview()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
                     </div>
+                    <div class="pb" id="overviewClasses"><div class="empty-state"><span class="spinner"></span></div></div>
                 </div>
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Moji klienti</span><span class="method m-blue">GET /api/trainer/clients</span></div>
-                    <div class="panel-body">
-                        <div class="api-url">/api/trainer/clients</div>
-                        <button class="btn btn-ghost btn-sm" onclick="loadClientsOverview()"><i class="fas fa-sync-alt"></i> Načítať</button>
-                        <div class="api-out" id="ov-clientOut">Klikni pre načítanie...</div>
-                    </div>
+                    <div class="ph"><span class="pt">Moji klienti</span></div>
+                    <div class="pb" id="overviewClients"><div class="empty-state"><span class="spinner"></span></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- MY CLASSES -->
+        <!-- ═══ MY CLASSES ═══ -->
         <div class="page-section" id="page-my-classes">
             <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Moje tréningy</span>
-                    <div style="display:flex;gap:0.8rem;align-items:center">
+                <div class="ph">
+                    <span class="pt">Moje lekcie</span>
+                    <div style="display:flex;gap:0.7rem;align-items:center">
                         <span class="method m-blue">GET /api/trainer/classes</span>
-                        <button class="btn btn-ghost btn-sm" onclick="loadMyTrainerClasses()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
+                        <button class="btn btn-ghost btn-sm" onclick="loadMyClasses()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
                     </div>
                 </div>
-                <div class="panel-body">
-                    <div class="api-url">/api/trainer/classes</div>
-                    <div id="trainerClassesTable"><div class="empty-state"><i class="fas fa-calendar"></i><p>Klikni Obnoviť pre načítanie</p></div></div>
-                </div>
-            </div>
-            <div class="panel">
-                <div class="panel-header"><span class="panel-title">Aktualizovať poznámku k tréningu</span><span class="method m-put">PUT /api/classes/{id}/notes</span></div>
-                <div class="panel-body">
-                    <div class="api-url">/api/classes/{id}/notes</div>
-                    <div class="form-row">
-                        <div class="form-group"><label class="form-label">ID tréningu</label><input class="form-input" type="number" id="noteClassId" placeholder="ID lekcie"></div>
-                        <div class="form-group"><label class="form-label">Poznámka</label><input class="form-input" type="text" id="noteText" placeholder="Poznámka k lekcii..."></div>
+                <div class="pb">
+                    <div class="search-bar">
+                        <input class="fi" type="text" id="classSearch" placeholder="Hľadaj podľa názvu alebo miesta..." oninput="filterClasses()">
+                        <select class="fi" id="classFilter" style="max-width:160px" onchange="filterClasses()">
+                            <option value="">Všetky</option>
+                            <option value="upcoming">Nadchádzajúce</option>
+                            <option value="past">Prebehnuté</option>
+                        </select>
                     </div>
-                    <button class="btn btn-blue" onclick="updateClassNote()"><i class="fas fa-save"></i> Uložiť poznámku</button>
-                    <div class="api-out" id="noteOut" style="margin-top:0.8rem">Výsledok...</div>
+                    <div id="classesTable"><div class="empty-state"><span class="spinner"></span></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- SCHEDULE -->
+        <!-- ═══ SCHEDULE ═══ -->
         <div class="page-section" id="page-schedule">
             <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Týždenný rozvrh</span>
-                    <div style="display:flex;gap:0.8rem;align-items:center">
-                        <span class="method m-blue">GET /api/trainer/schedule</span>
-                        <button class="btn btn-ghost btn-sm" onclick="loadSchedule()"><i class="fas fa-sync-alt"></i> Načítať</button>
+                <div class="ph">
+                    <span class="pt">Týždenný rozvrh</span>
+                    <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
+                        <button class="btn btn-ghost btn-sm" onclick="prevWeek()"><i class="fas fa-chevron-left"></i></button>
+                        <span id="weekLabel" style="font-family:var(--font-d);font-size:0.92rem;letter-spacing:0.05em;min-width:180px;text-align:center;color:var(--text)">—</span>
+                        <button class="btn btn-ghost btn-sm" onclick="nextWeek()"><i class="fas fa-chevron-right"></i></button>
+                        <button class="btn btn-ghost btn-sm" onclick="goToday()"><i class="fas fa-dot-circle"></i> Dnes</button>
                     </div>
                 </div>
-                <div class="panel-body">
-                    <div class="api-url">/api/trainer/schedule</div>
-                    <div class="week-grid" id="weekGrid">
-                        <div class="week-header"></div>
-                        <div class="week-header">Pondelok</div>
-                        <div class="week-header">Utorok</div>
-                        <div class="week-header">Streda</div>
-                        <div class="week-header">Štvrtok</div>
-                        <div class="week-header">Piatok</div>
-                        <div class="week-time">07:00</div>
-                        <div class="week-cell"><div class="week-event acid">CrossFit<br>07:00–08:00</div></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"><div class="week-event acid">CrossFit<br>07:00–08:00</div></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"><div class="week-event acid">CrossFit<br>07:00–08:00</div></div>
-                        <div class="week-time">09:00</div>
-                        <div class="week-cell"></div><div class="week-cell"></div><div class="week-cell"></div><div class="week-cell"></div><div class="week-cell"></div>
-                        <div class="week-time">12:00</div>
-                        <div class="week-cell"><div class="week-event red">Boxing<br>12:00–13:00</div></div>
-                        <div class="week-cell"><div class="week-event red">Boxing<br>12:00–13:00</div></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"><div class="week-event red">Boxing<br>12:00–13:00</div></div>
-                        <div class="week-cell"></div>
-                        <div class="week-time">17:00</div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"><div class="week-event">Body Pump<br>17:00–18:00</div></div>
-                        <div class="week-cell"></div>
-                        <div class="week-cell"><div class="week-event">Body Pump<br>17:00–18:00</div></div>
-                        <div class="week-time">19:00</div>
-                        <div class="week-cell"><div class="week-event acid">HIIT<br>19:00–20:00</div></div>
-                        <div class="week-cell"><div class="week-event acid">HIIT<br>19:00–20:00</div></div>
-                        <div class="week-cell"><div class="week-event acid">HIIT<br>19:00–20:00</div></div>
-                        <div class="week-cell"><div class="week-event acid">HIIT<br>19:00–20:00</div></div>
-                        <div class="week-cell"></div>
+                <div class="pb">
+                    <div style="display:flex;gap:1.2rem;margin-bottom:1rem;flex-wrap:wrap">
+                        <span style="font-size:0.78rem;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;background:rgba(10,132,255,0.3);border-left:2px solid var(--blue);margin-right:4px;border-radius:1px"></span>Lekcie</span>
+                        <span style="font-size:0.78rem;color:var(--muted)">Rozvrh je generovaný z tvojich lekcií v systéme</span>
                     </div>
-                    <div class="api-out" id="scheduleOut" style="margin-top:1.5rem">API odpoveď sa zobrazí tu po kliknutí Načítať...</div>
+                    <div class="schedule-wrap">
+                        <div class="week-grid" id="weekGrid"></div>
+                    </div>
+                    <div id="scheduleEmpty" style="display:none;text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem">
+                        <i class="fas fa-calendar-times" style="display:block;font-size:1.8rem;margin-bottom:0.6rem;opacity:0.3"></i>
+                        Žiadne lekcie tento týždeň — použi navigáciu na iný týždeň alebo si pridaj lekcie cez admina.
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- CLIENTS -->
+        <!-- ═══ CLIENTS ═══ -->
         <div class="page-section" id="page-clients">
-            <!-- Zoznam priradených cvičencov -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Moji cvičenci</span>
-                    <div style="display:flex;gap:0.8rem;align-items:center">
-                        <span class="method m-get">GET /api/trainer/clients</span>
-                        <button class="btn btn-ghost btn-sm" onclick="loadClients()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div id="clientsTable"><div class="empty-state"><i class="fas fa-users"></i><p>Klikni Obnoviť</p></div></div>
-                </div>
-            </div>
-            <!-- Pridať cvičenca -->
-            <div class="panel">
-                <div class="panel-header"><span class="panel-title">Pridať cvičenca</span><span class="method m-post">POST /api/trainer/clients</span></div>
-                <div class="panel-body">
-                    <div class="form-group">
-                        <label class="form-label">Vyber člena zo zoznamu</label>
-                        <div class="user-picker" id="addClientPickerWrap">
-                            <div style="display:flex;gap:0.5rem">
-                                <input class="form-input" type="text" id="addClientSearch" placeholder="Hľadaj meno alebo email..." oninput="filterClientPicker()" onfocus="openClientPicker()" autocomplete="off">
-                                <button class="btn btn-ghost btn-sm" onclick="openClientPicker()"><i class="fas fa-chevron-down"></i></button>
-                            </div>
-                            <div class="picker-dropdown" id="addClientPickerList"></div>
-                            <div class="selected-user-badge" id="addClientBadge">
-                                <div><div class="sub-name" id="addClientSelName">—</div><div class="sub-email" id="addClientSelEmail">—</div></div>
-                                <button class="sub-clear" onclick="clearClientPicker()"><i class="fas fa-times"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-blue" onclick="addClient()"><i class="fas fa-user-plus"></i> Pridať cvičenca</button>
-                    <div class="form-msg" id="addClientMsg"></div>
-                </div>
-            </div>
-            <!-- Detail cvičenca -->
-            <div class="panel" id="clientDetailPanel" style="display:none">
-                <div class="panel-header"><span class="panel-title" id="clientDetailTitle">Detail cvičenca</span></div>
-                <div class="panel-body" id="clientDetailBody"></div>
-            </div>
-        </div>
-
-        <!-- CLIENT DETAIL -->
-        <div class="page-section" id="page-client-detail">
             <div class="grid-2">
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Detail klienta</span><span class="method m-blue">GET /api/trainer/clients/{id}</span></div>
-                    <div class="panel-body">
-                        <div class="api-url">/api/trainer/clients/{id}</div>
-                        <div class="form-group">
-                            <label class="form-label">ID klienta</label>
-                            <input class="form-input" type="number" id="clientDetailId" placeholder="ID klienta">
+                    <div class="ph">
+                        <span class="pt">Moji klienti</span>
+                        <div style="display:flex;gap:0.7rem;align-items:center">
+                            <span class="method m-get">GET /api/trainer/clients</span>
+                            <button class="btn btn-ghost btn-sm" onclick="loadClients()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
                         </div>
-                        <button class="btn btn-blue btn-sm" onclick="loadClientDetail()"><i class="fas fa-search"></i> Načítať klienta</button>
-                        <div class="api-out" id="clientDetailOut" style="margin-top:0.8rem">Zadaj ID klienta...</div>
+                    </div>
+                    <div class="pb">
+                        <div class="search-bar">
+                            <input class="fi" type="text" id="clientSearch" placeholder="Hľadaj..." oninput="filterClients()">
+                        </div>
+                        <div id="clientsList"><div class="empty-state"><span class="spinner"></span></div></div>
                     </div>
                 </div>
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Lekcie klienta</span><span class="method m-blue">GET /api/trainer/clients/{id}/classes</span></div>
-                    <div class="panel-body">
-                        <div class="api-url">/api/trainer/clients/{id}/classes</div>
-                        <div class="form-group">
-                            <label class="form-label">ID klienta</label>
-                            <input class="form-input" type="number" id="clientClassesId" placeholder="ID klienta">
+                    <div class="ph"><span class="pt">Pridať klienta</span><span class="method m-post">POST /api/trainer/clients</span></div>
+                    <div class="pb">
+                        <div class="fg">
+                            <label class="fl">Vyber člena</label>
+                            <div class="user-picker" id="addClientPickerWrap">
+                                <div class="picker-row">
+                                    <input class="fi" type="text" id="addClientSearch" placeholder="Hľadaj meno alebo email..." oninput="filterClientPicker()" onfocus="openClientPicker()" autocomplete="off">
+                                    <button class="btn btn-ghost btn-sm" onclick="openClientPicker()"><i class="fas fa-chevron-down"></i></button>
+                                </div>
+                                <div class="picker-dd" id="addClientPickerList"></div>
+                                <div class="sel-badge" id="addClientBadge">
+                                    <div><div class="sbn" id="addClientSelName">—</div><div class="sbe" id="addClientSelEmail">—</div></div>
+                                    <button class="sel-clear" onclick="clearClientPicker()"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn btn-ghost btn-sm" onclick="loadClientClasses()"><i class="fas fa-list"></i> Načítať lekcie klienta</button>
-                        <div class="api-out" id="clientClassesOut" style="margin-top:0.8rem">Zadaj ID klienta...</div>
+                        <button class="btn btn-blue" onclick="addClient()"><i class="fas fa-user-plus"></i> Pridať klienta</button>
+                        <div class="fm" id="addClientMsg"></div>
                     </div>
-                </div>
-            </div>
-            <div class="panel">
-                <div class="panel-header"><span class="panel-title">Pridať poznámku ku klientovi</span><span class="method m-post">POST /api/trainer/clients/{id}/notes</span></div>
-                <div class="panel-body">
-                    <div class="api-url">/api/trainer/clients/{id}/notes</div>
-                    <div class="form-row">
-                        <div class="form-group"><label class="form-label">ID klienta</label><input class="form-input" type="number" id="clientNoteId" placeholder="ID"></div>
-                        <div class="form-group"><label class="form-label">Poznámka</label><input class="form-input" type="text" id="clientNoteText" placeholder="Napr. Pracuje na sile nôh..."></div>
-                    </div>
-                    <button class="btn btn-blue" onclick="addClientNote()"><i class="fas fa-sticky-note"></i> Pridať poznámku</button>
-                    <div class="api-out" id="clientNoteOut" style="margin-top:0.8rem">Výsledok...</div>
                 </div>
             </div>
         </div>
 
-        <!-- PROFILE -->
+        <!-- ═══ PROFILE ═══ -->
         <div class="page-section" id="page-profile">
-            <!-- Zobrazenie profilu -->
-            <div class="panel">
-                <div class="panel-header"><span class="panel-title">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
-                <div class="panel-body">
-                    <div id="trainerProfileData" style="display:none;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.5rem">
-                        <div><div class="form-label">Celé meno</div><div id="tp-name" style="font-size:0.9rem">—</div></div>
-                        <div><div class="form-label">Email</div><div id="tp-email" style="font-size:0.9rem">—</div></div>
-                        <div><div class="form-label">Telefón</div><div id="tp-phone" style="font-size:0.9rem">—</div></div>
-                        <div><div class="form-label">Rola</div><div id="tp-role">—</div></div>
-                        <div><div class="form-label">Špecializácia</div><div id="tp-spec" style="font-size:0.9rem">—</div></div>
-                        <div><div class="form-label">Registrovaný</div><div id="tp-created" style="font-size:0.9rem">—</div></div>
-                    </div>
+            <div class="panel" id="profileInfoPanel" style="display:none">
+                <div class="ph"><span class="pt">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
+                <div class="pb">
+                    <div class="fr3" id="profileInfoGrid"></div>
                 </div>
             </div>
-            <!-- Upraviť profil + heslo vedľa seba -->
             <div class="grid-2">
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Upraviť profil</span><span class="method m-put">PUT /api/users/{id}</span></div>
-                    <div class="panel-body">
-                        <div class="form-group"><label class="form-label">Celé meno *</label><input class="form-input" type="text" id="tp-edit-name" placeholder="Tvoje meno"></div>
-                        <div class="form-group"><label class="form-label">Telefón</label><input class="form-input" type="tel" id="tp-edit-phone" placeholder="+421..."></div>
-                        <div class="form-group"><label class="form-label">Špecializácia</label><input class="form-input" type="text" id="tp-edit-spec" placeholder="napr. CrossFit, Strength..."></div>
-                        <button class="btn btn-blue" onclick="updateTrainerProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
-                        <div class="form-msg" id="trainerProfileMsg"></div>
+                    <div class="ph"><span class="pt">Upraviť profil</span><span class="method m-put">PUT /api/users/{id}</span></div>
+                    <div class="pb">
+                        <div class="fg"><label class="fl">Celé meno *</label><input class="fi" type="text" id="tp-name" placeholder="Tvoje meno"></div>
+                        <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="tp-phone" placeholder="+421..."></div>
+                        <div class="fg"><label class="fl">Špecializácia</label><input class="fi" type="text" id="tp-spec" placeholder="napr. CrossFit, Strength Training..."></div>
+                        <button class="btn btn-blue" onclick="saveProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
+                        <div class="fm" id="profileMsg"></div>
                     </div>
                 </div>
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Zmena hesla</span><span class="method m-put">PUT /api/users/{id}/password</span></div>
-                    <div class="panel-body">
-                        <div class="form-group"><label class="form-label">Aktuálne heslo *</label><input class="form-input" type="password" id="tp-cur-pass" placeholder="Aktuálne heslo"></div>
-                        <div class="form-group"><label class="form-label">Nové heslo * (min 6 znakov)</label><input class="form-input" type="password" id="tp-new-pass" placeholder="Nové heslo"></div>
-                        <div class="form-group"><label class="form-label">Potvrdiť nové heslo *</label><input class="form-input" type="password" id="tp-new-pass2" placeholder="Zopakuj nové heslo"></div>
-                        <button class="btn btn-ghost" onclick="changeTrainerPassword()"><i class="fas fa-lock"></i> Zmeniť heslo</button>
-                        <div class="form-msg" id="trainerPassMsg"></div>
+                    <div class="ph"><span class="pt">Zmena hesla</span><span class="method m-put">PUT /api/users/{id}/password</span></div>
+                    <div class="pb">
+                        <div class="fg"><label class="fl">Aktuálne heslo *</label><input class="fi" type="password" id="tp-cur-pass"></div>
+                        <div class="fg"><label class="fl">Nové heslo * (min 6)</label><input class="fi" type="password" id="tp-new-pass"></div>
+                        <div class="fg"><label class="fl">Potvrdiť nové heslo *</label><input class="fi" type="password" id="tp-new-pass2"></div>
+                        <button class="btn btn-ghost" onclick="changePassword()"><i class="fas fa-lock"></i> Zmeniť heslo</button>
+                        <div class="fm" id="passMsg"></div>
                     </div>
                 </div>
             </div>
@@ -424,426 +402,479 @@
 <script>
     const API = 'http://localhost:8080';
     let token = localStorage.getItem('fp_token');
-    let user = JSON.parse(localStorage.getItem('fp_user') || 'null');
+    let user  = JSON.parse(localStorage.getItem('fp_user') || 'null');
 
-    if (!token || !user) { window.location.href = 'index.html'; }
+    if (!token || !user) window.location.href = 'index.html';
     if (user && user.role !== 'trainer') {
-        const map = { member: 'member.html', admin: 'admin.html' };
-        window.location.href = map[user.role] || 'index.html';
+        window.location.href = {member:'member.html',admin:'admin.html'}[user.role] || 'index.html';
     }
-
     if (user) {
-        const initials = (user.fullName || 'T').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-        document.getElementById('sideAvatar').textContent = initials;
-        document.getElementById('sideName').textContent = user.fullName || 'Tréner';
+        document.getElementById('sideAvatar').textContent = (user.fullName||'T').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('sideName').textContent  = user.fullName || 'Tréner';
         document.getElementById('sideEmail').textContent = user.email || '—';
     }
 
-    const titles = { overview:'Prehľad', 'my-classes':'Moje tréningy', schedule:'Týždenný rozvrh', clients:'Moji klienti', 'client-detail':'Detail klienta', profile:'Môj profil' };
+    const pageTitles = {overview:'Prehľad','my-classes':'Moje lekcie',schedule:'Týždenný rozvrh',clients:'Moji klienti',profile:'Môj profil'};
 
-    // ── FIX: auto-load pri otvorení sekcie (rovnako ako member.html) ──────────
     function showPage(id) {
-        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.getElementById('page-' + id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(el => { if (el.getAttribute('onclick')?.includes(id)) el.classList.add('active'); });
-        document.getElementById('topbarTitle').textContent = titles[id] || id;
-        // Auto-load pri otvorení sekcie
-        if (id === 'my-classes')    loadMyTrainerClasses();
-        if (id === 'clients')       loadClients();
-        if (id === 'profile')       loadTrainerProfile();
-        if (id === 'schedule')      loadSchedule();
+        document.querySelectorAll('.page-section').forEach(el=>el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+        document.getElementById('page-'+id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el=>{ if(el.getAttribute('onclick')?.includes("'"+id+"'")) el.classList.add('active'); });
+        document.getElementById('topbarTitle').textContent = pageTitles[id]||id;
+        if (id==='overview')    loadOverview();
+        if (id==='my-classes')  loadMyClasses();
+        if (id==='schedule')    renderSchedule();
+        if (id==='clients')     { loadClients(); loadAvailableMembers(); }
+        if (id==='profile')     loadProfile();
     }
 
     async function authFetch(url, opts={}) {
-        const res = await fetch(API + url, { ...opts, headers: {'Authorization':'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})} });
-        if (res.status === 401) { logout(); throw new Error('Session vypršala'); }
+        const res = await fetch(API+url, {...opts, headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
+        if (res.status===401) { logout(); throw new Error('Session vypršala'); }
         return res;
     }
-    function setOut(id, text) { document.getElementById(id).textContent = text; }
-
-    // ── OVERVIEW ─────────────────────────────────────────────────────────────
-    async function loadTrainerClassesOverview() {
-        setOut('ov-classOut', 'Načítavam...');
-        try {
-            const res = await authFetch('/api/trainer/classes');
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
-            setOut('ov-classOut', JSON.stringify(d, null, 2));
-            if (Array.isArray(d)) document.getElementById('ov-classCount').textContent = d.length;
-        } catch(e) { setOut('ov-classOut', '❌ ' + e.message); }
+    function showMsg(id,msg,type){ const el=document.getElementById(id); el.textContent=msg; el.className='fm '+type; }
+    function toast(msg,type='ok'){
+        const t=document.getElementById('toast');
+        t.className='toast t-'+type;
+        t.innerHTML=(type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>')+' '+msg;
+        t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3200);
     }
-    async function loadClientsOverview() {
-        setOut('ov-clientOut', 'Načítavam...');
+    function logout(){ localStorage.removeItem('fp_token'); localStorage.removeItem('fp_user'); window.location.href='index.html'; }
+    function fmtTime(dt){ return dt ? new Date(dt).toLocaleString('sk-SK',{weekday:'short',day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'; }
+    function fmtDate(dt){ return dt ? new Date(dt).toLocaleDateString('sk-SK') : '—'; }
+
+    // ── CACHE ─────────────────────────────────────────────────────────────────────
+    let myClasses = [];
+    let myClients = [];
+    let availableMembers = [];
+    let selectedClient = null;
+
+    // ── OVERVIEW ──────────────────────────────────────────────────────────────────
+    async function loadOverview() {
         try {
-            const res = await authFetch('/api/trainer/clients');
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
-            setOut('ov-clientOut', JSON.stringify(d, null, 2));
-            if (Array.isArray(d)) document.getElementById('ov-clientCount').textContent = d.length;
-        } catch(e) { setOut('ov-clientOut', '❌ ' + e.message); }
+            const [resCls, resCli] = await Promise.all([
+                authFetch('/api/trainer/classes'),
+                authFetch('/api/trainer/clients')
+            ]);
+            myClasses = resCls.ok ? (await resCls.json()) : [];
+            myClients = resCli.ok ? (await resCli.json()) : [];
+            if (!Array.isArray(myClasses)) myClasses=[];
+            if (!Array.isArray(myClients)) myClients=[];
+
+            document.getElementById('kpi-classes').textContent = myClasses.length;
+            document.getElementById('kpi-clients').textContent = myClients.length;
+            document.getElementById('kpi-booked').textContent  = myClasses.reduce((s,c)=>s+(c.booked||0),0);
+
+            // Hours this week
+            const now=new Date();
+            const mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7)); mon.setHours(0,0,0,0);
+            const sun=new Date(mon); sun.setDate(mon.getDate()+7);
+            const wc=myClasses.filter(c=>{ const d=new Date(c.startTime); return d>=mon&&d<sun; });
+            const hrs=wc.reduce((s,c)=>s+(c.durationMinutes||60)/60,0);
+            document.getElementById('kpi-hours').textContent = hrs.toFixed(1)+'h';
+
+            // Upcoming classes
+            const upcoming=[...myClasses]
+                .filter(c=>new Date(c.startTime)>=now)
+                .sort((a,b)=>new Date(a.startTime)-new Date(b.startTime))
+                .slice(0,5);
+            const clsEl=document.getElementById('overviewClasses');
+            clsEl.innerHTML = upcoming.length
+                ? upcoming.map(c=>{
+                    const pct=c.capacity?Math.round((c.booked||0)/c.capacity*100):0;
+                    const bc=pct>=90?'var(--red)':pct>=60?'var(--orange)':'var(--acid)';
+                    return `<div style="padding:0.65rem 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem">
+              <b style="font-size:0.87rem">${c.name||'—'}</b>
+              <span class="badge b-grey" style="font-size:0.6rem">${c.location||'—'}</span>
+            </div>
+            <div style="font-size:0.77rem;color:var(--muted);margin-bottom:0.35rem">${fmtTime(c.startTime)}</div>
+            <div class="occ-bar">
+              <div class="occ-track"><div class="occ-fill" style="width:${pct}%;background:${bc}"></div></div>
+              <span style="font-size:0.7rem;color:var(--muted);min-width:36px;text-align:right">${c.booked||0}/${c.capacity||'—'}</span>
+            </div>
+          </div>`;
+                }).join('')
+                : '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-calendar-times"></i><p>Žiadne nadchádzajúce lekcie</p></div>';
+
+            // Clients preview
+            const cliEl=document.getElementById('overviewClients');
+            cliEl.innerHTML = myClients.length
+                ? myClients.slice(0,6).map(c=>{
+                    const ini=(c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+                    return `<div class="client-card" onclick="openDrawer('${c.id}')">
+            <div class="ca">${ini}</div>
+            <div><div class="ci-name">${c.fullName||'—'}</div><div class="ci-meta">${c.email||'—'}</div></div>
+            <div style="margin-left:auto;color:var(--muted)"><i class="fas fa-chevron-right" style="font-size:0.75rem"></i></div>
+          </div>`;
+                }).join('')
+                : '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-users"></i><p>Žiadni klienti</p></div>';
+
+        } catch(e) { toast('Chyba: '+e.message,'err'); }
     }
 
-    // ── MY CLASSES ────────────────────────────────────────────────────────────
-    async function loadMyTrainerClasses() {
-        document.getElementById('trainerClassesTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+    // ── MY CLASSES ────────────────────────────────────────────────────────────────
+    async function loadMyClasses() {
+        document.getElementById('classesTable').innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
         try {
-            const res = await authFetch('/api/trainer/classes');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            if (!Array.isArray(data) || !data.length) {
-                document.getElementById('trainerClassesTable').innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne tréningy</p></div>';
-                return;
-            }
-            document.getElementById('ov-classCount').textContent = data.length;
-            let html = '<table class="data-table"><thead><tr><th>ID</th><th>Názov</th><th>Čas</th><th>Miesto</th><th>Prihlásení</th><th>Kapacita</th><th>Akcia</th></tr></thead><tbody>';
-            data.forEach(c => {
-                const booked = c.booked ?? c.enrolledCount ?? 0;
-                const capacity = c.capacity ?? '—';
-                const full = booked >= capacity;
-                html += `<tr>
-                    <td>#${c.id}</td>
-                    <td>${c.name||c.className||'—'}</td>
-                    <td>${c.startTime ? new Date(c.startTime).toLocaleString('sk-SK',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : (c.time||'—')}</td>
-                    <td>${c.location||'—'}</td>
-                    <td><span class="badge ${full?'b-red':'b-acid'}">${booked}/${capacity}</span></td>
-                    <td>${capacity}</td>
-                    <td><button class="btn btn-blue btn-sm" onclick="document.getElementById('noteClassId').value='${c.id}'"><i class="fas fa-edit"></i> Poznámka</button></td>
-                </tr>`;
-            });
-            html += '</tbody></table>';
-            document.getElementById('trainerClassesTable').innerHTML = html;
+            const res=await authFetch('/api/trainer/classes');
+            const data=await res.json();
+            if (!res.ok) throw new Error(data.message||'Chyba');
+            myClasses=Array.isArray(data)?data:[];
+            document.getElementById('kpi-classes').textContent=myClasses.length;
+            renderClassesTable(myClasses);
         } catch(e) {
-            document.getElementById('trainerClassesTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+            document.getElementById('classesTable').innerHTML=`<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
         }
     }
-    async function updateClassNote() {
-        const id = document.getElementById('noteClassId').value;
-        const note = document.getElementById('noteText').value.trim();
-        if (!id) return;
-        setOut('noteOut', 'Ukladám...');
-        try {
-            const res = await authFetch('/api/classes/'+id+'/notes', {method:'PUT', body:JSON.stringify({note})});
-            // ── FIX: rovnaký text() pattern ako member.html ──
-            const text = await res.text();
-            let d = {};
-            try { d = JSON.parse(text); } catch { d = {message: text||'OK'}; }
-            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
-            setOut('noteOut', d.message||'Poznámka uložená ✓');
-            toast('Poznámka uložená', 'ok');
-        } catch(e) { setOut('noteOut', '❌ ' + e.message); }
+
+    function renderClassesTable(classes) {
+        if (!classes.length) {
+            document.getElementById('classesTable').innerHTML='<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne lekcie</p></div>';
+            return;
+        }
+        const sorted=[...classes].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+        let html='<table class="dt"><thead><tr><th>Lekcia</th><th>Čas</th><th>Miesto</th><th>Obsadenosť</th><th>Status</th></tr></thead><tbody>';
+        sorted.forEach(c=>{
+            const booked=c.booked||0, cap=c.capacity||0;
+            const pct=cap?Math.round(booked/cap*100):0;
+            const bc=pct>=90?'var(--red)':pct>=60?'var(--orange)':'var(--acid)';
+            const isPast=new Date(c.startTime)<new Date();
+            html+=`<tr>
+      <td><b>${c.name||'—'}</b></td>
+      <td style="font-size:0.82rem;color:var(--muted)">${fmtTime(c.startTime)}</td>
+      <td><span class="badge b-grey">${c.location||'—'}</span></td>
+      <td>
+        <div class="occ-bar">
+          <div class="occ-track" style="width:80px"><div class="occ-fill" style="width:${pct}%;background:${bc}"></div></div>
+          <span style="font-size:0.73rem;color:var(--muted)">${booked}/${cap||'—'}</span>
+        </div>
+      </td>
+      <td>${isPast?'<span class="badge b-grey">Prebehla</span>':'<span class="badge b-acid">Nadchádzajúca</span>'}</td>
+    </tr>`;
+        });
+        html+='</tbody></table>';
+        document.getElementById('classesTable').innerHTML=html;
     }
 
-    // ── SCHEDULE ──────────────────────────────────────────────────────────────
-    async function loadSchedule() {
-        setOut('scheduleOut', 'Načítavam rozvrh...');
-        try {
-            const res = await authFetch('/api/trainer/schedule');
-            const text = await res.text();
-            let d = {};
-            try { d = JSON.parse(text); } catch { d = {message: text}; }
-            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera');
-            setOut('scheduleOut', JSON.stringify(d, null, 2));
-        } catch(e) { setOut('scheduleOut', '❌ ' + e.message + ' (rozvrh je zobrazený staticky vyššie)'); }
+    function filterClasses() {
+        const q=document.getElementById('classSearch').value.toLowerCase();
+        const f=document.getElementById('classFilter').value;
+        const now=new Date();
+        renderClassesTable(myClasses.filter(c=>{
+            const matchQ=!q||(c.name||'').toLowerCase().includes(q)||(c.location||'').toLowerCase().includes(q);
+            const isPast=new Date(c.startTime)<now;
+            const matchF=!f||(f==='upcoming'&&!isPast)||(f==='past'&&isPast);
+            return matchQ&&matchF;
+        }));
     }
 
-    // ── CLIENTS ───────────────────────────────────────────────────────────────
+    // ── SCHEDULE ──────────────────────────────────────────────────────────────────
+    let scheduleOffset=0;
+
+    function weekBounds(offset) {
+        const now=new Date();
+        const mon=new Date(now);
+        const dow=now.getDay(); // 0=Sun,1=Mon,...
+        mon.setDate(now.getDate()-((dow+6)%7)+offset*7);
+        mon.setHours(0,0,0,0);
+        const sun=new Date(mon); sun.setDate(mon.getDate()+6); sun.setHours(23,59,59,999);
+        return {mon,sun};
+    }
+
+    function prevWeek(){ scheduleOffset--; renderSchedule(); }
+    function nextWeek(){ scheduleOffset++; renderSchedule(); }
+    function goToday(){ scheduleOffset=0; renderSchedule(); }
+
+    async function renderSchedule() {
+        if (!myClasses.length) {
+            try {
+                const res=await authFetch('/api/trainer/classes');
+                if (res.ok) { const d=await res.json(); myClasses=Array.isArray(d)?d:[]; }
+            } catch {}
+        }
+
+        const {mon,sun}=weekBounds(scheduleOffset);
+        const SK_DAYS=['Po','Ut','St','Št','Pi','So','Ne'];
+        const dayDates=Array.from({length:7},(_,i)=>{ const d=new Date(mon); d.setDate(mon.getDate()+i); return d; });
+        const today=new Date(); today.setHours(0,0,0,0);
+        const HOURS=[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+        const COLORS=['c-blue','c-acid','c-red','c-orange','c-cyan'];
+        const colorMap={};
+        let ci=0;
+
+        // Filter this week's classes
+        const weekCls=myClasses.filter(c=>{
+            const d=new Date(c.startTime); return d>=mon&&d<=sun;
+        });
+        weekCls.forEach(c=>{ if(!colorMap[c.id]){ colorMap[c.id]=COLORS[ci%COLORS.length]; ci++; } });
+
+        // Week label
+        const fl=d=>d.toLocaleDateString('sk-SK',{day:'numeric',month:'numeric'});
+        document.getElementById('weekLabel').textContent=fl(mon)+' — '+fl(sun)+' '+sun.getFullYear();
+
+        // Build HTML
+        let html='<div class="wh"></div>';
+        dayDates.forEach((d,i)=>{
+            const isToday=d.getTime()===today.getTime();
+            html+=`<div class="wh ${isToday?'today-hdr':''}">${SK_DAYS[i]}<br><span style="font-size:0.8rem;font-weight:${isToday?700:400}">${d.getDate()}.${d.getMonth()+1}.</span></div>`;
+        });
+
+        HOURS.forEach(h=>{
+            html+=`<div class="wt">${String(h).padStart(2,'0')}:00</div>`;
+            dayDates.forEach(d=>{
+                const isToday=d.getTime()===today.getTime();
+                const cellCls=weekCls.filter(c=>{
+                    const cd=new Date(c.startTime);
+                    return cd.toDateString()===d.toDateString()&&cd.getHours()===h;
+                });
+                const events=cellCls.map(c=>`
+        <div class="we ${colorMap[c.id]}" title="${c.name} | ${fmtTime(c.startTime)} | ${c.booked||0}/${c.capacity||'?'} miest">
+          <div style="font-weight:600">${c.name||'—'}</div>
+          <div style="opacity:0.75;font-size:0.62rem">${new Date(c.startTime).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})} · ${c.booked||0}/${c.capacity||'?'}</div>
+        </div>`).join('');
+                html+=`<div class="wc ${isToday?'today-col':''}">${events}</div>`;
+            });
+        });
+
+        document.getElementById('weekGrid').innerHTML=html;
+        document.getElementById('scheduleEmpty').style.display=weekCls.length?'none':'block';
+    }
+
+    // ── CLIENTS ───────────────────────────────────────────────────────────────────
     async function loadClients() {
-        document.getElementById('clientsList').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        document.getElementById('clientsList').innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
         try {
-            const res = await authFetch('/api/trainer/clients');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            if (!Array.isArray(data) || !data.length) {
-                document.getElementById('clientsList').innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni klienti</p></div>';
-                return;
-            }
-            document.getElementById('ov-clientCount').textContent = data.length;
-            let html = '';
-            data.forEach(c => {
-                const initials = (c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-                html += `<div class="client-card" onclick="document.getElementById('clientDetailId').value='${c.id}';showPage('client-detail')">
-                    <div class="client-avatar">${initials}</div>
-                    <div class="client-info">
-                        <div class="client-name">${c.fullName||'—'}</div>
-                        <div class="client-meta">${c.email||'—'} • <span class="badge b-blue">${c.role||'member'}</span></div>
-                    </div>
-                    <div class="client-sessions" title="Počet sedení">${c.sessionsCount||0}</div>
-                </div>`;
-            });
-            document.getElementById('clientsList').innerHTML = html;
+            const res=await authFetch('/api/trainer/clients');
+            const data=await res.json();
+            if (!res.ok) throw new Error(data.message||'Chyba');
+            myClients=Array.isArray(data)?data:[];
+            document.getElementById('kpi-clients').textContent=myClients.length;
+            renderClients(myClients);
         } catch(e) {
-            document.getElementById('clientsList').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+            document.getElementById('clientsList').innerHTML=`<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
         }
     }
 
-    // ── CLIENT DETAIL ─────────────────────────────────────────────────────────
-    async function loadClientDetail() {
-        const id = document.getElementById('clientDetailId').value;
-        if (!id) return;
-        setOut('clientDetailOut', 'Načítavam...');
-        try {
-            const res = await authFetch('/api/trainer/clients/'+id);
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
-            setOut('clientDetailOut', JSON.stringify(d, null, 2));
-            if (d.id) document.getElementById('clientClassesId').value = d.id;
-            if (d.id) document.getElementById('clientNoteId').value = d.id;
-        } catch(e) { setOut('clientDetailOut', '❌ ' + e.message); }
-    }
-    async function loadClientClasses() {
-        const id = document.getElementById('clientClassesId').value;
-        if (!id) return;
-        setOut('clientClassesOut', 'Načítavam...');
-        try {
-            const res = await authFetch('/api/trainer/clients/'+id+'/classes');
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
-            setOut('clientClassesOut', JSON.stringify(d, null, 2));
-        } catch(e) { setOut('clientClassesOut', '❌ ' + e.message); }
-    }
-    async function addClientNote() {
-        const id = document.getElementById('clientNoteId').value;
-        const note = document.getElementById('clientNoteText').value.trim();
-        if (!id || !note) return;
-        setOut('clientNoteOut', 'Pridávam...');
-        try {
-            const res = await authFetch('/api/trainer/clients/'+id+'/notes', {method:'POST', body:JSON.stringify({note})});
-            // ── FIX: text() pattern ──
-            const text = await res.text();
-            let d = {};
-            try { d = JSON.parse(text); } catch { d = {message: text||'OK'}; }
-            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
-            setOut('clientNoteOut', d.message||'Poznámka pridaná ✓');
-            toast('Poznámka pridaná', 'ok');
-        } catch(e) { setOut('clientNoteOut', '❌ ' + e.message); }
+    function renderClients(clients) {
+        if (!clients.length) {
+            document.getElementById('clientsList').innerHTML='<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni priradení klienti</p></div>';
+            return;
+        }
+        document.getElementById('clientsList').innerHTML=clients.map(c=>{
+            const ini=(c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            return `<div class="client-card" onclick="openDrawer('${c.id}')">
+      <div class="ca">${ini}</div>
+      <div style="flex:1">
+        <div class="ci-name">${c.fullName||'—'}</div>
+        <div class="ci-meta">${c.email||'—'}${c.phone?' · '+c.phone:''}</div>
+      </div>
+      <div class="ci-actions">
+        <span class="badge ${c.active?'b-acid':'b-grey'}" style="font-size:0.6rem">${c.active?'Aktívny':'Neaktívny'}</span>
+        <button class="btn btn-red btn-sm" onclick="event.stopPropagation();removeClient('${c.id}')"><i class="fas fa-user-minus"></i></button>
+      </div>
+    </div>`;
+        }).join('');
     }
 
-    // ── PROFILE ───────────────────────────────────────────────────────────────
-    async function loadTrainerProfile() {
-        try {
-            const res = await authFetch('/api/auth/me');
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
-            const pd = document.getElementById('trainerProfileData');
-            pd.style.display = 'grid';
-            document.getElementById('tp-name').textContent    = d.fullName||'—';
-            document.getElementById('tp-email').textContent   = d.email||'—';
-            document.getElementById('tp-phone').textContent   = d.phone||'—';
-            document.getElementById('tp-role').innerHTML      = `<span class="badge b-blue">${d.role||'trainer'}</span>`;
-            document.getElementById('tp-spec').textContent    = d.specialization||'—';
-            document.getElementById('tp-created').textContent = d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—';
-            // Predvyplň formulár
-            document.getElementById('tp-edit-name').value  = d.fullName||'';
-            document.getElementById('tp-edit-phone').value = d.phone||'';
-            document.getElementById('tp-edit-spec').value  = d.specialization||'';
-        } catch(e) { toast(e.message, 'err'); }
+    function filterClients() {
+        const q=document.getElementById('clientSearch').value.toLowerCase();
+        renderClients(myClients.filter(c=>(c.fullName||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q)));
     }
 
-    async function updateTrainerProfile() {
-        const fullName       = document.getElementById('tp-edit-name').value.trim();
-        const phone          = document.getElementById('tp-edit-phone').value.trim();
-        const specialization = document.getElementById('tp-edit-spec').value.trim();
-        if (!fullName) return showMsg('trainerProfileMsg', 'Meno je povinné', 'err');
-        const uid = user?.id || user?.userId;
-        if (!uid) return showMsg('trainerProfileMsg', 'Chyba: ID nenájdené, odhláš sa a prihlás znova.', 'err');
+    async function removeClient(id) {
+        if (!confirm('Naozaj odstrániť klienta?')) return;
         try {
-            const res = await authFetch('/api/users/'+uid, {method:'PUT', body:JSON.stringify({fullName, phone, specialization})});
-            let d;
-            try { d = await res.json(); } catch { d = {}; }
-            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
-            showMsg('trainerProfileMsg', 'Profil aktualizovaný!', 'ok');
-            const upd = {...user, fullName, phone: phone||user.phone};
-            localStorage.setItem('fp_user', JSON.stringify(upd));
-            user = upd;
-            document.getElementById('sideName').textContent = fullName;
-            document.getElementById('sideAvatar').textContent = fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-            toast('Profil uložený!', 'ok');
-            loadTrainerProfile();
-        } catch(e) { showMsg('trainerProfileMsg', e.message, 'err'); }
+            const res=await authFetch('/api/trainer/clients/'+id,{method:'DELETE'});
+            if (res.ok) { toast('Klient odstránený','ok'); loadClients(); }
+            else toast('Chyba pri odstraňovaní','err');
+        } catch(e) { toast(e.message,'err'); }
     }
 
-    async function changeTrainerPassword() {
-        const cur  = document.getElementById('tp-cur-pass').value;
-        const np   = document.getElementById('tp-new-pass').value;
-        const np2  = document.getElementById('tp-new-pass2').value;
-        if (!cur)          return showMsg('trainerPassMsg', 'Zadaj aktuálne heslo', 'err');
-        if (np.length < 6) return showMsg('trainerPassMsg', 'Nové heslo musí mať aspoň 6 znakov', 'err');
-        if (np !== np2)    return showMsg('trainerPassMsg', 'Heslá sa nezhodujú', 'err');
-        const uid = user?.id || user?.userId;
-        if (!uid) return showMsg('trainerPassMsg', 'Chyba: ID nenájdené', 'err');
+    // ── CLIENT PICKER ─────────────────────────────────────────────────────────────
+    async function loadAvailableMembers() {
+        if (availableMembers.length) return;
         try {
-            const res = await authFetch('/api/users/'+uid+'/password', {
-                method: 'PUT',
-                body: JSON.stringify({currentPassword: cur, newPassword: np})
-            });
-            let d;
-            try { d = await res.json(); } catch { d = {}; }
-            if (!res.ok) throw new Error(typeof d.message==='string' ? d.message : 'Chyba servera ('+res.status+')');
-            showMsg('trainerPassMsg', 'Heslo úspešne zmenené!', 'ok');
-            document.getElementById('tp-cur-pass').value  = '';
-            document.getElementById('tp-new-pass').value  = '';
-            document.getElementById('tp-new-pass2').value = '';
-            toast('Heslo zmenené!', 'ok');
-        } catch(e) { showMsg('trainerPassMsg', e.message, 'err'); }
-    }
-
-    // ── UTILS ─────────────────────────────────────────────────────────────────
-    function showMsg(id, msg, type) {
-        const el = document.getElementById(id);
-        el.textContent = msg;
-        el.className = 'form-msg ' + type;
-    }
-    function toast(msg, type='ok') {
-        const t = document.getElementById('toast');
-        t.className = 'toast t-' + type;
-        t.innerHTML = (type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>') + ' ' + msg;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 3500);
-    }
-    function logout() {
-        localStorage.removeItem('fp_token');
-        localStorage.removeItem('fp_user');
-        window.location.href = 'index.html';
-    }
-    // ── CLIENTS ───────────────────────────────────────────────────────────────
-    let allMembersCache = [];
-    let selectedAddClient = null;
-
-    async function loadAllMembersForPicker() {
-        if (allMembersCache.length) return;
-        try {
-            const res = await authFetch('/api/admin/users');
-            if (res.ok) {
-                const data = await res.json();
-                allMembersCache = Array.isArray(data) ? data.filter(u=>u.role==='member') : [];
-            } else {
-                // Fallback — skús načítať všetkých
-                const res2 = await authFetch('/api/trainer/available-members');
-                if (res2.ok) allMembersCache = await res2.json();
-            }
+            const res=await authFetch('/api/trainer/available-members');
+            if (res.ok) { const d=await res.json(); availableMembers=Array.isArray(d)?d:[]; }
         } catch {}
     }
 
     function openClientPicker() {
-        loadAllMembersForPicker().then(() => {
-            const val = document.getElementById('addClientSearch').value.toLowerCase();
-            const filtered = allMembersCache.filter(u =>
-                (u.fullName||''). toLowerCase().includes(val) || (u.email||''). toLowerCase().includes(val));
-            const el = document.getElementById('addClientPickerList');
-            if (!filtered.length) {
-                el.innerHTML = '<div class="picker-option" style="color:var(--muted)">Žiadni členovia</div>';
-            } else {
-                el.innerHTML = filtered.map(u => `
-                    <div class="picker-option" onclick="selectAddClient('${u.id}')">
-                        <span>${u.fullName||'—'} <span style="color:var(--muted);font-size:0.8rem">&lt;${u.email}&gt;</span></span>
-                    </div>`).join('');
-            }
+        loadAvailableMembers().then(()=>{
+            const q=document.getElementById('addClientSearch').value.toLowerCase();
+            const assignedIds=myClients.map(c=>c.id);
+            const filtered=availableMembers.filter(u=>
+                !assignedIds.includes(u.id)&&
+                ((u.fullName||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q))
+            );
+            const el=document.getElementById('addClientPickerList');
+            el.innerHTML=filtered.length
+                ? filtered.map(u=>`<div class="picker-opt" onclick="selectAddClient('${u.id}')">
+          <span>${u.fullName||'—'} <span style="color:var(--muted);font-size:0.78rem">&lt;${u.email}&gt;</span></span>
+        </div>`).join('')
+                : '<div class="picker-opt" style="color:var(--muted)">Žiadni dostupní členovia</div>';
             el.classList.add('open');
         });
     }
-
-    function filterClientPicker() {
-        openClientPicker();
-    }
+    function filterClientPicker(){ openClientPicker(); }
 
     function selectAddClient(uid) {
-        const u = allMembersCache.find(x => x.id === uid);
+        const u=availableMembers.find(x=>x.id===uid);
         if (!u) return;
-        selectedAddClient = u;
-        document.getElementById('addClientSearch').value = '';
+        selectedClient=u;
+        document.getElementById('addClientSearch').value='';
         document.getElementById('addClientPickerList').classList.remove('open');
-        document.getElementById('addClientSelName').textContent = u.fullName || '—';
-        document.getElementById('addClientSelEmail').textContent = u.email || '—';
-        document.getElementById('addClientBadge').classList.add('visible');
+        document.getElementById('addClientSelName').textContent=u.fullName||'—';
+        document.getElementById('addClientSelEmail').textContent=u.email||'—';
+        document.getElementById('addClientBadge').classList.add('vis');
     }
 
     function clearClientPicker() {
-        selectedAddClient = null;
-        document.getElementById('addClientSearch').value = '';
-        document.getElementById('addClientBadge').classList.remove('visible');
-    }
-
-    async function loadClients() {
-        document.getElementById('clientsTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
-        try {
-            const res = await authFetch('/api/trainer/clients');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            if (!Array.isArray(data) || !data.length) {
-                document.getElementById('clientsTable').innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni priradení cvičenci</p></div>';
-                return;
-            }
-            let html = '<table class="data-table"><thead><tr><th>Meno</th><th>Email</th><th>Telefón</th><th>Akcia</th></tr></thead><tbody>';
-            data.forEach(c => {
-                html += `<tr>
-                    <td><b>${c.fullName||'—'}</b></td>
-                    <td style="color:var(--muted)">${c.email||'—'}</td>
-                    <td>${c.phone||'—'}</td>
-                    <td>
-                        <button class="btn btn-ghost btn-sm" onclick="showClientDetail('${c.id}')"><i class="fas fa-eye"></i> Detail</button>
-                        <button class="btn btn-red btn-sm" onclick="removeClient('${c.id}')" style="margin-left:0.4rem"><i class="fas fa-user-minus"></i></button>
-                    </td>
-                </tr>`;
-            });
-            html += '</tbody></table>';
-            document.getElementById('clientsTable').innerHTML = html;
-        } catch(e) {
-            document.getElementById('clientsTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
-        }
+        selectedClient=null;
+        document.getElementById('addClientSearch').value='';
+        document.getElementById('addClientBadge').classList.remove('vis');
     }
 
     async function addClient() {
-        if (!selectedAddClient) return showMsg('addClientMsg', 'Vyber cvičenca zo zoznamu', 'err');
+        if (!selectedClient) return showMsg('addClientMsg','Vyber člena zo zoznamu','err');
         try {
-            const res = await authFetch('/api/trainer/clients', {
-                method: 'POST',
-                body: JSON.stringify({memberId: selectedAddClient.id})
-            });
+            const res=await authFetch('/api/trainer/clients',{method:'POST',body:JSON.stringify({memberId:selectedClient.id})});
             let d; try{d=await res.json()}catch{d={}}
             if (!res.ok) throw new Error(d.message||'Chyba servera');
-            showMsg('addClientMsg', `${selectedAddClient.fullName} pridaný!`, 'ok');
-            toast('Cvičenec pridaný!', 'ok');
+            showMsg('addClientMsg',`${selectedClient.fullName} pridaný!`,'ok');
+            toast('Klient pridaný!','ok');
             clearClientPicker();
+            availableMembers=[];
             loadClients();
-        } catch(e) { showMsg('addClientMsg', e.message, 'err'); }
+        } catch(e) { showMsg('addClientMsg',e.message,'err'); }
     }
 
-    async function removeClient(memberId) {
-        if (!confirm('Naozaj odstrániť cvičenca?')) return;
+    // ── DRAWER ────────────────────────────────────────────────────────────────────
+    async function openDrawer(userId) {
+        document.getElementById('drawerOverlay').classList.add('open');
+        document.getElementById('clientDrawer').classList.add('open');
+        document.getElementById('drawerBody').innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
+        document.getElementById('drawerActions').innerHTML='';
         try {
-            const res = await authFetch('/api/trainer/clients/'+memberId, {method:'DELETE'});
-            if (res.ok) { toast('Cvičenec odstránený', 'ok'); loadClients(); }
-            else toast('Chyba', 'err');
-        } catch(e) { toast(e.message, 'err'); }
-    }
-
-    async function showClientDetail(memberId) {
-        try {
-            const res = await authFetch('/api/users/'+memberId);
-            const d = await res.json();
+            const res=await authFetch('/api/users/'+userId);
+            const d=await res.json();
             if (!res.ok) throw new Error(d.message);
-            const panel = document.getElementById('clientDetailPanel');
-            document.getElementById('clientDetailTitle').textContent = d.fullName || 'Detail cvičenca';
-            document.getElementById('clientDetailBody').innerHTML = `
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;font-size:0.87rem">
-                    <div><div class="form-label">Meno</div>${d.fullName||'—'}</div>
-                    <div><div class="form-label">Email</div>${d.email||'—'}</div>
-                    <div><div class="form-label">Telefón</div>${d.phone||'—'}</div>
-                    <div><div class="form-label">Rola</div><span class="badge b-cyan">${d.role||'—'}</span></div>
-                    <div><div class="form-label">Status</div>${d.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-grey">Neaktívny</span>'}</div>
-                    <div><div class="form-label">Registrovaný</div>${d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—'}</div>
-                </div>`;
-            panel.style.display = 'block';
-            panel.scrollIntoView({behavior:'smooth'});
-        } catch(e) { toast(e.message, 'err'); }
+            document.getElementById('drawerTitle').textContent=d.fullName||'Detail klienta';
+            let html=`
+      <div class="ds-title">Základné info</div>
+      <div class="drow">
+        <div class="df"><div class="dk">Meno</div>${d.fullName||'—'}</div>
+        <div class="df"><div class="dk">Email</div><span style="font-size:0.78rem">${d.email||'—'}</span></div>
+      </div>
+      <div class="drow">
+        <div class="df"><div class="dk">Telefón</div>${d.phone||'—'}</div>
+        <div class="df"><div class="dk">Stav</div>${d.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-grey">Neaktívny</span>'}</div>
+      </div>
+      <div class="drow">
+        <div class="df"><div class="dk">Registrovaný</div>${fmtDate(d.createdAt)}</div>
+        <div class="df"><div class="dk">Rola</div><span class="badge b-blue">${d.role||'member'}</span></div>
+      </div>`;
+            // Try membership
+            try {
+                const resM=await authFetch('/api/admin/memberships/user/'+userId);
+                if (resM.ok) {
+                    const m=await resM.json();
+                    if (m && m.status) {
+                        html+=`<div class="ds-title">Predplatné</div>
+            <div class="drow">
+              <div class="df"><div class="dk">Typ</div>${m.membershipTypeName||'—'}</div>
+              <div class="df"><div class="dk">Status</div><span class="badge ${m.status==='active'?'b-acid':'b-red'}">${m.status}</span></div>
+            </div>
+            <div class="drow">
+              <div class="df"><div class="dk">Platí do</div>${m.endDate||'—'}</div>
+              <div class="df"><div class="dk">Zostatok</div>${m.daysRemaining!=null?m.daysRemaining+' dní':'—'}</div>
+            </div>`;
+                    }
+                }
+            } catch {}
+            document.getElementById('drawerBody').innerHTML=html;
+            document.getElementById('drawerActions').innerHTML=`
+      <button class="btn btn-red btn-sm" onclick="removeClient('${userId}');closeDrawer()"><i class="fas fa-user-minus"></i> Odstrániť</button>`;
+        } catch(e) {
+            document.getElementById('drawerBody').innerHTML=`<div class="empty-state"><p>❌ ${e.message}</p></div>`;
+        }
     }
 
-    document.addEventListener('click', e => {
-        if (!e.target.closest('#addClientPickerWrap')) {
+    function closeDrawer() {
+        document.getElementById('drawerOverlay').classList.remove('open');
+        document.getElementById('clientDrawer').classList.remove('open');
+    }
+
+    // ── PROFILE ───────────────────────────────────────────────────────────────────
+    async function loadProfile() {
+        try {
+            const res=await authFetch('/api/auth/me');
+            const d=await res.json();
+            if (!res.ok) throw new Error(d.message);
+            document.getElementById('profileInfoPanel').style.display='block';
+            document.getElementById('profileInfoGrid').innerHTML=`
+      <div><div class="fl">Meno</div><div style="font-size:0.87rem">${d.fullName||'—'}</div></div>
+      <div><div class="fl">Email</div><div style="font-size:0.87rem">${d.email||'—'}</div></div>
+      <div><div class="fl">Telefón</div><div style="font-size:0.87rem">${d.phone||'—'}</div></div>
+      <div><div class="fl">Rola</div><span class="badge b-blue">${d.role||'trainer'}</span></div>
+      <div><div class="fl">Špecializácia</div><div style="font-size:0.87rem">${d.specialization||'—'}</div></div>
+      <div><div class="fl">Registrovaný</div><div style="font-size:0.87rem">${fmtDate(d.createdAt)}</div></div>`;
+            document.getElementById('tp-name').value =d.fullName||'';
+            document.getElementById('tp-phone').value=d.phone||'';
+            document.getElementById('tp-spec').value =d.specialization||'';
+        } catch(e) { toast(e.message,'err'); }
+    }
+
+    async function saveProfile() {
+        const fullName=document.getElementById('tp-name').value.trim();
+        const phone=document.getElementById('tp-phone').value.trim();
+        const specialization=document.getElementById('tp-spec').value.trim();
+        if (!fullName) return showMsg('profileMsg','Meno je povinné','err');
+        const uid=user?.id||user?.userId;
+        if (!uid) return showMsg('profileMsg','Chyba: ID nenájdené','err');
+        try {
+            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,specialization})});
+            let d; try{d=await res.json()}catch{d={}}
+            if (!res.ok) throw new Error(d.message||'Chyba servera');
+            showMsg('profileMsg','Profil aktualizovaný!','ok');
+            const upd={...user,fullName,phone};
+            localStorage.setItem('fp_user',JSON.stringify(upd)); user=upd;
+            document.getElementById('sideName').textContent=fullName;
+            document.getElementById('sideAvatar').textContent=fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            toast('Profil uložený!','ok');
+            loadProfile();
+        } catch(e) { showMsg('profileMsg',e.message,'err'); }
+    }
+
+    async function changePassword() {
+        const cur=document.getElementById('tp-cur-pass').value;
+        const np=document.getElementById('tp-new-pass').value;
+        const np2=document.getElementById('tp-new-pass2').value;
+        if (!cur) return showMsg('passMsg','Zadaj aktuálne heslo','err');
+        if (np.length<6) return showMsg('passMsg','Min 6 znakov','err');
+        if (np!==np2) return showMsg('passMsg','Heslá sa nezhodujú','err');
+        const uid=user?.id||user?.userId;
+        try {
+            const res=await authFetch('/api/users/'+uid+'/password',{method:'PUT',body:JSON.stringify({currentPassword:cur,newPassword:np})});
+            let d; try{d=await res.json()}catch{d={}}
+            if (!res.ok) throw new Error(d.message||'Chyba servera');
+            showMsg('passMsg','Heslo zmenené!','ok');
+            ['tp-cur-pass','tp-new-pass','tp-new-pass2'].forEach(id=>document.getElementById(id).value='');
+            toast('Heslo zmenené!','ok');
+        } catch(e) { showMsg('passMsg',e.message,'err'); }
+    }
+
+    // Close picker on outside click
+    document.addEventListener('click',e=>{
+        if (!e.target.closest('#addClientPickerWrap'))
             document.getElementById('addClientPickerList')?.classList.remove('open');
-        }
     });
+
+    // Boot
+    loadOverview();
 </script>
 </body>
 </html>

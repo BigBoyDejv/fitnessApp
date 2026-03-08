@@ -198,6 +198,17 @@
 
         @media(max-width:1100px){.pricing-grid{grid-template-columns:1fr 1fr}}
         @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stat-row{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.tr-grid{grid-template-columns:1fr 1fr}}
+
+        /* ── CLASS ROWS ── */
+        .cl-row{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.2rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;gap:1rem;}
+        .cl-row:last-child{border-bottom:none;}
+        .cl-row:hover{background:rgba(255,255,255,0.03);}
+        .cl-row-selected{background:rgba(200,255,0,0.05)!important;border-left:2px solid var(--acid);}
+        .cl-row-main{flex:1;min-width:0;}
+        .cl-row-name{font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .cl-row-meta{display:flex;gap:1rem;font-size:0.75rem;color:var(--muted);flex-wrap:wrap;}
+        .cl-row-meta span{display:flex;align-items:center;gap:0.3rem;}
+        .cl-row-status{flex-shrink:0;}
     </style>
 </head>
 <body>
@@ -285,7 +296,6 @@
                         <div class="api-out" id="ov-meOut">Klikni načítať...</div>
                     </div>
                 </div>
-
                 <div class="panel">
                     <div class="ph"><span class="pt">Moje lekcie</span><span class="method m-get">GET /api/classes/my</span></div>
                     <div class="pb">
@@ -429,23 +439,24 @@
         <!-- BOOK CLASS -->
         <div class="ps" id="pg-book">
             <div class="g2">
+                <!-- Zoznam lekcií -->
                 <div class="panel">
-                    <div class="ph"><span class="pt">Dostupné lekcie</span><span class="method m-get">GET /api/classes</span></div>
-                    <div class="pb">
-                        <div class="api-url">/api/classes</div>
-                        <button class="btn btn-ghost btn-sm" onclick="loadAllCl()" style="margin-bottom:0.9rem"><i class="fas fa-list"></i> Načítať lekcie</button>
-                        <div id="allClTable"><div class="empty"><i class="fas fa-dumbbell"></i><p>Klikni pre načítanie lekcií</p></div></div>
+                    <div class="ph">
+                        <span class="pt">Dostupné lekcie</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadAllCl()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
+                    </div>
+                    <div class="pb" style="padding:0">
+                        <div id="allClTable"><div class="empty" style="padding:2rem"><span class="spin"></span></div></div>
                     </div>
                 </div>
-                <div class="panel">
-                    <div class="ph"><span class="pt">Rezervovať / Zrušiť</span></div>
-                    <div class="pb">
-                        <div class="form-group"><label class="fl">ID lekcie <span style="color:var(--muted)">(klikni vľavo)</span></label><input class="fi" type="number" id="bookId" placeholder="napr. 3"></div>
-                        <div style="display:flex;gap:0.7rem;margin-bottom:0.9rem">
-                            <button class="btn btn-acid" onclick="bookCl()"><i class="fas fa-plus"></i> Rezervovať</button>
-                            <button class="btn btn-red" onclick="cancelCl()"><i class="fas fa-times"></i> Zrušiť</button>
+                <!-- Detail vybranej lekcie -->
+                <div class="panel" id="bookDetailPanel">
+                    <div class="ph"><span class="pt">Detail lekcie</span></div>
+                    <div class="pb" id="bookDetail">
+                        <div class="empty" style="padding:2rem">
+                            <i class="fas fa-hand-pointer"></i>
+                            <p style="margin-top:0.6rem">Vyber lekciu zo zoznamu</p>
                         </div>
-                        <div class="api-out" id="bookOut">Zadaj ID a klikni na akciu...</div>
                     </div>
                 </div>
             </div>
@@ -599,6 +610,7 @@
         if (id==='profile')    loadProfile();
         if (id==='classes')    loadMyClasses();
         if (id==='book')       loadAllCl();
+        if (id==='classes')    loadMyClasses();
         if (id==='trainers')   loadTrainers();
         if (id==='checkin')    loadCheckins();
         if (id==='stats')      loadStats();
@@ -637,15 +649,10 @@
         setOut('ov-meOut','Načítavam...');
         try {
             const res=await af('/api/auth/me'); const d=await res.json();
-            if(!res.ok) throw new Error(d.message); 
+            if(!res.ok) throw new Error(d.message);
             setOut('ov-meOut', JSON.stringify(d,null,2));
         } catch(e){setOut('ov-meOut','❌ '+e.message);}
     }
-
-
-
-
-
     async function loadMyClassesOv() {
         setOut('ov-clOut','Načítavam...');
         try {
@@ -854,17 +861,26 @@
         document.getElementById('myClTable').innerHTML='<div class="empty"><span class="spin"></span></div>';
         try {
             const res=await af('/api/classes/my'); const data=await res.json();
-            if(!res.ok) throw new Error(data.message);
+            if(!res.ok) throw new Error(data.message||('HTTP '+res.status));
             if(!Array.isArray(data)||!data.length){
                 document.getElementById('myClTable').innerHTML='<div class="empty"><i class="fas fa-calendar-times"></i><p>Žiadne rezervácie</p></div>';
                 return;
             }
             document.getElementById('ov-lessons').textContent=data.length;
-            let html='<table class="dt"><thead><tr><th>Názov</th><th>Tréner</th><th>Deň</th><th>Čas</th><th>Status</th><th>Akcia</th></tr></thead><tbody>';
+            let html='<table class="dt"><thead><tr><th>Názov</th><th>Tréner</th><th>Dátum a čas</th><th>Trvanie</th><th>Akcia</th></tr></thead><tbody>';
             data.forEach(c=>{
-                const cls=c.status==='confirmed'?'b-acid':c.status==='waiting'?'b-orange':'b-grey';
-                const label=c.status==='waiting'?'waitlist ('+c.waitlistPosition+')':c.status||'—';
-                html+=`<tr><td>${c.className||c.name||'—'}</td><td>${c.trainerName||'—'}</td><td>${c.dayName||'—'}</td><td>${c.startTime||'—'}</td><td><span class="badge ${cls}">${label}</span></td><td><button class="btn btn-red btn-sm" onclick="cancelById(${c.classId||c.id})"><i class="fas fa-times"></i></button></td></tr>`;
+                const dt = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+                const dur = c.durationMinutes ? c.durationMinutes+' min' : '—';
+                const isPast = c.startTime && new Date(c.startTime) < new Date();
+                html+=`<tr>
+        <td><b>${c.name||'—'}</b></td>
+        <td style="color:var(--muted)">${c.instructor||'—'}</td>
+        <td>${dt}</td>
+        <td style="color:var(--muted)">${dur}</td>
+        <td>${isPast
+                    ? '<span class="badge b-grey">Prebehnutá</span>'
+                    : '<button class="btn btn-red btn-sm" onclick="cancelById('+c.id+')"><i class="fas fa-times"></i> Zrušiť</button>'
+                }</td></tr>`;
             });
             document.getElementById('myClTable').innerHTML=html+'</tbody></table>';
         } catch(e){document.getElementById('myClTable').innerHTML=`<div class="empty"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;}
@@ -879,55 +895,138 @@
         } catch(e){toast(e.message,'err');}
     }
     async function loadAllCl() {
-        document.getElementById('allClTable').innerHTML='<div class="empty"><span class="spin"></span></div>';
+        document.getElementById('allClTable').innerHTML='<div class="empty" style="padding:2rem"><span class="spin"></span></div>';
         try {
-            const res=await af('/api/classes'); const data=await res.json();
-            if(!res.ok) throw new Error(data.message);
-            if(!Array.isArray(data)||!data.length){
-                document.getElementById('allClTable').innerHTML='<div class="empty"><i class="fas fa-dumbbell"></i><p>Žiadne lekcie</p></div>'; return;
+            const res = await af('/api/classes');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || ('HTTP ' + res.status));
+            if (!Array.isArray(data) || !data.length) {
+                document.getElementById('allClTable').innerHTML='<div class="empty" style="padding:2rem"><i class="fas fa-dumbbell"></i><p>Žiadne dostupné lekcie</p></div>';
+                return;
             }
-            let html='<table class="dt"><thead><tr><th>Názov</th><th>Deň</th><th>Čas</th><th>Voľné</th></tr></thead><tbody>';
-            data.forEach(c=>{
-                const full=c.availableSpots===0;
-                html+=`<tr onclick="document.getElementById('bookId').value='${c.id}'" style="cursor:pointer">
-        <td>${c.name||'—'}</td><td>${c.dayName||'—'}</td><td>${c.startTime||'—'}</td>
-        <td>${full?'<span class="badge b-red">Plná</span>':'<span class="badge b-acid">'+c.availableSpots+' miest</span>'}</td></tr>`;
+            // Uložiť do cache pre detail
+            window._classesCache = data;
+
+            let html = '';
+            data.forEach(c => {
+                const free = (c.capacity || 0) - (c.booked || 0);
+                const full = c.isFull || free <= 0;
+                const reserved = c.isReserved;
+                const dt = c.startTime
+                    ? new Date(c.startTime).toLocaleString('sk-SK', {weekday:'short', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})
+                    : '—';
+                const dur = c.durationMinutes ? c.durationMinutes + ' min' : '';
+
+                const statusBadge = reserved
+                    ? '<span class="badge b-acid" style="font-size:0.6rem"><i class="fas fa-check"></i> Rezervovaná</span>'
+                    : full
+                        ? '<span class="badge b-red" style="font-size:0.6rem">Plná</span>'
+                        : '<span class="badge b-cyan" style="font-size:0.6rem">' + free + ' voľných</span>';
+
+                const rowBg = reserved ? 'background:rgba(200,255,0,0.04);' : '';
+
+                html += '<div class="cl-row" onclick="selectClass(' + c.id + ')" style="' + rowBg + '">'
+                    + '<div class="cl-row-main">'
+                    + '<div class="cl-row-name">' + (c.name || '—') + '</div>'
+                    + '<div class="cl-row-meta">'
+                    + '<span><i class="fas fa-clock" style="opacity:0.5"></i> ' + dt + (dur ? ' · ' + dur : '') + '</span>'
+                    + '<span><i class="fas fa-user" style="opacity:0.5"></i> ' + (c.instructor || '—') + '</span>'
+                    + '</div>'
+                    + '</div>'
+                    + '<div class="cl-row-status">' + statusBadge + '</div>'
+                    + '</div>';
             });
-            document.getElementById('allClTable').innerHTML=html+'</tbody></table>';
-        } catch(e){document.getElementById('allClTable').innerHTML=`<div class="empty"><p>❌ ${e.message}</p></div>`;}
-    }
-    async function bookCl() {
-        const id=document.getElementById('bookId').value;
-        if(!id) return;
-        setOut('bookOut','Rezervujem...');
-        try {
-            const res=await af('/api/classes/'+id+'/book',{method:'POST'});
-            const text=await res.text();
-            let d={};
-            try { d=JSON.parse(text); } catch { d={message:text||'OK'}; }
-            if(!res.ok) throw new Error(d.message||text||'Chyba servera ('+res.status+')');
-            setOut('bookOut', d.message||'Rezervácia potvrdená ✓');
-            toast(d.status==='waiting'?'Waitlist (poz. '+d.waitlistPosition+')':'Lekcia rezervovaná!','ok');
-            loadMyClasses();
-        } catch(e){setOut('bookOut','❌ '+e.message);}
-    }
-    async function cancelCl() {
-        const id=document.getElementById('bookId').value;
-        if(!id) return;
-        setOut('bookOut','Rušim...');
-        try {
-            const res=await af('/api/classes/'+id+'/cancel',{method:'DELETE'});
-            const text=await res.text();
-            let d={};
-            try { d=JSON.parse(text); } catch { d={message:text||'OK'}; }
-            if(!res.ok) throw new Error(d.message||text||'Chyba servera ('+res.status+')');
-            setOut('bookOut', d.message||'Rezervácia zrušená ✓');
-            toast('Rezervácia zrušená','ok');
-            loadMyClasses();
-        } catch(e){setOut('bookOut','❌ '+e.message);}
+            document.getElementById('allClTable').innerHTML = html;
+        } catch(e) {
+            document.getElementById('allClTable').innerHTML = '<div class="empty" style="padding:2rem"><p>❌ ' + e.message + '</p></div>';
+        }
     }
 
-    // ===== TRAINERS =====
+    function selectClass(id) {
+        const c = (window._classesCache || []).find(x => x.id == id);
+        if (!c) return;
+
+        // Zvýrazni vybraný riadok
+        document.querySelectorAll('.cl-row').forEach(el => el.classList.remove('cl-row-selected'));
+        const rows = document.querySelectorAll('.cl-row');
+        rows.forEach(el => { if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('(' + id + ')')) el.classList.add('cl-row-selected'); });
+
+        const free = (c.capacity || 0) - (c.booked || 0);
+        const full = c.isFull || free <= 0;
+        const reserved = c.isReserved;
+        const dtStart = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK', {weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '—';
+        const dtEnd   = c.endTime   ? new Date(c.endTime).toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'}) : '';
+        const dur = c.durationMinutes ? c.durationMinutes + ' min' : '—';
+
+        const pct = c.capacity ? Math.round((c.booked / c.capacity) * 100) : 0;
+        const barColor = pct >= 90 ? 'var(--red)' : pct >= 60 ? 'var(--orange)' : 'var(--acid)';
+
+        document.getElementById('bookDetail').innerHTML =
+            '<div style="margin-bottom:1.2rem">'
+            + '<div style="font-family:var(--font-d);font-size:1.4rem;font-weight:900;letter-spacing:0.05em;margin-bottom:0.3rem">' + (c.name || '—') + '</div>'
+            + '<div style="font-size:0.82rem;color:var(--muted)">' + (c.instructor || '—') + '</div>'
+            + '</div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.2rem">'
+            + '<div><div class="fl" style="display:block">Začiatok</div><div style="font-size:0.85rem">' + dtStart + '</div></div>'
+            + '<div><div class="fl" style="display:block">Koniec</div><div style="font-size:0.85rem">' + (dtEnd ? dtEnd + ' (' + dur + ')' : dur) + '</div></div>'
+            + '<div><div class="fl" style="display:block">Miesto</div><div style="font-size:0.85rem">' + (c.location || '—') + '</div></div>'
+            + '<div><div class="fl" style="display:block">Obsadenosť</div>'
+            + '<div style="font-size:0.85rem;margin-bottom:0.3rem">' + (c.booked || 0) + ' / ' + (c.capacity || '?') + '</div>'
+            + '<div style="height:4px;background:var(--border2);border-radius:2px">'
+            + '<div style="width:' + pct + '%;height:4px;background:' + barColor + ';border-radius:2px"></div>'
+            + '</div></div>'
+            + '</div>'
+            + '<div style="display:flex;gap:0.7rem;margin-bottom:0.9rem">'
+            + (reserved
+                    ? '<button class="btn btn-red" onclick="cancelById(' + c.id + ')" style="flex:1;justify-content:center"><i class="fas fa-times"></i> Zrušiť rezerváciu</button>'
+                    : full
+                        ? '<button class="btn btn-ghost" disabled style="flex:1;justify-content:center;opacity:0.5"><i class="fas fa-ban"></i> Lekcia je plná</button>'
+                        : '<button class="btn btn-acid" onclick="bookById(' + c.id + ')" style="flex:1;justify-content:center"><i class="fas fa-plus"></i> Rezervovať</button>'
+            )
+            + '</div>'
+            + '<div id="bookOut" class="fm"></div>';
+    }
+
+    async function bookById(id) {
+        const btn = document.querySelector('#bookDetail .btn-acid');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Rezervujem...'; }
+        try {
+            const res = await af('/api/classes/' + id + '/book', {method: 'POST'});
+            const text = await res.text();
+            let d = {}; try { d = JSON.parse(text); } catch { d = {message: text || 'OK'}; }
+            if (!res.ok) throw new Error(d.message || text || 'Chyba servera (' + res.status + ')');
+            toast('Lekcia rezervovaná!', 'ok');
+            await loadAllCl();
+            selectClass(id);
+            loadMyClasses();
+        } catch(e) {
+            const out = document.getElementById('bookOut');
+            if (out) { out.textContent = '❌ ' + e.message; out.className = 'fm err'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Rezervovať'; }
+        }
+    }
+
+    async function cancelById(id) {
+        if (!confirm('Naozaj zrušiť rezerváciu?')) return;
+        try {
+            const res = await af('/api/classes/' + id + '/cancel', {method: 'DELETE'});
+            const text = await res.text();
+            let d = {}; try { d = JSON.parse(text); } catch { d = {message: text || 'OK'}; }
+            if (!res.ok) throw new Error(d.message || text || 'Chyba servera (' + res.status + ')');
+            toast('Rezervácia zrušená', 'ok');
+            await loadAllCl();
+            selectClass(id);
+            loadMyClasses();
+        } catch(e) {
+            const out = document.getElementById('bookOut');
+            if (out) { out.textContent = '❌ ' + e.message; out.className = 'fm err'; }
+        }
+    }
+
+    // Starý cancelById alias — zachovaný pre loadMyClasses tlačidlá
+    async function cancelByIdFromTable(id) { return cancelById(id); }
+
+
     async function loadTrainers() {
         try {
             const res=await af('/api/trainer/list'); const data=await res.json();
@@ -1001,8 +1100,6 @@
             setOut('statsOut',JSON.stringify(d,null,2));
         } catch(e){setOut('statsOut','❌ '+e.message+'\n(endpoint /api/stats/my bude dostupný po implementácii StatsService)');}
     }
-
-
 
     // ===== UTILS =====
     function showMsg(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='fm '+type;}

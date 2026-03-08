@@ -338,8 +338,8 @@
                             <label class="fl">Vyber profil</label>
                             <div class="user-picker" id="rolePickerWrap">
                                 <div class="picker-row">
-                                    <input class="fi" type="text" id="rolePickerSearch" placeholder="Hľadaj..." oninput="filterPicker('role')" onfocus="openPicker('role')" autocomplete="off">
-                                    <button class="btn btn-ghost btn-sm" onclick="openPicker('role')"><i class="fas fa-chevron-down"></i></button>
+                                    <input class="fi" type="text" id="rolePickerSearch" placeholder="Hľadaj..." oninput="filterPicker('role')" onfocus="openPicker('role', event)" autocomplete="off">
+                                    <button class="btn btn-ghost btn-sm" onclick="openPicker('role', event)"><i class="fas fa-chevron-down"></i></button>
                                 </div>
                                 <div class="picker-dd" id="rolePickerList"></div>
                                 <div class="sel-badge" id="roleSelectedBadge">
@@ -371,8 +371,8 @@
                             <label class="fl">Vyber profil</label>
                             <div class="user-picker" id="statusPickerWrap">
                                 <div class="picker-row">
-                                    <input class="fi" type="text" id="statusPickerSearch" placeholder="Hľadaj..." oninput="filterPicker('status')" onfocus="openPicker('status')" autocomplete="off">
-                                    <button class="btn btn-ghost btn-sm" onclick="openPicker('status')"><i class="fas fa-chevron-down"></i></button>
+                                    <input class="fi" type="text" id="statusPickerSearch" placeholder="Hľadaj..." oninput="filterPicker('status')" onfocus="openPicker('status', event)" autocomplete="off">
+                                    <button class="btn btn-ghost btn-sm" onclick="openPicker('status', event)"><i class="fas fa-chevron-down"></i></button>
                                 </div>
                                 <div class="picker-dd" id="statusPickerList"></div>
                                 <div class="sel-badge" id="statusSelectedBadge">
@@ -400,8 +400,8 @@
                         <label class="fl">1. Vyber člena</label>
                         <div class="user-picker" id="memPickerWrap">
                             <div class="picker-row">
-                                <input class="fi" type="text" id="memPickerSearch" placeholder="Hľadaj meno alebo email..." oninput="filterPicker('mem')" onfocus="openPicker('mem')" autocomplete="off">
-                                <button class="btn btn-ghost btn-sm" onclick="openPicker('mem')"><i class="fas fa-chevron-down"></i></button>
+                                <input class="fi" type="text" id="memPickerSearch" placeholder="Hľadaj meno alebo email..." oninput="filterPicker('mem')" onfocus="openPicker('mem', event)" autocomplete="off">
+                                <button class="btn btn-ghost btn-sm" onclick="openPicker('mem', event)"><i class="fas fa-chevron-down"></i></button>
                             </div>
                             <div class="picker-dd" id="memPickerList"></div>
                             <div class="sel-badge" id="memSelectedBadge">
@@ -476,8 +476,8 @@
                         <label class="fl">Tréner *</label>
                         <div class="user-picker" id="classTrainerPickerWrap">
                             <div class="picker-row">
-                                <input class="fi" type="text" id="classTrainerSearch" placeholder="Hľadaj trénera..." oninput="filterPicker('classTrainer')" onfocus="openPicker('classTrainer')" autocomplete="off">
-                                <button class="btn btn-ghost btn-sm" onclick="openPicker('classTrainer')"><i class="fas fa-chevron-down"></i></button>
+                                <input class="fi" type="text" id="classTrainerSearch" placeholder="Hľadaj trénera..." oninput="filterPicker('classTrainer')" onfocus="openPicker('classTrainer', event)" autocomplete="off">
+                                <button class="btn btn-ghost btn-sm" onclick="openPicker('classTrainer', event)"><i class="fas fa-chevron-down"></i></button>
                             </div>
                             <div class="picker-dd" id="classTrainerPickerList"></div>
                             <div class="sel-badge" id="classTrainerSelectedBadge">
@@ -560,7 +560,7 @@
         if (id==='users')          loadUsers();
         if (id==='memberships')    { loadUsers(); loadMembershipTypes(); }
         if (id==='classes-admin')  loadAdminClasses();
-        if (id==='create-class')   { loadUsers(); loadTrainersForPicker(); }
+        if (id==='create-class')   loadTrainersForPicker();
         if (id==='profile')        loadAdminProfile();
     }
 
@@ -861,25 +861,80 @@
     function buildPickerList(pid, users) {
         const el = document.getElementById(pid+'PickerList');
         if (!el) return;
-        if (!users.length) { el.innerHTML='<div class="picker-opt" style="color:var(--muted)">Žiadni užívatelia</div>'; return; }
-        el.innerHTML = users.map(u => `
-    <div class="picker-opt" onclick="selectPicker('${pid}','${u.id}')">
-      <span>${u.fullName||'—'} <span style="color:var(--muted);font-size:0.78rem">&lt;${u.email}&gt;</span></span>
-      <span>
-        <span class="po-role">${u.role||''}</span>
-        ${!u.active ? '<span class="po-frozen"> ❄</span>' : ''}
-      </span>
-    </div>`).join('');
+        el.innerHTML = '';
+
+        if (!users.length) {
+            const cacheLen = (pid==='classTrainer' ? allTrainersCache : allUsersCache).length;
+            const empty = document.createElement('div');
+            empty.className = 'picker-opt';
+            empty.style.color = 'var(--muted)';
+            empty.style.flexDirection = 'column';
+            empty.style.gap = '0.15rem';
+            empty.innerHTML = '<span>Žiadni užívatelia</span><span style="font-size:0.7rem">Cache: '+cacheLen+' záznamov</span>';
+            el.appendChild(empty);
+            return;
+        }
+
+        users.forEach(u => {
+            const row = document.createElement('div');
+            row.className = 'picker-opt';
+
+            const left = document.createElement('span');
+            const nameEl = document.createTextNode((u.fullName||'—')+' ');
+            const emailEl = document.createElement('span');
+            emailEl.style.cssText = 'color:var(--muted);font-size:0.78rem';
+            emailEl.textContent = '<'+u.email+'>';
+            left.appendChild(nameEl);
+            left.appendChild(emailEl);
+
+            const right = document.createElement('span');
+            const roleEl = document.createElement('span');
+            roleEl.className = 'po-role';
+            roleEl.textContent = u.role||'';
+            right.appendChild(roleEl);
+            if (!u.active) {
+                const ice = document.createElement('span');
+                ice.className = 'po-frozen';
+                ice.textContent = ' ❄';
+                right.appendChild(ice);
+            }
+
+            row.appendChild(left);
+            row.appendChild(right);
+
+            // Použiť addEventListener namiesto onclick — bez bubbling problémov
+            row.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                selectPicker(pid, u.id);
+            });
+
+            el.appendChild(row);
+        });
     }
 
-    function openPicker(pid) {
+    async function openPicker(pid, evt) {
+        if (evt) evt.stopPropagation();
         ['role','status','mem','classTrainer'].forEach(p => {
             if (p!==pid) { const el=document.getElementById(p+'PickerList'); if(el)el.classList.remove('open'); }
         });
         const el = document.getElementById(pid+'PickerList');
         if (!el) return;
-        const val = document.getElementById(pid+'PickerSearch').value.toLowerCase();
+
+        if (pid==='classTrainer' && !allTrainersCache.length) {
+            el.innerHTML='<div class="picker-opt" style="color:var(--muted)"><span class="spinner"></span>&nbsp; Nacitavam...</div>';
+            el.classList.add('open');
+            await loadTrainersForPicker();
+        }
+        if (pid!=='classTrainer' && !allUsersCache.length) {
+            el.innerHTML='<div class="picker-opt" style="color:var(--muted)"><span class="spinner"></span>&nbsp; Nacitavam...</div>';
+            el.classList.add('open');
+            await loadUsers();
+        }
+
+        const val = (document.getElementById(pid+'PickerSearch')||{value:''}).value.toLowerCase();
         const src = pid==='classTrainer' ? allTrainersCache : allUsersCache;
+        console.log('[Picker] openPicker', pid, '| src.length:', src.length, '| val:', val);
         buildPickerList(pid, src.filter(u=>(u.fullName||'').toLowerCase().includes(val)||(u.email||'').toLowerCase().includes(val)));
         el.classList.add('open');
     }
@@ -893,14 +948,27 @@
 
     function selectPicker(pid, userId) {
         const src = pid==='classTrainer' ? allTrainersCache : allUsersCache;
-        const u = src.find(x=>x.id===userId||x.id==userId);
-        if (!u) return;
+        const u = src.find(x=>String(x.id)===String(userId));
+        if (!u) { console.warn('[Picker] nenajdeny:', userId, 'src:', src.length); return; }
         pickerState[pid] = u;
-        document.getElementById(pid+'PickerSearch').value = '';
-        document.getElementById(pid+'PickerList').classList.remove('open');
-        document.getElementById(pid+'SelName').textContent  = u.fullName||'—';
-        document.getElementById(pid+'SelEmail').textContent = u.email||'—';
-        document.getElementById(pid+'SelectedBadge').classList.add('vis');
+        console.log('[Picker] selected:', pid, u.fullName);
+
+        const searchEl = document.getElementById(pid+'PickerSearch');
+        const listEl   = document.getElementById(pid+'PickerList');
+        const badgeEl  = document.getElementById(pid+'SelectedBadge');
+        const nameEl   = document.getElementById(pid+'SelName');
+        const emailEl  = document.getElementById(pid+'SelEmail');
+
+        console.log('[Picker] badge el:', badgeEl, 'nameEl:', nameEl);
+
+        if (searchEl) searchEl.value = '';
+        if (listEl)   listEl.classList.remove('open');
+        if (nameEl)   nameEl.textContent  = u.fullName||'—';
+        if (emailEl)  emailEl.textContent = u.email||'—';
+        if (badgeEl) {
+            badgeEl.classList.add('vis');
+            badgeEl.style.display = 'flex'; // priamy override pre istotu
+        }
     }
 
     function clearPicker(pid) {
@@ -910,17 +978,25 @@
     }
 
     document.addEventListener('click', e => {
-        if (!e.target.closest('.user-picker'))
+        // Zatvoriť picker len ak klik bol úplne mimo .user-picker
+        if (!e.target.closest('.user-picker') && !e.target.closest('.picker-dd') && !e.target.closest('.picker-opt'))
             document.querySelectorAll('.picker-dd').forEach(el=>el.classList.remove('open'));
     });
 
     async function loadTrainersForPicker() {
-        if (allTrainersCache.length) return;
         try {
             const res = await authFetch('/api/admin/profiles');
             const data = await res.json();
-            allTrainersCache = Array.isArray(data) ? data.filter(u=>u.role==='trainer') : [];
-        } catch {}
+            if (!Array.isArray(data)) { toast('API nevrátilo zoznam', 'err'); return; }
+            allUsersCache = data;
+            const trainers = data.filter(u => (u.role||'').toLowerCase() === 'trainer');
+            // Fallback: ak žiadni tréneri, ukáž všetkých
+            allTrainersCache = trainers.length > 0 ? trainers : data;
+            console.log('[Picker] profiles:', data.length, '| trainers:', trainers.length, '| cache:', allTrainersCache.length);
+        } catch(e) {
+            toast('Chyba nacitavania: '+e.message, 'err');
+            console.error('[Picker]', e);
+        }
     }
 
     // ── USERS ACTIONS ─────────────────────────────────────────────────────────────

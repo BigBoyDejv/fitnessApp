@@ -8,9 +8,10 @@ public record GymClassResponse(
         String instructor,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        int capacity,
-        int booked,
+        Integer capacity,
+        Integer booked,
         boolean isFull,
-        boolean isReservedByCurrentUser,
-        String location
+        boolean isReserved,
+        String location,
+        Integer durationMinutes     // vypočítané z startTime–endTime
 ) {}
