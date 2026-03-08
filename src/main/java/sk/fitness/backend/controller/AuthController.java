@@ -75,7 +75,7 @@ public class AuthController {
                 user.getId(),
                 user.getPhone(),
                 user.getAvatarUrl(),
-                user.isActive()
+                Boolean.TRUE.equals(user.getIsActive())
         ));
     }
 
@@ -98,7 +98,7 @@ public class AuthController {
                 user.getId(),
                 user.getPhone(),
                 user.getAvatarUrl(),
-                user.isActive()
+                Boolean.TRUE.equals(user.getIsActive())
         ));    }
 
     @GetMapping("/qr-code")
@@ -144,7 +144,7 @@ public class AuthController {
                 user.getPhone(),
                 user.getRole(),
                 user.getAvatarUrl(),
-                user.isActive(),
+                Boolean.TRUE.equals(user.getIsActive()),
                 user.getCreatedAt()
         );
 

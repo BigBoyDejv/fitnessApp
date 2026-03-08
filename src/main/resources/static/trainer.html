@@ -125,6 +125,19 @@
         .empty-state i{font-size:2.5rem;margin-bottom:1rem;display:block;}
 
         @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stat-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.week-grid{grid-template-columns:60px repeat(3,1fr)}}
+
+        /* User picker */
+        .user-picker{position:relative;}
+        .picker-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:3px;z-index:200;max-height:220px;overflow-y:auto;display:none;}
+        .picker-dropdown.open{display:block;}
+        .picker-option{padding:0.65rem 1rem;cursor:pointer;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:space-between;}
+        .picker-option:hover{background:rgba(0,212,180,0.08);color:var(--cyan);}
+        .selected-user-badge{display:none;align-items:center;gap:0.6rem;padding:0.5rem 0.8rem;background:rgba(0,212,180,0.07);border:1px solid rgba(0,212,180,0.2);border-radius:3px;margin-top:0.4rem;font-size:0.82rem;}
+        .selected-user-badge.visible{display:flex;}
+        .selected-user-badge .sub-name{font-weight:500;color:var(--cyan);}
+        .selected-user-badge .sub-email{color:var(--muted);font-size:0.75rem;}
+        .sub-clear{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;font-size:0.9rem;}
+        .sub-clear:hover{color:var(--red);}
     </style>
 </head>
 <body>
@@ -280,18 +293,45 @@
 
         <!-- CLIENTS -->
         <div class="page-section" id="page-clients">
+            <!-- Zoznam priradených cvičencov -->
             <div class="panel">
                 <div class="panel-header">
-                    <span class="panel-title">Moji klienti</span>
+                    <span class="panel-title">Moji cvičenci</span>
                     <div style="display:flex;gap:0.8rem;align-items:center">
-                        <span class="method m-blue">GET /api/trainer/clients</span>
+                        <span class="method m-get">GET /api/trainer/clients</span>
                         <button class="btn btn-ghost btn-sm" onclick="loadClients()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
                     </div>
                 </div>
                 <div class="panel-body">
-                    <div class="api-url">/api/trainer/clients</div>
-                    <div id="clientsList"><div class="empty-state"><i class="fas fa-users"></i><p>Klikni Obnoviť pre načítanie klientov</p></div></div>
+                    <div id="clientsTable"><div class="empty-state"><i class="fas fa-users"></i><p>Klikni Obnoviť</p></div></div>
                 </div>
+            </div>
+            <!-- Pridať cvičenca -->
+            <div class="panel">
+                <div class="panel-header"><span class="panel-title">Pridať cvičenca</span><span class="method m-post">POST /api/trainer/clients</span></div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="form-label">Vyber člena zo zoznamu</label>
+                        <div class="user-picker" id="addClientPickerWrap">
+                            <div style="display:flex;gap:0.5rem">
+                                <input class="form-input" type="text" id="addClientSearch" placeholder="Hľadaj meno alebo email..." oninput="filterClientPicker()" onfocus="openClientPicker()" autocomplete="off">
+                                <button class="btn btn-ghost btn-sm" onclick="openClientPicker()"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                            <div class="picker-dropdown" id="addClientPickerList"></div>
+                            <div class="selected-user-badge" id="addClientBadge">
+                                <div><div class="sub-name" id="addClientSelName">—</div><div class="sub-email" id="addClientSelEmail">—</div></div>
+                                <button class="sub-clear" onclick="clearClientPicker()"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-blue" onclick="addClient()"><i class="fas fa-user-plus"></i> Pridať cvičenca</button>
+                    <div class="form-msg" id="addClientMsg"></div>
+                </div>
+            </div>
+            <!-- Detail cvičenca -->
+            <div class="panel" id="clientDetailPanel" style="display:none">
+                <div class="panel-header"><span class="panel-title" id="clientDetailTitle">Detail cvičenca</span></div>
+                <div class="panel-body" id="clientDetailBody"></div>
             </div>
         </div>
 
@@ -666,6 +706,144 @@
         localStorage.removeItem('fp_user');
         window.location.href = 'index.html';
     }
+    // ── CLIENTS ───────────────────────────────────────────────────────────────
+    let allMembersCache = [];
+    let selectedAddClient = null;
+
+    async function loadAllMembersForPicker() {
+        if (allMembersCache.length) return;
+        try {
+            const res = await authFetch('/api/admin/users');
+            if (res.ok) {
+                const data = await res.json();
+                allMembersCache = Array.isArray(data) ? data.filter(u=>u.role==='member') : [];
+            } else {
+                // Fallback — skús načítať všetkých
+                const res2 = await authFetch('/api/trainer/available-members');
+                if (res2.ok) allMembersCache = await res2.json();
+            }
+        } catch {}
+    }
+
+    function openClientPicker() {
+        loadAllMembersForPicker().then(() => {
+            const val = document.getElementById('addClientSearch').value.toLowerCase();
+            const filtered = allMembersCache.filter(u =>
+                (u.fullName||''). toLowerCase().includes(val) || (u.email||''). toLowerCase().includes(val));
+            const el = document.getElementById('addClientPickerList');
+            if (!filtered.length) {
+                el.innerHTML = '<div class="picker-option" style="color:var(--muted)">Žiadni členovia</div>';
+            } else {
+                el.innerHTML = filtered.map(u => `
+                    <div class="picker-option" onclick="selectAddClient('${u.id}')">
+                        <span>${u.fullName||'—'} <span style="color:var(--muted);font-size:0.8rem">&lt;${u.email}&gt;</span></span>
+                    </div>`).join('');
+            }
+            el.classList.add('open');
+        });
+    }
+
+    function filterClientPicker() {
+        openClientPicker();
+    }
+
+    function selectAddClient(uid) {
+        const u = allMembersCache.find(x => x.id === uid);
+        if (!u) return;
+        selectedAddClient = u;
+        document.getElementById('addClientSearch').value = '';
+        document.getElementById('addClientPickerList').classList.remove('open');
+        document.getElementById('addClientSelName').textContent = u.fullName || '—';
+        document.getElementById('addClientSelEmail').textContent = u.email || '—';
+        document.getElementById('addClientBadge').classList.add('visible');
+    }
+
+    function clearClientPicker() {
+        selectedAddClient = null;
+        document.getElementById('addClientSearch').value = '';
+        document.getElementById('addClientBadge').classList.remove('visible');
+    }
+
+    async function loadClients() {
+        document.getElementById('clientsTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/trainer/clients');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            if (!Array.isArray(data) || !data.length) {
+                document.getElementById('clientsTable').innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni priradení cvičenci</p></div>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr><th>Meno</th><th>Email</th><th>Telefón</th><th>Akcia</th></tr></thead><tbody>';
+            data.forEach(c => {
+                html += `<tr>
+                    <td><b>${c.fullName||'—'}</b></td>
+                    <td style="color:var(--muted)">${c.email||'—'}</td>
+                    <td>${c.phone||'—'}</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" onclick="showClientDetail('${c.id}')"><i class="fas fa-eye"></i> Detail</button>
+                        <button class="btn btn-red btn-sm" onclick="removeClient('${c.id}')" style="margin-left:0.4rem"><i class="fas fa-user-minus"></i></button>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('clientsTable').innerHTML = html;
+        } catch(e) {
+            document.getElementById('clientsTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+        }
+    }
+
+    async function addClient() {
+        if (!selectedAddClient) return showMsg('addClientMsg', 'Vyber cvičenca zo zoznamu', 'err');
+        try {
+            const res = await authFetch('/api/trainer/clients', {
+                method: 'POST',
+                body: JSON.stringify({memberId: selectedAddClient.id})
+            });
+            let d; try{d=await res.json()}catch{d={}}
+            if (!res.ok) throw new Error(d.message||'Chyba servera');
+            showMsg('addClientMsg', `${selectedAddClient.fullName} pridaný!`, 'ok');
+            toast('Cvičenec pridaný!', 'ok');
+            clearClientPicker();
+            loadClients();
+        } catch(e) { showMsg('addClientMsg', e.message, 'err'); }
+    }
+
+    async function removeClient(memberId) {
+        if (!confirm('Naozaj odstrániť cvičenca?')) return;
+        try {
+            const res = await authFetch('/api/trainer/clients/'+memberId, {method:'DELETE'});
+            if (res.ok) { toast('Cvičenec odstránený', 'ok'); loadClients(); }
+            else toast('Chyba', 'err');
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    async function showClientDetail(memberId) {
+        try {
+            const res = await authFetch('/api/users/'+memberId);
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
+            const panel = document.getElementById('clientDetailPanel');
+            document.getElementById('clientDetailTitle').textContent = d.fullName || 'Detail cvičenca';
+            document.getElementById('clientDetailBody').innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;font-size:0.87rem">
+                    <div><div class="form-label">Meno</div>${d.fullName||'—'}</div>
+                    <div><div class="form-label">Email</div>${d.email||'—'}</div>
+                    <div><div class="form-label">Telefón</div>${d.phone||'—'}</div>
+                    <div><div class="form-label">Rola</div><span class="badge b-cyan">${d.role||'—'}</span></div>
+                    <div><div class="form-label">Status</div>${d.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-grey">Neaktívny</span>'}</div>
+                    <div><div class="form-label">Registrovaný</div>${d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—'}</div>
+                </div>`;
+            panel.style.display = 'block';
+            panel.scrollIntoView({behavior:'smooth'});
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#addClientPickerWrap')) {
+            document.getElementById('addClientPickerList')?.classList.remove('open');
+        }
+    });
 </script>
 </body>
 </html>

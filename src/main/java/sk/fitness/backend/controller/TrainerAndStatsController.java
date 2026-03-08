@@ -100,6 +100,93 @@ public class TrainerAndStatsController {
 
     // ── Pomocné ───────────────────────────────────────────────────────────────
 
+
+    // ── GET /api/trainer/clients ──────────────────────────────────────────────
+    // Vracia zoznam členov priradených k trénera
+    @GetMapping("/api/trainer/clients")
+    public ResponseEntity<?> getMyClients(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User trainer = resolveUser(userDetails);
+        if (trainer == null) return ResponseEntity.status(401).build();
+
+        List<Map<String, Object>> clients = userRepository.findByTrainerId(trainer.getId())
+                .stream()
+                .map(u -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id",       u.getId().toString());
+                    m.put("fullName", u.getFullName());
+                    m.put("email",    u.getEmail());
+                    m.put("phone",    u.getPhone());
+                    m.put("active",   Boolean.TRUE.equals(u.getIsActive()));
+                    return m;
+                })
+                .toList();
+        return ResponseEntity.ok(clients);
+    }
+
+    // ── POST /api/trainer/clients ─────────────────────────────────────────────
+    // Priraď člena k trénera
+    // Body: { memberId: "uuid" }
+    @PostMapping("/api/trainer/clients")
+    public ResponseEntity<?> addClient(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User trainer = resolveUser(userDetails);
+        if (trainer == null) return ResponseEntity.status(401).build();
+
+        String memberId = body.get("memberId");
+        if (memberId == null) return ResponseEntity.badRequest().body(Map.of("message", "Chýba memberId"));
+
+        User member = userRepository.findByIdEquals(UUID.fromString(memberId)).orElse(null);
+        if (member == null) return ResponseEntity.badRequest().body(Map.of("message", "Člen nenájdený"));
+
+        member.setTrainerId(trainer.getId());
+        userRepository.save(member);
+        return ResponseEntity.ok(Map.of("message", "Cvičenec priradený", "memberId", memberId));
+    }
+
+    // ── DELETE /api/trainer/clients/{memberId} ────────────────────────────────
+    // Odober člena od trénera
+    @DeleteMapping("/api/trainer/clients/{memberId}")
+    public ResponseEntity<?> removeClient(
+            @PathVariable String memberId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User trainer = resolveUser(userDetails);
+        if (trainer == null) return ResponseEntity.status(401).build();
+
+        User member = userRepository.findByIdEquals(UUID.fromString(memberId)).orElse(null);
+        if (member == null) return ResponseEntity.notFound().build();
+
+        if (!trainer.getId().equals(member.getTrainerId()))
+            return ResponseEntity.status(403).body(Map.of("message", "Tento člen nie je tvoj cvičenec"));
+
+        member.setTrainerId(null);
+        userRepository.save(member);
+        return ResponseEntity.ok(Map.of("message", "Cvičenec odstránený"));
+    }
+
+    // ── GET /api/trainer/available-members ───────────────────────────────────
+    // Všetci členovia (pre picker) — bez admin oprávnení
+    @GetMapping("/api/trainer/available-members")
+    public ResponseEntity<?> getAvailableMembers(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User trainer = resolveUser(userDetails);
+        if (trainer == null) return ResponseEntity.status(401).build();
+
+        List<Map<String, Object>> members = userRepository.findByRole("member")
+                .stream()
+                .map(u -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id",       u.getId().toString());
+                    m.put("fullName", u.getFullName());
+                    m.put("email",    u.getEmail());
+                    m.put("role",     u.getRole());
+                    return m;
+                })
+                .toList();
+        return ResponseEntity.ok(members);
+    }
+
     private User resolveUser(UserDetails userDetails) {
         if (userDetails == null) return null;
         return userRepository.findByEmail(userDetails.getUsername()).orElse(null);

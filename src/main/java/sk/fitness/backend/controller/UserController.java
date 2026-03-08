@@ -151,7 +151,7 @@ public class UserController {
         m.put("avatarUrl",      u.getAvatarUrl());
         m.put("role",           u.getRole());
         m.put("specialization", u.getSpecialization());
-        m.put("active",         u.isActive());
+        m.put("active",         Boolean.TRUE.equals(u.getIsActive()));
         m.put("createdAt",      u.getCreatedAt() != null ? u.getCreatedAt().toString() : null);
         m.put("updatedAt",      u.getUpdatedAt() != null ? u.getUpdatedAt().toString() : null);
         return m;

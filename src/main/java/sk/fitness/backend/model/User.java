@@ -2,6 +2,8 @@ package sk.fitness.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,25 +13,39 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password_hash", nullable = false)
     private String password;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "phone")
     private String phone;
 
-    @Column(nullable = false)
+    @Column(name = "role")
     private String role = "member";
 
     @Column(name = "avatar_url")
     private String avatarUrl;
+
+    @Column(name = "specialization")
+    private String specialization;
+
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+
+    // UUID trénera ku ktorému je priradený tento člen
+    // NULL = člen nie je priradený žiadnemu trénera
+    @Column(name = "trainer_id")
+    private UUID trainerId;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -37,20 +53,14 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "is_active")
-    private boolean isActive = true;
-
-    @Column(name = "specialization")
-    private String specialization;
-
     @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

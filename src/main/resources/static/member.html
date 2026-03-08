@@ -285,6 +285,7 @@
                         <div class="api-out" id="ov-meOut">Klikni načítať...</div>
                     </div>
                 </div>
+
                 <div class="panel">
                     <div class="ph"><span class="pt">Moje lekcie</span><span class="method m-get">GET /api/classes/my</span></div>
                     <div class="pb">
@@ -640,6 +641,11 @@
             setOut('ov-meOut', JSON.stringify(d,null,2));
         } catch(e){setOut('ov-meOut','❌ '+e.message);}
     }
+
+
+
+
+
     async function loadMyClassesOv() {
         setOut('ov-clOut','Načítavam...');
         try {
