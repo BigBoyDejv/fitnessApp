@@ -31,7 +31,7 @@ public class AdminController {
         this.membershipTypeRepository = membershipTypeRepository;
     }
 
-    // ── GET /api/admin/users ── zoznam všetkých užívateľov ───────────────────
+
     @GetMapping("/profiles")
     public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal UserDetails ud) {
         if (!isAdmin(ud)) return ResponseEntity.status(403).build();
@@ -40,7 +40,7 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
-    // ── PUT /api/admin/users/{id}/status ── aktivovať / deaktivovať ──────────
+
     @PutMapping("/profiles/{id}/status")
     public ResponseEntity<?> setUserStatus(
             @PathVariable String id,
@@ -56,7 +56,7 @@ public class AdminController {
         return ResponseEntity.ok(userDto(user));
     }
 
-    // ── GET /api/admin/memberships/user/{userId} ── členstvo konkrétneho člena
+
     @GetMapping("/memberships/user/{userId}")
     public ResponseEntity<?> getUserMembership(
             @PathVariable String userId,
@@ -69,8 +69,6 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ── POST /api/admin/memberships/assign ── priradiť / obnoviť predplatné ──
-    // Body: { userId, membershipTypeId, startDate (optional) }
     @PostMapping("/memberships/assign")
     public ResponseEntity<?> assignMembership(
             @RequestBody Map<String, Object> body,
@@ -90,7 +88,7 @@ public class AdminController {
         MembershipType type = membershipTypeRepository.findById(typeId).orElse(null);
         if (type == null) return ResponseEntity.badRequest().body(Map.of("message", "Typ členstva nenájdený"));
 
-        // Zruš existujúce aktívne členstvo
+
         membershipRepository.findByUserIdAndStatus(user.getId(), Membership.MembershipStatus.active)
                 .ifPresent(old -> {
                     old.setStatus(Membership.MembershipStatus.cancelled);
@@ -112,7 +110,7 @@ public class AdminController {
         return ResponseEntity.ok(membershipDto(m));
     }
 
-    // ── PUT /api/admin/memberships/cancel/{userId} ── zrušiť predplatné ──────
+
     @PutMapping("/memberships/cancel/{userId}")
     public ResponseEntity<?> cancelMembership(
             @PathVariable String userId,
@@ -130,7 +128,7 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("message", "Predplatné zrušené", "userId", userId));
     }
 
-    // ── Pomocné ───────────────────────────────────────────────────────────────
+
 
     private boolean isAdmin(UserDetails ud) {
         if (ud == null) return false;

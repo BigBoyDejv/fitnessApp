@@ -42,8 +42,6 @@ public class User {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
-    // UUID trénera ku ktorému je priradený tento člen
-    // NULL = člen nie je priradený žiadnemu trénera
     @Column(name = "trainer_id")
     private UUID trainerId;
 

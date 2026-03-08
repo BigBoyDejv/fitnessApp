@@ -5,217 +5,352 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>FITNESS PRO — Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <style>
-        :root{--acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--bg:#0A0A0A;--surface:#111111;--surface2:#1A1A1A;--border:#222222;--text:#F0F0F0;--muted:#666666;--font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;}
+        :root{
+            --acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;
+            --bg:#070708;--surface:#0F0F11;--surface2:#171719;--surface3:#1E1E21;
+            --border:#252528;--border2:#2E2E32;--text:#F2F2F7;--muted:#6E6E73;--muted2:#48484D;
+            --font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;
+            --frozen:#4FC3F7;--frozen-bg:rgba(79,195,247,0.08);--frozen-border:rgba(79,195,247,0.25);
+        }
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;}
-        h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.02em;text-transform:uppercase;}
-        ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--red);}
-        .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
-        .sidebar-logo{padding:1.8rem 1.5rem;border-bottom:1px solid var(--border);}
-        .sidebar-logo .logo{font-family:var(--font-d);font-size:1.7rem;font-weight:900;color:var(--red);letter-spacing:0.12em;}
-        .sidebar-logo .role-tag{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(255,45,85,0.12);color:var(--red);border:1px solid rgba(255,45,85,0.25);padding:0.18rem 0.7rem;border-radius:2px;margin-top:0.5rem;}
-        .sidebar-user{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.9rem;}
-        .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--orange));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:#fff;flex-shrink:0;}
-        .user-info .name{font-size:0.88rem;font-weight:500;}
-        .user-info .email{font-size:0.75rem;color:var(--muted);}
-        .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
-        .nav-section{padding:0.5rem 1.5rem 0.3rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
-        .nav-item{display:flex;align-items:center;gap:0.9rem;padding:0.75rem 1.5rem;color:var(--muted);font-size:0.88rem;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent;text-decoration:none;}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.03em;text-transform:uppercase;}
+        ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--border2);}
+
+        /* ── SIDEBAR ── */
+        .sidebar{width:256px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+        .sb-logo{padding:1.6rem 1.5rem 1.2rem;border-bottom:1px solid var(--border);}
+        .sb-logo .logo{font-family:var(--font-d);font-size:1.6rem;font-weight:900;color:var(--red);letter-spacing:0.15em;display:flex;align-items:center;gap:0.5rem;}
+        .sb-logo .logo span{color:var(--text);}
+        .sb-logo .role-tag{display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.2);padding:0.2rem 0.7rem;border-radius:2px;margin-top:0.6rem;}
+        .sb-user{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.85rem;}
+        .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--orange));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.2rem;font-weight:900;color:#fff;flex-shrink:0;}
+        .sb-user .name{font-size:0.85rem;font-weight:500;}
+        .sb-user .email{font-size:0.72rem;color:var(--muted);}
+        .sb-nav{flex:1;padding:0.8rem 0;overflow-y:auto;}
+        .nav-section{padding:0.8rem 1.5rem 0.25rem;font-family:var(--font-d);font-size:0.6rem;font-weight:700;letter-spacing:0.25em;color:var(--muted2);}
+        .nav-item{display:flex;align-items:center;gap:0.85rem;padding:0.65rem 1.5rem;color:var(--muted);font-size:0.85rem;cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;text-decoration:none;}
         .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
-        .nav-item.active{color:var(--red);border-left-color:var(--red);background:rgba(255,45,85,0.05);}
-        .nav-item i{width:16px;text-align:center;font-size:0.9rem;}
-        .sidebar-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border);}
-        .logout-btn{display:flex;align-items:center;gap:0.8rem;color:var(--muted);font-size:0.85rem;cursor:pointer;transition:color 0.2s;background:none;border:none;width:100%;text-align:left;font-family:var(--font-b);}
+        .nav-item.active{color:var(--text);border-left-color:var(--red);background:rgba(255,45,85,0.06);}
+        .nav-item i{width:15px;text-align:center;font-size:0.85rem;opacity:0.7;}
+        .nav-item.active i{opacity:1;color:var(--red);}
+        .sb-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);}
+        .logout-btn{display:flex;align-items:center;gap:0.75rem;color:var(--muted);font-size:0.82rem;cursor:pointer;transition:color 0.15s;background:none;border:none;width:100%;font-family:var(--font-b);}
         .logout-btn:hover{color:var(--red);}
-        .main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
-        .topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;position:sticky;top:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);z-index:50;}
-        .page-title{font-size:1.4rem;font-weight:800;letter-spacing:0.05em;}
-        .topbar-right{display:flex;align-items:center;gap:1rem;}
-        .admin-badge{background:rgba(255,45,85,0.12);color:var(--red);border:1px solid rgba(255,45,85,0.25);font-family:var(--font-d);font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.2rem 0.8rem;border-radius:2px;}
-        .content{padding:2.5rem;flex:1;}
-        .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
-        .panel-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
-        .panel-title{font-size:1.1rem;font-weight:800;letter-spacing:0.05em;}
-        .panel-body{padding:1.5rem;}
-        .method{font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;padding:0.2rem 0.6rem;border-radius:2px;}
-        .m-get{background:rgba(0,255,209,0.12);color:var(--acid2);}
-        .m-post{background:rgba(200,255,0,0.12);color:var(--acid);}
-        .m-del{background:rgba(255,45,85,0.12);color:var(--red);}
-        .m-put{background:rgba(255,149,0,0.12);color:var(--orange);}
-        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
-        .stat-card{background:var(--surface);padding:1.5rem 1.2rem;}
-        .stat-card-icon{font-size:1.2rem;color:var(--red);margin-bottom:0.7rem;}
-        .stat-card-val{font-family:var(--font-d);font-size:2.5rem;font-weight:900;line-height:1;}
-        .stat-card-lbl{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
-        .stat-card.accent .stat-card-icon{color:var(--acid);}
-        .stat-card.accent .stat-card-val{color:var(--acid);}
-        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
-        .btn{font-family:var(--font-d);font-size:0.9rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.55rem 1.4rem;border:2px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.4rem;}
+
+        /* ── MAIN ── */
+        .main{margin-left:256px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+        .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;background:rgba(7,7,8,0.92);backdrop-filter:blur(16px);z-index:50;}
+        .page-title{font-size:1.25rem;font-weight:800;letter-spacing:0.06em;}
+        .topbar-right{display:flex;align-items:center;gap:0.75rem;}
+        .admin-badge{background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.2);font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.2rem 0.75rem;border-radius:2px;}
+        .content{padding:2rem;flex:1;}
+
+        /* ── KPI GRID ── */
+        .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .kpi-card{background:var(--surface);padding:1.3rem 1.2rem;position:relative;overflow:hidden;}
+        .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--border2));}
+        .kpi-icon{font-size:1rem;color:var(--kpi-color,var(--muted));margin-bottom:0.6rem;opacity:0.8;}
+        .kpi-val{font-family:var(--font-d);font-size:2.2rem;font-weight:900;line-height:1;color:var(--kpi-color,var(--text));}
+        .kpi-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.25rem;}
+        .kpi-sub{font-size:0.72rem;color:var(--muted);margin-top:0.15rem;}
+
+        /* ── PANELS ── */
+        .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.5rem;}
+        .ph{padding:1rem 1.4rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
+        .pt{font-size:1rem;font-weight:800;letter-spacing:0.05em;}
+        .pb{padding:1.4rem;}
+        .method{font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;padding:0.18rem 0.55rem;border-radius:2px;}
+        .m-get{background:rgba(0,255,209,0.1);color:var(--acid2);}
+        .m-post{background:rgba(200,255,0,0.1);color:var(--acid);}
+        .m-del{background:rgba(255,45,85,0.1);color:var(--red);}
+        .m-put{background:rgba(255,149,0,0.1);color:var(--orange);}
+
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+        .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;}
+
+        /* ── BUTTONS ── */
+        .btn{font-family:var(--font-d);font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.5rem 1.2rem;border:1.5px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:0.4rem;}
         .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
         .btn-acid:hover{background:transparent;color:var(--acid);}
         .btn-red{background:var(--red);color:#fff;border-color:var(--red);}
         .btn-red:hover{background:transparent;color:var(--red);}
-        .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+        .btn-ghost{background:transparent;color:var(--text);border-color:var(--border2);}
         .btn-ghost:hover{border-color:var(--red);color:var(--red);}
         .btn-orange{background:transparent;color:var(--orange);border-color:var(--orange);}
         .btn-orange:hover{background:var(--orange);color:#000;}
         .btn-cyan{background:transparent;color:var(--acid2);border-color:var(--acid2);}
         .btn-cyan:hover{background:var(--acid2);color:#000;}
-        .btn-sm{font-size:0.75rem;padding:0.38rem 0.9rem;}
+        .btn-blue{background:transparent;color:var(--blue);border-color:var(--blue);}
+        .btn-blue:hover{background:var(--blue);color:#fff;}
+        .btn-frozen{background:var(--frozen-bg);color:var(--frozen);border-color:var(--frozen-border);}
+        .btn-frozen:hover{background:var(--frozen);color:#000;}
+        .btn-sm{font-size:0.72rem;padding:0.32rem 0.8rem;}
         .btn-block{width:100%;justify-content:center;}
-        .form-group{margin-bottom:1rem;}
-        .form-label{display:block;font-size:0.68rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;}
-        .form-input{width:100%;padding:0.7rem 0.9rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.88rem;transition:border-color 0.2s;}
-        .form-input:focus{outline:none;border-color:var(--red);}
-        select.form-input option{background:var(--surface2);}
-        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
-        .form-msg{margin-top:0.7rem;padding:0.6rem 0.8rem;border-radius:3px;font-size:0.8rem;display:none;}
-        .form-msg.err{background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.3);display:block;}
-        .form-msg.ok{background:rgba(200,255,0,0.08);color:var(--acid);border:1px solid rgba(200,255,0,0.2);display:block;}
-        .data-table{width:100%;border-collapse:collapse;}
-        .data-table th{font-family:var(--font-d);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.8rem 1rem;text-align:left;border-bottom:1px solid var(--border);}
-        .data-table td{padding:0.9rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.87rem;vertical-align:middle;}
-        .data-table tr:hover td{background:var(--surface2);}
-        .badge{display:inline-block;font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.6rem;border-radius:2px;}
-        .b-acid{background:rgba(200,255,0,0.12);color:var(--acid);}
-        .b-cyan{background:rgba(0,255,209,0.12);color:var(--acid2);}
-        .b-red{background:rgba(255,45,85,0.12);color:var(--red);}
-        .b-orange{background:rgba(255,149,0,0.12);color:var(--orange);}
-        .b-grey{background:rgba(255,255,255,0.07);color:var(--muted);}
+
+        /* ── FORMS ── */
+        .fg{margin-bottom:1rem;}
+        .fl{display:block;font-size:0.65rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem;}
+        .fi{width:100%;padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.85rem;transition:border-color 0.15s;}
+        .fi:focus{outline:none;border-color:var(--red);}
+        select.fi option{background:var(--surface2);}
+        .fr{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+        .fm{margin-top:0.65rem;padding:0.55rem 0.8rem;border-radius:3px;font-size:0.78rem;display:none;}
+        .fm.err{background:rgba(255,45,85,0.08);color:var(--red);border:1px solid rgba(255,45,85,0.2);display:block;}
+        .fm.ok{background:rgba(200,255,0,0.07);color:var(--acid);border:1px solid rgba(200,255,0,0.18);display:block;}
+
+        /* ── TABLE ── */
+        .dt{width:100%;border-collapse:collapse;}
+        .dt th{font-family:var(--font-d);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.75rem 0.9rem;text-align:left;border-bottom:1px solid var(--border);}
+        .dt td{padding:0.8rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.84rem;vertical-align:middle;}
+        .dt tr:hover td{background:var(--surface2);}
+        .dt tr.frozen-row td{background:var(--frozen-bg)!important;}
+        .dt tr.frozen-row{opacity:0.75;}
+
+        /* ── BADGE ── */
+        .badge{display:inline-flex;align-items:center;gap:0.3rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.55rem;border-radius:2px;}
+        .b-acid{background:rgba(200,255,0,0.1);color:var(--acid);}
+        .b-cyan{background:rgba(0,255,209,0.1);color:var(--acid2);}
+        .b-red{background:rgba(255,45,85,0.1);color:var(--red);}
+        .b-orange{background:rgba(255,149,0,0.1);color:var(--orange);}
+        .b-grey{background:rgba(255,255,255,0.06);color:var(--muted);}
+        .b-frozen{background:var(--frozen-bg);color:var(--frozen);border:1px solid var(--frozen-border);}
+        .b-blue{background:rgba(10,132,255,0.1);color:var(--blue);}
+
+        /* ── PICKER ── */
+        .user-picker{position:relative;}
+        .picker-row{display:flex;align-items:center;gap:0.5rem;}
+        .picker-row .fi{flex:1;}
+        .picker-dd{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:3px;z-index:200;max-height:200px;overflow-y:auto;display:none;margin-top:2px;}
+        .picker-dd.open{display:block;}
+        .picker-opt{padding:0.6rem 0.9rem;cursor:pointer;font-size:0.83rem;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}
+        .picker-opt:hover{background:rgba(255,45,85,0.07);color:var(--red);}
+        .picker-opt .po-role{font-family:var(--font-d);font-size:0.62rem;color:var(--muted);}
+        .picker-opt .po-frozen{font-size:0.65rem;color:var(--frozen);}
+        .sel-badge{display:none;align-items:center;gap:0.6rem;padding:0.45rem 0.8rem;background:rgba(200,255,0,0.06);border:1px solid rgba(200,255,0,0.15);border-radius:3px;margin-top:0.35rem;font-size:0.8rem;}
+        .sel-badge.vis{display:flex;}
+        .sel-badge .sbn{font-weight:500;color:var(--acid);}
+        .sel-badge .sbe{color:var(--muted);font-size:0.72rem;}
+        .sel-clear{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;font-size:0.85rem;}
+        .sel-clear:hover{color:var(--red);}
+
+        /* ── MISC ── */
         .page-section{display:none;}
         .page-section.active{display:block;}
-        .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,45,85,0.3);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;}
+        .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,45,85,0.25);border-top-color:var(--red);border-radius:50%;animation:spin 0.65s linear infinite;}
         @keyframes spin{to{transform:rotate(360deg);}}
-        .toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.85rem 1.3rem;font-size:0.85rem;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:280px;display:flex;align-items:center;gap:0.6rem;}
+        .toast{position:fixed;bottom:1.8rem;right:1.8rem;z-index:9999;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:0.75rem 1.1rem;font-size:0.83rem;transform:translateY(70px);opacity:0;transition:all 0.28s;max-width:260px;display:flex;align-items:center;gap:0.55rem;}
         .toast.show{transform:translateY(0);opacity:1;}
-        .toast.t-ok{border-color:var(--acid);color:var(--acid);}
-        .toast.t-err{border-color:var(--red);color:var(--red);}
-        .empty-state{text-align:center;padding:3rem;color:var(--muted);}
-        .empty-state i{font-size:2.5rem;margin-bottom:1rem;display:block;}
-        .search-bar{display:flex;gap:0.8rem;margin-bottom:1.2rem;}
-        .search-bar .form-input{flex:1;}
-        /* User picker — vyberací box s vyhľadávaním */
-        .user-picker{position:relative;}
-        .user-picker-input{display:flex;align-items:center;gap:0.5rem;}
-        .user-picker-input .form-input{flex:1;}
-        .picker-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:3px;z-index:200;max-height:220px;overflow-y:auto;display:none;}
-        .picker-dropdown.open{display:block;}
-        .picker-option{padding:0.65rem 1rem;cursor:pointer;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:space-between;}
-        .picker-option:hover{background:rgba(255,45,85,0.08);color:var(--red);}
-        .picker-option .po-role{font-family:var(--font-d);font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);}
-        .selected-user-badge{display:none;align-items:center;gap:0.6rem;padding:0.5rem 0.8rem;background:rgba(200,255,0,0.07);border:1px solid rgba(200,255,0,0.2);border-radius:3px;margin-top:0.4rem;font-size:0.82rem;}
-        .selected-user-badge.visible{display:flex;}
-        .selected-user-badge .sub-name{font-weight:500;color:var(--acid);}
-        .selected-user-badge .sub-email{color:var(--muted);font-size:0.75rem;}
-        .sub-clear{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;font-size:0.9rem;}
-        .sub-clear:hover{color:var(--red);}
-        @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stat-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
+        .toast.t-ok{border-color:rgba(200,255,0,0.3);color:var(--acid);}
+        .toast.t-err{border-color:rgba(255,45,85,0.3);color:var(--red);}
+        .empty-state{text-align:center;padding:2.5rem;color:var(--muted);}
+        .empty-state i{font-size:2rem;margin-bottom:0.8rem;display:block;opacity:0.4;}
+        .search-bar{display:flex;gap:0.7rem;margin-bottom:1rem;}
+        .search-bar .fi{flex:1;}
+
+        /* frozen warning banner */
+        .frozen-banner{background:var(--frozen-bg);border:1px solid var(--frozen-border);border-radius:4px;padding:0.6rem 1rem;font-size:0.8rem;color:var(--frozen);display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;}
+
+        /* revenue chart bars */
+        .rev-chart{display:flex;align-items:flex-end;gap:6px;height:60px;margin:0.8rem 0 0.3rem;}
+        .rev-bar{flex:1;border-radius:2px 2px 0 0;transition:opacity 0.2s;cursor:pointer;position:relative;}
+        .rev-bar:hover{opacity:0.75;}
+        .rev-bar .rev-tip{display:none;position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border2);padding:0.25rem 0.5rem;border-radius:2px;font-size:0.7rem;white-space:nowrap;color:var(--text);}
+        .rev-bar:hover .rev-tip{display:block;}
+        .rev-labels{display:flex;justify-content:space-between;}
+        .rev-labels span{font-size:0.65rem;color:var(--muted);}
+
+        /* user detail drawer */
+        .drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;backdrop-filter:blur(4px);}
+        .drawer-overlay.open{display:block;}
+        .drawer{position:fixed;right:0;top:0;bottom:0;width:420px;background:var(--surface);border-left:1px solid var(--border);z-index:301;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
+        .drawer.open{transform:translateX(0);}
+        .drawer-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .drawer-head h3{font-size:1.1rem;}
+        .drawer-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;}
+        .drawer-close:hover{color:var(--red);}
+        .drawer-body{flex:1;overflow-y:auto;padding:1.5rem;}
+        .drawer-section{margin-bottom:1.5rem;}
+        .drawer-section-title{font-family:var(--font-d);font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:0.7rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);}
+        .drow{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.5rem;}
+        .dfield{font-size:0.83rem;}
+        .dfield .dk{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.15rem;}
+        .drawer-actions{padding:1.2rem 1.5rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:0.6rem;}
+
+        @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+        @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.grid-2,.grid-3{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
-<aside class="sidebar">
-    <div class="sidebar-logo">
-        <div class="logo">FITNESS PRO</div>
-        <div class="role-tag"><i class="fas fa-shield-alt"></i> Admin</div>
+
+<!-- USER DETAIL DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="userDrawer">
+    <div class="drawer-head">
+        <h3 id="drawerTitle">Detail profilu</h3>
+        <button class="drawer-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
     </div>
-    <div class="sidebar-user">
+    <div class="drawer-body" id="drawerBody">
+        <div class="empty-state"><span class="spinner"></span></div>
+    </div>
+    <div class="drawer-actions" id="drawerActions"></div>
+</div>
+
+<aside class="sidebar">
+    <div class="sb-logo">
+        <div class="logo">FITNESS<span>PRO</span></div>
+        <div class="role-tag"><i class="fas fa-shield-alt"></i> Admin panel</div>
+    </div>
+    <div class="sb-user">
         <div class="avatar" id="sideAvatar">A</div>
-        <div class="user-info">
+        <div>
             <div class="name" id="sideName">Admin</div>
             <div class="email" id="sideEmail">—</div>
         </div>
     </div>
-    <nav class="sidebar-nav">
+    <nav class="sb-nav">
         <div class="nav-section">Prehľad</div>
         <a class="nav-item active" onclick="showPage('overview')" href="#"><i class="fas fa-chart-line"></i> Dashboard</a>
         <div class="nav-section">Správa</div>
-        <a class="nav-item" onclick="showPage('users')" href="#"><i class="fas fa-users"></i> Užívatelia</a>
+        <a class="nav-item" onclick="showPage('users')" href="#"><i class="fas fa-users"></i> Profily</a>
         <a class="nav-item" onclick="showPage('memberships')" href="#"><i class="fas fa-id-card"></i> Predplatné</a>
         <a class="nav-item" onclick="showPage('classes-admin')" href="#"><i class="fas fa-calendar-alt"></i> Lekcie</a>
         <a class="nav-item" onclick="showPage('create-class')" href="#"><i class="fas fa-plus-circle"></i> Nová lekcia</a>
         <div class="nav-section">Nastavenia</div>
         <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user-cog"></i> Môj profil</a>
     </nav>
-    <div class="sidebar-footer">
+    <div class="sb-footer">
         <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Odhlásiť sa</button>
     </div>
 </aside>
+
 <main class="main">
     <div class="topbar">
         <div class="page-title" id="topbarTitle">Dashboard</div>
         <div class="topbar-right">
-            <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin panel</span>
+            <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin</span>
         </div>
     </div>
     <div class="content">
 
-        <!-- OVERVIEW -->
+        <!-- ═══ OVERVIEW ═══ -->
         <div class="page-section active" id="page-overview">
-            <div class="stat-row">
-                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-users"></i></div><div class="stat-card-val" id="stat-users">—</div><div class="stat-card-lbl">Celkovo užívateľov</div></div>
-                <div class="stat-card accent"><div class="stat-card-icon"><i class="fas fa-user-check"></i></div><div class="stat-card-val" id="stat-active-users">—</div><div class="stat-card-lbl">Aktívni členovia</div></div>
-                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-calendar-check"></i></div><div class="stat-card-val" id="stat-classes">—</div><div class="stat-card-lbl">Lekcie celkovo</div></div>
-                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-chalkboard-teacher"></i></div><div class="stat-card-val" id="stat-trainers">—</div><div class="stat-card-lbl">Tréneri</div></div>
+            <div class="kpi-grid">
+                <div class="kpi-card" style="--kpi-color:var(--acid2)">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div class="kpi-val" id="kpi-total">—</div>
+                    <div class="kpi-lbl">Celkom profilov</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color:var(--acid)">
+                    <div class="kpi-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="kpi-val" id="kpi-memberships">—</div>
+                    <div class="kpi-lbl">Aktívne permanentky</div>
+                    <div class="kpi-sub" id="kpi-mem-sub"></div>
+                </div>
+                <div class="kpi-card" style="--kpi-color:var(--orange)">
+                    <div class="kpi-icon"><i class="fas fa-euro-sign"></i></div>
+                    <div class="kpi-val" id="kpi-revenue">—</div>
+                    <div class="kpi-lbl">Obrat tento mesiac</div>
+                    <div class="kpi-sub" id="kpi-rev-sub"></div>
+                </div>
+                <div class="kpi-card" style="--kpi-color:var(--red)">
+                    <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="kpi-val" id="kpi-classes">—</div>
+                    <div class="kpi-lbl">Lekcie celkovo</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color:var(--frozen)">
+                    <div class="kpi-icon"><i class="fas fa-snowflake"></i></div>
+                    <div class="kpi-val" id="kpi-frozen">—</div>
+                    <div class="kpi-lbl">Zmrazené účty</div>
+                </div>
             </div>
+
+            <div class="grid-2">
+                <!-- Revenue chart -->
+                <div class="panel">
+                    <div class="ph"><span class="pt">Mesačný obrat (€)</span><span class="method m-get">GET /api/admin/stats/revenue</span></div>
+                    <div class="pb">
+                        <div class="rev-chart" id="revChart"></div>
+                        <div class="rev-labels" id="revLabels"></div>
+                        <div style="margin-top:0.8rem;font-size:0.8rem;color:var(--muted)" id="revNote"></div>
+                    </div>
+                </div>
+                <!-- Membership breakdown -->
+                <div class="panel">
+                    <div class="ph"><span class="pt">Permanentky podľa typu</span><span class="method m-get">GET /api/admin/stats/memberships</span></div>
+                    <div class="pb" id="memBreakdown"><div class="empty-state"><span class="spinner"></span></div></div>
+                </div>
+            </div>
+
+            <!-- Recent registrations -->
             <div class="panel">
-                <div class="panel-header"><span class="panel-title">Rýchly prehľad</span><button class="btn btn-ghost btn-sm" onclick="loadOverview()"><i class="fas fa-sync-alt"></i> Obnoviť</button></div>
-                <div class="panel-body">
-                    <div id="overviewOut" style="color:var(--muted);font-size:0.88rem">Klikni Obnoviť pre načítanie štatistík...</div>
+                <div class="ph">
+                    <span class="pt">Nedávne registrácie</span>
+                    <button class="btn btn-ghost btn-sm" onclick="loadOverview()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
+                </div>
+                <div class="pb">
+                    <div id="recentUsersTable"><div class="empty-state"><span class="spinner"></span></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- USERS -->
+        <!-- ═══ USERS ═══ -->
         <div class="page-section" id="page-users">
             <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Všetci užívatelia</span>
-                    <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap">
+                <div class="ph">
+                    <span class="pt">Všetky profily</span>
+                    <div style="display:flex;gap:0.7rem;align-items:center;flex-wrap:wrap">
                         <span class="method m-get">GET /api/admin/profiles</span>
                         <button class="btn btn-ghost btn-sm" onclick="loadUsers()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
                     </div>
                 </div>
-                <div class="panel-body">
+                <div class="pb">
                     <div class="search-bar">
-                        <input class="form-input" type="text" id="userSearch" placeholder="Hľadať podľa mena alebo emailu..." oninput="filterUsers()">
-                        <select class="form-input" id="roleFilter" onchange="filterUsers()" style="max-width:150px">
+                        <input class="fi" type="text" id="userSearch" placeholder="Hľadať meno alebo email..." oninput="filterUsers()">
+                        <select class="fi" id="roleFilter" onchange="filterUsers()" style="max-width:140px">
                             <option value="">Všetky role</option>
                             <option value="member">Member</option>
                             <option value="trainer">Trainer</option>
                             <option value="admin">Admin</option>
                             <option value="reception">Reception</option>
                         </select>
+                        <select class="fi" id="statusFilter" onchange="filterUsers()" style="max-width:140px">
+                            <option value="">Všetky stavy</option>
+                            <option value="active">Aktívni</option>
+                            <option value="frozen">Zmrazení</option>
+                            <option value="inactive">Neaktívni</option>
+                        </select>
                     </div>
-                    <div id="usersTable"><div class="empty-state"><i class="fas fa-users"></i><p>Klikni Obnoviť pre načítanie</p></div></div>
+                    <div id="usersTable"><div class="empty-state"><i class="fas fa-users"></i><p>Klikni Obnoviť</p></div></div>
                 </div>
             </div>
 
             <div class="grid-2">
-                <!-- Zmena roly cez picker -->
+                <!-- Zmena roly -->
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Zmeniť rolu</span><span class="method m-put">PUT /api/users/{id}</span></div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label class="form-label">Vyber užívateľa</label>
+                    <div class="ph"><span class="pt">Zmeniť rolu</span><span class="method m-put">PUT /api/users/{id}</span></div>
+                    <div class="pb">
+                        <div class="fg">
+                            <label class="fl">Vyber profil</label>
                             <div class="user-picker" id="rolePickerWrap">
-                                <div class="user-picker-input">
-                                    <input class="form-input" type="text" id="rolePickerSearch" placeholder="Hľadaj meno alebo email..." oninput="filterPicker('role')" onfocus="openPicker('role')" autocomplete="off">
+                                <div class="picker-row">
+                                    <input class="fi" type="text" id="rolePickerSearch" placeholder="Hľadaj..." oninput="filterPicker('role')" onfocus="openPicker('role')" autocomplete="off">
                                     <button class="btn btn-ghost btn-sm" onclick="openPicker('role')"><i class="fas fa-chevron-down"></i></button>
                                 </div>
-                                <div class="picker-dropdown" id="rolePickerList"></div>
-                                <div class="selected-user-badge" id="roleSelectedBadge">
-                                    <div><div class="sub-name" id="roleSelName">—</div><div class="sub-email" id="roleSelEmail">—</div></div>
-                                    <button class="sub-clear" onclick="clearPicker('role')"><i class="fas fa-times"></i></button>
+                                <div class="picker-dd" id="rolePickerList"></div>
+                                <div class="sel-badge" id="roleSelectedBadge">
+                                    <div><div class="sbn" id="roleSelName">—</div><div class="sbe" id="roleSelEmail">—</div></div>
+                                    <button class="sel-clear" onclick="clearPicker('role')"><i class="fas fa-times"></i></button>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Nová rola</label>
-                            <select class="form-input" id="newRole">
+                        <div class="fg">
+                            <label class="fl">Nová rola</label>
+                            <select class="fi" id="newRole">
                                 <option value="member">member</option>
                                 <option value="trainer">trainer</option>
                                 <option value="admin">admin</option>
@@ -223,197 +358,189 @@
                             </select>
                         </div>
                         <button class="btn btn-orange" onclick="changeUserRole()"><i class="fas fa-user-tag"></i> Zmeniť rolu</button>
-                        <div class="form-msg" id="roleMsg"></div>
+                        <div class="fm" id="roleMsg"></div>
                     </div>
                 </div>
 
-                <!-- Aktivovať / Deaktivovať cez picker -->
+                <!-- Zmrazenie / Aktivácia -->
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Aktivovať / Deaktivovať</span><span class="method m-put">PUT /api/admin/profiles/{id}/status</span></div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label class="form-label">Vyber užívateľa</label>
+                    <div class="ph"><span class="pt">Správa prístupu</span><span class="method m-put">PUT /api/admin/profiles/{id}/status</span></div>
+                    <div class="pb">
+                        <div class="frozen-banner"><i class="fas fa-snowflake"></i> <b>Zmrazený účet</b> = používateľ sa nevie prihlásiť. Aktívny = normálny prístup.</div>
+                        <div class="fg">
+                            <label class="fl">Vyber profil</label>
                             <div class="user-picker" id="statusPickerWrap">
-                                <div class="user-picker-input">
-                                    <input class="form-input" type="text" id="statusPickerSearch" placeholder="Hľadaj meno alebo email..." oninput="filterPicker('status')" onfocus="openPicker('status')" autocomplete="off">
+                                <div class="picker-row">
+                                    <input class="fi" type="text" id="statusPickerSearch" placeholder="Hľadaj..." oninput="filterPicker('status')" onfocus="openPicker('status')" autocomplete="off">
                                     <button class="btn btn-ghost btn-sm" onclick="openPicker('status')"><i class="fas fa-chevron-down"></i></button>
                                 </div>
-                                <div class="picker-dropdown" id="statusPickerList"></div>
-                                <div class="selected-user-badge" id="statusSelectedBadge">
-                                    <div><div class="sub-name" id="statusSelName">—</div><div class="sub-email" id="statusSelEmail">—</div></div>
-                                    <button class="sub-clear" onclick="clearPicker('status')"><i class="fas fa-times"></i></button>
+                                <div class="picker-dd" id="statusPickerList"></div>
+                                <div class="sel-badge" id="statusSelectedBadge">
+                                    <div><div class="sbn" id="statusSelName">—</div><div class="sbe" id="statusSelEmail">—</div></div>
+                                    <button class="sel-clear" onclick="clearPicker('status')"><i class="fas fa-times"></i></button>
                                 </div>
                             </div>
                         </div>
-                        <div style="display:flex;gap:0.8rem;margin-top:0.5rem">
+                        <div style="display:flex;gap:0.6rem;margin-top:0.5rem;flex-wrap:wrap">
                             <button class="btn btn-cyan" onclick="setUserStatus(true)"><i class="fas fa-user-check"></i> Aktivovať</button>
-                            <button class="btn btn-red" onclick="setUserStatus(false)"><i class="fas fa-user-times"></i> Deaktivovať</button>
+                            <button class="btn btn-frozen" onclick="setUserStatus(false)"><i class="fas fa-snowflake"></i> Zmraziť účet</button>
                         </div>
-                        <div class="form-msg" id="statusMsg"></div>
+                        <div class="fm" id="statusMsg"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- MEMBERSHIPS -->
+        <!-- ═══ MEMBERSHIPS ═══ -->
         <div class="page-section" id="page-memberships">
             <div class="panel">
-                <div class="panel-header"><span class="panel-title">Správa predplatného</span><span class="method m-get">GET /api/memberships</span></div>
-                <div class="panel-body">
-                    <!-- Krok 1: Vyber člena -->
-                    <div class="form-group">
-                        <label class="form-label">1. Vyber člena</label>
+                <div class="ph"><span class="pt">Správa predplatného</span></div>
+                <div class="pb">
+                    <div class="fg">
+                        <label class="fl">1. Vyber člena</label>
                         <div class="user-picker" id="memPickerWrap">
-                            <div class="user-picker-input">
-                                <input class="form-input" type="text" id="memPickerSearch" placeholder="Hľadaj meno alebo email..." oninput="filterPicker('mem')" onfocus="openPicker('mem')" autocomplete="off">
+                            <div class="picker-row">
+                                <input class="fi" type="text" id="memPickerSearch" placeholder="Hľadaj meno alebo email..." oninput="filterPicker('mem')" onfocus="openPicker('mem')" autocomplete="off">
                                 <button class="btn btn-ghost btn-sm" onclick="openPicker('mem')"><i class="fas fa-chevron-down"></i></button>
                             </div>
-                            <div class="picker-dropdown" id="memPickerList"></div>
-                            <div class="selected-user-badge" id="memSelectedBadge">
-                                <div><div class="sub-name" id="memSelName">—</div><div class="sub-email" id="memSelEmail">—</div></div>
-                                <button class="sub-clear" onclick="clearPicker('mem')"><i class="fas fa-times"></i></button>
+                            <div class="picker-dd" id="memPickerList"></div>
+                            <div class="sel-badge" id="memSelectedBadge">
+                                <div><div class="sbn" id="memSelName">—</div><div class="sbe" id="memSelEmail">—</div></div>
+                                <button class="sel-clear" onclick="clearPicker('mem')"><i class="fas fa-times"></i></button>
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-ghost btn-sm" onclick="loadMemberMembership()" style="margin-bottom:1.2rem"><i class="fas fa-search"></i> Načítať členstvo</button>
-                    <div id="memberMemDisplay" style="display:none;margin-bottom:1.5rem">
-                        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:0.8rem">
-                            <div style="font-family:var(--font-d);font-size:0.7rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:0.5rem">Aktuálne predplatné</div>
-                            <div id="memCurrentData" style="font-size:0.88rem"></div>
+                    <button class="btn btn-ghost btn-sm" onclick="loadMemberMembership()" style="margin-bottom:1.2rem"><i class="fas fa-search"></i> Načítať predplatné</button>
+                    <div id="memberMemDisplay" style="display:none;margin-bottom:1.4rem">
+                        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1rem">
+                            <div style="font-family:var(--font-d);font-size:0.65rem;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:0.6rem">Aktuálne predplatné</div>
+                            <div id="memCurrentData"></div>
                         </div>
                     </div>
-                    <!-- Krok 2: Priradiť / zmeniť predplatné -->
-                    <div style="border-top:1px solid var(--border);padding-top:1.2rem;margin-top:0.5rem">
-                        <div class="form-label" style="margin-bottom:0.8rem">2. Priradiť / zmeniť predplatné</div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Typ členstva</label>
-                                <select class="form-input" id="memTypeSelect">
-                                    <option value="">— Načítavam typy... —</option>
-                                </select>
+                    <div style="border-top:1px solid var(--border);padding-top:1.2rem">
+                        <div class="fl" style="margin-bottom:0.8rem">2. Priradiť / zmeniť predplatné</div>
+                        <div class="fr">
+                            <div class="fg">
+                                <label class="fl">Typ členstva</label>
+                                <select class="fi" id="memTypeSelect"><option value="">— Načítavam... —</option></select>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Dátum začiatku</label>
-                                <input class="form-input" type="date" id="memStartDate">
+                            <div class="fg">
+                                <label class="fl">Dátum začiatku (voliteľné)</label>
+                                <input class="fi" type="date" id="memStartDate">
                             </div>
                         </div>
-                        <button class="btn btn-acid" onclick="assignMembership()"><i class="fas fa-id-card"></i> Priradiť predplatné</button>
-                        <button class="btn btn-red" onclick="cancelMembership()" style="margin-left:0.8rem"><i class="fas fa-ban"></i> Zrušiť predplatné</button>
-                        <div class="form-msg" id="memMsg"></div>
+                        <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
+                            <button class="btn btn-acid" onclick="assignMembership()"><i class="fas fa-id-card"></i> Priradiť</button>
+                            <button class="btn btn-red" onclick="cancelMembership()"><i class="fas fa-ban"></i> Zrušiť predplatné</button>
+                        </div>
+                        <div class="fm" id="memMsg"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CLASSES ADMIN -->
+        <!-- ═══ CLASSES ═══ -->
         <div class="page-section" id="page-classes-admin">
             <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Všetky lekcie</span>
-                    <div style="display:flex;gap:0.8rem">
-                        <span class="method m-get">GET /api/classes</span>
+                <div class="ph">
+                    <span class="pt">Všetky lekcie</span>
+                    <div style="display:flex;gap:0.7rem">
                         <button class="btn btn-ghost btn-sm" onclick="loadAdminClasses()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
-                        <button class="btn btn-acid btn-sm" onclick="showPage('create-class')"><i class="fas fa-plus"></i> Nová lekcia</button>
+                        <button class="btn btn-acid btn-sm" onclick="showPage('create-class')"><i class="fas fa-plus"></i> Nová</button>
                     </div>
                 </div>
-                <div class="panel-body">
-                    <div id="adminClassesTable"><div class="empty-state"><i class="fas fa-calendar-alt"></i><p>Klikni Obnoviť pre načítanie</p></div></div>
-                </div>
+                <div class="pb"><div id="adminClassesTable"><div class="empty-state"><i class="fas fa-calendar-alt"></i><p>Klikni Obnoviť</p></div></div></div>
             </div>
         </div>
 
-        <!-- CREATE CLASS -->
+        <!-- ═══ CREATE CLASS ═══ -->
         <div class="page-section" id="page-create-class">
-            <div class="panel" style="max-width:700px">
-                <div class="panel-header"><span class="panel-title">Vytvoriť novú lekciu</span><span class="method m-post">POST /api/classes</span></div>
-                <div class="panel-body">
-                    <div class="form-row">
-                        <div class="form-group"><label class="form-label">Názov lekcie *</label><input class="form-input" type="text" id="c-name" placeholder="napr. CrossFit Ráno"></div>
-                        <div class="form-group">
-                            <label class="form-label">Typ</label>
-                            <select class="form-input" id="c-type">
-                                <option>CrossFit</option><option>Joga</option><option>Boxing</option><option>HIIT</option><option>Body Pump</option><option>Pilates</option><option>Spinning</option>
-                            </select>
+            <div class="panel" style="max-width:680px">
+                <div class="ph"><span class="pt">Vytvoriť lekciu</span><span class="method m-post">POST /api/classes</span></div>
+                <div class="pb">
+                    <div class="fr">
+                        <div class="fg"><label class="fl">Názov *</label><input class="fi" type="text" id="c-name" placeholder="CrossFit Ráno"></div>
+                        <div class="fg"><label class="fl">Typ</label>
+                            <select class="fi" id="c-type"><option>CrossFit</option><option>Joga</option><option>Boxing</option><option>HIIT</option><option>Body Pump</option><option>Pilates</option><option>Spinning</option></select>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group"><label class="form-label">Dátum a čas začiatku *</label><input class="form-input" type="datetime-local" id="c-time"></div>
-                        <div class="form-group"><label class="form-label">Trvanie (min)</label><input class="form-input" type="number" id="c-duration" placeholder="60" min="15" max="240"></div>
+                    <div class="fr">
+                        <div class="fg"><label class="fl">Dátum a čas *</label><input class="fi" type="datetime-local" id="c-time"></div>
+                        <div class="fg"><label class="fl">Trvanie (min)</label><input class="fi" type="number" id="c-duration" placeholder="60" min="15"></div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group"><label class="form-label">Kapacita (počet miest)</label><input class="form-input" type="number" id="c-capacity" placeholder="20" min="1"></div>
-                        <div class="form-group"><label class="form-label">Miesto / Sála</label><input class="form-input" type="text" id="c-location" placeholder="napr. Sála A"></div>
+                    <div class="fr">
+                        <div class="fg"><label class="fl">Kapacita</label><input class="fi" type="number" id="c-capacity" placeholder="20" min="1"></div>
+                        <div class="fg"><label class="fl">Miesto / Sála</label><input class="fi" type="text" id="c-location" placeholder="Sála A"></div>
                     </div>
-                    <!-- Tréner — picker zo zoznamu -->
-                    <div class="form-group">
-                        <label class="form-label">Tréner *</label>
+                    <div class="fg">
+                        <label class="fl">Tréner *</label>
                         <div class="user-picker" id="classTrainerPickerWrap">
-                            <div class="user-picker-input">
-                                <input class="form-input" type="text" id="classTrainerSearch" placeholder="Hľadaj trénera..." oninput="filterPicker('classTrainer')" onfocus="openPicker('classTrainer')" autocomplete="off">
+                            <div class="picker-row">
+                                <input class="fi" type="text" id="classTrainerSearch" placeholder="Hľadaj trénera..." oninput="filterPicker('classTrainer')" onfocus="openPicker('classTrainer')" autocomplete="off">
                                 <button class="btn btn-ghost btn-sm" onclick="openPicker('classTrainer')"><i class="fas fa-chevron-down"></i></button>
                             </div>
-                            <div class="picker-dropdown" id="classTrainerPickerList"></div>
-                            <div class="selected-user-badge" id="classTrainerSelectedBadge">
-                                <div><div class="sub-name" id="classTrainerSelName">—</div><div class="sub-email" id="classTrainerSelEmail">—</div></div>
-                                <button class="sub-clear" onclick="clearPicker('classTrainer')"><i class="fas fa-times"></i></button>
+                            <div class="picker-dd" id="classTrainerPickerList"></div>
+                            <div class="sel-badge" id="classTrainerSelectedBadge">
+                                <div><div class="sbn" id="classTrainerSelName">—</div><div class="sbe" id="classTrainerSelEmail">—</div></div>
+                                <button class="sel-clear" onclick="clearPicker('classTrainer')"><i class="fas fa-times"></i></button>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group"><label class="form-label">Popis</label><textarea class="form-input" id="c-desc" rows="3" placeholder="Popis lekcie..." style="resize:vertical;font-family:var(--font-b)"></textarea></div>
+                    <div class="fg"><label class="fl">Popis</label><textarea class="fi" id="c-desc" rows="3" style="resize:vertical;font-family:var(--font-b)" placeholder="Popis lekcie..."></textarea></div>
                     <button class="btn btn-red btn-block" onclick="createClass()"><i class="fas fa-plus"></i> Vytvoriť lekciu</button>
-                    <div class="form-msg" id="createClassMsg"></div>
+                    <div class="fm" id="createClassMsg"></div>
                 </div>
             </div>
         </div>
 
-        <!-- PROFILE ADMIN -->
+        <!-- ═══ PROFILE ═══ -->
         <div class="page-section" id="page-profile">
             <div class="grid-2">
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Admin profil</span><span class="method m-get">GET /api/auth/me</span></div>
-                    <div class="panel-body">
-                        <div id="adminProfileData" style="display:none;margin-bottom:1rem">
-                            <div class="form-row" style="margin-bottom:0.5rem">
-                                <div><div class="form-label">Celé meno</div><div id="ap-name" style="padding:0.3rem 0">—</div></div>
-                                <div><div class="form-label">Email</div><div id="ap-email" style="padding:0.3rem 0">—</div></div>
+                    <div class="ph"><span class="pt">Admin profil</span><span class="method m-put">PUT /api/users/{id}</span></div>
+                    <div class="pb">
+                        <div id="adminProfileData" style="display:none;margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)">
+                            <div class="fr" style="margin-bottom:0.5rem">
+                                <div><div class="fl">Meno</div><div id="ap-name" style="font-size:0.88rem">—</div></div>
+                                <div><div class="fl">Email</div><div id="ap-email" style="font-size:0.88rem">—</div></div>
                             </div>
-                            <div class="form-row">
-                                <div><div class="form-label">Rola</div><div id="ap-role" style="padding:0.3rem 0">—</div></div>
-                                <div><div class="form-label">Status</div><div id="ap-active" style="padding:0.3rem 0">—</div></div>
+                            <div class="fr">
+                                <div><div class="fl">Rola</div><div id="ap-role">—</div></div>
+                                <div><div class="fl">Stav účtu</div><div id="ap-active">—</div></div>
                             </div>
                         </div>
-                        <div class="form-group"><label class="form-label">Celé meno *</label><input class="form-input" type="text" id="ap-edit-name" placeholder="Tvoje meno"></div>
-                        <div class="form-group"><label class="form-label">Telefón</label><input class="form-input" type="tel" id="ap-edit-phone" placeholder="+421..."></div>
+                        <div class="fg"><label class="fl">Celé meno *</label><input class="fi" type="text" id="ap-edit-name" placeholder="Tvoje meno"></div>
+                        <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="ap-edit-phone" placeholder="+421..."></div>
                         <button class="btn btn-orange" onclick="saveAdminProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
-                        <div class="form-msg" id="adminProfMsg"></div>
+                        <div class="fm" id="adminProfMsg"></div>
                     </div>
                 </div>
                 <div class="panel">
-                    <div class="panel-header"><span class="panel-title">Zmena hesla</span><span class="method m-put">PUT /api/users/{id}/password</span></div>
-                    <div class="panel-body">
-                        <div class="form-group"><label class="form-label">Aktuálne heslo *</label><input class="form-input" type="password" id="ap-cur-pass" placeholder="Aktuálne heslo"></div>
-                        <div class="form-group"><label class="form-label">Nové heslo * (min 6 znakov)</label><input class="form-input" type="password" id="ap-new-pass" placeholder="Nové heslo"></div>
-                        <div class="form-group"><label class="form-label">Potvrdiť nové heslo *</label><input class="form-input" type="password" id="ap-new-pass2" placeholder="Zopakuj nové heslo"></div>
+                    <div class="ph"><span class="pt">Zmena hesla</span><span class="method m-put">PUT /api/users/{id}/password</span></div>
+                    <div class="pb">
+                        <div class="fg"><label class="fl">Aktuálne heslo *</label><input class="fi" type="password" id="ap-cur-pass"></div>
+                        <div class="fg"><label class="fl">Nové heslo * (min 6)</label><input class="fi" type="password" id="ap-new-pass"></div>
+                        <div class="fg"><label class="fl">Potvrdiť nové heslo *</label><input class="fi" type="password" id="ap-new-pass2"></div>
                         <button class="btn btn-ghost" onclick="changeAdminPassword()"><i class="fas fa-lock"></i> Zmeniť heslo</button>
-                        <div class="form-msg" id="adminPassMsg"></div>
+                        <div class="fm" id="adminPassMsg"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div>
+    </div><!-- /content -->
 </main>
 
 <script>
     const API = 'http://localhost:8080';
     let token = localStorage.getItem('fp_token');
     let user  = JSON.parse(localStorage.getItem('fp_user') || 'null');
-    let allUsersCache  = [];
+    let allUsersCache = [];
     let allTrainersCache = [];
 
     if (!token || !user) window.location.href = 'index.html';
     if (user && user.role !== 'admin') {
-        window.location.href = {member:'member.html', trainer:'trainer.html'}[user.role] || 'index.html';
+        window.location.href = {member:'member.html',trainer:'trainer.html'}[user.role] || 'index.html';
     }
     if (user) {
         document.getElementById('sideAvatar').textContent = (user.fullName||'A').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
@@ -421,100 +548,370 @@
         document.getElementById('sideEmail').textContent = user.email || '—';
     }
 
-    // ── NAVIGATION ────────────────────────────────────────────────────────────────
-    const pageTitles = {overview:'Dashboard',users:'Správa užívateľov',memberships:'Správa predplatného','classes-admin':'Lekcie','create-class':'Nová lekcia',profile:'Admin profil'};
+    // ── NAV ───────────────────────────────────────────────────────────────────────
+    const pageTitles = {overview:'Dashboard',users:'Správa profilov',memberships:'Predplatné','classes-admin':'Lekcie','create-class':'Nová lekcia',profile:'Môj profil'};
     function showPage(id) {
-        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.getElementById('page-' + id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(el => { if (el.getAttribute('onclick')?.includes(id)) el.classList.add('active'); });
-        document.getElementById('topbarTitle').textContent = pageTitles[id] || id;
-        // Auto-load
-        if (id==='users') loadUsers();
-        if (id==='memberships') { loadUsers(); loadMembershipTypes(); }
-        if (id==='classes-admin') loadAdminClasses();
-        if (id==='create-class') { loadUsers(); loadTrainersForPicker(); }
-        if (id==='profile') loadAdminProfile();
-        if (id==='overview') loadOverview();
+        document.querySelectorAll('.page-section').forEach(el=>el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+        document.getElementById('page-'+id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el=>{if(el.getAttribute('onclick')?.includes("'"+id+"'"))el.classList.add('active');});
+        document.getElementById('topbarTitle').textContent = pageTitles[id]||id;
+        if (id==='overview')       loadOverview();
+        if (id==='users')          loadUsers();
+        if (id==='memberships')    { loadUsers(); loadMembershipTypes(); }
+        if (id==='classes-admin')  loadAdminClasses();
+        if (id==='create-class')   { loadUsers(); loadTrainersForPicker(); }
+        if (id==='profile')        loadAdminProfile();
     }
 
     async function authFetch(url, opts={}) {
-        const res = await fetch(API + url, {...opts, headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
+        const res = await fetch(API+url, {...opts, headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
         if (res.status===401) { logout(); throw new Error('Session vypršala'); }
         return res;
     }
-    function showMsg(id, msg, type) {
-        const el = document.getElementById(id);
-        el.textContent = msg; el.className = 'form-msg ' + type;
+    function showMsg(id,msg,type){ const el=document.getElementById(id); el.textContent=msg; el.className='fm '+type; }
+    function toast(msg,type='ok'){
+        const t=document.getElementById('toast');
+        t.className='toast t-'+type;
+        t.innerHTML=(type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>')+' '+msg;
+        t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3200);
     }
-    function toast(msg, type='ok') {
-        const t = document.getElementById('toast');
-        t.className = 'toast t-' + type;
-        t.innerHTML = (type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>') + ' ' + msg;
-        t.classList.add('show');
-        setTimeout(()=>t.classList.remove('show'),3500);
+    function logout(){ localStorage.removeItem('fp_token'); localStorage.removeItem('fp_user'); window.location.href='index.html'; }
+
+    function userStatusBadge(u) {
+        if (!Boolean(u.active)) return '<span class="badge b-frozen"><i class="fas fa-snowflake"></i> Zmrazený</span>';
+        return '<span class="badge b-acid">Aktívny</span>';
     }
-    function logout() { localStorage.removeItem('fp_token'); localStorage.removeItem('fp_user'); window.location.href='index.html'; }
 
-    // ── USER PICKER ───────────────────────────────────────────────────────────────
-    // Každý picker má: id (role|status|mem|classTrainer), vybraný user
-    const pickerState = { role: null, status: null, mem: null, classTrainer: null };
+    // ── OVERVIEW ─────────────────────────────────────────────────────────────────
+    async function loadOverview() {
+        try {
+            // Profiles
+            const [resU, resCls] = await Promise.all([
+                authFetch('/api/admin/profiles'),
+                authFetch('/api/classes')
+            ]);
+            const users = await resU.json();
+            const classes = await resCls.json();
 
-    function buildPickerList(pickerId, users) {
-        const el = document.getElementById(pickerId + 'PickerList');
+            const total   = Array.isArray(users) ? users.length : 0;
+            const frozen  = Array.isArray(users) ? users.filter(u=>!u.active).length : 0;
+            const trainers= Array.isArray(users) ? users.filter(u=>u.role==='trainer').length : 0;
+            allUsersCache = Array.isArray(users) ? users : [];
+
+            document.getElementById('kpi-total').textContent   = total;
+            document.getElementById('kpi-frozen').textContent  = frozen;
+            document.getElementById('kpi-classes').textContent = Array.isArray(classes) ? classes.length : '—';
+
+            // Membership stats from admin endpoint
+            try {
+                const resMem = await authFetch('/api/admin/stats/memberships');
+                if (resMem.ok) {
+                    const mStats = await resMem.json();
+                    document.getElementById('kpi-memberships').textContent = mStats.totalActive || 0;
+                    document.getElementById('kpi-mem-sub').textContent = `z ${total} profilov`;
+                    buildMemBreakdown(mStats);
+                } else { throw new Error(); }
+            } catch {
+                // fallback — estimate from users list
+                document.getElementById('kpi-memberships').textContent = '—';
+                document.getElementById('memBreakdown').innerHTML = buildMemBreakdownFallback();
+            }
+
+            // Revenue stats
+            try {
+                const resRev = await authFetch('/api/admin/stats/revenue');
+                if (resRev.ok) {
+                    const rStats = await resRev.json();
+                    document.getElementById('kpi-revenue').textContent = (rStats.currentMonth || 0) + ' €';
+                    document.getElementById('kpi-rev-sub').textContent = 'vs ' + (rStats.lastMonth||0) + ' € minulý mesiac';
+                    buildRevenueChart(rStats.monthly || []);
+                } else { throw new Error(); }
+            } catch {
+                document.getElementById('kpi-revenue').textContent = '—';
+                buildRevenueChart([]);
+            }
+
+            // Recent users table
+            if (Array.isArray(users) && users.length) {
+                const recent = [...users].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
+                renderRecentUsers(recent);
+            }
+
+        } catch(e) {
+            document.getElementById('kpi-total').textContent = 'ERR';
+            toast('Chyba pri načítaní: '+e.message, 'err');
+        }
+    }
+
+    function buildRevenueChart(monthly) {
+        const chart  = document.getElementById('revChart');
+        const labels = document.getElementById('revLabels');
+        const note   = document.getElementById('revNote');
+
+        // Fallback mock data if empty
+        const months = ['Aug','Sep','Okt','Nov','Dec','Jan','Feb','Mar'];
+        const values = monthly.length >= 8
+            ? monthly.slice(-8).map(m=>m.total||0)
+            : [820,940,780,1050,1230,890,1100,monthly.length?monthly[monthly.length-1]?.total||0:0];
+
+        const maxV = Math.max(...values, 1);
+        chart.innerHTML = values.map((v,i) => {
+            const h = Math.max(6, (v/maxV)*56);
+            const isCurrent = i === values.length-1;
+            return `<div class="rev-bar" style="height:${h}px;background:${isCurrent?'var(--orange)':'rgba(200,255,0,0.25)'}">
+      <div class="rev-tip">${months[i]}: ${v} €</div>
+    </div>`;
+        }).join('');
+        labels.innerHTML = months.map(m=>`<span>${m}</span>`).join('');
+        if (!monthly.length) note.textContent = '* Zobrazené sú odhadované dáta (backend endpoint /api/admin/stats/revenue ešte nie je aktívny)';
+    }
+
+    function buildMemBreakdown(stats) {
+        const bd = document.getElementById('memBreakdown');
+        if (!stats.byType || !stats.byType.length) {
+            bd.innerHTML = '<div class="empty-state" style="padding:1.5rem"><p>Žiadne dáta</p></div>';
+            return;
+        }
+        const total = stats.totalActive || 1;
+        bd.innerHTML = stats.byType.map(t => {
+            const pct = Math.round((t.count/total)*100);
+            return `<div style="margin-bottom:0.9rem">
+      <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.3rem">
+        <span>${t.name}</span>
+        <span style="color:var(--acid);font-family:var(--font-d);font-size:0.95rem;font-weight:700">${t.count}</span>
+      </div>
+      <div style="height:4px;background:var(--border2);border-radius:2px">
+        <div style="height:4px;width:${pct}%;background:var(--acid);border-radius:2px;transition:width 0.8s"></div>
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:0.15rem">${pct}% z aktívnych</div>
+    </div>`;
+        }).join('');
+    }
+
+    function buildMemBreakdownFallback() {
+        return '<div style="padding:0.5rem;font-size:0.8rem;color:var(--muted)"><i class="fas fa-info-circle"></i> Backend endpoint /api/admin/stats/memberships nie je aktívny — pridaj ho pre detailné štatistiky.</div>';
+    }
+
+    function renderRecentUsers(users) {
+        let html = '<table class="dt"><thead><tr><th>Meno</th><th>Email</th><th>Rola</th><th>Stav</th><th>Registrovaný</th></tr></thead><tbody>';
+        users.forEach(u => {
+            const roleCls = u.role==='admin'?'b-red':u.role==='trainer'?'b-orange':u.role==='reception'?'b-blue':'b-grey';
+            const frozenRow = !u.active ? ' frozen-row' : '';
+            html += `<tr class="${frozenRow}">
+      <td><b>${u.fullName||'—'}</b></td>
+      <td style="color:var(--muted);font-size:0.8rem">${u.email||'—'}</td>
+      <td><span class="badge ${roleCls}">${u.role||'—'}</span></td>
+      <td>${userStatusBadge(u)}</td>
+      <td style="color:var(--muted);font-size:0.8rem">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('sk-SK') : '—'}</td>
+    </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('recentUsersTable').innerHTML = html;
+    }
+
+    // ── USERS ─────────────────────────────────────────────────────────────────────
+    async function loadUsers() {
+        document.getElementById('usersTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/admin/profiles');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            allUsersCache = Array.isArray(data) ? data : [];
+            renderUsersTable(allUsersCache);
+        } catch(e) {
+            document.getElementById('usersTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
+        }
+    }
+
+    function renderUsersTable(users) {
+        if (!users.length) {
+            document.getElementById('usersTable').innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Žiadne výsledky</p></div>';
+            return;
+        }
+        let html = '<table class="dt"><thead><tr><th>Meno</th><th>Email</th><th>Rola</th><th>Stav účtu</th><th>Akcie</th></tr></thead><tbody>';
+        users.forEach(u => {
+            const roleCls = u.role==='admin'?'b-red':u.role==='trainer'?'b-orange':u.role==='reception'?'b-blue':'b-grey';
+            const isActive = Boolean(u.active);
+            const frozenRow = !isActive ? ' frozen-row' : '';
+            html += `<tr class="${frozenRow}">
+      <td>
+        <b>${u.fullName||'—'}</b>
+        <div style="font-size:0.72rem;color:var(--muted)">${u.id?.substring(0,8)}…</div>
+      </td>
+      <td style="color:var(--muted);font-size:0.82rem">${u.email||'—'}</td>
+      <td><span class="badge ${roleCls}">${u.role||'—'}</span></td>
+      <td>${userStatusBadge(u)}</td>
+      <td>
+        <div style="display:flex;gap:0.35rem;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" title="Detail" onclick="openDrawer('${u.id}')"><i class="fas fa-eye"></i></button>
+          <button class="btn btn-ghost btn-sm" title="Rola" onclick="selectPicker('role','${u.id}')"><i class="fas fa-user-tag"></i></button>
+          <button class="btn btn-${isActive?'frozen':'cyan'} btn-sm" title="${isActive?'Zmraziť':'Aktivovať'}" onclick="quickToggle('${u.id}',${isActive})">
+            <i class="fas fa-${isActive?'snowflake':'user-check'}"></i>
+          </button>
+          <button class="btn btn-ghost btn-sm" title="Predplatné" onclick="selectPicker('mem','${u.id}');showPage('memberships')"><i class="fas fa-id-card"></i></button>
+        </div>
+      </td>
+    </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('usersTable').innerHTML = html;
+    }
+
+    function filterUsers() {
+        const search = document.getElementById('userSearch').value.toLowerCase();
+        const role   = document.getElementById('roleFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        renderUsersTable(allUsersCache.filter(u => {
+            const matchSearch = !search || (u.fullName||'').toLowerCase().includes(search) || (u.email||'').toLowerCase().includes(search);
+            const matchRole   = !role || u.role===role;
+            const matchStatus = !status ||
+                (status==='active'   && Boolean(u.active)) ||
+                (status==='frozen'   && !Boolean(u.active)) ||
+                (status==='inactive' && !Boolean(u.active));
+            return matchSearch && matchRole && matchStatus;
+        }));
+    }
+
+    async function quickToggle(id, currentActive) {
+        try {
+            const res = await authFetch('/api/admin/profiles/'+id+'/status', {method:'PUT',body:JSON.stringify({active:!currentActive})});
+            const d = await res.json();
+            if (res.ok) {
+                toast(currentActive ? '❄️ Účet zmrazený' : '✓ Účet aktivovaný', currentActive?'err':'ok');
+                loadUsers();
+            } else toast(d.message||'Chyba','err');
+        } catch(e) { toast(e.message,'err'); }
+    }
+
+    // ── DRAWER ────────────────────────────────────────────────────────────────────
+    async function openDrawer(userId) {
+        document.getElementById('drawerOverlay').classList.add('open');
+        document.getElementById('userDrawer').classList.add('open');
+        document.getElementById('drawerBody').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        document.getElementById('drawerActions').innerHTML = '';
+        try {
+            const res = await authFetch('/api/users/'+userId);
+            const d   = await res.json();
+            if (!res.ok) throw new Error(d.message);
+            document.getElementById('drawerTitle').textContent = d.fullName || 'Detail profilu';
+            const isActive = Boolean(d.active);
+            document.getElementById('drawerBody').innerHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Základné info</div>
+        <div class="drow">
+          <div class="dfield"><div class="dk">Meno</div>${d.fullName||'—'}</div>
+          <div class="dfield"><div class="dk">Email</div>${d.email||'—'}</div>
+        </div>
+        <div class="drow">
+          <div class="dfield"><div class="dk">Telefón</div>${d.phone||'—'}</div>
+          <div class="dfield"><div class="dk">Rola</div>${d.role||'—'}</div>
+        </div>
+        <div class="drow">
+          <div class="dfield"><div class="dk">Stav účtu</div>${userStatusBadge(d)}</div>
+          <div class="dfield"><div class="dk">Registrovaný</div>${d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—'}</div>
+        </div>
+        ${d.specialization ? `<div class="dfield" style="margin-top:0.5rem"><div class="dk">Špecializácia</div>${d.specialization}</div>` : ''}
+      </div>`;
+
+            // Try load membership
+            try {
+                const resM = await authFetch('/api/admin/memberships/user/'+userId);
+                if (resM.ok) {
+                    const m = await resM.json();
+                    document.getElementById('drawerBody').innerHTML += `
+          <div class="drawer-section">
+            <div class="drawer-section-title">Predplatné</div>
+            <div class="drow">
+              <div class="dfield"><div class="dk">Typ</div>${m.membershipTypeName||'—'}</div>
+              <div class="dfield"><div class="dk">Status</div><span class="badge ${m.status==='active'?'b-acid':'b-red'}">${m.status}</span></div>
+            </div>
+            <div class="drow">
+              <div class="dfield"><div class="dk">Platí do</div>${m.endDate||'—'}</div>
+              <div class="dfield"><div class="dk">Zostatok</div>${m.daysRemaining} dní</div>
+            </div>
+          </div>`;
+                } else {
+                    document.getElementById('drawerBody').innerHTML += `
+          <div class="drawer-section">
+            <div class="drawer-section-title">Predplatné</div>
+            <div style="color:var(--muted);font-size:0.83rem">Žiadne aktívne predplatné</div>
+          </div>`;
+                }
+            } catch {}
+
+            document.getElementById('drawerActions').innerHTML = `
+      <button class="btn btn-ghost btn-sm" onclick="selectPicker('mem','${userId}');showPage('memberships');closeDrawer()"><i class="fas fa-id-card"></i> Spravovať predplatné</button>
+      <button class="btn btn-${isActive?'frozen':'cyan'} btn-sm" onclick="quickToggle('${userId}',${isActive});closeDrawer()">
+        <i class="fas fa-${isActive?'snowflake':'user-check'}"></i> ${isActive?'Zmraziť účet':'Aktivovať účet'}
+      </button>`;
+        } catch(e) {
+            document.getElementById('drawerBody').innerHTML = `<div class="empty-state"><p>❌ ${e.message}</p></div>`;
+        }
+    }
+
+    function closeDrawer() {
+        document.getElementById('drawerOverlay').classList.remove('open');
+        document.getElementById('userDrawer').classList.remove('open');
+    }
+
+    // ── PICKER ────────────────────────────────────────────────────────────────────
+    const pickerState = {role:null,status:null,mem:null,classTrainer:null};
+
+    function buildPickerList(pid, users) {
+        const el = document.getElementById(pid+'PickerList');
         if (!el) return;
-        if (!users.length) { el.innerHTML = '<div class="picker-option" style="color:var(--muted)">Žiadni užívatelia</div>'; return; }
+        if (!users.length) { el.innerHTML='<div class="picker-opt" style="color:var(--muted)">Žiadni užívatelia</div>'; return; }
         el.innerHTML = users.map(u => `
-    <div class="picker-option" onclick="selectPicker('${pickerId}', '${u.id}')">
-      <span>${u.fullName||'—'} <span style="color:var(--muted);font-size:0.8rem">&lt;${u.email}&gt;</span></span>
-      <span class="po-role">${u.role||''}</span>
+    <div class="picker-opt" onclick="selectPicker('${pid}','${u.id}')">
+      <span>${u.fullName||'—'} <span style="color:var(--muted);font-size:0.78rem">&lt;${u.email}&gt;</span></span>
+      <span>
+        <span class="po-role">${u.role||''}</span>
+        ${!u.active ? '<span class="po-frozen"> ❄</span>' : ''}
+      </span>
     </div>`).join('');
     }
 
     function openPicker(pid) {
-        // Zatvor ostatné
         ['role','status','mem','classTrainer'].forEach(p => {
-            if (p!==pid) { const el=document.getElementById(p+'PickerList'); if(el) el.classList.remove('open'); }
+            if (p!==pid) { const el=document.getElementById(p+'PickerList'); if(el)el.classList.remove('open'); }
         });
-        const el = document.getElementById(pid + 'PickerList');
+        const el = document.getElementById(pid+'PickerList');
         if (!el) return;
-        const searchVal = document.getElementById(pid+'PickerSearch').value.toLowerCase();
+        const val = document.getElementById(pid+'PickerSearch').value.toLowerCase();
         const src = pid==='classTrainer' ? allTrainersCache : allUsersCache;
-        const filtered = src.filter(u => (u.fullName||''). toLowerCase().includes(searchVal) || (u.email||''). toLowerCase().includes(searchVal));
-        buildPickerList(pid, filtered);
+        buildPickerList(pid, src.filter(u=>(u.fullName||'').toLowerCase().includes(val)||(u.email||'').toLowerCase().includes(val)));
         el.classList.add('open');
     }
 
     function filterPicker(pid) {
         const val = document.getElementById(pid+'PickerSearch').value.toLowerCase();
         const src = pid==='classTrainer' ? allTrainersCache : allUsersCache;
-        const filtered = src.filter(u => (u.fullName||''). toLowerCase().includes(val) || (u.email||''). toLowerCase().includes(val));
-        buildPickerList(pid, filtered);
+        buildPickerList(pid, src.filter(u=>(u.fullName||'').toLowerCase().includes(val)||(u.email||'').toLowerCase().includes(val)));
         document.getElementById(pid+'PickerList').classList.add('open');
     }
 
     function selectPicker(pid, userId) {
-        const u = (pid==='classTrainer' ? allTrainersCache : allUsersCache).find(x=>x.id===userId || x.id==userId);
+        const src = pid==='classTrainer' ? allTrainersCache : allUsersCache;
+        const u = src.find(x=>x.id===userId||x.id==userId);
         if (!u) return;
         pickerState[pid] = u;
         document.getElementById(pid+'PickerSearch').value = '';
         document.getElementById(pid+'PickerList').classList.remove('open');
-        document.getElementById(pid+'SelName').textContent  = u.fullName || '—';
-        document.getElementById(pid+'SelEmail').textContent = u.email || '—';
-        document.getElementById(pid+'SelectedBadge').classList.add('visible');
+        document.getElementById(pid+'SelName').textContent  = u.fullName||'—';
+        document.getElementById(pid+'SelEmail').textContent = u.email||'—';
+        document.getElementById(pid+'SelectedBadge').classList.add('vis');
     }
 
     function clearPicker(pid) {
-        pickerState[pid] = null;
-        document.getElementById(pid+'PickerSearch').value = '';
-        document.getElementById(pid+'SelectedBadge').classList.remove('visible');
+        pickerState[pid]=null;
+        document.getElementById(pid+'PickerSearch').value='';
+        document.getElementById(pid+'SelectedBadge').classList.remove('vis');
     }
 
-    // Zatvor picker kliknutím mimo
     document.addEventListener('click', e => {
-        if (!e.target.closest('.user-picker')) {
-            document.querySelectorAll('.picker-dropdown').forEach(el=>el.classList.remove('open'));
-        }
+        if (!e.target.closest('.user-picker'))
+            document.querySelectorAll('.picker-dd').forEach(el=>el.classList.remove('open'));
     });
 
     async function loadTrainersForPicker() {
@@ -526,112 +923,30 @@
         } catch {}
     }
 
-    // ── OVERVIEW ──────────────────────────────────────────────────────────────────
-    async function loadOverview() {
-        try {
-            const res = await authFetch('/api/admin/profiles');
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                document.getElementById('stat-users').textContent = data.length;
-                document.getElementById('stat-active-users').textContent = data.filter(u=>u.active).length;
-                document.getElementById('stat-trainers').textContent = data.filter(u=>u.role==='trainer').length;
-            }
-            const res2 = await authFetch('/api/classes');
-            const cls = await res2.json();
-            if (Array.isArray(cls)) document.getElementById('stat-classes').textContent = cls.length;
-            document.getElementById('overviewOut').innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;font-size:0.85rem">
-        <div><span style="color:var(--muted)">Celkom users:</span> <b>${data.length}</b></div>
-        <div><span style="color:var(--muted)">Aktívni:</span> <b style="color:var(--acid)">${data.filter(u=>u.active).length}</b></div>
-        <div><span style="color:var(--muted)">Tréneri:</span> <b style="color:var(--orange)">${data.filter(u=>u.role==='trainer').length}</b></div>
-      </div>`;
-        } catch(e) { document.getElementById('overviewOut').textContent = '❌ ' + e.message; }
-    }
-
-    // ── USERS ─────────────────────────────────────────────────────────────────────
-    async function loadUsers() {
-        document.getElementById('usersTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
-        try {
-            const res = await authFetch('/api/admin/profiles');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            allUsersCache = Array.isArray(data) ? data : [];
-            document.getElementById('stat-users').textContent = allUsersCache.length;
-            document.getElementById('stat-active-users').textContent = allUsersCache.filter(u=>u.active).length;
-            document.getElementById('stat-trainers').textContent = allUsersCache.filter(u=>u.role==='trainer').length;
-            renderUsersTable(allUsersCache);
-        } catch(e) {
-            document.getElementById('usersTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
-        }
-    }
-
-    function renderUsersTable(users) {
-        if (!users.length) {
-            document.getElementById('usersTable').innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni užívatelia</p></div>';
-            return;
-        }
-        let html = '<table class="data-table"><thead><tr><th>Meno</th><th>Email</th><th>Rola</th><th>Status</th><th>Akcie</th></tr></thead><tbody>';
-        users.forEach(u => {
-            const roleCls = u.role==='admin'?'b-red':u.role==='trainer'?'b-orange':u.role==='reception'?'b-cyan':'b-grey';
-            html += `<tr>
-      <td><b>${u.fullName||'—'}</b><div style="font-size:0.75rem;color:var(--muted)">${u.id?.substring(0,8)}...</div></td>
-      <td style="color:var(--muted)">${u.email||'—'}</td>
-      <td><span class="badge ${roleCls}">${u.role||'—'}</span></td>
-      <td>${u.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-grey">Neaktívny</span>'}</td>
-      <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
-        <button class="btn btn-ghost btn-sm" title="Vyber pre zmenu roly" onclick="selectPicker('role','${u.id}');showPage('users')"><i class="fas fa-user-tag"></i></button>
-        <button class="btn btn-${u.active?'red':'cyan'} btn-sm" onclick="quickToggle('${u.id}',${u.active})">
-          <i class="fas fa-${u.active?'user-times':'user-check'}"></i>
-        </button>
-        <button class="btn btn-ghost btn-sm" title="Predplatné" onclick="selectPicker('mem','${u.id}');showPage('memberships')"><i class="fas fa-id-card"></i></button>
-      </td>
-    </tr>`;
-        });
-        html += '</tbody></table>';
-        document.getElementById('usersTable').innerHTML = html;
-    }
-
-    function filterUsers() {
-        const search = document.getElementById('userSearch').value.toLowerCase();
-        const role   = document.getElementById('roleFilter').value;
-        renderUsersTable(allUsersCache.filter(u =>
-            (!search || (u.fullName||''). toLowerCase().includes(search) || (u.email||''). toLowerCase().includes(search)) &&
-            (!role || u.role===role)
-        ));
-    }
-
-    async function quickToggle(id, currentActive) {
-        try {
-            const res = await authFetch('/api/admin/profiles/'+id+'/status', {method:'PUT', body:JSON.stringify({active:!currentActive})});
-            const d = await res.json();
-            if (res.ok) { toast(!currentActive?'Užívateľ aktivovaný':'Užívateľ deaktivovaný','ok'); loadUsers(); }
-            else toast(d.message||'Chyba','err');
-        } catch(e) { toast(e.message,'err'); }
-    }
-
+    // ── USERS ACTIONS ─────────────────────────────────────────────────────────────
     async function changeUserRole() {
         const u = pickerState.role;
-        if (!u) return showMsg('roleMsg','Vyber užívateľa zo zoznamu','err');
+        if (!u) return showMsg('roleMsg','Vyber profil zo zoznamu','err');
         const role = document.getElementById('newRole').value;
         try {
-            const res = await authFetch('/api/users/'+u.id, {method:'PUT', body:JSON.stringify({role})});
+            const res = await authFetch('/api/users/'+u.id, {method:'PUT',body:JSON.stringify({role})});
             let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba servera');
-            showMsg('roleMsg',`Rola ${u.fullName} zmenená na ${role}`,'ok');
-            toast('Rola zmenená','ok');
-            loadUsers();
+            if (!res.ok) throw new Error(d.message||'Chyba');
+            showMsg('roleMsg','Rola zmenená: '+u.fullName+' → '+role,'ok');
+            toast('Rola zmenená','ok'); loadUsers();
         } catch(e) { showMsg('roleMsg',e.message,'err'); }
     }
 
     async function setUserStatus(active) {
         const u = pickerState.status;
-        if (!u) return showMsg('statusMsg','Vyber užívateľa zo zoznamu','err');
+        if (!u) return showMsg('statusMsg','Vyber profil zo zoznamu','err');
+        if (!active && !confirm(`Zmraziť účet pre ${u.fullName}?\nPoužívateľ sa nebude môcť prihlásiť.`)) return;
         try {
-            const res = await authFetch('/api/admin/profiles/'+u.id+'/status', {method:'PUT', body:JSON.stringify({active})});
+            const res = await authFetch('/api/admin/profiles/'+u.id+'/status', {method:'PUT',body:JSON.stringify({active})});
             let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba servera');
-            showMsg('statusMsg',(active?'Aktivovaný':'Deaktivovaný')+': '+u.fullName,'ok');
-            toast(active?'Aktivovaný':'Deaktivovaný','ok');
+            if (!res.ok) throw new Error(d.message||'Chyba');
+            showMsg('statusMsg',(active?'✓ Aktivovaný':'❄️ Zmrazený')+': '+u.fullName,'ok');
+            toast(active?'Účet aktivovaný':'Účet zmrazený', active?'ok':'err');
             loadUsers();
         } catch(e) { showMsg('statusMsg',e.message,'err'); }
     }
@@ -642,9 +957,8 @@
             const res = await authFetch('/api/memberships/types');
             const types = await res.json();
             const sel = document.getElementById('memTypeSelect');
-            if (Array.isArray(types) && types.length) {
-                sel.innerHTML = types.map(t => `<option value="${t.id}">${t.name} — ${t.priceCents/100} €/mes</option>`).join('');
-            }
+            if (Array.isArray(types) && types.length)
+                sel.innerHTML = types.map(t=>`<option value="${t.id}">${t.name} — ${(t.priceCents/100).toFixed(2)} €</option>`).join('');
         } catch {}
     }
 
@@ -653,19 +967,19 @@
         if (!u) return toast('Najprv vyber člena','err');
         try {
             const res = await authFetch('/api/admin/memberships/user/'+u.id);
-            const d   = await res.json();
             const disp = document.getElementById('memberMemDisplay');
             disp.style.display = 'block';
-            if (!res.ok || !d) {
+            if (!res.ok) {
                 document.getElementById('memCurrentData').innerHTML = '<span style="color:var(--muted)">Žiadne aktívne predplatné</span>';
                 return;
             }
-            const statusCls = d.status==='active'?'b-acid':d.status==='expired'?'b-red':'b-grey';
+            const d = await res.json();
+            const sCls = d.status==='active'?'b-acid':d.status==='expired'?'b-red':'b-grey';
             document.getElementById('memCurrentData').innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem">
-        <div><span style="color:var(--muted);font-size:0.75rem">Typ</span><br><b>${d.membershipTypeName||'—'}</b></div>
-        <div><span style="color:var(--muted);font-size:0.75rem">Platnosť</span><br>${d.startDate} – ${d.endDate}</div>
-        <div><span style="color:var(--muted);font-size:0.75rem">Status</span><br><span class="badge ${statusCls}">${d.status}</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;font-size:0.85rem">
+        <div><div class="fl">Typ</div><b>${d.membershipTypeName||'—'}</b></div>
+        <div><div class="fl">Platnosť</div>${d.startDate} – ${d.endDate}</div>
+        <div><div class="fl">Status</div><span class="badge ${sCls}">${d.status}</span> <span style="color:var(--muted);font-size:0.75rem">(${d.daysRemaining} dní)</span></div>
       </div>`;
         } catch(e) { toast(e.message,'err'); }
     }
@@ -673,57 +987,61 @@
     async function assignMembership() {
         const u = pickerState.mem;
         if (!u) return showMsg('memMsg','Vyber člena zo zoznamu','err');
-        const typeId    = document.getElementById('memTypeSelect').value;
+        const typeId = document.getElementById('memTypeSelect').value;
         const startDate = document.getElementById('memStartDate').value;
         if (!typeId) return showMsg('memMsg','Vyber typ členstva','err');
         try {
-            const res = await authFetch('/api/admin/memberships/assign', {
-                method:'POST',
-                body: JSON.stringify({userId: u.id, membershipTypeId: +typeId, startDate: startDate||null})
-            });
+            const res = await authFetch('/api/admin/memberships/assign', {method:'POST',body:JSON.stringify({userId:u.id,membershipTypeId:+typeId,startDate:startDate||null})});
             let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba servera');
-            showMsg('memMsg',`Predplatné priradené: ${u.fullName}`,'ok');
-            toast('Predplatné priradené','ok');
-            loadMemberMembership();
+            if (!res.ok) throw new Error(d.message||'Chyba');
+            showMsg('memMsg','Predplatné priradené: '+u.fullName,'ok');
+            toast('Predplatné priradené','ok'); loadMemberMembership();
         } catch(e) { showMsg('memMsg',e.message,'err'); }
     }
 
     async function cancelMembership() {
         const u = pickerState.mem;
         if (!u) return showMsg('memMsg','Vyber člena zo zoznamu','err');
-        if (!confirm(`Naozaj zrušiť predplatné pre ${u.fullName}?`)) return;
+        if (!confirm(`Zrušiť predplatné pre ${u.fullName}?`)) return;
         try {
             const res = await authFetch('/api/admin/memberships/cancel/'+u.id, {method:'PUT'});
             let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba servera');
-            showMsg('memMsg',`Predplatné zrušené: ${u.fullName}`,'ok');
-            toast('Predplatné zrušené','ok');
-            loadMemberMembership();
+            if (!res.ok) throw new Error(d.message||'Chyba');
+            showMsg('memMsg','Predplatné zrušené: '+u.fullName,'ok');
+            toast('Predplatné zrušené','ok'); loadMemberMembership();
         } catch(e) { showMsg('memMsg',e.message,'err'); }
     }
 
     // ── CLASSES ───────────────────────────────────────────────────────────────────
     async function loadAdminClasses() {
-        document.getElementById('adminClassesTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        document.getElementById('adminClassesTable').innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
         try {
             const res = await authFetch('/api/classes');
             const data = await res.json();
             if (!res.ok) throw new Error(data.message);
-            document.getElementById('stat-classes').textContent = Array.isArray(data)?data.length:'—';
             if (!Array.isArray(data)||!data.length) {
                 document.getElementById('adminClassesTable').innerHTML='<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne lekcie</p></div>';
                 return;
             }
-            let html='<table class="data-table"><thead><tr><th>Názov</th><th>Tréner</th><th>Čas</th><th>Miesto</th><th>Kapacita</th><th>Akcia</th></tr></thead><tbody>';
+            let html='<table class="dt"><thead><tr><th>Názov</th><th>Tréner</th><th>Čas</th><th>Miesto</th><th>Obsadenosť</th><th>Akcia</th></tr></thead><tbody>';
             data.forEach(c=>{
-                const dt = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK') : '—';
+                const dt = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+                const booked = c.booked||0, cap = c.capacity||'?';
+                const pct = cap!=='?' ? Math.round((booked/cap)*100) : 0;
+                const barColor = pct>=90?'var(--red)':pct>=60?'var(--orange)':'var(--acid)';
                 html+=`<tr>
         <td><b>${c.name||'—'}</b></td>
-        <td>${c.instructor||c.trainerName||'—'}</td>
-        <td>${dt}</td>
-        <td>${c.location||'—'}</td>
-        <td>${c.booked||0} / ${c.capacity||'—'}</td>
+        <td style="color:var(--muted)">${c.instructor||'—'}</td>
+        <td style="font-size:0.82rem">${dt}</td>
+        <td style="color:var(--muted)">${c.location||'—'}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <div style="flex:1;height:4px;background:var(--border2);border-radius:2px">
+              <div style="width:${pct}%;height:4px;background:${barColor};border-radius:2px"></div>
+            </div>
+            <span style="font-size:0.75rem;color:var(--muted)">${booked}/${cap}</span>
+          </div>
+        </td>
         <td><button class="btn btn-red btn-sm" onclick="deleteClass(${c.id})"><i class="fas fa-trash"></i></button></td>
       </tr>`;
             });
@@ -735,50 +1053,37 @@
     }
 
     async function deleteClass(id) {
-        if (!confirm('Naozaj zmazať lekciu #'+id+'?')) return;
+        if (!confirm('Zmazať lekciu #'+id+'?')) return;
         try {
             const res = await authFetch('/api/classes/'+id,{method:'DELETE'});
             if (res.ok) { toast('Lekcia zmazaná','ok'); loadAdminClasses(); }
-            else toast('Chyba pri mazaní','err');
+            else toast('Chyba','err');
         } catch(e) { toast(e.message,'err'); }
     }
 
     async function createClass() {
-        const name     = document.getElementById('c-name').value.trim();
-        const type     = document.getElementById('c-type').value;
-        const time     = document.getElementById('c-time').value;
-        const duration = document.getElementById('c-duration').value;
-        const capacity = document.getElementById('c-capacity').value;
-        const location = document.getElementById('c-location').value.trim();
-        const desc     = document.getElementById('c-desc').value.trim();
-        const trainer  = pickerState.classTrainer;
-        if (!name || !time) return showMsg('createClassMsg','Vyplň povinné polia (Názov, Čas)','err');
-        if (!trainer)       return showMsg('createClassMsg','Vyber trénera zo zoznamu','err');
+        const name=document.getElementById('c-name').value.trim();
+        const type=document.getElementById('c-type').value;
+        const time=document.getElementById('c-time').value;
+        const dur=document.getElementById('c-duration').value;
+        const cap=document.getElementById('c-capacity').value;
+        const loc=document.getElementById('c-location').value.trim();
+        const desc=document.getElementById('c-desc').value.trim();
+        const tr=pickerState.classTrainer;
+        if (!name||!time) return showMsg('createClassMsg','Vyplň Názov a Čas','err');
+        if (!tr) return showMsg('createClassMsg','Vyber trénera','err');
         try {
-            const res = await authFetch('/api/classes', {
-                method:'POST',
-                body: JSON.stringify({
-                    name, type,
-                    startTime: time,
-                    durationMinutes: +duration||60,
-                    capacity: +capacity||20,
-                    location,
-                    description: desc,
-                    instructor: trainer.fullName,
-                    trainerId: trainer.id
-                })
-            });
+            const res = await authFetch('/api/classes',{method:'POST',body:JSON.stringify({name,type,startTime:time,durationMinutes:+dur||60,capacity:+cap||20,location:loc,description:desc,instructor:tr.fullName,trainerId:tr.id})});
             let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba servera');
-            showMsg('createClassMsg','Lekcia úspešne vytvorená!','ok');
+            if (!res.ok) throw new Error(d.message||'Chyba');
+            showMsg('createClassMsg','Lekcia vytvorená!','ok');
             toast('Lekcia vytvorená!','ok');
-            // Reset
             ['c-name','c-time','c-duration','c-capacity','c-location','c-desc'].forEach(id=>document.getElementById(id).value='');
             clearPicker('classTrainer');
         } catch(e) { showMsg('createClassMsg',e.message,'err'); }
     }
 
-    // ── ADMIN PROFILE ─────────────────────────────────────────────────────────────
+    // ── PROFILE ───────────────────────────────────────────────────────────────────
     async function loadAdminProfile() {
         try {
             const res = await authFetch('/api/auth/me');
@@ -788,49 +1093,48 @@
             document.getElementById('ap-name').textContent  = d.fullName||'—';
             document.getElementById('ap-email').textContent = d.email||'—';
             document.getElementById('ap-role').innerHTML    = `<span class="badge b-red">${d.role}</span>`;
-            document.getElementById('ap-active').innerHTML  = d.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-red">Neaktívny</span>';
-            document.getElementById('ap-edit-name').value  = d.fullName||'_';
-            document.getElementById('ap-edit-phone').value = d.phone||'_';
+            document.getElementById('ap-active').innerHTML  = userStatusBadge(d);
+            document.getElementById('ap-edit-name').value   = d.fullName||'';
+            document.getElementById('ap-edit-phone').value  = d.phone||'';
         } catch(e) { toast(e.message,'err'); }
     }
 
     async function saveAdminProfile() {
-        const fullName = document.getElementById('ap-edit-name').value.trim();
-        const phone    = document.getElementById('ap-edit-phone').value.trim();
+        const fullName=document.getElementById('ap-edit-name').value.trim();
+        const phone=document.getElementById('ap-edit-phone').value.trim();
         if (!fullName) return showMsg('adminProfMsg','Meno je povinné','err');
-        const uid = user?.id||user?.userId;
+        const uid=user?.id||user?.userId;
         try {
             const res = await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone})});
             let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba servera');
+            if (!res.ok) throw new Error(d.message||'Chyba');
             showMsg('adminProfMsg','Profil aktualizovaný!','ok');
             const upd={...user,fullName,phone};
-            localStorage.setItem('fp_user',JSON.stringify(upd));
-            user=upd;
+            localStorage.setItem('fp_user',JSON.stringify(upd)); user=upd;
             document.getElementById('sideName').textContent=fullName;
             toast('Profil uložený','ok');
         } catch(e) { showMsg('adminProfMsg',e.message,'err'); }
     }
 
     async function changeAdminPassword() {
-        const cur = document.getElementById('ap-cur-pass').value;
-        const np  = document.getElementById('ap-new-pass').value;
-        const np2 = document.getElementById('ap-new-pass2').value;
-        if (!cur)          return showMsg('adminPassMsg','Zadaj aktuálne heslo','err');
-        if (np.length < 6) return showMsg('adminPassMsg','Min 6 znakov','err');
-        if (np !== np2)    return showMsg('adminPassMsg','Heslá sa nezhodujú','err');
-        const uid = user?.id||user?.userId;
+        const cur=document.getElementById('ap-cur-pass').value;
+        const np=document.getElementById('ap-new-pass').value;
+        const np2=document.getElementById('ap-new-pass2').value;
+        if (!cur) return showMsg('adminPassMsg','Zadaj aktuálne heslo','err');
+        if (np.length<6) return showMsg('adminPassMsg','Min 6 znakov','err');
+        if (np!==np2) return showMsg('adminPassMsg','Heslá sa nezhodujú','err');
+        const uid=user?.id||user?.userId;
         try {
             const res = await authFetch('/api/users/'+uid+'/password',{method:'PUT',body:JSON.stringify({currentPassword:cur,newPassword:np})});
             let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba servera');
+            if (!res.ok) throw new Error(d.message||'Chyba');
             showMsg('adminPassMsg','Heslo zmenené!','ok');
             ['ap-cur-pass','ap-new-pass','ap-new-pass2'].forEach(id=>document.getElementById(id).value='');
             toast('Heslo zmenené','ok');
         } catch(e) { showMsg('adminPassMsg',e.message,'err'); }
     }
 
-    // Prvotné načítanie
+    // Boot
     loadOverview();
 </script>
 </body>

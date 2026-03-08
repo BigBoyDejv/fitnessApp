@@ -637,7 +637,7 @@
         setOut('ov-meOut','Načítavam...');
         try {
             const res=await af('/api/auth/me'); const d=await res.json();
-            if(!res.ok) throw new Error(d.message);
+            if(!res.ok) throw new Error(d.message); 
             setOut('ov-meOut', JSON.stringify(d,null,2));
         } catch(e){setOut('ov-meOut','❌ '+e.message);}
     }
