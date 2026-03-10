@@ -19,7 +19,7 @@
         .sidebar-logo .logo{font-family:var(--font-d);font-size:1.7rem;font-weight:900;color:var(--acid);letter-spacing:0.12em;}
         .role-tag{display:inline-block;font-family:var(--font-d);font-size:0.63rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(200,255,0,0.1);color:var(--acid);border:1px solid rgba(200,255,0,0.22);padding:0.15rem 0.6rem;border-radius:2px;margin-top:0.4rem;}
         .sidebar-user{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.8rem;}
-        .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--acid),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.2rem;font-weight:900;color:#000;flex-shrink:0;}
+        .avatar img{width:38px;height:38px;border-radius:50%;object-fit:cover;}
         .user-info .name{font-size:0.87rem;font-weight:500;}
         .user-info .email{font-size:0.7rem;color:var(--muted);}
         .sidebar-nav{flex:1;padding:0.7rem 0;}
@@ -290,19 +290,12 @@
             <div class="g2">
                 <div class="panel">
                     <div class="ph"><span class="pt">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
-                    <div class="pb">
-                        <div class="api-url">/api/auth/me</div>
-                        <button class="btn btn-ghost btn-sm" onclick="loadMe()"><i class="fas fa-sync-alt"></i> Načítať</button>
-                        <div class="api-out" id="ov-meOut">Klikni načítať...</div>
-                    </div>
+                    <div class="pb" id="ov-meOut" style="min-height:unset"></div>
                 </div>
+
                 <div class="panel">
                     <div class="ph"><span class="pt">Moje lekcie</span><span class="method m-get">GET /api/classes/my</span></div>
-                    <div class="pb">
-                        <div class="api-url">/api/classes/my</div>
-                        <button class="btn btn-ghost btn-sm" onclick="loadMyClassesOv()"><i class="fas fa-calendar"></i> Načítať</button>
-                        <div class="api-out" id="ov-clOut">Klikni načítať...</div>
-                    </div>
+                    <div id="ov-clOut" style="padding:0;min-height:unset"></div>
                 </div>
             </div>
         </div>
@@ -594,6 +587,8 @@
     refreshLive();
     initBarChart();
     setInterval(refreshLive, 30000);
+    loadMe();
+    loadMyClassesOv();
 
     // ===== NAV =====
     const titles = {overview:'Prehľad',profile:'Môj profil',notifications:'Notifikácie',membership:'Moje členstvo',pricing:'Cenník',classes:'Moje lekcie',book:'Rezervácia lekcií',trainers:'Naši tréneri',qr:'QR Vstupný kód',checkin:'História vstupov',stats:'Moje štatistiky',rules:'Pravidlá centra'};
@@ -606,6 +601,7 @@
         });
         document.getElementById('topTitle').textContent = titles[id]||id;
         // Auto-load pri otvorení sekcie
+        if (id==='overview')   { loadMe(); loadMyClassesOv(); }
         if (id==='membership') { loadMembership(); loadMemHistory(); }
         if (id==='profile')    loadProfile();
         if (id==='classes')    loadMyClasses();
@@ -646,21 +642,76 @@
 
     // ===== OVERVIEW =====
     async function loadMe() {
-        setOut('ov-meOut','Načítavam...');
+        const el = document.getElementById('ov-meOut');
         try {
-            const res=await af('/api/auth/me'); const d=await res.json();
-            if(!res.ok) throw new Error(d.message);
-            setOut('ov-meOut', JSON.stringify(d,null,2));
-        } catch(e){setOut('ov-meOut','❌ '+e.message);}
+            const res = await af('/api/auth/me');
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
+            const ini = (d.fullName||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+            const av = d.avatarUrl
+                ? `<img src="${d.avatarUrl}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+                : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--acid),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:900;font-size:1.1rem;color:#000;flex-shrink:0">${ini}</div>`;
+
+
+            // Update sidebar
+            const sideAv = document.getElementById('sideAvatar');
+            if (d.avatarUrl) {
+                sideAv.innerHTML = `<img src="${d.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+            } else {
+                sideAv.innerHTML = ini;
+            }
+            document.getElementById('sideName').textContent  = d.fullName || '—';
+            document.getElementById('sideEmail').textContent = d.email || '—';
+
+            el.innerHTML = `
+            <div style="display:flex;align-items:center;gap:0.9rem;margin-bottom:1rem;padding-bottom:0.9rem;border-bottom:1px solid var(--border)">
+                ${av}
+                <div>
+                    <div style="font-weight:600;font-size:0.95rem">${d.fullName||'—'}</div>
+                    <div style="font-size:0.78rem;color:var(--muted)">${d.email||'—'}</div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
+                <div><div class="fl">Rola</div><span class="badge b-acid">${d.role||'—'}</span></div>
+                <div><div class="fl">Stav</div>${d.isActive ? '<span class="badge b-acid">Aktívny</span>' : '<span class="badge b-red">Neaktívny</span>'}</div>
+                <div><div class="fl">Telefón</div><div style="font-size:0.83rem;margin-top:0.15rem">${d.phone||'—'}</div></div>
+                <div><div class="fl">Registrovaný</div><div style="font-size:0.83rem;margin-top:0.15rem">${new Date(d.createdAt).toLocaleDateString('sk-SK')}</div></div>
+            </div>`;
+        } catch(e) {
+            el.innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
+        }
     }
     async function loadMyClassesOv() {
-        setOut('ov-clOut','Načítavam...');
+        const el = document.getElementById('ov-clOut');
         try {
-            const res=await af('/api/classes/my'); const d=await res.json();
-            if(!res.ok) throw new Error(d.message);
-            setOut('ov-clOut', JSON.stringify(d,null,2));
-            if(Array.isArray(d)) document.getElementById('ov-lessons').textContent=d.length;
-        } catch(e){setOut('ov-clOut','❌ '+e.message);}
+            const res = await af('/api/classes/my');
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message);
+            const now = new Date();
+            const upcoming = Array.isArray(d) ? d.filter(c => new Date(c.startTime) >= now) : [];
+            document.getElementById('ov-lessons').textContent = upcoming.length;
+            if (!upcoming.length) {
+                el.innerHTML = `<div class="empty"><i class="fas fa-calendar-times"></i><p>Žiadne nadchádzajúce lekcie</p></div>`;
+                return;
+            }
+            el.innerHTML = upcoming.slice(0,5).map(c => {
+                const dt = new Date(c.startTime).toLocaleString('sk-SK', {weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+                const dur = c.durationMinutes ? c.durationMinutes + ' min' : '';
+                return `
+            <div class="cl-row">
+                <div class="cl-row-main">
+                    <div class="cl-row-name">${c.name}</div>
+                    <div class="cl-row-meta">
+                        <span><i class="fas fa-clock" style="opacity:0.5"></i> ${dt}${dur ? ' · '+dur : ''}</span>
+                        <span><i class="fas fa-map-marker-alt" style="opacity:0.5"></i> ${c.location||'—'}</span>
+                    </div>
+                </div>
+                <span class="badge b-acid" style="font-size:0.6rem"><i class="fas fa-check"></i> Res.</span>
+            </div>`;
+            }).join('') + (upcoming.length > 5 ? `<div style="text-align:center;padding:0.6rem;font-size:0.78rem;color:var(--muted)">+ ${upcoming.length-5} ďalších</div>` : '');
+        } catch(e) {
+            el.innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
+        }
     }
 
     // ===== PROFILE — opravené =====
@@ -1111,6 +1162,7 @@
         setTimeout(()=>t.classList.remove('show'),3200);
     }
     function logout(){localStorage.removeItem('fp_token');localStorage.removeItem('fp_user');window.location.href='index.html';}
+
 </script>
 </body>
 </html>

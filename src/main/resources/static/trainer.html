@@ -379,6 +379,7 @@
                         <div class="fg"><label class="fl">Celé meno *</label><input class="fi" type="text" id="tp-name" placeholder="Tvoje meno"></div>
                         <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="tp-phone" placeholder="+421..."></div>
                         <div class="fg"><label class="fl">Špecializácia</label><input class="fi" type="text" id="tp-spec" placeholder="napr. CrossFit, Strength Training..."></div>
+                        <div class="fg"><label class="fl">URL avatara</label><input class="fi" type="url" id="tp-avatar" placeholder="https://..."></div>
                         <button class="btn btn-blue" onclick="saveProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                         <div class="fm" id="profileMsg"></div>
                     </div>
@@ -815,6 +816,8 @@
             const d=await res.json();
             if (!res.ok) throw new Error(d.message);
             document.getElementById('profileInfoPanel').style.display='block';
+
+
             document.getElementById('profileInfoGrid').innerHTML=`
       <div><div class="fl">Meno</div><div style="font-size:0.87rem">${d.fullName||'—'}</div></div>
       <div><div class="fl">Email</div><div style="font-size:0.87rem">${d.email||'—'}</div></div>
@@ -824,7 +827,8 @@
       <div><div class="fl">Registrovaný</div><div style="font-size:0.87rem">${fmtDate(d.createdAt)}</div></div>`;
             document.getElementById('tp-name').value =d.fullName||'';
             document.getElementById('tp-phone').value=d.phone||'';
-            document.getElementById('tp-spec').value =d.specialization||'';
+            document.getElementById('tp-spec').value  = d.specialization||'';
+            document.getElementById('tp-avatar').value = d.avatarUrl||'';
         } catch(e) { toast(e.message,'err'); }
     }
 
@@ -832,19 +836,24 @@
         const fullName=document.getElementById('tp-name').value.trim();
         const phone=document.getElementById('tp-phone').value.trim();
         const specialization=document.getElementById('tp-spec').value.trim();
+        const avatarUrl=document.getElementById('tp-avatar').value.trim();
         if (!fullName) return showMsg('profileMsg','Meno je povinné','err');
         const uid=user?.id||user?.userId;
         if (!uid) return showMsg('profileMsg','Chyba: ID nenájdené','err');
         try {
-            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,specialization})});
+            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,specialization,avatarUrl})});
             let d; try{d=await res.json()}catch{d={}}
             if (!res.ok) throw new Error(d.message||'Chyba servera');
             showMsg('profileMsg','Profil aktualizovaný!','ok');
-            const upd={...user,fullName,phone};
+            const upd={...user,fullName,phone,avatarUrl};
             localStorage.setItem('fp_user',JSON.stringify(upd)); user=upd;
             document.getElementById('sideName').textContent=fullName;
-            document.getElementById('sideAvatar').textContent=fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-            toast('Profil uložený!','ok');
+            const sideAv=document.getElementById('sideAvatar');
+            if (avatarUrl) {
+                sideAv.innerHTML=`<img src="${avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+            } else {
+                sideAv.textContent=fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            }            toast('Profil uložený!','ok');
             loadProfile();
         } catch(e) { showMsg('profileMsg',e.message,'err'); }
     }
