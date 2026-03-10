@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://ep-holy-voice-a8acpn9c-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require
-    username: neondb_owner
-    password: npg_jeMyJm5xdG9Q
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
 
 jwt:
-  secret: MojeSuperTajneHeslo1234567890abcdefghijklmnopqrstuvwxyzABCDEF
-  expiration: 604800000
+  secret: ${JWT_SECRET}
+  expiration: 86400000
