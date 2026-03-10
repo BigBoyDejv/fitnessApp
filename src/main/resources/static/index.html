@@ -162,6 +162,17 @@
         @keyframes spin{to{transform:rotate(360deg);}}
         .hidden{display:none!important;}
 
+        .nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none;}
+        .nav-hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all 0.25s;}
+        .nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+        .nav-hamburger.open span:nth-child(2){opacity:0;}
+        .nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+        .mobile-menu{display:none;position:fixed;top:68px;left:0;right:0;background:rgba(10,10,10,0.98);border-bottom:1px solid var(--border);padding:1rem 1.5rem;flex-direction:column;gap:0;z-index:998;backdrop-filter:blur(20px);}
+        .mobile-menu.open{display:flex;}
+        .mobile-menu a{padding:0.9rem 0;color:var(--muted);font-size:0.9rem;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid var(--border);}
+        .mobile-menu a:last-child{border-bottom:none;}
+        .mobile-menu a:hover{color:var(--acid);}
+
         @media(max-width:1024px){
             .hero{grid-template-columns:1fr;padding:5rem 1.5rem 3rem;}
             .auth-panel{max-width:100%;}
@@ -172,8 +183,26 @@
             .footer-grid{grid-template-columns:1fr 1fr;}
             nav{padding:0 1.5rem;}
             .nav-links{display:none;}
+            .nav-hamburger{display:flex;}
             .section{padding:5rem 1.5rem;}
+            .hero-stats{gap:1.5rem;}
+            .sched-table{font-size:0.78rem;}
+            .sched-table th,.sched-table td{padding:0.6rem 0.7rem;}
         }
+        @media(max-width:600px){
+            .hero h1{font-size:clamp(2.8rem,10vw,5rem);}
+            .hero-stats{flex-wrap:wrap;gap:1rem;}
+            .hero-cta .btn-lg{font-size:1rem;padding:0.75rem 1.6rem;}
+            .price-grid{grid-template-columns:1fr;}
+            .footer-grid{grid-template-columns:1fr;}
+            .sched-table{display:block;overflow-x:auto;}
+            footer{padding:3rem 1rem 1.5rem;}
+            .section{padding:4rem 1rem;}
+            .contact-grid{gap:2.5rem;}
+            nav{padding:0 1rem;}
+            .nav-actions .btn-ghost{display:none;}
+        }
+
     </style>
 </head>
 <body>
@@ -192,7 +221,20 @@
         <button class="btn btn-ghost btn-sm" onclick="focusLogin()">Prihlásiť</button>
         <button class="btn btn-acid btn-sm" onclick="focusRegister()">Registrovať</button>
     </div>
+    <!-- SEM: -->
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleNav()">
+        <span></span><span></span><span></span>
+    </button>
 </nav>
+<!-- A SEM hneď za </nav>: -->
+<div class="mobile-menu" id="mobileMenu">
+    <a href="#programy" onclick="closeNav()">Programy</a>
+    <a href="#cennik" onclick="closeNav()">Cenník</a>
+    <a href="#rozvrh" onclick="closeNav()">Rozvrh</a>
+    <a href="#kontakt" onclick="closeNav()">Kontakt</a>
+    <a href="#" onclick="closeNav();focusLogin()" style="color:var(--text)">Prihlásiť sa</a>
+    <a href="#" onclick="closeNav();focusRegister()" style="color:var(--acid)">Registrovať</a>
+</div>
 
 <!-- HERO -->
 <section class="hero" id="home">
@@ -502,6 +544,14 @@
             showMsg('regMsg', e.message, 'err');
             setBtn('regBtn', false, 'Vytvoriť účet');
         }
+    }
+    function toggleNav(){
+        document.getElementById('navHamburger').classList.toggle('open');
+        document.getElementById('mobileMenu').classList.toggle('open');
+    }
+    function closeNav(){
+        document.getElementById('navHamburger').classList.remove('open');
+        document.getElementById('mobileMenu').classList.remove('open');
     }
 
     function toast(msg, type='ok') {
