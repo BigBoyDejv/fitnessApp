@@ -197,7 +197,49 @@
         .toast.t-err{border-color:var(--red);color:var(--red);}
 
         @media(max-width:1100px){.pricing-grid{grid-template-columns:1fr 1fr}}
-        @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stat-row{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.tr-grid{grid-template-columns:1fr 1fr}}
+        @media(max-width:900px){
+            .sidebar{transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
+            .sidebar.open{transform:translateX(0);}
+            .main{margin-left:0}
+            .stat-row{grid-template-columns:1fr 1fr}
+            .g2{grid-template-columns:1fr}
+            .tr-grid{grid-template-columns:1fr 1fr}
+            .content{padding:1rem;}
+            .topbar{padding:0 1rem;}
+            .hamburger{display:flex;}
+            .sidebar-overlay{display:block;}
+            .sidebar-overlay.open{opacity:1;pointer-events:all;}
+        }
+        @media(max-width:600px){
+            .stat-row{grid-template-columns:1fr 1fr;}
+            .pricing-grid{grid-template-columns:1fr;}
+            .tr-grid{grid-template-columns:1fr;}
+            .g2{grid-template-columns:1fr;}
+            .fr{grid-template-columns:1fr;}
+            .mc-row{flex-direction:column;gap:1rem;}
+            .mc-meta{grid-template-columns:1fr 1fr;}
+            .sc-val{font-size:1.8rem;}
+            .dt thead{display:none;}
+            .dt tr{display:block;border:1px solid var(--border);border-radius:4px;margin-bottom:0.6rem;padding:0.5rem;}
+            .dt td{display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.6rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.8rem;}
+            .dt td:last-child{border-bottom:none;}
+            .dt td::before{content:attr(data-label);font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-d);}
+            .pb{padding:1rem;}
+            .ph{padding:0.75rem 1rem;}
+            .topbar{padding:0 0.8rem;}
+            .page-title{font-size:1.05rem;}
+            .content{padding:0.75rem;}
+            .panel{margin-bottom:1rem;}
+            .btn{font-size:0.78rem;padding:0.45rem 0.9rem;}
+        }
+        .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none;z-index:60;}
+        .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all 0.25s;}
+        .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+        .hamburger.open span:nth-child(2){opacity:0;}
+        .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;opacity:0;pointer-events:none;transition:opacity 0.28s;backdrop-filter:blur(3px);}
+
+
 
         /* ── CLASS ROWS ── */
         .cl-row{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.2rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;gap:1rem;}
@@ -213,8 +255,9 @@
 </head>
 <body>
 <div class="toast" id="toast"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
         <div class="logo">FITNESS PRO</div>
         <div class="role-tag"><i class="fas fa-user"></i> Člen</div>
@@ -251,10 +294,19 @@
 </aside>
 
 <main class="main">
+
     <div class="topbar">
-        <div class="page-title" id="topTitle">Prehľad</div>
+        <div style="display:flex;align-items:center;gap:0.8rem">
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="page-title" id="topTitle">Prehľad</div>
+        </div>
         <div class="live-badge"><div class="live-dot"></div> Live</div>
     </div>
+
+
+
     <div class="content">
 
         <!-- OVERVIEW -->
@@ -598,6 +650,7 @@
     // ===== NAV =====
     const titles = {overview:'Prehľad',profile:'Môj profil',notifications:'Notifikácie',membership:'Moje členstvo',pricing:'Cenník',classes:'Moje lekcie',book:'Rezervácia lekcií',trainers:'Naši tréneri',qr:'QR Vstupný kód',checkin:'História vstupov',stats:'Moje štatistiky',rules:'Pravidlá centra'};
     function go(id) {
+        closeSidebar();
         document.querySelectorAll('.ps').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('pg-'+id).classList.add('active');
@@ -1158,6 +1211,21 @@
     }
 
     // ===== UTILS =====
+
+    function toggleSidebar(){
+        const s=document.getElementById('sidebar');
+        const h=document.getElementById('hamburger');
+        const o=document.getElementById('sidebarOverlay');
+        s.classList.toggle('open');
+        h.classList.toggle('open');
+        o.classList.toggle('open');
+    }
+    function closeSidebar(){
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('hamburger').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
     function showMsg(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='fm '+type;}
     function toast(msg,type='ok'){
         const t=document.getElementById('toast');
