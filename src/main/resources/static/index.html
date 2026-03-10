@@ -417,7 +417,11 @@
 </footer>
 
 <script>
-    const API = 'http://localhost:8080';
+    const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8080'
+        : 'https://fitnessapp-5ogv.onrender.com';
+
+
 
     // If already logged in, redirect
     const existingToken = localStorage.getItem('fp_token');

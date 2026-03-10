@@ -566,7 +566,12 @@
 </main>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    const API = 'http://localhost:8080';
+    const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8080'
+        : 'https://fitnessapp-5ogv.onrender.com';
+
+
+
     let token = localStorage.getItem('fp_token');
     let user  = JSON.parse(localStorage.getItem('fp_user') || 'null');
 
