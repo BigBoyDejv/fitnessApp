@@ -117,7 +117,8 @@ public class TrainerAndStatsController {
                     m.put("fullName", u.getFullName());
                     m.put("email",    u.getEmail());
                     m.put("phone",    u.getPhone());
-                    m.put("active",   Boolean.TRUE.equals(u.getIsActive()));
+                    m.put("active",     Boolean.TRUE.equals(u.getIsActive()));
+                    m.put("avatarUrl",  u.getAvatarUrl());
                     return m;
                 })
                 .toList();

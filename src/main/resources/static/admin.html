@@ -554,6 +554,11 @@
                         </div>
                         <div class="fg"><label class="fl">Celé meno *</label><input class="fi" type="text" id="ap-edit-name" placeholder="Tvoje meno"></div>
                         <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="ap-edit-phone" placeholder="+421..."></div>
+                        <div class="fg">
+                            <label class="fl">URL avatara</label>
+                            <input class="fi" type="url" id="ap-edit-avatar" placeholder="https://...">
+                        </div>
+
                         <button class="btn btn-orange" onclick="saveAdminProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                         <div class="fm" id="adminProfMsg"></div>
                     </div>
@@ -591,7 +596,12 @@
         window.location.href = {member:'member.html',trainer:'trainer.html'}[user.role] || 'index.html';
     }
     if (user) {
-        document.getElementById('sideAvatar').textContent = (user.fullName||'A').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        const av = document.getElementById('sideAvatar');
+        if (user.avatarUrl) {
+            av.innerHTML = `<img src="${user.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+        } else {
+            av.textContent = (user.fullName||'A').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        }
         document.getElementById('sideName').textContent  = user.fullName || 'Admin';
         document.getElementById('sideEmail').textContent = user.email || '—';
     }
@@ -748,7 +758,12 @@
             const roleCls = u.role==='admin'?'b-red':u.role==='trainer'?'b-orange':u.role==='reception'?'b-blue':'b-grey';
             const frozenRow = !u.active ? ' frozen-row' : '';
             html += `<tr class="${frozenRow}">
-      <td><b>${u.fullName||'—'}</b></td>
+      <td>
+    <div style="display:flex;align-items:center;gap:0.6rem">
+      ${avatarHtml(u, 30)}
+      <b>${u.fullName||'—'}</b>
+    </div>
+  </td>
       <td style="color:var(--muted);font-size:0.8rem">${u.email||'—'}</td>
       <td><span class="badge ${roleCls}">${u.role||'—'}</span></td>
       <td>${userStatusBadge(u)}</td>
@@ -784,10 +799,17 @@
             const isActive = Boolean(u.active);
             const frozenRow = !isActive ? ' frozen-row' : '';
             html += `<tr class="${frozenRow}">
-      <td>
+       <td>
+    <div style="display:flex;align-items:center;gap:0.6rem">
+      ${avatarHtml(u, 32)}
+      <div>
         <b>${u.fullName||'—'}</b>
         <div style="font-size:0.72rem;color:var(--muted)">${u.id?.substring(0,8)}…</div>
-      </td>
+      </div>
+    </div>
+  </td>
+
+
       <td style="color:var(--muted);font-size:0.82rem">${u.email||'—'}</td>
       <td><span class="badge ${roleCls}">${u.role||'—'}</span></td>
       <td>${userStatusBadge(u)}</td>
@@ -846,22 +868,26 @@
             document.getElementById('drawerTitle').textContent = d.fullName || 'Detail profilu';
             const isActive = Boolean(d.active);
             document.getElementById('drawerBody').innerHTML = `
-      <div class="drawer-section">
-        <div class="drawer-section-title">Základné info</div>
-        <div class="drow">
-          <div class="dfield"><div class="dk">Meno</div>${d.fullName||'—'}</div>
-          <div class="dfield"><div class="dk">Email</div>${d.email||'—'}</div>
-        </div>
-        <div class="drow">
-          <div class="dfield"><div class="dk">Telefón</div>${d.phone||'—'}</div>
-          <div class="dfield"><div class="dk">Rola</div>${d.role||'—'}</div>
-        </div>
-        <div class="drow">
-          <div class="dfield"><div class="dk">Stav účtu</div>${userStatusBadge(d)}</div>
-          <div class="dfield"><div class="dk">Registrovaný</div>${d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—'}</div>
-        </div>
-        ${d.specialization ? `<div class="dfield" style="margin-top:0.5rem"><div class="dk">Špecializácia</div>${d.specialization}</div>` : ''}
-      </div>`;
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+    ${avatarHtml(d, 60)}
+    <div>
+      <div style="font-family:var(--font-d);font-size:1.3rem;font-weight:900">${d.fullName||'—'}</div>
+      <div style="font-size:0.8rem;color:var(--muted)">${d.email||''}</div>
+      <div style="margin-top:0.3rem"><span class="badge b-grey">${d.role||''}</span></div>
+    </div>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-section-title">Základné info</div>
+    <div class="drow">
+      <div class="dfield"><div class="dk">Telefón</div>${d.phone||'—'}</div>
+      <div class="dfield"><div class="dk">Rola</div>${d.role||'—'}</div>
+    </div>
+    <div class="drow">
+      <div class="dfield"><div class="dk">Stav účtu</div>${userStatusBadge(d)}</div>
+      <div class="dfield"><div class="dk">Registrovaný</div>${d.createdAt ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—'}</div>
+    </div>
+    ${d.specialization ? `<div class="dfield" style="margin-top:0.5rem"><div class="dk">Špecializácia</div>${d.specialization}</div>` : ''}
+  </div>`;
 
             // Try load membership
             try {
@@ -1221,25 +1247,41 @@
             document.getElementById('ap-active').innerHTML  = userStatusBadge(d);
             document.getElementById('ap-edit-name').value   = d.fullName||'';
             document.getElementById('ap-edit-phone').value  = d.phone||'';
+            document.getElementById('ap-edit-avatar').value = d.avatarUrl||'';
+
+            const av = document.getElementById('sideAvatar');
+            if (d.avatarUrl) {
+                av.innerHTML = `<img src="${d.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+            } else {
+                av.textContent = (d.fullName||'A').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            }
         } catch(e) { toast(e.message,'err'); }
     }
 
     async function saveAdminProfile() {
         const fullName=document.getElementById('ap-edit-name').value.trim();
         const phone=document.getElementById('ap-edit-phone').value.trim();
+        const avatarUrl=document.getElementById('ap-edit-avatar').value.trim();
         if (!fullName) return showMsg('adminProfMsg','Meno je povinné','err');
         const uid=user?.id||user?.userId;
         try {
-            const res = await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone})});
+            const res = await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,avatarUrl:avatarUrl||null})});
             let d; try{d=await res.json()}catch{d={}}
             if (!res.ok) throw new Error(d.message||'Chyba');
             showMsg('adminProfMsg','Profil aktualizovaný!','ok');
-            const upd={...user,fullName,phone};
+            const upd={...user,fullName,phone,avatarUrl};
             localStorage.setItem('fp_user',JSON.stringify(upd)); user=upd;
             document.getElementById('sideName').textContent=fullName;
+            const av=document.getElementById('sideAvatar');
+            if (avatarUrl) {
+                av.innerHTML=`<img src="${avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+            } else {
+                av.textContent=fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            }
             toast('Profil uložený','ok');
         } catch(e) { showMsg('adminProfMsg',e.message,'err'); }
     }
+
 
     async function changeAdminPassword() {
         const cur=document.getElementById('ap-cur-pass').value;
@@ -1270,7 +1312,26 @@
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
 
+    function avatarHtml(user, size=36){
+        const s=`width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0`;
+        if(user.avatarUrl) return `<img src="${user.avatarUrl}" style="${s}" onerror="this.outerHTML=initialsAvatar('${user.fullName||'?'}',${size})">`;
+        return initialsAvatar(user.fullName||'?', size);
+    }
+    function initialsAvatar(name, size=36){
+        const ini=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--orange));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:${Math.round(size*0.38)}px;font-weight:900;color:#fff;flex-shrink:0">${ini}</div>`;
+    }
+
     // Boot
+    authFetch('/api/auth/me').then(r=>r.json()).then(d=>{
+        if (d.avatarUrl) {
+            document.getElementById('sideAvatar').innerHTML=`<img src="${d.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+        }
+        // Aktualizuj aj localStorage
+        const upd={...user,...d};
+        localStorage.setItem('fp_user',JSON.stringify(upd));
+        user=upd;
+    }).catch(()=>{});
     loadOverview();
 </script>
 </body>

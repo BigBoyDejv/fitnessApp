@@ -459,7 +459,12 @@
         window.location.href = {member:'member.html',admin:'admin.html'}[user.role] || 'index.html';
     }
     if (user) {
-        document.getElementById('sideAvatar').textContent = (user.fullName||'T').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        const av = document.getElementById('sideAvatar');
+        if (user.avatarUrl) {
+            av.innerHTML = `<img src="${user.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+        } else {
+            av.textContent = (user.fullName||'T').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        }
         document.getElementById('sideName').textContent  = user.fullName || 'Tréner';
         document.getElementById('sideEmail').textContent = user.email || '—';
     }
@@ -556,7 +561,7 @@
                 ? myClients.slice(0,6).map(c=>{
                     const ini=(c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
                     return `<div class="client-card" onclick="openDrawer('${c.id}')">
-            <div class="ca">${ini}</div>
+    <div style="flex-shrink:0">${avatarHtml(c, 36)}</div>
             <div><div class="ci-name">${c.fullName||'—'}</div><div class="ci-meta">${c.email||'—'}</div></div>
             <div style="margin-left:auto;color:var(--muted)"><i class="fas fa-chevron-right" style="font-size:0.75rem"></i></div>
           </div>`;
@@ -717,7 +722,7 @@
         document.getElementById('clientsList').innerHTML=clients.map(c=>{
             const ini=(c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
             return `<div class="client-card" onclick="openDrawer('${c.id}')">
-      <div class="ca">${ini}</div>
+      <div style="flex-shrink:0">${avatarHtml(c, 36)}</div>
       <div style="flex:1">
         <div class="ci-name">${c.fullName||'—'}</div>
         <div class="ci-meta">${c.email||'—'}${c.phone?' · '+c.phone:''}</div>
@@ -943,7 +948,26 @@
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
 
+    function avatarHtml(user, size=36){
+        const s=`width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0`;
+        if(user.avatarUrl) return `<img src="${user.avatarUrl}" style="${s}" onerror="this.outerHTML=initialsAvatar('${user.fullName||'?'}',${size})">`;
+        return initialsAvatar(user.fullName||'?', size);
+    }
+    function initialsAvatar(name, size=36){
+        const ini=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:${Math.round(size*0.38)}px;font-weight:900;color:#fff;flex-shrink:0">${ini}</div>`;
+    }
+
     // Boot
+
+    authFetch('/api/auth/me').then(r=>r.json()).then(d=>{
+        const av=document.getElementById('sideAvatar');
+        if (d.avatarUrl) {
+            av.innerHTML=`<img src="${d.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+        }
+        const upd={...user,...d};
+        localStorage.setItem('fp_user',JSON.stringify(upd)); user=upd;
+    }).catch(()=>{});
     loadOverview();
 </script>
 </body>

@@ -28,7 +28,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5500","https://fitnessapp-5ogv.onrender.com","https://fitpro-bakalarka.netlify.app"));
+        config.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:8080", "http://localhost:5173", "http://127.0.0.1:5500","https://fitnessapp-5ogv.onrender.com","https://fitpro-bakalarka.netlify.app"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -45,19 +45,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Verejné - bez tokenu
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
-
-                        // Chránené - vyžadujú token
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/qr-code").authenticated()
-
                         .requestMatchers(
                                 "/", "/index.html", "/member.html", "/admin.html", "/trainer.html",
                                 "/favicon.ico", "/static/**", "/css/**", "/js/**","/reception.html"
                         ).permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->

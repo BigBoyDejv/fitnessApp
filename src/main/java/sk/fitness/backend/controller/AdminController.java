@@ -154,6 +154,7 @@ public class AdminController {
         m.put("role",           u.getRole());
         m.put("active",         Boolean.TRUE.equals(u.getIsActive()));
         m.put("specialization", u.getSpecialization());
+        m.put("avatarUrl",      u.getAvatarUrl());  // ← TOTO CHÝBA, PRIDAJ
         m.put("createdAt",      u.getCreatedAt() != null ? u.getCreatedAt().toString() : null);
         return m;
     }

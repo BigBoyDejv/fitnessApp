@@ -536,6 +536,7 @@
                         </div>
                         <div class="fg"><label class="fl">Celé meno *</label><input class="fi" type="text" id="p-edit-name"></div>
                         <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="p-edit-phone" placeholder="+421..."></div>
+                        <div class="fg"><label class="fl">URL avatara</label><input class="fi" type="url" id="p-edit-avatar" placeholder="https://..."></div>
                         <button class="btn btn-purple" onclick="saveProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                         <div class="fm" id="profileMsg"></div>
                     </div>
@@ -570,7 +571,12 @@
         window.location.href=map[user.role]||'index.html';
     }
     if (user){
-        document.getElementById('sideAvatar').textContent=(user.fullName||'R').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        const av=document.getElementById('sideAvatar');
+        if(user.avatarUrl){
+            av.innerHTML=`<img src="${user.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+        } else {
+            av.textContent=(user.fullName||'R').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        }
         document.getElementById('sideName').textContent=user.fullName||'Recepcia';
         document.getElementById('sideEmail').textContent=user.email||'—';
     }
@@ -700,9 +706,7 @@
         if(!results.length){el.innerHTML='<div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem">Žiadny člen nenájdený</div>';return;}
         el.innerHTML=results.map(m=>`
         <div class="name-result-item" onclick="doCheckinById('${m.id}','${m.fullName||''}')">
-            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:0.9rem;font-weight:700;flex-shrink:0">
-                ${(m.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
-            </div>
+            ${avatarHtml(m, 34)}
             <div style="flex:1">
                 <div style="font-size:0.85rem;font-weight:500">${m.fullName||'—'}</div>
                 <div style="font-size:0.72rem;color:var(--muted)">${m.email||''}</div>
@@ -890,7 +894,13 @@
         let html='<table class="dt"><thead><tr><th>Meno</th><th>Email</th><th>Telefón</th><th>Stav</th><th>Akcie</th></tr></thead><tbody>';
         members.forEach(m=>{
             html+=`<tr class="${!m.active?'frozen-row':''}">
-            <td data-label="Meno"><b>${m.fullName||'—'}</b></td>
+
+            <td data-label="Meno">
+  <div style="display:flex;align-items:center;gap:0.6rem">
+    ${avatarHtml(m, 32)}
+    <b>${m.fullName||'—'}</b>
+  </div>
+</td>
             <td data-label="Email" style="color:var(--muted);font-size:0.82rem">${m.email||'—'}</td>
             <td data-label="Telefón" style="color:var(--muted)">${m.phone||'—'}</td>
             <td data-label="Stav">${m.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-frozen"><i class="fas fa-snowflake"></i> Zmrazený</span>'}</td>
@@ -1198,20 +1208,30 @@
             document.getElementById('p-role').innerHTML='<span class="badge b-purple">reception</span>';
             document.getElementById('p-edit-name').value=d.fullName||'';
             document.getElementById('p-edit-phone').value=d.phone||'';
+            document.getElementById('p-edit-avatar').value=d.avatarUrl||'';
         }catch(e){toast(e.message,'err');}
     }
     async function saveProfile(){
         const fullName=document.getElementById('p-edit-name').value.trim();
         const phone=document.getElementById('p-edit-phone').value.trim();
+        const avatarUrl=document.getElementById('p-edit-avatar').value.trim();
         if(!fullName)return showMsg('profileMsg','Meno je povinné','err');
         const uid=user?.id||user?.userId;
         try{
-            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone})});
+            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,avatarUrl:avatarUrl||null})});
             let d;try{d=await res.json()}catch{d={}}
             if(!res.ok)throw new Error(d.message||'Chyba');
             showMsg('profileMsg','Profil aktualizovaný!','ok');
-            const upd={...user,fullName,phone};localStorage.setItem('fp_user',JSON.stringify(upd));user=upd;
-            document.getElementById('sideName').textContent=fullName;toast('Profil uložený','ok');
+            const upd={...user,fullName,phone,avatarUrl};
+            localStorage.setItem('fp_user',JSON.stringify(upd));user=upd;
+            document.getElementById('sideName').textContent=fullName;
+            const av=document.getElementById('sideAvatar');
+            if(avatarUrl){
+                av.innerHTML=`<img src="${avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+            } else {
+                av.textContent=fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            }
+            toast('Profil uložený','ok');
         }catch(e){showMsg('profileMsg',e.message,'err');}
     }
     async function changePassword(){
@@ -1232,10 +1252,28 @@
         }catch(e){showMsg('passMsg',e.message,'err');}
     }
 
+    function avatarHtml(user, size=36){
+        const s=`width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0`;
+        if(user.avatarUrl) return `<img src="${user.avatarUrl}" style="${s}" onerror="this.outerHTML=initialsAvatar('${user.fullName||'?'}',${size})">`;
+        return initialsAvatar(user.fullName||'?', size);
+    }
+    function initialsAvatar(name, size=36){
+        const ini=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:${Math.round(size*0.38)}px;font-weight:900;color:#fff;flex-shrink:0">${ini}</div>`;
+    }
+
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('hamburger').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open');}
     function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('hamburger').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
     renderProductGrid();
+    authFetch('/api/auth/me').then(r=>r.json()).then(d=>{
+        const av=document.getElementById('sideAvatar');
+        if(d.avatarUrl){
+            av.innerHTML=`<img src="${d.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
+        }
+        const upd={...user,...d};
+        localStorage.setItem('fp_user',JSON.stringify(upd));user=upd;
+    }).catch(()=>{});
     loadOverview();
 </script>
 </body>

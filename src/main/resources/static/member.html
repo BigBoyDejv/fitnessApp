@@ -1230,6 +1230,16 @@
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
 
+    function avatarHtml(user, size=36){
+        const s=`width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0`;
+        if(user.avatarUrl) return `<img src="${user.avatarUrl}" style="${s}" onerror="this.outerHTML=initialsAvatar('${user.fullName||'?'}',${size})">`;
+        return initialsAvatar(user.fullName||'?', size);
+    }
+    function initialsAvatar(name, size=36){
+        const ini=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:${Math.round(size*0.38)}px;font-weight:900;color:#fff;flex-shrink:0">${ini}</div>`;
+    }
+
     function showMsg(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='fm '+type;}
     function toast(msg,type='ok'){
         const t=document.getElementById('toast');

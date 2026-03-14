@@ -35,7 +35,11 @@ public class UserController {
 
         UUID uid = UUID.fromString(id);
 
-        if (!caller.getId().equals(uid) && !caller.getRole().equalsIgnoreCase("admin")) {
+        boolean isAdmin = caller.getRole().equalsIgnoreCase("admin");
+        boolean isTrainer = caller.getRole().equalsIgnoreCase("trainer");
+        boolean isReception = caller.getRole().equalsIgnoreCase("reception");
+
+        if (!caller.getId().equals(uid) && !isAdmin && !isTrainer && !isReception) {
             return ResponseEntity.status(403).body(Map.of("message", "Nemáš oprávnenie"));
         }
 
