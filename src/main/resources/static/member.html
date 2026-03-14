@@ -346,12 +346,12 @@
 
             <div class="g2">
                 <div class="panel">
-                    <div class="ph"><span class="pt">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
+                    <div class="ph"><span class="pt">Môj profil</span></div>
                     <div class="pb" id="ov-meOut" style="min-height:unset"></div>
                 </div>
 
                 <div class="panel">
-                    <div class="ph"><span class="pt">Moje lekcie</span><span class="method m-get">GET /api/classes/my</span></div>
+                    <div class="ph"><span class="pt">Moje lekcie</span></div>
                     <div id="ov-clOut" style="padding:0;min-height:unset"></div>
                 </div>
             </div>
@@ -361,7 +361,7 @@
         <div class="ps" id="pg-profile">
             <!-- Zobrazenie profilu -->
             <div class="panel">
-                <div class="ph"><span class="pt">Môj profil</span><span class="method m-get">GET /api/auth/me</span></div>
+                <div class="ph"><span class="pt">Môj profil</span></div>
                 <div class="pb">
                     <div id="profileData" style="display:none;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.5rem">
                         <div><div class="fl">Celé meno</div><div id="p-name" style="font-size:0.9rem">—</div></div>
@@ -375,7 +375,7 @@
             </div>
             <!-- Upraviť profil -->
             <div class="panel">
-                <div class="ph"><span class="pt">Upraviť profil</span><span class="method m-put">PUT /api/users/{id}</span></div>
+                <div class="ph"><span class="pt">Upraviť profil</span></div>
                 <div class="pb">
                     <div class="fr">
                         <div class="form-group"><label class="fl">Celé meno *</label><input class="fi" type="text" id="e-name" placeholder="Ján Novák"></div>
@@ -388,7 +388,7 @@
             </div>
             <!-- Zmena hesla -->
             <div class="panel">
-                <div class="ph"><span class="pt">Zmena hesla</span><span class="method m-put">PUT /api/users/{id}/password</span></div>
+                <div class="ph"><span class="pt">Zmena hesla</span></div>
                 <div class="pb">
                     <div class="fr">
                         <div class="form-group"><label class="fl">Aktuálne heslo *</label><input class="fi" type="password" id="e-cur-pass" placeholder="Aktuálne heslo"></div>
@@ -415,7 +415,7 @@
         <!-- MEMBERSHIP -->
         <div class="ps" id="pg-membership">
             <div class="panel">
-                <div class="ph"><span class="pt">Aktívne členstvo</span><span class="method m-get">GET /api/memberships/my</span></div>
+                <div class="ph"><span class="pt">Aktívne členstvo</span></div>
                 <div class="pb">
                     <div class="api-url">/api/memberships/my</div>
                     <button class="btn btn-ghost btn-sm" onclick="loadMembership()" style="margin-bottom:1.1rem"><i class="fas fa-sync-alt"></i> Načítať</button>
@@ -423,7 +423,7 @@
                 </div>
             </div>
             <div class="panel">
-                <div class="ph"><span class="pt">História platieb</span><span class="method m-get">GET /api/memberships/my/history</span></div>
+                <div class="ph"><span class="pt">História platieb</span></div>
                 <div class="pb">
                     <div class="api-url">/api/memberships/my/history</div>
                     <button class="btn btn-ghost btn-sm" onclick="loadMemHistory()" style="margin-bottom:0.9rem"><i class="fas fa-history"></i> Načítať históriu</button>
@@ -435,7 +435,7 @@
         <!-- PRICING -->
         <div class="ps" id="pg-pricing">
             <div class="panel">
-                <div class="ph"><span class="pt">Cenník členstva</span><span class="method m-get">GET /api/memberships/types</span></div>
+                <div class="ph"><span class="pt">Cenník členstva</span></div>
                 <div class="pb">
                     <div class="api-url">/api/memberships/types</div>
                     <button class="btn btn-ghost btn-sm" onclick="loadPricing()" style="margin-bottom:1.4rem"><i class="fas fa-sync-alt"></i> Načítať z API</button>
@@ -478,7 +478,7 @@
                 <div class="ph">
                     <span class="pt">Moje rezervácie</span>
                     <div style="display:flex;gap:0.7rem;align-items:center">
-                        <span class="method m-get">GET /api/classes/my</span>
+
                         <button class="btn btn-ghost btn-sm" onclick="loadMyClasses()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
                     </div>
                 </div>
@@ -534,9 +534,8 @@
         <!-- QR -->
         <div class="ps" id="pg-qr">
             <div class="panel" style="max-width:480px;margin:0 auto">
-                <div class="ph"><span class="pt">QR Vstupný kód</span><span class="method m-get">GET /api/auth/qr-code</span></div>
+                <div class="ph"><span class="pt">QR Vstupný kód</span></div>
                 <div class="pb" style="text-align:center">
-                    <div class="api-url">/api/auth/qr-code</div>
                     <p style="color:var(--muted);font-size:0.84rem;margin-bottom:1.4rem;line-height:1.7">Jednorazový QR kód pre vstup do centra. Obsahuje tvoje ID a časové razítko. Platí 24 hodín.</p>
                     <button class="btn btn-acid" id="qrBtn" onclick="genQR()"><i class="fas fa-qrcode"></i> Generovať QR kód</button>
                     <div style="margin-top:1.4rem">
