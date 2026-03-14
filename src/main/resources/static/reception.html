@@ -7,22 +7,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
     <style>
         :root{
             --acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;--purple:#BF5AF2;
             --bg:#070708;--surface:#0F0F11;--surface2:#171719;--surface3:#1E1E21;
             --border:#252528;--border2:#2E2E32;--text:#F2F2F7;--muted:#6E6E73;--muted2:#48484D;
             --font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;
+            --frozen:#4FC3F7;--frozen-bg:rgba(79,195,247,0.08);--frozen-border:rgba(79,195,247,0.25);
         }
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;overflow-x:hidden;}
         h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.03em;text-transform:uppercase;}
         ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--purple);}
-
-        /* SIDEBAR */
         .sidebar{width:256px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
         .sb-logo{padding:1.6rem 1.5rem 1.2rem;border-bottom:1px solid var(--border);}
-        .sb-logo .logo{font-family:var(--font-d);font-size:1.6rem;font-weight:900;color:var(--purple);letter-spacing:0.15em;display:flex;align-items:center;gap:0.5rem;}
+        .sb-logo .logo{font-family:var(--font-d);font-size:1.6rem;font-weight:900;color:var(--purple);letter-spacing:0.15em;}
         .sb-logo .logo span{color:var(--text);}
         .sb-logo .role-tag{display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(191,90,242,0.1);color:var(--purple);border:1px solid rgba(191,90,242,0.2);padding:0.2rem 0.7rem;border-radius:2px;margin-top:0.6rem;}
         .sb-user{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.85rem;}
@@ -39,23 +39,17 @@
         .sb-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);}
         .logout-btn{display:flex;align-items:center;gap:0.75rem;color:var(--muted);font-size:0.82rem;cursor:pointer;transition:color 0.15s;background:none;border:none;width:100%;font-family:var(--font-b);}
         .logout-btn:hover{color:var(--red);}
-
-        /* MAIN */
         .main{margin-left:256px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
         .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;background:rgba(7,7,8,0.92);backdrop-filter:blur(16px);z-index:50;}
         .page-title{font-size:1.25rem;font-weight:800;letter-spacing:0.06em;}
         .reception-badge{background:rgba(191,90,242,0.1);color:var(--purple);border:1px solid rgba(191,90,242,0.2);font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.2rem 0.75rem;border-radius:2px;}
         .content{padding:2rem;flex:1;}
-
-        /* KPI */
-        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
         .kpi-card{background:var(--surface);padding:1.3rem 1.2rem;position:relative;overflow:hidden;}
         .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--border2));}
         .kpi-icon{font-size:1rem;color:var(--kpi-color,var(--muted));margin-bottom:0.6rem;opacity:0.8;}
         .kpi-val{font-family:var(--font-d);font-size:2.2rem;font-weight:900;line-height:1;color:var(--kpi-color,var(--text));}
         .kpi-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.25rem;}
-
-        /* PANELS */
         .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.5rem;}
         .ph{padding:1rem 1.4rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
         .pt{font-size:1rem;font-weight:800;letter-spacing:0.05em;}
@@ -63,10 +57,9 @@
         .method{font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;padding:0.18rem 0.55rem;border-radius:2px;}
         .m-get{background:rgba(0,255,209,0.1);color:var(--acid2);}
         .m-post{background:rgba(200,255,0,0.1);color:var(--acid);}
+        .m-put{background:rgba(255,149,0,0.1);color:var(--orange);}
         .m-purple{background:rgba(191,90,242,0.1);color:var(--purple);}
         .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
-
-        /* BUTTONS */
         .btn{font-family:var(--font-d);font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.5rem 1.2rem;border:1.5px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:0.4rem;}
         .btn-purple{background:var(--purple);color:#fff;border-color:var(--purple);}
         .btn-purple:hover{background:transparent;color:var(--purple);}
@@ -76,27 +69,26 @@
         .btn-ghost:hover{border-color:var(--purple);color:var(--purple);}
         .btn-red{background:transparent;color:var(--red);border-color:var(--red);}
         .btn-red:hover{background:var(--red);color:#fff;}
+        .btn-cyan{background:transparent;color:var(--acid2);border-color:var(--acid2);}
+        .btn-cyan:hover{background:var(--acid2);color:#000;}
+        .btn-frozen{background:var(--frozen-bg);color:var(--frozen);border-color:var(--frozen-border);}
+        .btn-frozen:hover{background:var(--frozen);color:#000;}
         .btn-sm{font-size:0.72rem;padding:0.32rem 0.8rem;}
         .btn-block{width:100%;justify-content:center;}
-        .btn-lg{font-size:1.1rem;padding:0.8rem 2rem;}
-
-        /* FORMS */
         .fg{margin-bottom:1rem;}
         .fl{display:block;font-size:0.65rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem;}
         .fi{width:100%;padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.85rem;transition:border-color 0.15s;}
         .fi:focus{outline:none;border-color:var(--purple);}
+        select.fi option{background:var(--surface2);}
         .fr{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
         .fm{margin-top:0.65rem;padding:0.55rem 0.8rem;border-radius:3px;font-size:0.78rem;display:none;}
         .fm.err{background:rgba(255,45,85,0.08);color:var(--red);border:1px solid rgba(255,45,85,0.2);display:block;}
         .fm.ok{background:rgba(200,255,0,0.07);color:var(--acid);border:1px solid rgba(200,255,0,0.18);display:block;}
-
-        /* TABLE */
         .dt{width:100%;border-collapse:collapse;}
         .dt th{font-family:var(--font-d);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.75rem 0.9rem;text-align:left;border-bottom:1px solid var(--border);}
         .dt td{padding:0.8rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.84rem;vertical-align:middle;text-align:left;}
         .dt tr:hover td{background:var(--surface2);}
-
-        /* BADGE */
+        .dt tr.frozen-row td{background:var(--frozen-bg)!important;}
         .badge{display:inline-flex;align-items:center;gap:0.3rem;font-family:var(--font-d);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.55rem;border-radius:2px;}
         .b-acid{background:rgba(200,255,0,0.1);color:var(--acid);}
         .b-cyan{background:rgba(0,255,209,0.1);color:var(--acid2);}
@@ -104,32 +96,80 @@
         .b-orange{background:rgba(255,149,0,0.1);color:var(--orange);}
         .b-grey{background:rgba(255,255,255,0.06);color:var(--muted);}
         .b-purple{background:rgba(191,90,242,0.1);color:var(--purple);}
-
-        /* CHECK-IN BOX */
-        .checkin-box{background:var(--surface2);border:2px dashed var(--border2);border-radius:8px;padding:2.5rem;text-align:center;transition:border-color 0.2s;}
-        .checkin-box.active{border-color:var(--purple);border-style:solid;}
-        .checkin-box i{font-size:3rem;color:var(--purple);margin-bottom:1rem;display:block;opacity:0.7;}
-        .checkin-box p{color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem;}
-
-        /* CHECKIN RESULT */
-        .checkin-result{border-radius:6px;padding:1.5rem;margin-top:1.2rem;display:none;}
+        .b-frozen{background:var(--frozen-bg);color:var(--frozen);border:1px solid var(--frozen-border);}
+        .drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;backdrop-filter:blur(4px);}
+        .drawer-overlay.open{display:block;}
+        .drawer{position:fixed;right:0;top:0;bottom:0;width:420px;background:var(--surface);border-left:1px solid var(--border);z-index:301;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
+        .drawer.open{transform:translateX(0);}
+        .drawer-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .drawer-head h3{font-size:1.1rem;}
+        .drawer-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;}
+        .drawer-close:hover{color:var(--red);}
+        .drawer-body{flex:1;overflow-y:auto;padding:1.5rem;}
+        .drawer-actions{padding:1.2rem 1.5rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:0.6rem;}
+        .drow{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.5rem;}
+        .dfield{font-size:0.83rem;}
+        .dfield .dk{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.15rem;}
+        .drawer-section{margin-bottom:1.5rem;}
+        .drawer-section-title{font-family:var(--font-d);font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:0.7rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);}
+        .frozen-banner{background:var(--frozen-bg);border:1px solid var(--frozen-border);border-radius:4px;padding:0.6rem 1rem;font-size:0.8rem;color:var(--frozen);display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;}
+        .checkin-result{border-radius:6px;padding:1.2rem;margin-top:1rem;display:none;}
         .checkin-result.ok{background:rgba(200,255,0,0.06);border:1px solid rgba(200,255,0,0.2);}
         .checkin-result.err{background:rgba(255,45,85,0.06);border:1px solid rgba(255,45,85,0.2);}
-        .cr-name{font-family:var(--font-d);font-size:1.4rem;font-weight:900;margin-bottom:0.2rem;}
-        .cr-ok .cr-name{color:var(--acid);}
-        .cr-err .cr-name{color:var(--red);}
-        .cr-meta{font-size:0.8rem;color:var(--muted);}
-        .cr-status{display:flex;align-items:center;gap:0.5rem;margin-top:0.7rem;font-size:0.85rem;}
-
-        /* RECENT CHECKINS */
-        .checkin-item{display:flex;align-items:center;gap:0.9rem;padding:0.75rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-        .checkin-item:last-child{border-bottom:none;}
-        .ci-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:0.95rem;font-weight:700;flex-shrink:0;}
-        .ci-info{flex:1;}
-        .ci-name{font-size:0.85rem;font-weight:500;}
-        .ci-time{font-size:0.72rem;color:var(--muted);}
-        .ci-badge{margin-left:auto;}
-
+        /* CHECKIN TABS */
+        .checkin-tabs{display:flex;gap:0;margin-bottom:1.2rem;border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+        .ctab{flex:1;padding:0.55rem;font-family:var(--font-d);font-size:0.82rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.15s;}
+        .ctab.active{background:var(--purple);color:#fff;}
+        .ctab.inactive{background:var(--surface2);color:var(--muted);}
+        /* CAMERA */
+        .camera-wrap{display:none;margin-top:0.8rem;}
+        .camera-inner{background:var(--surface2);border:1px solid var(--border);border-radius:6px;overflow:hidden;position:relative;}
+        .camera-frame{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+        .camera-box{width:200px;height:200px;border:2px solid var(--purple);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);}
+        .camera-box::before,.camera-box::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--purple);border-style:solid;}
+        .camera-scanning{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:196px;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent);animation:scan 2s linear infinite;}
+        @keyframes scan{0%{top:calc(50% - 98px)}100%{top:calc(50% + 98px)}}
+        /* NAME SEARCH */
+        .name-results{border:1px solid var(--border);border-radius:4px;max-height:220px;overflow-y:auto;}
+        .name-result-item{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.15s;}
+        .name-result-item:hover{background:rgba(191,90,242,0.08);}
+        .name-result-item:last-child{border-bottom:none;}
+        /* KASA */
+        .kasa-items{min-height:180px;max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;margin-bottom:1rem;}
+        .kasa-item{display:flex;align-items:center;gap:0.8rem;padding:0.65rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+        .kasa-item:last-child{border-bottom:none;}
+        .kasa-item-name{font-size:0.84rem;font-weight:500;flex:1;}
+        .kasa-item-price{font-family:var(--font-d);font-size:0.95rem;font-weight:700;color:var(--acid);min-width:60px;text-align:right;}
+        .qty-btn{width:24px;height:24px;border-radius:3px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;transition:all 0.15s;}
+        .qty-btn:hover{border-color:var(--purple);color:var(--purple);}
+        .qty-val{font-family:var(--font-d);font-size:1rem;font-weight:700;min-width:20px;text-align:center;}
+        .kasa-total{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+        .kasa-total-lbl{font-family:var(--font-d);font-size:0.72rem;letter-spacing:0.15em;color:var(--muted);}
+        .kasa-total-val{font-family:var(--font-d);font-size:2rem;font-weight:900;color:var(--acid);}
+        .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;}
+        .product-btn{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.65rem 0.5rem;cursor:pointer;text-align:center;transition:all 0.15s;}
+        .product-btn:hover{border-color:var(--purple);background:rgba(191,90,242,0.06);}
+        .product-btn .p-name{font-size:0.75rem;font-weight:500;margin-bottom:0.2rem;line-height:1.3;}
+        .product-btn .p-price{font-family:var(--font-d);font-size:0.92rem;font-weight:700;color:var(--acid);}
+        /* MUSIC */
+        .music-player{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1.5rem;text-align:center;}
+        .music-title{font-family:var(--font-d);font-size:1.2rem;font-weight:700;margin-bottom:0.2rem;}
+        .music-artist{font-size:0.82rem;color:var(--muted);margin-bottom:1.2rem;}
+        .music-progress{height:4px;background:var(--border2);border-radius:2px;margin-bottom:1.2rem;cursor:pointer;}
+        .music-progress-fill{height:4px;background:var(--purple);border-radius:2px;transition:width 0.5s linear;}
+        .music-controls{display:flex;align-items:center;justify-content:center;gap:1.2rem;margin-bottom:1rem;}
+        .mc-btn{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;transition:color 0.15s;padding:0.3rem;}
+        .mc-btn:hover{color:var(--text);}
+        .mc-btn.play{width:44px;height:44px;border-radius:50%;background:var(--purple);color:#fff;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+        .music-vol{display:flex;align-items:center;gap:0.6rem;}
+        .vol-slider{flex:1;height:3px;-webkit-appearance:none;background:var(--border2);border-radius:2px;outline:none;cursor:pointer;}
+        .vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--purple);cursor:pointer;}
+        .playlist{max-height:220px;overflow-y:auto;margin-top:1rem;}
+        .pl-item{display:flex;align-items:center;gap:0.7rem;padding:0.5rem 0.7rem;border-radius:3px;cursor:pointer;transition:background 0.15s;}
+        .pl-item:hover{background:rgba(191,90,242,0.08);}
+        .pl-item.active{background:rgba(191,90,242,0.12);color:var(--purple);}
+        .pl-num{font-family:var(--font-d);font-size:0.72rem;color:var(--muted);width:18px;text-align:center;}
+        .pl-name{font-size:0.82rem;flex:1;}
         /* MISC */
         .page-section{display:none;}
         .page-section.active{display:block;animation:fi 0.2s ease;}
@@ -147,16 +187,13 @@
         .occ-bar{display:flex;align-items:center;gap:0.5rem;}
         .occ-track{flex:1;height:4px;background:var(--border2);border-radius:2px;}
         .occ-fill{height:4px;border-radius:2px;}
-
-        /* HAMBURGER */
         .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none;z-index:200;}
         .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all 0.25s;}
         .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
         .hamburger.open span:nth-child(2){opacity:0;}
         .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
         .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;opacity:0;pointer-events:none;transition:opacity 0.28s;backdrop-filter:blur(3px);}
-
-        /* RESPONSIVE */
+        @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
         @media(max-width:900px){
             .sidebar{transform:translateX(-100%);}
             .sidebar.open{transform:translateX(0);}
@@ -166,9 +203,11 @@
             .hamburger{display:flex;}
             .sidebar-overlay{display:block;}
             .sidebar-overlay.open{opacity:1;pointer-events:all;}
+            .drawer{width:100%;}
             .topbar{padding:0 1rem;}
             .content{padding:1rem;}
             .fr{grid-template-columns:1fr;}
+            .product-grid{grid-template-columns:repeat(2,1fr);}
         }
         @media(max-width:600px){
             .kpi-grid{grid-template-columns:1fr 1fr;}
@@ -178,7 +217,7 @@
             .dt tr{display:block;border:1px solid var(--border);border-radius:4px;margin-bottom:0.6rem;padding:0.5rem;}
             .dt td{display:flex;justify-content:flex-start;align-items:center;gap:0.5rem;padding:0.4rem 0.6rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.8rem;}
             .dt td:last-child{border-bottom:none;}
-            .dt td::before{content:attr(data-label);font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-d);min-width:80px;}
+            .dt td::before{content:attr(data-label);font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-d);min-width:75px;}
             .content{padding:0.75rem;}
             .pb{padding:1rem;}
             .page-title{font-size:1rem;}
@@ -188,6 +227,16 @@
 <body>
 <div class="toast" id="toast"></div>
 
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="userDrawer">
+    <div class="drawer-head">
+        <h3 id="drawerTitle">Detail profilu</h3>
+        <button class="drawer-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="drawer-body" id="drawerBody"><div class="empty-state"><span class="spinner"></span></div></div>
+    <div class="drawer-actions" id="drawerActions"></div>
+</div>
+
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <aside class="sidebar" id="sidebar">
     <div class="sb-logo">
@@ -196,10 +245,7 @@
     </div>
     <div class="sb-user">
         <div class="avatar" id="sideAvatar">R</div>
-        <div>
-            <div class="name" id="sideName">Recepcia</div>
-            <div class="email" id="sideEmail">—</div>
-        </div>
+        <div><div class="name" id="sideName">Recepcia</div><div class="email" id="sideEmail">—</div></div>
     </div>
     <nav class="sb-nav">
         <div class="nav-section">Hlavné</div>
@@ -208,6 +254,8 @@
         <a class="nav-item" onclick="showPage('checkin')" href="#"><i class="fas fa-qrcode"></i> Check-in</a>
         <a class="nav-item" onclick="showPage('members')" href="#"><i class="fas fa-users"></i> Členovia</a>
         <a class="nav-item" onclick="showPage('classes')" href="#"><i class="fas fa-calendar-alt"></i> Lekcie</a>
+        <a class="nav-item" onclick="showPage('kasa')" href="#"><i class="fas fa-cash-register"></i> Pokladňa</a>
+        <a class="nav-item" onclick="showPage('music')" href="#"><i class="fas fa-music"></i> Hudba</a>
         <div class="nav-section">Účet</div>
         <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user"></i> Môj profil</a>
     </nav>
@@ -219,124 +267,107 @@
 <main class="main">
     <div class="topbar">
         <div style="display:flex;align-items:center;gap:0.8rem">
-            <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
-                <span></span><span></span><span></span>
-            </button>
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
             <div class="page-title" id="topbarTitle">Prehľad</div>
         </div>
-        <div>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+            <span id="clockDisplay" style="font-family:var(--font-d);font-size:1.1rem;color:var(--muted)"></span>
             <span class="reception-badge"><i class="fas fa-concierge-bell"></i> Recepcia</span>
         </div>
     </div>
     <div class="content">
 
-        <!-- ═══ OVERVIEW ═══ -->
+        <!-- OVERVIEW -->
         <div class="page-section active" id="page-overview">
             <div class="kpi-grid">
-                <div class="kpi-card" style="--kpi-color:var(--purple)">
-                    <div class="kpi-icon"><i class="fas fa-sign-in-alt"></i></div>
-                    <div class="kpi-val" id="kpi-checkins">—</div>
-                    <div class="kpi-lbl">Check-in dnes</div>
-                </div>
-                <div class="kpi-card" style="--kpi-color:var(--acid)">
-                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
-                    <div class="kpi-val" id="kpi-members">—</div>
-                    <div class="kpi-lbl">Aktívni členovia</div>
-                </div>
-                <div class="kpi-card" style="--kpi-color:var(--acid2)">
-                    <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
-                    <div class="kpi-val" id="kpi-classes">—</div>
-                    <div class="kpi-lbl">Lekcie dnes</div>
-                </div>
-                <div class="kpi-card" style="--kpi-color:var(--orange)">
-                    <div class="kpi-icon"><i class="fas fa-clock"></i></div>
-                    <div class="kpi-val" id="kpi-now">—</div>
-                    <div class="kpi-lbl">Aktuálny čas</div>
-                </div>
+                <div class="kpi-card" style="--kpi-color:var(--purple)"><div class="kpi-icon"><i class="fas fa-sign-in-alt"></i></div><div class="kpi-val" id="kpi-checkins">—</div><div class="kpi-lbl">Check-in dnes</div></div>
+                <div class="kpi-card" style="--kpi-color:var(--acid)"><div class="kpi-icon"><i class="fas fa-users"></i></div><div class="kpi-val" id="kpi-members">—</div><div class="kpi-lbl">Aktívni členovia</div></div>
+                <div class="kpi-card" style="--kpi-color:var(--acid2)"><div class="kpi-icon"><i class="fas fa-calendar-check"></i></div><div class="kpi-val" id="kpi-classes">—</div><div class="kpi-lbl">Lekcie dnes</div></div>
+                <div class="kpi-card" style="--kpi-color:var(--orange)"><div class="kpi-icon"><i class="fas fa-euro-sign"></i></div><div class="kpi-val" id="kpi-revenue">0 €</div><div class="kpi-lbl">Tržba dnes</div></div>
+                <div class="kpi-card" style="--kpi-color:var(--red)"><div class="kpi-icon"><i class="fas fa-snowflake"></i></div><div class="kpi-val" id="kpi-frozen">—</div><div class="kpi-lbl">Zmrazené účty</div></div>
             </div>
-
             <div class="grid-2">
-                <!-- Quick check-in -->
                 <div class="panel">
-                    <div class="ph">
-                        <span class="pt">Rýchly check-in</span>
-                        <button class="btn btn-purple btn-sm" onclick="showPage('checkin')"><i class="fas fa-qrcode"></i> Otvoriť</button>
-                    </div>
+                    <div class="ph"><span class="pt">Rýchly check-in</span><button class="btn btn-purple btn-sm" onclick="showPage('checkin')"><i class="fas fa-qrcode"></i> Otvoriť</button></div>
                     <div class="pb">
-                        <div class="fg">
-                            <label class="fl">ID člena alebo QR kód</label>
+                        <div class="fg"><label class="fl">QR kód / ID člena</label>
                             <div style="display:flex;gap:0.6rem">
                                 <input class="fi" type="text" id="quickCheckinInput" placeholder="Zadaj QR kód..." onkeydown="if(event.key==='Enter')quickCheckin()">
                                 <button class="btn btn-purple" onclick="quickCheckin()"><i class="fas fa-sign-in-alt"></i></button>
                             </div>
                         </div>
-                        <div class="fm" id="quickCheckinMsg"></div>
                         <div id="quickCheckinResult"></div>
                     </div>
                 </div>
-
-                <!-- Nedávne check-iny -->
                 <div class="panel">
-                    <div class="ph">
-                        <span class="pt">Nedávne vstupy</span>
-                        <button class="btn btn-ghost btn-sm" onclick="loadRecentCheckins()"><i class="fas fa-sync-alt"></i></button>
-                    </div>
-                    <div class="pb" id="recentCheckinsEl">
-                        <div class="empty-state"><span class="spinner"></span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dnešné lekcie -->
-            <div class="panel">
-                <div class="ph">
-                    <span class="pt">Dnešné lekcie</span>
-                    <span class="method m-get">GET /api/classes</span>
-                </div>
-                <div class="pb" id="todayClassesEl">
-                    <div class="empty-state"><span class="spinner"></span></div>
+                    <div class="ph"><span class="pt">Dnešné lekcie</span><button class="btn btn-ghost btn-sm" onclick="loadOverview()"><i class="fas fa-sync-alt"></i></button></div>
+                    <div class="pb" id="todayClassesEl"><div class="empty-state"><span class="spinner"></span></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- ═══ CHECK-IN ═══ -->
+        <!-- CHECK-IN -->
         <div class="page-section" id="page-checkin">
             <div class="grid-2">
                 <div class="panel">
-                    <div class="ph">
-                        <span class="pt">Check-in člena</span>
-                        <span class="method m-purple">POST /api/checkin/scan</span>
-                    </div>
+                    <div class="ph"><span class="pt">Check-in člena</span><span class="method m-purple">POST /api/checkin/scan</span></div>
                     <div class="pb">
-                        <div class="checkin-box" id="checkinBox">
-                            <i class="fas fa-qrcode"></i>
-                            <p>Zadaj QR kód člena alebo jeho ID pre registráciu vstupu</p>
-                            <div class="fg" style="text-align:left">
-                                <label class="fl">QR kód / ID člena</label>
-                                <input class="fi" type="text" id="checkinInput" placeholder="Naskenuj alebo zadaj ručne..." autofocus onkeydown="if(event.key==='Enter')doCheckin()">
-                            </div>
-                            <button class="btn btn-purple btn-lg" onclick="doCheckin()" style="margin-top:0.5rem">
-                                <i class="fas fa-sign-in-alt"></i> Potvrdiť vstup
-                            </button>
+                        <!-- Taby -->
+                        <div class="checkin-tabs">
+                            <button class="ctab active" id="tabQr" onclick="switchCheckinTab('qr')"><i class="fas fa-qrcode"></i> QR skener</button>
+                            <button class="ctab inactive" id="tabName" onclick="switchCheckinTab('name')"><i class="fas fa-search"></i> Podľa mena</button>
                         </div>
+
+                        <!-- QR tab -->
+                        <div id="checkinTabQr">
+                            <div class="fg">
+                                <label class="fl">QR kód / ID člena</label>
+                                <input class="fi" type="text" id="checkinInput" placeholder="Naskenuj alebo zadaj ručne..." onkeydown="if(event.key==='Enter')doCheckin()" style="font-size:1rem;padding:0.9rem;">
+                            </div>
+                            <div style="display:flex;gap:0.6rem;margin-bottom:0.8rem">
+                                <button class="btn btn-purple" onclick="doCheckin()" style="flex:1"><i class="fas fa-sign-in-alt"></i> Potvrdiť vstup</button>
+                                <button class="btn btn-ghost" id="scanBtn" onclick="toggleCamera()"><i class="fas fa-camera"></i> Skener</button>
+                            </div>
+                            <!-- Kamera -->
+                            <div class="camera-wrap" id="cameraWrap">
+                                <div class="camera-inner">
+                                    <video id="cameraVideo" style="width:100%;display:block;max-height:260px;object-fit:cover" autoplay playsinline muted></video>
+                                    <div class="camera-frame">
+                                        <div class="camera-box"></div>
+                                    </div>
+                                    <div class="camera-scanning" id="cameraScanning"></div>
+                                    <div style="position:absolute;top:0.6rem;right:0.6rem">
+                                        <button class="btn btn-red btn-sm" onclick="stopCamera()"><i class="fas fa-times"></i> Zatvoriť</button>
+                                    </div>
+                                    <div style="position:absolute;bottom:0.6rem;left:0;right:0;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.7)">
+                                        <i class="fas fa-info-circle"></i> Namier kameru na QR kód člena
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Name tab -->
+                        <div id="checkinTabName" style="display:none">
+                            <div class="fg">
+                                <label class="fl">Hľadaj podľa mena alebo emailu</label>
+                                <input class="fi" type="text" id="checkinNameSearch" placeholder="Zadaj meno alebo email..." oninput="searchMembersForCheckin()">
+                            </div>
+                            <div class="name-results" id="checkinNameResults">
+                                <div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem">Začni písať meno...</div>
+                            </div>
+                        </div>
+
                         <div class="checkin-result" id="checkinResult"></div>
-                        <div class="fm" id="checkinMsg"></div>
                     </div>
                 </div>
-
                 <div class="panel">
-                    <div class="ph">
-                        <span class="pt">História vstupov dnes</span>
-                        <button class="btn btn-ghost btn-sm" onclick="loadTodayCheckins()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
-                    </div>
-                    <div class="pb" id="todayCheckinsEl">
-                        <div class="empty-state"><span class="spinner"></span></div>
-                    </div>
+                    <div class="ph"><span class="pt">Vstupy dnes</span><button class="btn btn-ghost btn-sm" onclick="loadTodayCheckins()"><i class="fas fa-sync-alt"></i> Obnoviť</button></div>
+                    <div class="pb" id="todayCheckinsEl"><div class="empty-state"><span class="spinner"></span></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- ═══ MEMBERS ═══ -->
+        <!-- MEMBERS -->
         <div class="page-section" id="page-members">
             <div class="panel">
                 <div class="ph">
@@ -350,17 +381,39 @@
                     <div class="search-bar">
                         <input class="fi" type="text" id="memberSearch" placeholder="Hľadaj meno alebo email..." oninput="filterMembers()">
                         <select class="fi" id="memberStatusFilter" onchange="filterMembers()" style="max-width:160px">
-                            <option value="">Všetci</option>
-                            <option value="active">Aktívni</option>
-                            <option value="inactive">Zmrazení</option>
+                            <option value="">Všetci</option><option value="active">Aktívni</option><option value="frozen">Zmrazení</option>
                         </select>
                     </div>
                     <div id="membersTable"><div class="empty-state"><i class="fas fa-users"></i><p>Klikni Obnoviť</p></div></div>
                 </div>
             </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="ph"><span class="pt">Správa prístupu</span><span class="method m-put">PUT /api/admin/profiles/{id}/status</span></div>
+                    <div class="pb">
+                        <div class="frozen-banner"><i class="fas fa-snowflake"></i> <b>Zmrazený účet</b> = používateľ sa nevie prihlásiť.</div>
+                        <div class="fg"><label class="fl">Vyber člena</label><select class="fi" id="freezeSelect"><option value="">— vyber člena —</option></select></div>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                            <button class="btn btn-cyan" onclick="setMemberStatus(true)"><i class="fas fa-user-check"></i> Aktivovať</button>
+                            <button class="btn btn-frozen" onclick="setMemberStatus(false)"><i class="fas fa-snowflake"></i> Zmraziť</button>
+                        </div>
+                        <div class="fm" id="freezeMsg"></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="ph"><span class="pt">Priradiť permanentku</span><span class="method m-purple">POST /api/admin/memberships/assign</span></div>
+                    <div class="pb">
+                        <div class="fg"><label class="fl">Vyber člena</label><select class="fi" id="memAssignMember"><option value="">— vyber člena —</option></select></div>
+                        <div class="fg"><label class="fl">Typ členstva</label><select class="fi" id="memAssignType"><option value="">— načítavam... —</option></select></div>
+                        <div class="fg"><label class="fl">Dátum začiatku (voliteľné)</label><input class="fi" type="date" id="memAssignDate"></div>
+                        <button class="btn btn-acid" onclick="assignMembership()"><i class="fas fa-id-card"></i> Priradiť permanentku</button>
+                        <div class="fm" id="memAssignMsg"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- ═══ CLASSES ═══ -->
+        <!-- CLASSES -->
         <div class="page-section" id="page-classes">
             <div class="panel">
                 <div class="ph">
@@ -374,9 +427,7 @@
                     <div class="search-bar">
                         <input class="fi" type="text" id="classSearch" placeholder="Hľadaj lekciu..." oninput="filterClasses()">
                         <select class="fi" id="classTimeFilter" onchange="filterClasses()" style="max-width:160px">
-                            <option value="">Všetky</option>
-                            <option value="today">Dnes</option>
-                            <option value="upcoming">Nadchádzajúce</option>
+                            <option value="">Všetky</option><option value="today">Dnes</option><option value="upcoming">Nadchádzajúce</option>
                         </select>
                     </div>
                     <div id="classesTable"><div class="empty-state"><i class="fas fa-calendar-alt"></i><p>Klikni Obnoviť</p></div></div>
@@ -384,7 +435,92 @@
             </div>
         </div>
 
-        <!-- ═══ PROFILE ═══ -->
+        <!-- KASA -->
+        <div class="page-section" id="page-kasa">
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="ph"><span class="pt">Produkty</span><button class="btn btn-ghost btn-sm" onclick="clearKasa()"><i class="fas fa-trash"></i> Vymazať košík</button></div>
+                    <div class="pb">
+                        <div class="fl" style="margin-bottom:0.6rem">Rýchly výber</div>
+                        <div class="product-grid" id="productGrid"></div>
+                        <div class="fg"><label class="fl">Vlastný produkt</label>
+                            <div style="display:flex;gap:0.5rem">
+                                <input class="fi" type="text" id="customProductName" placeholder="Názov produktu">
+                                <input class="fi" type="number" id="customProductPrice" placeholder="€" style="max-width:80px" min="0" step="0.01">
+                                <button class="btn btn-ghost btn-sm" onclick="addCustomProduct()"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="ph"><span class="pt">Aktuálny účet</span><span id="kasaItemCount" style="font-family:var(--font-d);font-size:0.8rem;color:var(--muted)">0 položiek</span></div>
+                    <div class="pb">
+                        <div class="kasa-items" id="kasaItems"><div class="empty-state" style="padding:1.5rem"><i class="fas fa-shopping-cart"></i><p>Košík je prázdny</p></div></div>
+                        <div class="kasa-total">
+                            <div><div class="kasa-total-lbl">Celková suma</div><div class="kasa-total-val" id="kasaTotal">0,00 €</div></div>
+                            <div style="text-align:right"><div class="kasa-total-lbl">Tržba dnes</div><div style="font-family:var(--font-d);font-size:1.1rem;font-weight:700;color:var(--orange)" id="kasaDailyTotal">0,00 €</div></div>
+                        </div>
+                        <div class="fg"><label class="fl">Priradiť k členovi (voliteľné)</label><select class="fi" id="kasaMemberSelect"><option value="">— bez priradenia —</option></select></div>
+                        <div style="display:flex;gap:0.6rem">
+                            <button class="btn btn-acid" onclick="processPayment('cash')" style="flex:1"><i class="fas fa-money-bill"></i> Hotovosť</button>
+                            <button class="btn btn-purple" onclick="processPayment('card')" style="flex:1"><i class="fas fa-credit-card"></i> Karta</button>
+                        </div>
+                        <div class="fm" id="kasaMsg"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="ph"><span class="pt">Dnešné transakcie</span><button class="btn btn-ghost btn-sm" onclick="renderTransactions()"><i class="fas fa-sync-alt"></i> Obnoviť</button></div>
+                <div class="pb" id="transactionsEl"><div class="empty-state"><i class="fas fa-receipt"></i><p>Žiadne transakcie dnes</p></div></div>
+            </div>
+        </div>
+
+        <!-- MUSIC -->
+        <div class="page-section" id="page-music">
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="ph"><span class="pt">Prehrávač</span></div>
+                    <div class="pb">
+                        <div class="music-player">
+                            <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2rem;color:#fff;"><i class="fas fa-music"></i></div>
+                            <div class="music-title" id="musicTitle">Vyber skladbu</div>
+                            <div class="music-artist" id="musicArtist">—</div>
+                            <div class="music-progress" onclick="seekMusic(event)"><div class="music-progress-fill" id="musicProgress" style="width:0%"></div></div>
+                            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-bottom:0.8rem">
+                                <span id="musicCurrent">0:00</span><span id="musicDuration">0:00</span>
+                            </div>
+                            <div class="music-controls">
+                                <button class="mc-btn" onclick="prevTrack()"><i class="fas fa-backward"></i></button>
+                                <button class="mc-btn play" onclick="togglePlay()"><i class="fas fa-play" id="playIcon"></i></button>
+                                <button class="mc-btn" onclick="nextTrack()"><i class="fas fa-forward"></i></button>
+                                <button class="mc-btn" id="shuffleBtn" onclick="toggleShuffle()"><i class="fas fa-random"></i></button>
+                                <button class="mc-btn" id="repeatBtn" onclick="toggleRepeat()"><i class="fas fa-redo"></i></button>
+                            </div>
+                            <div class="music-vol">
+                                <i class="fas fa-volume-down" style="color:var(--muted);font-size:0.85rem"></i>
+                                <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="70" oninput="setVolume(this.value)">
+                                <i class="fas fa-volume-up" style="color:var(--muted);font-size:0.85rem"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt">Playlist</span>
+                        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('musicUpload').click()"><i class="fas fa-plus"></i> Pridať MP3</button>
+                        <input type="file" id="musicUpload" accept="audio/*" multiple style="display:none" onchange="addTracks(event)">
+                    </div>
+                    <div class="pb">
+                        <div class="playlist" id="playlist"></div>
+                        <div style="margin-top:1rem;padding:0.8rem;background:var(--surface2);border-radius:4px;font-size:0.78rem;color:var(--muted)">
+                            <i class="fas fa-info-circle"></i> Nahraj MP3 súbory zo svojho zariadenia.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE -->
         <div class="page-section" id="page-profile">
             <div class="grid-2">
                 <div class="panel">
@@ -397,14 +533,14 @@
                             </div>
                             <div><div class="fl">Rola</div><div id="p-role">—</div></div>
                         </div>
-                        <div class="fg"><label class="fl">Celé meno *</label><input class="fi" type="text" id="p-edit-name" placeholder="Tvoje meno"></div>
+                        <div class="fg"><label class="fl">Celé meno *</label><input class="fi" type="text" id="p-edit-name"></div>
                         <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="p-edit-phone" placeholder="+421..."></div>
                         <button class="btn btn-purple" onclick="saveProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                         <div class="fm" id="profileMsg"></div>
                     </div>
                 </div>
                 <div class="panel">
-                    <div class="ph"><span class="pt">Zmena hesla</span><span class="method m-get">PUT /api/users/{id}/password</span></div>
+                    <div class="ph"><span class="pt">Zmena hesla</span></div>
                     <div class="pb">
                         <div class="fg"><label class="fl">Aktuálne heslo *</label><input class="fi" type="password" id="p-cur-pass"></div>
                         <div class="fg"><label class="fl">Nové heslo * (min 6)</label><input class="fi" type="password" id="p-new-pass"></div>
@@ -420,439 +556,678 @@
 </main>
 
 <script>
-    const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:8080'
-        : 'https://fitnessapp-5ogv.onrender.com';
+    const API = window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
+        ? 'http://localhost:8080' : 'https://fitnessapp-5ogv.onrender.com';
 
-    let token = localStorage.getItem('fp_token');
-    let user  = JSON.parse(localStorage.getItem('fp_user') || 'null');
-    let allMembers = [];
-    let allClasses = [];
+    let token=localStorage.getItem('fp_token');
+    let user=JSON.parse(localStorage.getItem('fp_user')||'null');
+    let allMembers=[]; let allClasses=[];
 
-    if (!token || !user) window.location.href = 'index.html';
-    if (user && user.role !== 'reception') {
-        window.location.href = {member:'member.html', trainer:'trainer.html', admin:'admin.html'}[user.role] || 'index.html';
+    if (!token||!user) window.location.href='index.html';
+    if (user&&user.role!=='reception'){
+        const map={member:'member.html',trainer:'trainer.html',admin:'admin.html'};
+        window.location.href=map[user.role]||'index.html';
     }
-    if (user) {
-        document.getElementById('sideAvatar').textContent = (user.fullName||'R').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-        document.getElementById('sideName').textContent  = user.fullName || 'Recepcia';
-        document.getElementById('sideEmail').textContent = user.email || '—';
+    if (user){
+        document.getElementById('sideAvatar').textContent=(user.fullName||'R').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('sideName').textContent=user.fullName||'Recepcia';
+        document.getElementById('sideEmail').textContent=user.email||'—';
     }
 
-    // Hodiny
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('kpi-now').textContent =
-            now.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
+    setInterval(()=>{
+        const n=new Date();
+        document.getElementById('clockDisplay').textContent=n.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    },1000);
 
-    // ── NAV ───────────────────────────────────────────────────────────────────
-    const pageTitles = {overview:'Prehľad', checkin:'Check-in', members:'Členovia', classes:'Lekcie', profile:'Môj profil'};
+    const pageTitles={overview:'Prehľad',checkin:'Check-in',members:'Členovia',classes:'Lekcie',kasa:'Pokladňa',music:'Hudba',profile:'Môj profil'};
 
-    function showPage(id) {
+    function showPage(id){
         closeSidebar();
+        stopCamera();
         document.querySelectorAll('.page-section').forEach(el=>el.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
         document.getElementById('page-'+id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(el=>{
-            if(el.getAttribute('onclick')?.includes("'"+id+"'")) el.classList.add('active');
-        });
-        document.getElementById('topbarTitle').textContent = pageTitles[id]||id;
-        if (id==='overview')  loadOverview();
-        if (id==='checkin')   { loadTodayCheckins(); document.getElementById('checkinInput').focus(); }
-        if (id==='members')   loadMembers();
-        if (id==='classes')   loadClasses();
-        if (id==='profile')   loadProfile();
+        document.querySelectorAll('.nav-item').forEach(el=>{if(el.getAttribute('onclick')?.includes("'"+id+"'"))el.classList.add('active');});
+        document.getElementById('topbarTitle').textContent=pageTitles[id]||id;
+        if(id==='overview') loadOverview();
+        if(id==='checkin'){if(!allMembers.length)loadMembers();loadTodayCheckins();setTimeout(()=>document.getElementById('checkinInput').focus(),100);}
+        if(id==='members'){loadMembers();loadMembershipTypes();}
+        if(id==='classes') loadClasses();
+        if(id==='kasa'){populateMemberSelects();renderTransactions();}
+        if(id==='music') renderPlaylist();
+        if(id==='profile') loadProfile();
     }
 
-    async function authFetch(url, opts={}) {
-        const res = await fetch(API+url, {...opts, headers:{
-                'Authorization':'Bearer '+token,
-                'Content-Type':'application/json',
-                ...(opts.headers||{})
-            }});
-        if (res.status===401) { logout(); throw new Error('Session vypršala'); }
+    async function authFetch(url,opts={}){
+        const res=await fetch(API+url,{...opts,headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
+        if(res.status===401){logout();throw new Error('Session vypršala');}
         return res;
     }
+    function showMsg(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='fm '+type;}
+    function toast(msg,type='ok'){
+        const t=document.getElementById('toast');
+        t.className='toast t-'+type;
+        t.innerHTML=(type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>')+' '+msg;
+        t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);
+    }
+    function logout(){localStorage.removeItem('fp_token');localStorage.removeItem('fp_user');window.location.href='index.html';}
+    function fmtTime(dt){return dt?new Date(dt).toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';}
+    function fmtEur(n){return n.toFixed(2).replace('.',',')+' €';}
+    function getTodayKey(){const d=new Date();return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();}
+    function getDailyTotal(){return JSON.parse(localStorage.getItem('kasa_transactions_'+getTodayKey())||'[]').reduce((s,t)=>s+t.total,0);}
 
-    function showMsg(id, msg, type) {
-        const el = document.getElementById(id);
-        el.textContent = msg;
-        el.className = 'fm ' + type;
+    // ── CHECKIN TABS ───────────────────────────────────────────────────────────
+    function switchCheckinTab(tab){
+        const isQr=tab==='qr';
+        document.getElementById('checkinTabQr').style.display=isQr?'block':'none';
+        document.getElementById('checkinTabName').style.display=isQr?'none':'block';
+        document.getElementById('tabQr').className='ctab '+(isQr?'active':'inactive');
+        document.getElementById('tabName').className='ctab '+(isQr?'inactive':'active');
+        if(!isQr){stopCamera();setTimeout(()=>document.getElementById('checkinNameSearch').focus(),100);}
+        else setTimeout(()=>document.getElementById('checkinInput').focus(),100);
     }
 
-    function toast(msg, type='ok') {
-        const t = document.getElementById('toast');
-        t.className = 'toast t-'+type;
-        t.innerHTML = (type==='ok'?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-exclamation-circle"></i>')+' '+msg;
-        t.classList.add('show');
-        setTimeout(()=>t.classList.remove('show'), 3200);
-    }
+    // ── QR KAMERA ─────────────────────────────────────────────────────────────
+    let cameraStream=null;
+    let scanningActive=false;
 
-    function logout() {
-        localStorage.removeItem('fp_token');
-        localStorage.removeItem('fp_user');
-        window.location.href = 'index.html';
-    }
-
-    function fmtTime(dt) {
-        return dt ? new Date(dt).toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
-    }
-
-    function memberBadge(active) {
-        return active
-            ? '<span class="badge b-acid">Aktívny</span>'
-            : '<span class="badge b-grey">Zmrazený</span>';
-    }
-
-    // ── OVERVIEW ─────────────────────────────────────────────────────────────
-    async function loadOverview() {
-        try {
-            const [resM, resCls] = await Promise.all([
-                authFetch('/api/admin/profiles'),
-                authFetch('/api/classes')
-            ]);
-            const members = resM.ok ? await resM.json() : [];
-            const classes = resCls.ok ? await resCls.json() : [];
-            allMembers = Array.isArray(members) ? members : [];
-            allClasses = Array.isArray(classes) ? classes : [];
-
-            const activeMembers = allMembers.filter(m => m.active && m.role === 'member').length;
-            document.getElementById('kpi-members').textContent = activeMembers;
-
-            const today = new Date(); today.setHours(0,0,0,0);
-            const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
-            const todayClasses = allClasses.filter(c => {
-                const d = new Date(c.startTime);
-                return d >= today && d < tomorrow;
+    async function toggleCamera(){
+        if(cameraStream){stopCamera();return;}
+        try{
+            cameraStream=await navigator.mediaDevices.getUserMedia({
+                video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
             });
-            document.getElementById('kpi-classes').textContent = todayClasses.length;
-
-            renderTodayClasses(todayClasses);
-            loadRecentCheckins();
-
-        } catch(e) { toast('Chyba: '+e.message, 'err'); }
-    }
-
-    function renderTodayClasses(classes) {
-        const el = document.getElementById('todayClassesEl');
-        if (!classes.length) {
-            el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-calendar-times"></i><p>Žiadne lekcie dnes</p></div>';
-            return;
-        }
-        let html = '<table class="dt"><thead><tr><th>Lekcia</th><th>Čas</th><th>Tréner</th><th>Miesto</th><th>Obsadenosť</th></tr></thead><tbody>';
-        classes.forEach(c => {
-            const booked = c.booked||0, cap = c.capacity||0;
-            const pct = cap ? Math.round(booked/cap*100) : 0;
-            const bc = pct>=90?'var(--red)':pct>=60?'var(--orange)':'var(--acid)';
-            html += `<tr>
-                <td data-label="Lekcia"><b>${c.name||'—'}</b></td>
-                <td data-label="Čas" style="color:var(--muted);font-size:0.82rem">${fmtTime(c.startTime)}</td>
-                <td data-label="Tréner" style="color:var(--muted)">${c.instructor||'—'}</td>
-                <td data-label="Miesto"><span class="badge b-grey">${c.location||'—'}</span></td>
-                <td data-label="Obsadenosť">
-                    <div class="occ-bar">
-                        <div class="occ-track"><div class="occ-fill" style="width:${pct}%;background:${bc}"></div></div>
-                        <span style="font-size:0.73rem;color:var(--muted)">${booked}/${cap||'—'}</span>
-                    </div>
-                </td>
-            </tr>`;
-        });
-        html += '</tbody></table>';
-        el.innerHTML = html;
-    }
-
-    async function loadRecentCheckins() {
-        const el = document.getElementById('recentCheckinsEl');
-        try {
-            // Skús načítať posledné check-iny zo všetkých členov — fallback na prázdny stav
-            el.innerHTML = '<div class="empty-state" style="padding:1rem"><i class="fas fa-sign-in-alt"></i><p style="font-size:0.8rem">Nedávne vstupy sa zobrazia po prvom check-ine</p></div>';
-        } catch(e) {
-            el.innerHTML = '<div class="empty-state"><p>Chyba načítania</p></div>';
+            const video=document.getElementById('cameraVideo');
+            video.srcObject=cameraStream;
+            document.getElementById('cameraWrap').style.display='block';
+            document.getElementById('scanBtn').innerHTML='<i class="fas fa-camera" style="color:var(--purple)"></i> Aktívny';
+            scanningActive=true;
+            video.addEventListener('loadedmetadata',startQrScan,{once:true});
+            toast('Kamera zapnutá — namier na QR kód','ok');
+        }catch(e){
+            toast('Kamera nedostupná: '+e.message,'err');
         }
     }
 
-    // ── CHECK-IN ─────────────────────────────────────────────────────────────
-    async function doCheckin() {
-        const val = document.getElementById('checkinInput').value.trim();
-        if (!val) return showMsg('checkinMsg', 'Zadaj QR kód alebo ID člena', 'err');
+    function startQrScan(){
+        const video=document.getElementById('cameraVideo');
+        const canvas=document.createElement('canvas');
+        const ctx=canvas.getContext('2d');
 
-        const resultEl = document.getElementById('checkinResult');
-        resultEl.style.display = 'none';
-
-        try {
-            const res = await authFetch('/api/checkin/scan', {
-                method: 'POST',
-                body: JSON.stringify({qrCode: val})
-            });
-            const d = await res.json();
-
-            if (res.ok) {
-                resultEl.className = 'checkin-result ok';
-                resultEl.style.display = 'block';
-                resultEl.innerHTML = `
-                    <div style="display:flex;align-items:center;gap:1rem">
-                        <div style="font-size:2.5rem;color:var(--acid)"><i class="fas fa-check-circle"></i></div>
-                        <div>
-                            <div class="cr-name" style="color:var(--acid)">${d.fullName || '—'}</div>
-                            <div class="cr-meta">${d.email || ''}</div>
-                            <div class="cr-status">
-                                <span class="badge b-acid"><i class="fas fa-id-card"></i> ${d.membershipType || 'Aktívne členstvo'}</span>
-                                <span style="color:var(--muted);font-size:0.75rem">${d.daysRemaining != null ? d.daysRemaining+' dní zostatok' : ''}</span>
-                            </div>
-                        </div>
-                    </div>`;
-                document.getElementById('checkinInput').value = '';
-                document.getElementById('checkinInput').focus();
-                loadTodayCheckins();
-                toast('✓ Vstup potvrdený: '+( d.fullName||val), 'ok');
-                // Aktualizuj KPI
-                const cur = parseInt(document.getElementById('kpi-checkins').textContent) || 0;
-                document.getElementById('kpi-checkins').textContent = cur + 1;
-            } else {
-                resultEl.className = 'checkin-result err';
-                resultEl.style.display = 'block';
-                resultEl.innerHTML = `
-                    <div style="display:flex;align-items:center;gap:1rem">
-                        <div style="font-size:2.5rem;color:var(--red)"><i class="fas fa-times-circle"></i></div>
-                        <div>
-                            <div class="cr-name" style="color:var(--red)">Vstup zamietnutý</div>
-                            <div class="cr-meta">${d.message || 'Neplatný QR kód alebo neaktívne členstvo'}</div>
-                        </div>
-                    </div>`;
-                toast('Vstup zamietnutý', 'err');
-            }
-        } catch(e) {
-            showMsg('checkinMsg', e.message, 'err');
-        }
-    }
-
-    async function quickCheckin() {
-        const val = document.getElementById('quickCheckinInput').value.trim();
-        if (!val) return;
-        try {
-            const res = await authFetch('/api/checkin/scan', {method:'POST', body:JSON.stringify({qrCode: val})});
-            const d = await res.json();
-            const el = document.getElementById('quickCheckinResult');
-            if (res.ok) {
-                el.innerHTML = `<div style="padding:0.6rem 0.8rem;background:rgba(200,255,0,0.06);border:1px solid rgba(200,255,0,0.2);border-radius:4px;margin-top:0.5rem;font-size:0.83rem;color:var(--acid)">
-                    <i class="fas fa-check"></i> <b>${d.fullName||'Člen'}</b> — vstup potvrdený</div>`;
-                document.getElementById('quickCheckinInput').value = '';
-                toast('✓ '+( d.fullName||val), 'ok');
-            } else {
-                el.innerHTML = `<div style="padding:0.6rem 0.8rem;background:rgba(255,45,85,0.06);border:1px solid rgba(255,45,85,0.2);border-radius:4px;margin-top:0.5rem;font-size:0.83rem;color:var(--red)">
-                    <i class="fas fa-times"></i> ${d.message||'Zamietnutý vstup'}</div>`;
-            }
-            setTimeout(()=>{ el.innerHTML=''; }, 4000);
-        } catch(e) { showMsg('quickCheckinMsg', e.message, 'err'); }
-    }
-
-    async function loadTodayCheckins() {
-        const el = document.getElementById('todayCheckinsEl');
-        el.innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
-        try {
-            // Endpoint pre všetky dnešné check-iny (ak existuje)
-            const res = await authFetch('/api/checkin/today');
-            if (res.ok) {
-                const data = await res.json();
-                if (!Array.isArray(data) || !data.length) {
-                    el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-sign-in-alt"></i><p>Zatiaľ žiadne vstupy dnes</p></div>';
-                    document.getElementById('kpi-checkins').textContent = 0;
+        function scan(){
+            if(!scanningActive)return;
+            if(video.readyState===video.HAVE_ENOUGH_DATA){
+                canvas.width=video.videoWidth;
+                canvas.height=video.videoHeight;
+                ctx.drawImage(video,0,0,canvas.width,canvas.height);
+                const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+                const code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
+                if(code){
+                    scanningActive=false;
+                    stopCamera();
+                    document.getElementById('checkinInput').value=code.data;
+                    toast('QR kód naskenovaný!','ok');
+                    doCheckin();
                     return;
                 }
-                document.getElementById('kpi-checkins').textContent = data.length;
-                el.innerHTML = data.slice(0,15).map(c => {
-                    const ini = (c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-                    const t = c.checkedAt ? new Date(c.checkedAt).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'}) : '—';
-                    return `<div class="checkin-item">
-                        <div class="ci-avatar">${ini}</div>
-                        <div class="ci-info">
-                            <div class="ci-name">${c.fullName||'—'}</div>
-                            <div class="ci-time">${t}</div>
-                        </div>
-                        <div class="ci-badge"><span class="badge b-acid"><i class="fas fa-check"></i></span></div>
-                    </div>`;
-                }).join('');
-            } else {
-                el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-info-circle"></i><p style="font-size:0.8rem">Endpoint /api/checkin/today nie je dostupný</p></div>';
             }
-        } catch(e) {
-            el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><p style="font-size:0.8rem;color:var(--muted)">Načítanie check-inov nie je dostupné</p></div>';
+            requestAnimationFrame(scan);
         }
+        scan();
+    }
+
+    function stopCamera(){
+        scanningActive=false;
+        if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+        document.getElementById('cameraWrap').style.display='none';
+        document.getElementById('scanBtn').innerHTML='<i class="fas fa-camera"></i> Skener';
+    }
+
+    // ── VYHĽADÁVANIE PODĽA MENA ────────────────────────────────────────────────
+    function searchMembersForCheckin(){
+        const q=document.getElementById('checkinNameSearch').value.toLowerCase().trim();
+        const el=document.getElementById('checkinNameResults');
+        if(!q){el.innerHTML='<div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem">Začni písať meno...</div>';return;}
+        const results=allMembers.filter(m=>m.role==='member'&&((m.fullName||'').toLowerCase().includes(q)||(m.email||'').toLowerCase().includes(q))).slice(0,8);
+        if(!results.length){el.innerHTML='<div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem">Žiadny člen nenájdený</div>';return;}
+        el.innerHTML=results.map(m=>`
+        <div class="name-result-item" onclick="doCheckinById('${m.id}','${m.fullName||''}')">
+            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:0.9rem;font-weight:700;flex-shrink:0">
+                ${(m.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
+            </div>
+            <div style="flex:1">
+                <div style="font-size:0.85rem;font-weight:500">${m.fullName||'—'}</div>
+                <div style="font-size:0.72rem;color:var(--muted)">${m.email||''}</div>
+            </div>
+            <span class="badge ${m.active?'b-acid':'b-frozen'}" style="font-size:0.6rem">${m.active?'Aktívny':'Zmrazený'}</span>
+        </div>`).join('');
+    }
+
+    async function doCheckinById(userId,name){
+        document.getElementById('checkinNameSearch').value='';
+        document.getElementById('checkinNameResults').innerHTML='<div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem">Začni písať meno...</div>';
+        await processCheckin(userId,name);
+    }
+
+    // ── CHECK-IN LOGIKA ────────────────────────────────────────────────────────
+    // Overuje: 1) účet aktívny, 2) má aktívnu permanentku
+    async function processCheckin(userId, displayName){
+        const resultEl=document.getElementById('checkinResult');
+        resultEl.style.display='none';
+        try{
+            // Najprv over permanentku
+            const resM=await authFetch('/api/admin/memberships/user/'+userId);
+            if(!resM.ok){
+                showCheckinError(resultEl, displayName||userId, 'Člen nemá aktívnu permanentku');
+                return;
+            }
+            const mem=await resM.json();
+            if(mem.status!=='active'){
+                showCheckinError(resultEl, displayName||userId, `Permanentka vypršala (${mem.endDate||'—'})`);
+                return;
+            }
+
+            // Permanentka OK — zaregistruj vstup
+            const res=await authFetch('/api/checkin/scan',{method:'POST',body:JSON.stringify({userId})});
+            const d=await res.json();
+            if(res.ok){
+                resultEl.className='checkin-result ok';
+                resultEl.style.display='block';
+                resultEl.innerHTML=`<div style="display:flex;align-items:center;gap:1rem">
+                <i class="fas fa-check-circle" style="font-size:2.5rem;color:var(--acid)"></i>
+                <div>
+                    <div style="font-family:var(--font-d);font-size:1.4rem;font-weight:900;color:var(--acid)">${d.fullName||displayName||'Člen'}</div>
+                    <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem">${d.email||''}</div>
+                    <div style="margin-top:0.5rem"><span class="badge b-acid"><i class="fas fa-id-card"></i> ${mem.membershipTypeName||'Permanentka'}</span>
+                    <span style="font-size:0.75rem;color:var(--muted);margin-left:0.5rem">${mem.daysRemaining} dní zostatok</span></div>
+                </div>
+            </div>`;
+                toast('✓ Vstup: '+(d.fullName||displayName),'ok');
+                loadTodayCheckins();
+                // Reset inputu
+                document.getElementById('checkinInput').value='';
+                document.getElementById('checkinInput').focus();
+            }else{
+                showCheckinError(resultEl, displayName||userId, d.message||'Chyba servera');
+            }
+        }catch(e){toast(e.message,'err');}
+    }
+
+    function showCheckinError(el,name,msg){
+        el.className='checkin-result err';
+        el.style.display='block';
+        el.innerHTML=`<div style="display:flex;align-items:center;gap:1rem">
+        <i class="fas fa-times-circle" style="font-size:2.5rem;color:var(--red)"></i>
+        <div>
+            <div style="font-family:var(--font-d);font-size:1.2rem;font-weight:900;color:var(--red)">Vstup zamietnutý</div>
+            <div style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem">${name}</div>
+            <div style="font-size:0.8rem;color:var(--red);margin-top:0.3rem"><i class="fas fa-exclamation-triangle"></i> ${msg}</div>
+        </div>
+    </div>`;
+        toast('Zamietnutý: '+msg,'err');
+    }
+
+    async function doCheckin(){
+        const val=document.getElementById('checkinInput').value.trim();
+        if(!val)return;
+        await processCheckin(val, null);
+    }
+
+    async function quickCheckin(){
+        const val=document.getElementById('quickCheckinInput').value.trim();if(!val)return;
+        const el=document.getElementById('quickCheckinResult');
+        try{
+            // Over permanentku
+            const resM=await authFetch('/api/admin/memberships/user/'+val);
+            if(!resM.ok){
+                el.innerHTML=`<div style="padding:0.6rem 0.8rem;background:rgba(255,45,85,0.06);border:1px solid rgba(255,45,85,0.2);border-radius:4px;margin-top:0.5rem;font-size:0.83rem;color:var(--red)"><i class="fas fa-times"></i> Žiadna aktívna permanentka</div>`;
+                setTimeout(()=>el.innerHTML='',4000);return;
+            }
+            const mem=await resM.json();
+            if(mem.status!=='active'){
+                el.innerHTML=`<div style="padding:0.6rem 0.8rem;background:rgba(255,45,85,0.06);border:1px solid rgba(255,45,85,0.2);border-radius:4px;margin-top:0.5rem;font-size:0.83rem;color:var(--red)"><i class="fas fa-times"></i> Permanentka vypršala</div>`;
+                setTimeout(()=>el.innerHTML='',4000);return;
+            }
+            const res=await authFetch('/api/checkin/scan',{method:'POST',body:JSON.stringify({userId:val})});
+            const d=await res.json();
+            if(res.ok){
+                el.innerHTML=`<div style="padding:0.6rem 0.8rem;background:rgba(200,255,0,0.06);border:1px solid rgba(200,255,0,0.2);border-radius:4px;margin-top:0.5rem;font-size:0.83rem;color:var(--acid)"><i class="fas fa-check"></i> <b>${d.fullName||'Člen'}</b> — vstup potvrdený</div>`;
+                document.getElementById('quickCheckinInput').value='';toast('✓ '+(d.fullName||val),'ok');
+            }else{
+                el.innerHTML=`<div style="padding:0.6rem 0.8rem;background:rgba(255,45,85,0.06);border:1px solid rgba(255,45,85,0.2);border-radius:4px;margin-top:0.5rem;font-size:0.83rem;color:var(--red)"><i class="fas fa-times"></i> ${d.message||'Chyba'}</div>`;
+            }
+            setTimeout(()=>el.innerHTML='',4000);
+        }catch(e){toast(e.message,'err');}
+    }
+
+    async function loadTodayCheckins(){
+        const el=document.getElementById('todayCheckinsEl');
+        el.innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
+        try{
+            const res=await authFetch('/api/checkin/today');
+            if(res.ok){
+                const data=await res.json();
+                document.getElementById('kpi-checkins').textContent=Array.isArray(data)?data.length:0;
+                if(!Array.isArray(data)||!data.length){el.innerHTML='<div class="empty-state" style="padding:1.5rem"><i class="fas fa-sign-in-alt"></i><p>Zatiaľ žiadne vstupy dnes</p></div>';return;}
+                el.innerHTML=data.slice(0,20).map(c=>{
+                    const ini=(c.fullName||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+                    const t=c.checkedAt?new Date(c.checkedAt).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'}):'—';
+                    return `<div style="display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+                    <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:0.9rem;font-weight:700;flex-shrink:0">${ini}</div>
+                    <div style="flex:1"><div style="font-size:0.84rem;font-weight:500">${c.fullName||'—'}</div><div style="font-size:0.72rem;color:var(--muted)">${c.email||''}</div></div>
+                    <div style="font-size:0.75rem;color:var(--muted)">${t}</div></div>`;
+                }).join('');
+            }else{el.innerHTML='<div class="empty-state" style="padding:1.5rem"><p style="font-size:0.8rem">Endpoint /api/checkin/today nie je dostupný</p></div>';}
+        }catch(e){el.innerHTML='<div class="empty-state" style="padding:1.5rem"><p style="font-size:0.8rem;color:var(--muted)">Načítanie nie je dostupné</p></div>';}
+    }
+
+    // ── OVERVIEW ──────────────────────────────────────────────────────────────
+    async function loadOverview(){
+        try{
+            const[resM,resCls]=await Promise.all([authFetch('/api/admin/profiles'),authFetch('/api/classes')]);
+            allMembers=resM.ok?(await resM.json()):[];
+            allClasses=resCls.ok?(await resCls.json()):[];
+            if(!Array.isArray(allMembers))allMembers=[];
+            if(!Array.isArray(allClasses))allClasses=[];
+            document.getElementById('kpi-members').textContent=allMembers.filter(m=>m.active&&m.role==='member').length;
+            document.getElementById('kpi-frozen').textContent=allMembers.filter(m=>!m.active).length;
+            const today=new Date();today.setHours(0,0,0,0);
+            const tmr=new Date(today);tmr.setDate(today.getDate()+1);
+            const todayCls=allClasses.filter(c=>{const d=new Date(c.startTime);return d>=today&&d<tmr;});
+            document.getElementById('kpi-classes').textContent=todayCls.length;
+            document.getElementById('kpi-revenue').textContent=fmtEur(getDailyTotal());
+            document.getElementById('kasaDailyTotal').textContent=fmtEur(getDailyTotal());
+            renderTodayClassesOverview(todayCls);
+            loadTodayCheckinsCount();
+        }catch(e){toast('Chyba: '+e.message,'err');}
+    }
+
+    async function loadTodayCheckinsCount(){
+        try{const res=await authFetch('/api/checkin/today');if(res.ok){const d=await res.json();document.getElementById('kpi-checkins').textContent=Array.isArray(d)?d.length:0;}}catch{}
+    }
+
+    function renderTodayClassesOverview(classes){
+        const el=document.getElementById('todayClassesEl');
+        if(!classes.length){el.innerHTML='<div class="empty-state" style="padding:1.5rem"><i class="fas fa-calendar-times"></i><p>Žiadne lekcie dnes</p></div>';return;}
+        el.innerHTML=classes.map(c=>{
+            const b=c.booked||0,cap=c.capacity||0,pct=cap?Math.round(b/cap*100):0;
+            const bc=pct>=90?'var(--red)':pct>=60?'var(--orange)':'var(--acid)';
+            return `<div style="padding:0.6rem 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem">
+                <b style="font-size:0.85rem">${c.name||'—'}</b>
+                <span style="font-size:0.75rem;color:var(--muted)">${new Date(c.startTime).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem">
+                <div class="occ-track" style="flex:1"><div class="occ-fill" style="width:${pct}%;background:${bc}"></div></div>
+                <span style="font-size:0.72rem;color:var(--muted)">${b}/${cap}</span>
+            </div>
+        </div>`;
+        }).join('');
     }
 
     // ── MEMBERS ───────────────────────────────────────────────────────────────
-    async function loadMembers() {
-        document.getElementById('membersTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
-        try {
-            const res = await authFetch('/api/admin/profiles');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            allMembers = Array.isArray(data) ? data : [];
-            renderMembersTable(allMembers.filter(m => m.role === 'member'));
-        } catch(e) {
-            document.getElementById('membersTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
-        }
+    async function loadMembers(){
+        document.getElementById('membersTable').innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
+        try{
+            const res=await authFetch('/api/admin/profiles');const data=await res.json();
+            if(!res.ok)throw new Error(data.message);
+            allMembers=Array.isArray(data)?data:[];
+            renderMembersTable(allMembers.filter(m=>m.role==='member'));
+            populateMemberSelects();
+        }catch(e){document.getElementById('membersTable').innerHTML=`<div class="empty-state"><p>❌ ${e.message}</p></div>`;}
     }
 
-    function renderMembersTable(members) {
-        if (!members.length) {
-            document.getElementById('membersTable').innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni členovia</p></div>';
-            return;
-        }
-        let html = '<table class="dt"><thead><tr><th>Meno</th><th>Email</th><th>Telefón</th><th>Stav</th></tr></thead><tbody>';
-        members.forEach(m => {
-            html += `<tr>
-                <td data-label="Meno"><b>${m.fullName||'—'}</b></td>
-                <td data-label="Email" style="color:var(--muted);font-size:0.82rem">${m.email||'—'}</td>
-                <td data-label="Telefón" style="color:var(--muted)">${m.phone||'—'}</td>
-                <td data-label="Stav">${memberBadge(m.active)}</td>
-            </tr>`;
+    function renderMembersTable(members){
+        if(!members.length){document.getElementById('membersTable').innerHTML='<div class="empty-state"><i class="fas fa-users"></i><p>Žiadni členovia</p></div>';return;}
+        let html='<table class="dt"><thead><tr><th>Meno</th><th>Email</th><th>Telefón</th><th>Stav</th><th>Akcie</th></tr></thead><tbody>';
+        members.forEach(m=>{
+            html+=`<tr class="${!m.active?'frozen-row':''}">
+            <td data-label="Meno"><b>${m.fullName||'—'}</b></td>
+            <td data-label="Email" style="color:var(--muted);font-size:0.82rem">${m.email||'—'}</td>
+            <td data-label="Telefón" style="color:var(--muted)">${m.phone||'—'}</td>
+            <td data-label="Stav">${m.active?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-frozen"><i class="fas fa-snowflake"></i> Zmrazený</span>'}</td>
+            <td data-label="Akcie"><button class="btn btn-ghost btn-sm" onclick="openDrawer('${m.id}')"><i class="fas fa-eye"></i></button></td>
+        </tr>`;
         });
-        html += '</tbody></table>';
-        document.getElementById('membersTable').innerHTML = html;
+        document.getElementById('membersTable').innerHTML=html+'</tbody></table>';
     }
 
-    function filterMembers() {
-        const q = document.getElementById('memberSearch').value.toLowerCase();
-        const s = document.getElementById('memberStatusFilter').value;
-        const members = allMembers.filter(m => m.role === 'member');
-        renderMembersTable(members.filter(m => {
-            const matchQ = !q || (m.fullName||'').toLowerCase().includes(q) || (m.email||'').toLowerCase().includes(q);
-            const matchS = !s || (s==='active' && m.active) || (s==='inactive' && !m.active);
-            return matchQ && matchS;
+    function filterMembers(){
+        const q=document.getElementById('memberSearch').value.toLowerCase();
+        const s=document.getElementById('memberStatusFilter').value;
+        renderMembersTable(allMembers.filter(m=>m.role==='member').filter(m=>{
+            const mQ=!q||(m.fullName||'').toLowerCase().includes(q)||(m.email||'').toLowerCase().includes(q);
+            const mS=!s||(s==='active'&&m.active)||(s==='frozen'&&!m.active);
+            return mQ&&mS;
         }));
+    }
+
+    function populateMemberSelects(){
+        const members=allMembers.filter(m=>m.role==='member');
+        const opts=members.map(m=>`<option value="${m.id}">${m.fullName} (${m.email})</option>`).join('');
+        document.getElementById('freezeSelect').innerHTML='<option value="">— vyber člena —</option>'+opts;
+        document.getElementById('memAssignMember').innerHTML='<option value="">— vyber člena —</option>'+opts;
+        document.getElementById('kasaMemberSelect').innerHTML='<option value="">— bez priradenia —</option>'+members.map(m=>`<option value="${m.id}">${m.fullName}</option>`).join('');
+    }
+
+    async function setMemberStatus(active){
+        const id=document.getElementById('freezeSelect').value;
+        if(!id)return showMsg('freezeMsg','Vyber člena','err');
+        const u=allMembers.find(m=>m.id===id);
+        if(!active&&!confirm(`Zmraziť účet pre ${u?.fullName}?`))return;
+        try{
+            const res=await authFetch('/api/admin/profiles/'+id+'/status',{method:'PUT',body:JSON.stringify({active})});
+            let d;try{d=await res.json()}catch{d={}}
+            if(!res.ok)throw new Error(d.message||'Chyba');
+            showMsg('freezeMsg',(active?'✓ Aktivovaný':'❄️ Zmrazený')+': '+(u?.fullName||''),'ok');
+            toast(active?'Účet aktivovaný':'Účet zmrazený',active?'ok':'err');loadMembers();
+        }catch(e){showMsg('freezeMsg',e.message,'err');}
+    }
+
+    async function loadMembershipTypes(){
+        try{
+            const res=await authFetch('/api/memberships/types');const types=await res.json();
+            const sel=document.getElementById('memAssignType');
+            if(Array.isArray(types)&&types.length)
+                sel.innerHTML=types.map(t=>`<option value="${t.id}">${t.name} — ${(t.priceCents/100).toFixed(2)} €</option>`).join('');
+        }catch{}
+    }
+
+    async function assignMembership(){
+        const userId=document.getElementById('memAssignMember').value;
+        const typeId=document.getElementById('memAssignType').value;
+        const startDate=document.getElementById('memAssignDate').value;
+        if(!userId)return showMsg('memAssignMsg','Vyber člena','err');
+        if(!typeId)return showMsg('memAssignMsg','Vyber typ členstva','err');
+        try{
+            const res=await authFetch('/api/admin/memberships/assign',{method:'POST',body:JSON.stringify({userId,membershipTypeId:+typeId,startDate:startDate||null})});
+            let d;try{d=await res.json()}catch{d={}}
+            if(!res.ok)throw new Error(d.message||'Chyba');
+            showMsg('memAssignMsg','Permanentka priradená!','ok');toast('Permanentka priradená','ok');
+        }catch(e){showMsg('memAssignMsg',e.message,'err');}
+    }
+
+    // ── DRAWER ────────────────────────────────────────────────────────────────
+    async function openDrawer(userId){
+        document.getElementById('drawerOverlay').classList.add('open');
+        document.getElementById('userDrawer').classList.add('open');
+        document.getElementById('drawerBody').innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
+        document.getElementById('drawerActions').innerHTML='';
+        try{
+            const res=await authFetch('/api/users/'+userId);const d=await res.json();
+            if(!res.ok)throw new Error(d.message);
+            document.getElementById('drawerTitle').textContent=d.fullName||'Detail profilu';
+            const isActive=Boolean(d.active);
+            document.getElementById('drawerBody').innerHTML=`
+            <div class="drawer-section"><div class="drawer-section-title">Základné info</div>
+                <div class="drow">
+                    <div class="dfield"><div class="dk">Meno</div>${d.fullName||'—'}</div>
+                    <div class="dfield"><div class="dk">Email</div><span style="font-size:0.78rem">${d.email||'—'}</span></div>
+                </div>
+                <div class="drow">
+                    <div class="dfield"><div class="dk">Telefón</div>${d.phone||'—'}</div>
+                    <div class="dfield"><div class="dk">Stav</div>${isActive?'<span class="badge b-acid">Aktívny</span>':'<span class="badge b-frozen"><i class="fas fa-snowflake"></i> Zmrazený</span>'}</div>
+                </div>
+            </div>`;
+            try{
+                const resM=await authFetch('/api/admin/memberships/user/'+userId);
+                if(resM.ok){
+                    const m=await resM.json();
+                    document.getElementById('drawerBody').innerHTML+=`
+                    <div class="drawer-section"><div class="drawer-section-title">Predplatné</div>
+                        <div class="drow">
+                            <div class="dfield"><div class="dk">Typ</div>${m.membershipTypeName||'—'}</div>
+                            <div class="dfield"><div class="dk">Status</div><span class="badge ${m.status==='active'?'b-acid':'b-red'}">${m.status}</span></div>
+                        </div>
+                        <div class="drow">
+                            <div class="dfield"><div class="dk">Platí do</div>${m.endDate||'—'}</div>
+                            <div class="dfield"><div class="dk">Zostatok</div>${m.daysRemaining} dní</div>
+                        </div>
+                    </div>`;
+                }else{document.getElementById('drawerBody').innerHTML+='<div class="drawer-section"><div class="drawer-section-title">Predplatné</div><div style="color:var(--muted);font-size:0.83rem">Žiadne aktívne predplatné</div></div>';}
+            }catch{}
+            document.getElementById('drawerActions').innerHTML=`
+            <button class="btn btn-${isActive?'frozen':'cyan'} btn-sm" onclick="quickToggleStatus('${userId}',${isActive});closeDrawer()">
+                <i class="fas fa-${isActive?'snowflake':'user-check'}"></i> ${isActive?'Zmraziť účet':'Aktivovať účet'}
+            </button>`;
+        }catch(e){document.getElementById('drawerBody').innerHTML=`<div class="empty-state"><p>❌ ${e.message}</p></div>`;}
+    }
+    function closeDrawer(){document.getElementById('drawerOverlay').classList.remove('open');document.getElementById('userDrawer').classList.remove('open');}
+    async function quickToggleStatus(id,currentActive){
+        try{
+            const res=await authFetch('/api/admin/profiles/'+id+'/status',{method:'PUT',body:JSON.stringify({active:!currentActive})});
+            if(res.ok){toast(currentActive?'Účet zmrazený':'Účet aktivovaný',currentActive?'err':'ok');loadMembers();}
+            else toast('Chyba','err');
+        }catch(e){toast(e.message,'err');}
     }
 
     // ── CLASSES ───────────────────────────────────────────────────────────────
-    async function loadClasses() {
-        document.getElementById('classesTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
-        try {
-            const res = await authFetch('/api/classes');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            allClasses = Array.isArray(data) ? data : [];
-            renderClassesTable(allClasses);
-        } catch(e) {
-            document.getElementById('classesTable').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;
-        }
+    async function loadClasses(){
+        document.getElementById('classesTable').innerHTML='<div class="empty-state"><span class="spinner"></span></div>';
+        try{
+            const res=await authFetch('/api/classes');const data=await res.json();
+            if(!res.ok)throw new Error(data.message);
+            allClasses=Array.isArray(data)?data:[];renderClassesTable(allClasses);
+        }catch(e){document.getElementById('classesTable').innerHTML=`<div class="empty-state"><p>❌ ${e.message}</p></div>`;}
     }
-
-    function renderClassesTable(classes) {
-        if (!classes.length) {
-            document.getElementById('classesTable').innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne lekcie</p></div>';
-            return;
-        }
-        const sorted = [...classes].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
-        let html = '<table class="dt"><thead><tr><th>Lekcia</th><th>Tréner</th><th>Čas</th><th>Miesto</th><th>Obsadenosť</th><th>Status</th></tr></thead><tbody>';
-        sorted.forEach(c => {
-            const booked = c.booked||0, cap = c.capacity||0;
-            const pct = cap ? Math.round(booked/cap*100) : 0;
-            const bc = pct>=90?'var(--red)':pct>=60?'var(--orange)':'var(--acid)';
-            const isPast = new Date(c.startTime) < new Date();
-            const isToday = (() => {
-                const d = new Date(c.startTime); const t = new Date();
-                return d.toDateString() === t.toDateString();
-            })();
-            html += `<tr>
-                <td data-label="Lekcia"><b>${c.name||'—'}</b></td>
-                <td data-label="Tréner" style="color:var(--muted)">${c.instructor||'—'}</td>
-                <td data-label="Čas" style="font-size:0.82rem;color:var(--muted)">${fmtTime(c.startTime)}</td>
-                <td data-label="Miesto"><span class="badge b-grey">${c.location||'—'}</span></td>
-                <td data-label="Obsadenosť">
-                    <div class="occ-bar">
-                        <div class="occ-track" style="width:80px"><div class="occ-fill" style="width:${pct}%;background:${bc}"></div></div>
-                        <span style="font-size:0.73rem;color:var(--muted)">${booked}/${cap||'—'}</span>
-                    </div>
-                </td>
-                <td data-label="Status">${isPast ? '<span class="badge b-grey">Prebehla</span>' : isToday ? '<span class="badge b-purple">Dnes</span>' : '<span class="badge b-acid">Nadchádzajúca</span>'}</td>
-            </tr>`;
+    function renderClassesTable(classes){
+        if(!classes.length){document.getElementById('classesTable').innerHTML='<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Žiadne lekcie</p></div>';return;}
+        const sorted=[...classes].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+        let html='<table class="dt"><thead><tr><th>Lekcia</th><th>Tréner</th><th>Čas</th><th>Miesto</th><th>Obsadenosť</th><th>Status</th></tr></thead><tbody>';
+        sorted.forEach(c=>{
+            const b=c.booked||0,cap=c.capacity||0,pct=cap?Math.round(b/cap*100):0;
+            const bc=pct>=90?'var(--red)':pct>=60?'var(--orange)':'var(--acid)';
+            const isPast=new Date(c.startTime)<new Date();
+            const d=new Date(c.startTime),t=new Date(),isToday=d.toDateString()===t.toDateString();
+            html+=`<tr><td data-label="Lekcia"><b>${c.name||'—'}</b></td>
+            <td data-label="Tréner" style="color:var(--muted)">${c.instructor||'—'}</td>
+            <td data-label="Čas" style="font-size:0.82rem;color:var(--muted)">${fmtTime(c.startTime)}</td>
+            <td data-label="Miesto"><span class="badge b-grey">${c.location||'—'}</span></td>
+            <td data-label="Obsadenosť"><div class="occ-bar"><div class="occ-track" style="width:80px"><div class="occ-fill" style="width:${pct}%;background:${bc}"></div></div><span style="font-size:0.73rem;color:var(--muted)">${b}/${cap||'—'}</span></div></td>
+            <td data-label="Status">${isPast?'<span class="badge b-grey">Prebehla</span>':isToday?'<span class="badge b-purple">Dnes</span>':'<span class="badge b-acid">Nadchádzajúca</span>'}</td>
+        </tr>`;
         });
-        html += '</tbody></table>';
-        document.getElementById('classesTable').innerHTML = html;
+        document.getElementById('classesTable').innerHTML=html+'</tbody></table>';
     }
-
-    function filterClasses() {
-        const q = document.getElementById('classSearch').value.toLowerCase();
-        const f = document.getElementById('classTimeFilter').value;
-        const now = new Date();
-        const today = new Date(); today.setHours(0,0,0,0);
-        const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
-        renderClassesTable(allClasses.filter(c => {
-            const matchQ = !q || (c.name||'').toLowerCase().includes(q) || (c.instructor||'').toLowerCase().includes(q);
-            const d = new Date(c.startTime);
-            const matchF = !f ||
-                (f==='today' && d>=today && d<tomorrow) ||
-                (f==='upcoming' && d>=now);
-            return matchQ && matchF;
+    function filterClasses(){
+        const q=document.getElementById('classSearch').value.toLowerCase();
+        const f=document.getElementById('classTimeFilter').value;
+        const now=new Date(),today=new Date();today.setHours(0,0,0,0);
+        const tmr=new Date(today);tmr.setDate(today.getDate()+1);
+        renderClassesTable(allClasses.filter(c=>{
+            const mQ=!q||(c.name||'').toLowerCase().includes(q)||(c.instructor||'').toLowerCase().includes(q);
+            const d=new Date(c.startTime);
+            const mF=!f||(f==='today'&&d>=today&&d<tmr)||(f==='upcoming'&&d>=now);
+            return mQ&&mF;
         }));
     }
 
+    // ── KASA ──────────────────────────────────────────────────────────────────
+    const PRODUCTS=[
+        {name:'Proteínový bar',price:2.50},{name:'Protein shake',price:4.00},
+        {name:'Izotonický nápoj',price:1.80},{name:'Voda 0,5L',price:0.80},
+        {name:'Energetický nápoj',price:2.20},{name:'Kreatin 100g',price:12.00},
+        {name:'Protein 1kg',price:35.00},{name:'Fitness rukavice',price:15.00},
+        {name:'Vstupenka - jednorazová',price:8.00},
+    ];
+    let kasaCart=[];
+
+    function renderProductGrid(){
+        document.getElementById('productGrid').innerHTML=PRODUCTS.map((p,i)=>
+            `<div class="product-btn" onclick="addToKasa(${i})"><div class="p-name">${p.name}</div><div class="p-price">${fmtEur(p.price)}</div></div>`
+        ).join('');
+    }
+    function addToKasa(idx){
+        const p=PRODUCTS[idx];const ex=kasaCart.find(i=>i.name===p.name);
+        if(ex)ex.qty++;else kasaCart.push({name:p.name,price:p.price,qty:1});
+        renderKasaCart();
+    }
+    function addCustomProduct(){
+        const name=document.getElementById('customProductName').value.trim();
+        const price=parseFloat(document.getElementById('customProductPrice').value);
+        if(!name||isNaN(price)||price<=0)return toast('Zadaj názov a cenu','err');
+        kasaCart.push({name,price,qty:1});
+        document.getElementById('customProductName').value='';document.getElementById('customProductPrice').value='';
+        renderKasaCart();
+    }
+    function renderKasaCart(){
+        const el=document.getElementById('kasaItems');
+        const total=kasaCart.reduce((s,i)=>s+i.price*i.qty,0);
+        document.getElementById('kasaTotal').textContent=fmtEur(total);
+        document.getElementById('kasaItemCount').textContent=kasaCart.reduce((s,i)=>s+i.qty,0)+' položiek';
+        if(!kasaCart.length){el.innerHTML='<div class="empty-state" style="padding:1.5rem"><i class="fas fa-shopping-cart"></i><p>Košík je prázdny</p></div>';return;}
+        el.innerHTML=kasaCart.map((item,idx)=>`
+        <div class="kasa-item">
+            <div style="flex:1"><div class="kasa-item-name">${item.name}</div><div style="font-size:0.73rem;color:var(--muted)">${fmtEur(item.price)} / ks</div></div>
+            <div style="display:flex;align-items:center;gap:0.4rem">
+                <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
+                <span class="qty-val">${item.qty}</span>
+                <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
+            </div>
+            <div class="kasa-item-price">${fmtEur(item.price*item.qty)}</div>
+            <button class="btn btn-red btn-sm" style="margin-left:0.4rem" onclick="removeFromKasa(${idx})"><i class="fas fa-times"></i></button>
+        </div>`).join('');
+    }
+    function changeQty(idx,delta){kasaCart[idx].qty+=delta;if(kasaCart[idx].qty<=0)kasaCart.splice(idx,1);renderKasaCart();}
+    function removeFromKasa(idx){kasaCart.splice(idx,1);renderKasaCart();}
+    function clearKasa(){kasaCart=[];renderKasaCart();showMsg('kasaMsg','','');}
+    async function processPayment(method){
+        if(!kasaCart.length)return showMsg('kasaMsg','Košík je prázdny','err');
+        const total=kasaCart.reduce((s,i)=>s+i.price*i.qty,0);
+        const sel=document.getElementById('kasaMemberSelect');
+        const memberId=sel.value;
+        const memberName=memberId?sel.options[sel.selectedIndex].text:null;
+        const tx={id:Date.now(),time:new Date().toISOString(),items:[...kasaCart],total,method,memberId:memberId||null,memberName:memberName||null};
+        const key='kasa_transactions_'+getTodayKey();
+        const existing=JSON.parse(localStorage.getItem(key)||'[]');
+        existing.push(tx);localStorage.setItem(key,JSON.stringify(existing));
+        const dt=getDailyTotal();
+        document.getElementById('kpi-revenue').textContent=fmtEur(dt);
+        document.getElementById('kasaDailyTotal').textContent=fmtEur(dt);
+        toast(`✓ Platba ${fmtEur(total)} — ${method==='cash'?'hotovosť':'karta'}`,'ok');
+        showMsg('kasaMsg',`Platba ${fmtEur(total)} úspešná (${method==='cash'?'hotovosť':'karta'})${memberName?' — '+memberName:''}`, 'ok');
+        kasaCart=[];renderKasaCart();renderTransactions();
+    }
+    function renderTransactions(){
+        const el=document.getElementById('transactionsEl');
+        const txs=JSON.parse(localStorage.getItem('kasa_transactions_'+getTodayKey())||'[]').slice().reverse();
+        if(!txs.length){el.innerHTML='<div class="empty-state"><i class="fas fa-receipt"></i><p>Žiadne transakcie dnes</p></div>';return;}
+        const dayTotal=txs.reduce((s,t)=>s+t.total,0);
+        let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:0.8rem;background:var(--surface2);border-radius:4px">
+        <span style="font-size:0.8rem;color:var(--muted)">Celkovo dnes: <b style="color:var(--text)">${txs.length} transakcií</b></span>
+        <span style="font-family:var(--font-d);font-size:1.2rem;font-weight:900;color:var(--orange)">${fmtEur(dayTotal)}</span>
+    </div><table class="dt"><thead><tr><th>Čas</th><th>Položky</th><th>Člen</th><th>Platba</th><th>Suma</th></tr></thead><tbody>`;
+        txs.forEach(tx=>{
+            const t=new Date(tx.time).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});
+            const items=tx.items.map(i=>`${i.name} ×${i.qty}`).join(', ');
+            html+=`<tr>
+            <td data-label="Čas" style="color:var(--muted);font-size:0.8rem">${t}</td>
+            <td data-label="Položky" style="font-size:0.8rem">${items}</td>
+            <td data-label="Člen" style="color:var(--muted);font-size:0.8rem">${tx.memberName||'—'}</td>
+            <td data-label="Platba"><span class="badge ${tx.method==='cash'?'b-orange':'b-purple'}">${tx.method==='cash'?'Hotovosť':'Karta'}</span></td>
+            <td data-label="Suma" style="font-family:var(--font-d);font-weight:700;color:var(--acid)">${fmtEur(tx.total)}</td>
+        </tr>`;
+        });
+        el.innerHTML=html+'</tbody></table>';
+    }
+
+    // ── MUSIC ─────────────────────────────────────────────────────────────────
+    let playlist=[],currentTrack=-1,isPlaying=false,isShuffle=false,isRepeat=false;
+    const audio=new Audio();
+    audio.addEventListener('timeupdate',updateProgress);
+    audio.addEventListener('ended',()=>{if(isRepeat)audio.play();else nextTrack();});
+    function addTracks(e){
+        Array.from(e.target.files).forEach(f=>playlist.push({name:f.name.replace(/\.[^/.]+$/,''),url:URL.createObjectURL(f)}));
+        renderPlaylist();if(currentTrack===-1&&playlist.length>0)loadTrack(0);
+        toast(`Pridaných ${e.target.files.length} skladieb`,'ok');e.target.value='';
+    }
+    function loadTrack(idx){
+        if(idx<0||idx>=playlist.length)return;
+        currentTrack=idx;audio.src=playlist[idx].url;
+        document.getElementById('musicTitle').textContent=playlist[idx].name;
+        document.getElementById('musicArtist').textContent='Lokálny súbor';
+        document.getElementById('musicProgress').style.width='0%';
+        document.getElementById('musicCurrent').textContent='0:00';
+        renderPlaylist();if(isPlaying)audio.play();
+    }
+    function togglePlay(){
+        if(!playlist.length)return toast('Najprv nahraj hudbu','err');
+        if(currentTrack===-1)loadTrack(0);
+        if(isPlaying){audio.pause();isPlaying=false;document.getElementById('playIcon').className='fas fa-play';}
+        else{audio.play();isPlaying=true;document.getElementById('playIcon').className='fas fa-pause';}
+    }
+    function nextTrack(){if(!playlist.length)return;let n=isShuffle?Math.floor(Math.random()*playlist.length):(currentTrack+1)%playlist.length;isPlaying=true;loadTrack(n);audio.play();document.getElementById('playIcon').className='fas fa-pause';}
+    function prevTrack(){if(!playlist.length)return;let p=currentTrack<=0?playlist.length-1:currentTrack-1;isPlaying=true;loadTrack(p);audio.play();document.getElementById('playIcon').className='fas fa-pause';}
+    function toggleShuffle(){isShuffle=!isShuffle;document.getElementById('shuffleBtn').style.color=isShuffle?'var(--purple)':'var(--muted)';}
+    function toggleRepeat(){isRepeat=!isRepeat;document.getElementById('repeatBtn').style.color=isRepeat?'var(--purple)':'var(--muted)';}
+    function setVolume(v){audio.volume=v/100;}
+    function updateProgress(){
+        if(!audio.duration)return;
+        document.getElementById('musicProgress').style.width=(audio.currentTime/audio.duration*100)+'%';
+        document.getElementById('musicCurrent').textContent=fmtSec(audio.currentTime);
+        document.getElementById('musicDuration').textContent=fmtSec(audio.duration);
+    }
+    function seekMusic(e){const bar=e.currentTarget,rect=bar.getBoundingClientRect();if(audio.duration)audio.currentTime=((e.clientX-rect.left)/rect.width)*audio.duration;}
+    function fmtSec(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m}:${sec<10?'0':''}${sec}`;}
+    function renderPlaylist(){
+        const el=document.getElementById('playlist');
+        if(!playlist.length){el.innerHTML='<div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem">Playlist je prázdny — nahraj MP3 súbory</div>';return;}
+        el.innerHTML=playlist.map((t,i)=>`
+        <div class="pl-item ${i===currentTrack?'active':''}" onclick="isPlaying=true;loadTrack(${i});audio.play();document.getElementById('playIcon').className='fas fa-pause'">
+            <span class="pl-num">${i===currentTrack?'<i class="fas fa-volume-up" style="font-size:0.65rem"></i>':(i+1)}</span>
+            <span class="pl-name">${t.name}</span>
+        </div>`).join('');
+    }
+
     // ── PROFILE ───────────────────────────────────────────────────────────────
-    async function loadProfile() {
-        try {
-            const res = await authFetch('/api/auth/me');
-            const d = await res.json();
-            if (!res.ok) throw new Error(d.message);
-            document.getElementById('profileData').style.display = 'block';
-            document.getElementById('p-name').textContent  = d.fullName||'—';
-            document.getElementById('p-email').textContent = d.email||'—';
-            document.getElementById('p-role').innerHTML    = '<span class="badge b-purple">reception</span>';
-            document.getElementById('p-edit-name').value   = d.fullName||'';
-            document.getElementById('p-edit-phone').value  = d.phone||'';
-        } catch(e) { toast(e.message, 'err'); }
+    async function loadProfile(){
+        try{
+            const res=await authFetch('/api/auth/me');const d=await res.json();
+            if(!res.ok)throw new Error(d.message);
+            document.getElementById('profileData').style.display='block';
+            document.getElementById('p-name').textContent=d.fullName||'—';
+            document.getElementById('p-email').textContent=d.email||'—';
+            document.getElementById('p-role').innerHTML='<span class="badge b-purple">reception</span>';
+            document.getElementById('p-edit-name').value=d.fullName||'';
+            document.getElementById('p-edit-phone').value=d.phone||'';
+        }catch(e){toast(e.message,'err');}
     }
-
-    async function saveProfile() {
-        const fullName = document.getElementById('p-edit-name').value.trim();
-        const phone    = document.getElementById('p-edit-phone').value.trim();
-        if (!fullName) return showMsg('profileMsg', 'Meno je povinné', 'err');
-        const uid = user?.id || user?.userId;
-        try {
-            const res = await authFetch('/api/users/'+uid, {method:'PUT', body:JSON.stringify({fullName, phone})});
-            let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba');
-            showMsg('profileMsg', 'Profil aktualizovaný!', 'ok');
-            const upd = {...user, fullName, phone};
-            localStorage.setItem('fp_user', JSON.stringify(upd)); user = upd;
-            document.getElementById('sideName').textContent = fullName;
-            toast('Profil uložený', 'ok');
-        } catch(e) { showMsg('profileMsg', e.message, 'err'); }
+    async function saveProfile(){
+        const fullName=document.getElementById('p-edit-name').value.trim();
+        const phone=document.getElementById('p-edit-phone').value.trim();
+        if(!fullName)return showMsg('profileMsg','Meno je povinné','err');
+        const uid=user?.id||user?.userId;
+        try{
+            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone})});
+            let d;try{d=await res.json()}catch{d={}}
+            if(!res.ok)throw new Error(d.message||'Chyba');
+            showMsg('profileMsg','Profil aktualizovaný!','ok');
+            const upd={...user,fullName,phone};localStorage.setItem('fp_user',JSON.stringify(upd));user=upd;
+            document.getElementById('sideName').textContent=fullName;toast('Profil uložený','ok');
+        }catch(e){showMsg('profileMsg',e.message,'err');}
     }
-
-    async function changePassword() {
-        const cur  = document.getElementById('p-cur-pass').value;
-        const np   = document.getElementById('p-new-pass').value;
-        const np2  = document.getElementById('p-new-pass2').value;
-        if (!cur) return showMsg('passMsg', 'Zadaj aktuálne heslo', 'err');
-        if (np.length<6) return showMsg('passMsg', 'Min 6 znakov', 'err');
-        if (np!==np2) return showMsg('passMsg', 'Heslá sa nezhodujú', 'err');
-        const uid = user?.id || user?.userId;
-        try {
-            const res = await authFetch('/api/users/'+uid+'/password', {method:'PUT', body:JSON.stringify({currentPassword:cur, newPassword:np})});
-            let d; try{d=await res.json()}catch{d={}}
-            if (!res.ok) throw new Error(d.message||'Chyba');
-            showMsg('passMsg', 'Heslo zmenené!', 'ok');
+    async function changePassword(){
+        const cur=document.getElementById('p-cur-pass').value;
+        const np=document.getElementById('p-new-pass').value;
+        const np2=document.getElementById('p-new-pass2').value;
+        if(!cur)return showMsg('passMsg','Zadaj aktuálne heslo','err');
+        if(np.length<6)return showMsg('passMsg','Min 6 znakov','err');
+        if(np!==np2)return showMsg('passMsg','Heslá sa nezhodujú','err');
+        const uid=user?.id||user?.userId;
+        try{
+            const res=await authFetch('/api/users/'+uid+'/password',{method:'PUT',body:JSON.stringify({currentPassword:cur,newPassword:np})});
+            let d;try{d=await res.json()}catch{d={}}
+            if(!res.ok)throw new Error(d.message||'Chyba');
+            showMsg('passMsg','Heslo zmenené!','ok');
             ['p-cur-pass','p-new-pass','p-new-pass2'].forEach(id=>document.getElementById(id).value='');
-            toast('Heslo zmenené', 'ok');
-        } catch(e) { showMsg('passMsg', e.message, 'err'); }
+            toast('Heslo zmenené','ok');
+        }catch(e){showMsg('passMsg',e.message,'err');}
     }
 
-    // ── SIDEBAR ───────────────────────────────────────────────────────────────
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('hamburger').classList.toggle('open');
-        document.getElementById('sidebarOverlay').classList.toggle('open');
-    }
-    function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('hamburger').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('open');
-    }
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('hamburger').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open');}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('hamburger').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
-    // Boot
+    renderProductGrid();
     loadOverview();
 </script>
 </body>

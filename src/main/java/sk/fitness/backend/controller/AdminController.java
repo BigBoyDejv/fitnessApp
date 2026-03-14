@@ -31,22 +31,22 @@ public class AdminController {
         this.membershipTypeRepository = membershipTypeRepository;
     }
 
-
+    // ── GET /api/admin/users ── zoznam všetkých užívateľov ───────────────────
     @GetMapping("/profiles")
     public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal UserDetails ud) {
-        if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+        if (!isAdminOrReception(ud)) return ResponseEntity.status(403).build();
         List<Map<String, Object>> users = userRepository.findAll()
                 .stream().map(this::userDto).collect(Collectors.toList());
         return ResponseEntity.ok(users);
     }
 
-
+    // ── PUT /api/admin/users/{id}/status ── aktivovať / deaktivovať ──────────
     @PutMapping("/profiles/{id}/status")
     public ResponseEntity<?> setUserStatus(
             @PathVariable String id,
             @RequestBody Map<String, Boolean> body,
             @AuthenticationPrincipal UserDetails ud) {
-        if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+        if (!isAdminOrReception(ud)) return ResponseEntity.status(403).build();
         User user = userRepository.findByIdEquals(UUID.fromString(id)).orElse(null);
         if (user == null) return ResponseEntity.notFound().build();
         Boolean active = body.get("active");
@@ -56,12 +56,12 @@ public class AdminController {
         return ResponseEntity.ok(userDto(user));
     }
 
-
+    // ── GET /api/admin/memberships/user/{userId} ── členstvo konkrétneho člena
     @GetMapping("/memberships/user/{userId}")
     public ResponseEntity<?> getUserMembership(
             @PathVariable String userId,
             @AuthenticationPrincipal UserDetails ud) {
-        if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+        if (!isAdminOrReception(ud)) return ResponseEntity.status(403).build();
         return membershipRepository
                 .findByUserIdAndStatus(UUID.fromString(userId), Membership.MembershipStatus.active)
                 .map(m -> ResponseEntity.ok(membershipDto(m)))
@@ -69,11 +69,13 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // ── POST /api/admin/memberships/assign ── priradiť / obnoviť predplatné ──
+    // Body: { userId, membershipTypeId, startDate (optional) }
     @PostMapping("/memberships/assign")
     public ResponseEntity<?> assignMembership(
             @RequestBody Map<String, Object> body,
             @AuthenticationPrincipal UserDetails ud) {
-        if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+        if (!isAdminOrReception(ud)) return ResponseEntity.status(403).build();
 
         String userId = (String) body.get("userId");
         Integer typeId = (Integer) body.get("membershipTypeId");
@@ -88,7 +90,7 @@ public class AdminController {
         MembershipType type = membershipTypeRepository.findById(typeId).orElse(null);
         if (type == null) return ResponseEntity.badRequest().body(Map.of("message", "Typ členstva nenájdený"));
 
-
+        // Zruš existujúce aktívne členstvo
         membershipRepository.findByUserIdAndStatus(user.getId(), Membership.MembershipStatus.active)
                 .ifPresent(old -> {
                     old.setStatus(Membership.MembershipStatus.cancelled);
@@ -110,7 +112,7 @@ public class AdminController {
         return ResponseEntity.ok(membershipDto(m));
     }
 
-
+    // ── PUT /api/admin/memberships/cancel/{userId} ── zrušiť predplatné ──────
     @PutMapping("/memberships/cancel/{userId}")
     public ResponseEntity<?> cancelMembership(
             @PathVariable String userId,
@@ -128,12 +130,19 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("message", "Predplatné zrušené", "userId", userId));
     }
 
-
+    // ── Pomocné ───────────────────────────────────────────────────────────────
 
     private boolean isAdmin(UserDetails ud) {
         if (ud == null) return false;
         User caller = userRepository.findByEmail(ud.getUsername()).orElse(null);
         return caller != null && "admin".equalsIgnoreCase(caller.getRole());
+    }
+
+    private boolean isAdminOrReception(UserDetails ud) {
+        if (ud == null) return false;
+        User caller = userRepository.findByEmail(ud.getUsername()).orElse(null);
+        if (caller == null) return false;
+        return "admin".equalsIgnoreCase(caller.getRole()) || "reception".equalsIgnoreCase(caller.getRole());
     }
 
     private Map<String, Object> userDto(User u) {
