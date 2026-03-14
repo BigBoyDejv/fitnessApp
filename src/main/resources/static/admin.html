@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         :root{
             --acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;
@@ -163,6 +164,40 @@
         .rev-labels{display:flex;justify-content:space-between;}
         .rev-labels span{font-size:0.65rem;color:var(--muted);}
 
+        /* ── STATS PAGE ── */
+        .stats-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:2rem;}
+        .stats-hero .sh-card{background:var(--surface);padding:1.4rem 1.3rem;position:relative;overflow:hidden;}
+        .stats-hero .sh-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--sh-accent,var(--border2));}
+        .sh-icon{font-size:1.1rem;color:var(--sh-accent,var(--muted));margin-bottom:0.5rem;opacity:0.8;}
+        .sh-val{font-family:var(--font-d);font-size:2rem;font-weight:900;line-height:1;color:var(--sh-accent,var(--text));}
+        .sh-lbl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
+        .sh-delta{font-size:0.72rem;margin-top:0.25rem;display:flex;align-items:center;gap:0.3rem;}
+        .sh-delta.up{color:var(--acid);}
+        .sh-delta.down{color:var(--red);}
+        .sh-delta.neutral{color:var(--muted);}
+        .chart-wrap{position:relative;height:280px;}
+        .chart-wrap canvas{width:100%!important;height:100%!important;}
+        .chart-wrap-sm{position:relative;height:240px;}
+        .chart-wrap-sm canvas{width:100%!important;height:100%!important;}
+        .stats-filter{display:flex;gap:0.35rem;}
+        .stats-filter button{font-family:var(--font-d);font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.65rem;border:1px solid var(--border2);border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+        .stats-filter button.active,.stats-filter button:hover{background:rgba(255,45,85,0.1);color:var(--red);border-color:rgba(255,45,85,0.25);}
+        .top-product-row{display:flex;align-items:center;gap:0.8rem;padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+        .top-product-row:last-child{border-bottom:none;}
+        .tp-rank{font-family:var(--font-d);font-size:1.1rem;font-weight:900;color:var(--muted2);width:24px;text-align:center;}
+        .tp-rank.gold{color:#FFD700;}
+        .tp-rank.silver{color:#C0C0C0;}
+        .tp-rank.bronze{color:#CD7F32;}
+        .tp-info{flex:1;}
+        .tp-name{font-size:0.85rem;font-weight:500;}
+        .tp-qty{font-size:0.72rem;color:var(--muted);}
+        .tp-rev{font-family:var(--font-d);font-size:0.95rem;font-weight:700;color:var(--acid);}
+        .tp-bar-wrap{flex:1;max-width:120px;}
+        .tp-bar-bg{height:4px;background:var(--border2);border-radius:2px;}
+        .tp-bar-fill{height:4px;border-radius:2px;background:var(--acid);transition:width 0.8s ease;}
+        @media(max-width:1100px){.stats-hero{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:600px){.stats-hero{grid-template-columns:1fr;}.chart-wrap,.chart-wrap-sm{height:200px;}}
+
         /* user detail drawer */
         .drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;backdrop-filter:blur(4px);}
         .drawer-overlay.open{display:block;}
@@ -258,6 +293,8 @@
         <a class="nav-item" onclick="showPage('memberships')" href="#"><i class="fas fa-id-card"></i> Predplatné</a>
         <a class="nav-item" onclick="showPage('classes-admin')" href="#"><i class="fas fa-calendar-alt"></i> Lekcie</a>
         <a class="nav-item" onclick="showPage('create-class')" href="#"><i class="fas fa-plus-circle"></i> Nová lekcia</a>
+        <div class="nav-section">Analytika</div>
+        <a class="nav-item" onclick="showPage('stats')" href="#"><i class="fas fa-chart-bar"></i> Štatistiky</a>
         <div class="nav-section">Nastavenia</div>
         <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user-cog"></i> Môj profil</a>
     </nav>
@@ -576,6 +613,136 @@
             </div>
         </div>
 
+        <!-- ═══ ŠTATISTIKY ═══ -->
+        <div class="page-section" id="page-stats">
+
+            <!-- Hero KPI cards -->
+            <div class="stats-hero" id="stats-hero">
+                <div class="sh-card" style="--sh-accent:var(--acid)">
+                    <div class="sh-icon"><i class="fas fa-euro-sign"></i></div>
+                    <div class="sh-val" id="sh-total-rev">—</div>
+                    <div class="sh-lbl">Celkový obrat tento mesiac</div>
+                    <div class="sh-delta neutral" id="sh-total-delta"></div>
+                </div>
+                <div class="sh-card" style="--sh-accent:var(--orange)">
+                    <div class="sh-icon"><i class="fas fa-cash-register"></i></div>
+                    <div class="sh-val" id="sh-reception-rev">—</div>
+                    <div class="sh-lbl">Tržby recepcia</div>
+                    <div class="sh-delta neutral" id="sh-reception-delta"></div>
+                </div>
+                <div class="sh-card" style="--sh-accent:var(--acid2)">
+                    <div class="sh-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="sh-val" id="sh-mem-rev">—</div>
+                    <div class="sh-lbl">Tržby permanentky</div>
+                    <div class="sh-delta neutral" id="sh-mem-delta"></div>
+                </div>
+                <div class="sh-card" style="--sh-accent:var(--red)">
+                    <div class="sh-icon"><i class="fas fa-walking"></i></div>
+                    <div class="sh-val" id="sh-checkins">—</div>
+                    <div class="sh-lbl">Check-iny tento mesiac</div>
+                    <div class="sh-delta neutral" id="sh-checkins-delta"></div>
+                </div>
+            </div>
+
+            <!-- Row 1: Monthly Revenue + Daily Revenue -->
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-chart-bar" style="margin-right:0.4rem;opacity:0.6"></i>Mesačné tržby</span>
+                        <div class="stats-filter" id="sf-monthly">
+                            <button onclick="loadMonthlyChart(6)" class="active">6M</button>
+                            <button onclick="loadMonthlyChart(12)">12M</button>
+                        </div>
+                    </div>
+                    <div class="pb"><div class="chart-wrap"><canvas id="chartMonthlyRev"></canvas></div></div>
+                </div>
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-chart-area" style="margin-right:0.4rem;opacity:0.6"></i>Denné tržby</span>
+                        <div class="stats-filter" id="sf-daily">
+                            <button onclick="loadDailyChart(7)">7D</button>
+                            <button onclick="loadDailyChart(30)" class="active">30D</button>
+                            <button onclick="loadDailyChart(90)">90D</button>
+                        </div>
+                    </div>
+                    <div class="pb"><div class="chart-wrap"><canvas id="chartDailyRev"></canvas></div></div>
+                </div>
+            </div>
+
+            <!-- Row 2: Top Products + Category + Payment -->
+            <div class="grid-3">
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-trophy" style="margin-right:0.4rem;opacity:0.6"></i>Top produkty</span>
+                        <div class="stats-filter" id="sf-products">
+                            <button onclick="loadTopProducts(1)" class="active">1M</button>
+                            <button onclick="loadTopProducts(3)">3M</button>
+                            <button onclick="loadTopProducts(6)">6M</button>
+                        </div>
+                    </div>
+                    <div class="pb" id="topProductsList">
+                        <div class="empty-state"><span class="spinner"></span></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-tags" style="margin-right:0.4rem;opacity:0.6"></i>Podľa kategórie</span>
+                    </div>
+                    <div class="pb"><div class="chart-wrap-sm"><canvas id="chartCategory"></canvas></div></div>
+                </div>
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-credit-card" style="margin-right:0.4rem;opacity:0.6"></i>Spôsob platby</span>
+                    </div>
+                    <div class="pb"><div class="chart-wrap-sm"><canvas id="chartPayment"></canvas></div></div>
+                </div>
+            </div>
+
+            <!-- Row 3: Membership Popularity + Check-ins by Hour + by Weekday -->
+            <div class="grid-3">
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-star" style="margin-right:0.4rem;opacity:0.6"></i>Popularita permanentiek</span>
+                    </div>
+                    <div class="pb"><div class="chart-wrap-sm"><canvas id="chartMemTypes"></canvas></div></div>
+                </div>
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-clock" style="margin-right:0.4rem;opacity:0.6"></i>Návštevnosť podľa hodiny</span>
+                        <div class="stats-filter" id="sf-hour">
+                            <button onclick="loadCheckinsByHour(30)" class="active">30D</button>
+                            <button onclick="loadCheckinsByHour(90)">90D</button>
+                        </div>
+                    </div>
+                    <div class="pb"><div class="chart-wrap-sm"><canvas id="chartHour"></canvas></div></div>
+                </div>
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt"><i class="fas fa-calendar-week" style="margin-right:0.4rem;opacity:0.6"></i>Návštevnosť podľa dňa</span>
+                        <div class="stats-filter" id="sf-weekday">
+                            <button onclick="loadCheckinsByWeekday(30)">30D</button>
+                            <button onclick="loadCheckinsByWeekday(90)" class="active">90D</button>
+                        </div>
+                    </div>
+                    <div class="pb"><div class="chart-wrap-sm"><canvas id="chartWeekday"></canvas></div></div>
+                </div>
+            </div>
+
+            <!-- Row 4: Daily Checkins Trend -->
+            <div class="panel">
+                <div class="ph">
+                    <span class="pt"><i class="fas fa-chart-line" style="margin-right:0.4rem;opacity:0.6"></i>Trend návštevnosti (denne)</span>
+                    <div class="stats-filter" id="sf-checkin-daily">
+                        <button onclick="loadDailyCheckins(14)">14D</button>
+                        <button onclick="loadDailyCheckins(30)" class="active">30D</button>
+                        <button onclick="loadDailyCheckins(60)">60D</button>
+                    </div>
+                </div>
+                <div class="pb"><div class="chart-wrap"><canvas id="chartDailyCheckins"></canvas></div></div>
+            </div>
+
+        </div>
+
     </div><!-- /content -->
 </main>
 
@@ -607,7 +774,7 @@
     }
 
     // ── NAV ───────────────────────────────────────────────────────────────────────
-    const pageTitles = {overview:'Dashboard',users:'Správa profilov',memberships:'Predplatné','classes-admin':'Lekcie','create-class':'Nová lekcia',profile:'Môj profil'};
+    const pageTitles = {overview:'Dashboard',users:'Správa profilov',memberships:'Predplatné','classes-admin':'Lekcie','create-class':'Nová lekcia',profile:'Môj profil',stats:'Štatistiky'};
     function showPage(id) {
         closeSidebar();
         document.querySelectorAll('.page-section').forEach(el=>el.classList.remove('active'));
@@ -621,6 +788,7 @@
         if (id==='classes-admin')  loadAdminClasses();
         if (id==='create-class')   loadTrainersForPicker();
         if (id==='profile')        loadAdminProfile();
+        if (id==='stats')          loadStatsPage();
     }
 
     async function authFetch(url, opts={}) {
@@ -1320,6 +1488,462 @@
     function initialsAvatar(name, size=36){
         const ini=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
         return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--orange));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:${Math.round(size*0.38)}px;font-weight:900;color:#fff;flex-shrink:0">${ini}</div>`;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  ŠTATISTIKY – kompletný dashboard s grafmi
+    // ══════════════════════════════════════════════════════════════════════════
+
+    // Chart.js global defaults
+    Chart.defaults.color = '#6E6E73';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+    Chart.defaults.plugins.legend.labels.padding = 16;
+
+    // Chart instances (to destroy before re-creating)
+    let chartInstances = {};
+    function getOrCreateChart(canvasId, config) {
+        if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return null;
+        chartInstances[canvasId] = new Chart(ctx, config);
+        return chartInstances[canvasId];
+    }
+
+    function setActiveFilter(groupId, btn) {
+        document.querySelectorAll('#'+groupId+' button').forEach(b => b.classList.remove('active'));
+        if (btn && btn.target) btn = btn.target;
+        if (btn) btn.classList.add('active');
+    }
+
+    const chartColors = {
+        acid: '#C8FF00', acid2: '#00FFD1', red: '#FF2D55', orange: '#FF9500', blue: '#0A84FF',
+        frozen: '#4FC3F7', purple: '#BF5AF2', pink: '#FF6B8A', teal: '#64FFDA', amber: '#FFC107'
+    };
+    const paletteArray = [chartColors.acid, chartColors.acid2, chartColors.orange, chartColors.red, chartColors.blue, chartColors.frozen, chartColors.purple, chartColors.pink, chartColors.teal, chartColors.amber];
+
+    function deltaHtml(current, previous, suffix = '€') {
+        if (previous === 0 && current === 0) return '<div class="sh-delta neutral">— rovnaké</div>';
+        if (previous === 0) return '<div class="sh-delta up"><i class="fas fa-arrow-up"></i> nové</div>';
+        const pct = Math.round(((current - previous) / previous) * 100);
+        if (pct > 0) return `<div class="sh-delta up"><i class="fas fa-arrow-up"></i> +${pct}% vs minulý mes.</div>`;
+        if (pct < 0) return `<div class="sh-delta down"><i class="fas fa-arrow-down"></i> ${pct}% vs minulý mes.</div>`;
+        return '<div class="sh-delta neutral">— rovnaké</div>';
+    }
+
+    // ── Main loader ──────────────────────────────────────────────────────────
+    async function loadStatsPage() {
+        await Promise.all([
+            loadStatsDashboard(),
+            loadMonthlyChart(6),
+            loadDailyChart(30),
+            loadTopProducts(1),
+            loadCategoryChart(3),
+            loadPaymentChart(3),
+            loadMembershipPopularity(),
+            loadCheckinsByHour(30),
+            loadCheckinsByWeekday(90),
+            loadDailyCheckins(30)
+        ]);
+    }
+
+    // ── 1. Dashboard hero KPIs ───────────────────────────────────────────────
+    async function loadStatsDashboard() {
+        try {
+            const res = await authFetch('/api/admin/stats/dashboard');
+            if (!res.ok) throw new Error('Dashboard nedostupný');
+            const d = await res.json();
+
+            document.getElementById('sh-total-rev').textContent = (d.totalRevenueThisMonth || 0).toFixed(2) + ' €';
+            document.getElementById('sh-total-delta').innerHTML = deltaHtml(d.totalRevenueThisMonth||0, d.totalRevenueLastMonth||0);
+
+            document.getElementById('sh-reception-rev').textContent = (d.receptionRevenueThisMonth || 0).toFixed(2) + ' €';
+            document.getElementById('sh-reception-delta').innerHTML = deltaHtml(d.receptionRevenueThisMonth||0, d.receptionRevenueLastMonth||0);
+
+            document.getElementById('sh-mem-rev').textContent = (d.membershipRevenueThisMonth || 0).toFixed(2) + ' €';
+            document.getElementById('sh-mem-delta').innerHTML = deltaHtml(d.membershipRevenueThisMonth||0, d.membershipRevenueLastMonth||0);
+
+            document.getElementById('sh-checkins').textContent = d.checkinsThisMonth || 0;
+            document.getElementById('sh-checkins-delta').innerHTML = deltaHtml(d.checkinsThisMonth||0, d.checkinsLastMonth||0);
+        } catch(e) {
+            console.warn('Stats dashboard error:', e);
+        }
+    }
+
+    // ── 2. Monthly revenue chart ─────────────────────────────────────────────
+    async function loadMonthlyChart(months) {
+        const btn = event?.target; if(btn) setActiveFilter('sf-monthly', btn);
+        try {
+            const res = await authFetch('/api/admin/stats/reception/monthly?months=' + months);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            // Also get membership revenue per month
+            const resMemRev = await authFetch('/api/admin/stats/revenue');
+            let memMonthly = [];
+            if (resMemRev.ok) {
+                const memData = await resMemRev.json();
+                memMonthly = memData.monthly || [];
+            }
+
+            const labels = data.map(d => d.label || (d.month + '/' + d.year));
+            const receptionVals = data.map(d => d.totalRevenueEuros || 0);
+
+            // Match membership data to reception months
+            const memVals = data.map(d => {
+                const match = memMonthly.find(m => m.year === d.year && m.month === d.month);
+                return match ? (match.total || 0) : 0;
+            });
+
+            getOrCreateChart('chartMonthlyRev', {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Recepcia',
+                            data: receptionVals,
+                            backgroundColor: 'rgba(255,149,0,0.7)',
+                            borderColor: chartColors.orange,
+                            borderWidth: 1,
+                            borderRadius: 3,
+                            barPercentage: 0.6
+                        },
+                        {
+                            label: 'Permanentky',
+                            data: memVals,
+                            backgroundColor: 'rgba(0,255,209,0.5)',
+                            borderColor: chartColors.acid2,
+                            borderWidth: 1,
+                            borderRadius: 3,
+                            barPercentage: 0.6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { callback: v => v + ' €' } }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + ' €' }
+                        }
+                    }
+                }
+            });
+        } catch(e) {
+            console.warn('Monthly chart error:', e);
+        }
+    }
+
+    // ── 3. Daily revenue chart ───────────────────────────────────────────────
+    async function loadDailyChart(days) {
+        const btn = event?.target; if(btn) setActiveFilter('sf-daily', btn);
+        try {
+            const res = await authFetch('/api/admin/stats/reception/daily?days=' + days);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            const labels = data.map(d => {
+                const dt = new Date(d.date);
+                return dt.toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit' });
+            });
+
+            getOrCreateChart('chartDailyRev', {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Denné tržby',
+                        data: data.map(d => d.totalRevenueEuros || 0),
+                        borderColor: chartColors.acid,
+                        backgroundColor: 'rgba(200,255,0,0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: days <= 14 ? 4 : 2,
+                        pointBackgroundColor: chartColors.acid,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { callback: v => v + ' €' } }
+                    },
+                    plugins: {
+                        tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(2) + ' €  (' + (data[ctx.dataIndex]?.transactionCount||0) + ' transakcií)' } },
+                        legend: { display: false }
+                    }
+                }
+            });
+        } catch(e) { console.warn('Daily chart error:', e); }
+    }
+
+    // ── 4. Top products list ─────────────────────────────────────────────────
+    async function loadTopProducts(months) {
+        const btn = event?.target; if(btn) setActiveFilter('sf-products', btn);
+        const container = document.getElementById('topProductsList');
+        container.innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/admin/stats/reception/top-products?months=' + months);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            if (!data.length) {
+                container.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-box-open"></i><p>Žiadne predaje</p></div>';
+                return;
+            }
+
+            const maxQty = Math.max(...data.map(d => d.totalQuantity), 1);
+            container.innerHTML = data.slice(0, 10).map((p, i) => {
+                const pct = Math.round((p.totalQuantity / maxQty) * 100);
+                const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                return `<div class="top-product-row">
+                    <div class="tp-rank ${rankCls}">${i + 1}</div>
+                    <div class="tp-info">
+                        <div class="tp-name">${p.productName}</div>
+                        <div class="tp-qty">${p.totalQuantity}× predané</div>
+                    </div>
+                    <div class="tp-bar-wrap">
+                        <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:${pct}%;background:${paletteArray[i % paletteArray.length]}"></div></div>
+                    </div>
+                    <div class="tp-rev">${p.totalRevenueEuros.toFixed(2)} €</div>
+                </div>`;
+            }).join('');
+        } catch(e) {
+            container.innerHTML = '<div class="empty-state" style="padding:1rem"><p style="color:var(--muted)">Nedostupné</p></div>';
+        }
+    }
+
+    // ── 5. Sales by category (donut) ─────────────────────────────────────────
+    async function loadCategoryChart(months) {
+        try {
+            const res = await authFetch('/api/admin/stats/reception/by-category?months=' + (months||3));
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            getOrCreateChart('chartCategory', {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.category),
+                    datasets: [{
+                        data: data.map(d => d.totalRevenueEuros),
+                        backgroundColor: paletteArray.slice(0, data.length),
+                        borderColor: '#0F0F11',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toFixed(2) + ' €' } },
+                        legend: { position: 'bottom', labels: { font: { size: 10 } } }
+                    }
+                }
+            });
+        } catch(e) { console.warn('Category chart error:', e); }
+    }
+
+    // ── 6. Sales by payment method (donut) ───────────────────────────────────
+    async function loadPaymentChart(months) {
+        try {
+            const res = await authFetch('/api/admin/stats/reception/by-payment?months=' + (months||3));
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            const methodLabels = { cash: 'Hotovosť', card: 'Karta', membership_credit: 'Kredit permanentky' };
+
+            getOrCreateChart('chartPayment', {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => methodLabels[d.paymentMethod] || d.paymentMethod),
+                    datasets: [{
+                        data: data.map(d => d.totalRevenueEuros),
+                        backgroundColor: [chartColors.acid, chartColors.blue, chartColors.orange, chartColors.red, chartColors.purple],
+                        borderColor: '#0F0F11',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toFixed(2) + ' € (' + (data[ctx.dataIndex]?.count||0) + '×)' } },
+                        legend: { position: 'bottom', labels: { font: { size: 10 } } }
+                    }
+                }
+            });
+        } catch(e) { console.warn('Payment chart error:', e); }
+    }
+
+    // ── 7. Membership type popularity ────────────────────────────────────────
+    async function loadMembershipPopularity() {
+        try {
+            const res = await authFetch('/api/admin/stats/memberships');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const types = data.byType || [];
+
+            getOrCreateChart('chartMemTypes', {
+                type: 'bar',
+                data: {
+                    labels: types.map(t => t.name),
+                    datasets: [{
+                        label: 'Aktívne',
+                        data: types.map(t => t.count),
+                        backgroundColor: types.map((_, i) => paletteArray[i % paletteArray.length] + 'CC'),
+                        borderColor: types.map((_, i) => paletteArray[i % paletteArray.length]),
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, grid: { display: false }, ticks: { stepSize: 1 } },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } catch(e) { console.warn('Membership popularity error:', e); }
+    }
+
+    // ── 8. Check-ins by hour ─────────────────────────────────────────────────
+    async function loadCheckinsByHour(days) {
+        const btn = event?.target; if(btn) setActiveFilter('sf-hour', btn);
+        try {
+            const res = await authFetch('/api/admin/stats/checkins/by-hour?days=' + days);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            const maxCount = Math.max(...data.map(d => d.count), 1);
+
+            getOrCreateChart('chartHour', {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.label),
+                    datasets: [{
+                        label: 'Check-iny',
+                        data: data.map(d => d.count),
+                        backgroundColor: data.map(d => {
+                            const intensity = d.count / maxCount;
+                            if (intensity > 0.75) return 'rgba(255,45,85,0.75)';
+                            if (intensity > 0.5) return 'rgba(255,149,0,0.65)';
+                            if (intensity > 0.25) return 'rgba(200,255,0,0.45)';
+                            return 'rgba(110,110,115,0.25)';
+                        }),
+                        borderRadius: 2,
+                        barPercentage: 0.85
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false }, ticks: { maxRotation: 90, font: { size: 9 } } },
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } catch(e) { console.warn('Checkins by hour error:', e); }
+    }
+
+    // ── 9. Check-ins by weekday ──────────────────────────────────────────────
+    async function loadCheckinsByWeekday(days) {
+        const btn = event?.target; if(btn) setActiveFilter('sf-weekday', btn);
+        try {
+            const res = await authFetch('/api/admin/stats/checkins/by-weekday?days=' + days);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            const maxCount = Math.max(...data.map(d => d.count), 1);
+
+            getOrCreateChart('chartWeekday', {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.dayName),
+                    datasets: [{
+                        label: 'Check-iny',
+                        data: data.map(d => d.count),
+                        backgroundColor: data.map((d, i) => {
+                            const intensity = d.count / maxCount;
+                            return `rgba(0,255,209,${0.2 + intensity * 0.6})`;
+                        }),
+                        borderColor: chartColors.acid2,
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.55
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } catch(e) { console.warn('Checkins by weekday error:', e); }
+    }
+
+    // ── 10. Daily checkins trend ─────────────────────────────────────────────
+    async function loadDailyCheckins(days) {
+        const btn = event?.target; if(btn) setActiveFilter('sf-checkin-daily', btn);
+        try {
+            const res = await authFetch('/api/admin/stats/checkins/daily?days=' + days);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            const labels = data.map(d => {
+                const dt = new Date(d.date);
+                return dt.toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit' });
+            });
+
+            getOrCreateChart('chartDailyCheckins', {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Denné návštevy',
+                        data: data.map(d => d.count),
+                        borderColor: chartColors.red,
+                        backgroundColor: 'rgba(255,45,85,0.06)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: days <= 14 ? 5 : days <= 30 ? 3 : 1,
+                        pointBackgroundColor: chartColors.red,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } catch(e) { console.warn('Daily checkins error:', e); }
     }
 
     // Boot

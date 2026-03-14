@@ -502,22 +502,62 @@
 
     async function doLogin() {
         const email = document.getElementById('lEmail').value.trim();
-        const pass = document.getElementById('lPass').value.trim();
-        if (!email || !pass) return showMsg('loginMsg', 'Vyplň email a heslo', 'err');
+        const pass  = document.getElementById('lPass').value.trim();
+
+        if (!email) return showMsg('loginMsg', 'Zadaj email', 'err');
+        if (!pass)  return showMsg('loginMsg', 'Zadaj heslo', 'err');
+
         setBtn('loginBtn', true, '');
+
         try {
             const res = await fetch(API + '/api/auth/login', {
-                method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({email, password: pass})
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: pass })
             });
+
+
+            if (!res.ok) {
+                let errorMessage = 'Prihlásenie zlyhalo';
+
+
+                const text = await res.text();
+
+
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.error || data.message || errorMessage;
+                } catch (e) {
+
+                    if (text.trim()) {
+                        errorMessage = text.trim().substring(0, 120);
+                    } else {
+                        errorMessage = `Zlý email alebo heslo.`;
+                    }
+                }
+
+                if (res.status === 401) {
+                    errorMessage = 'Nesprávny email alebo heslo';
+                } else if (res.status === 400) {
+                    errorMessage = 'Neplatné údaje';
+                } else if (res.status === 429) {
+                    errorMessage = 'Príliš veľa pokusov – skús neskôr';
+                }
+
+                throw new Error(errorMessage);
+            }
+
+
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || data.message || 'Prihlásenie zlyhalo');
+
             localStorage.setItem('fp_token', data.token);
             localStorage.setItem('fp_user', JSON.stringify(data));
-            toast('Vitaj, ' + data.fullName + '!', 'ok');
+            toast('Vitaj, ' + (data.fullName || 'user') + '!', 'ok');
             setTimeout(() => redirectByRole(data.role), 700);
-        } catch(e) {
-            showMsg('loginMsg', e.message, 'err');
+
+        } catch (e) {
+            showMsg('loginMsg', e.message || 'Neočakávaná chyba pri prihlásení', 'err');
+        } finally {
             setBtn('loginBtn', false, 'Prihlásiť sa');
         }
     }
@@ -561,6 +601,7 @@
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3500);
     }
+
 </script>
 </body>
 </html>
