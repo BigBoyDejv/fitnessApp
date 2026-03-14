@@ -79,6 +79,41 @@ public class CheckInController {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Vstup zaznamenaný");
         response.put("userId", userId);
+        response.put("fullName", user.getFullName());
+        response.put("email", user.getEmail());
         return ResponseEntity.ok(response);
+    }
+
+    // ── GET /api/checkin/today ────────────────────────────────────────────────
+    @GetMapping("/today")
+    public ResponseEntity<?> getTodayCheckins(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) return ResponseEntity.status(401).build();
+
+        User caller = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        if (caller == null) return ResponseEntity.status(401).build();
+
+        if (!caller.getRole().equalsIgnoreCase("admin") &&
+                !caller.getRole().equalsIgnoreCase("reception")) {
+            return ResponseEntity.status(403).body("Nemáš oprávnenie");
+        }
+
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay   = startOfDay.plusDays(1);
+
+        List<Map<String, Object>> result = checkInRepository
+                .findByCheckedInAtBetweenOrderByCheckedInAtDesc(startOfDay, endOfDay)
+                .stream()
+                .map(c -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("checkedAt", c.getCheckedInAt().toString());
+                    m.put("fullName",  c.getUser() != null ? c.getUser().getFullName() : "—");
+                    m.put("email",     c.getUser() != null ? c.getUser().getEmail() : "—");
+                    return m;
+                })
+                .toList();
+
+        return ResponseEntity.ok(result);
     }
 }

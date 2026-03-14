@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     // Aktívni / neaktívni
     List<User> findByIsActive(boolean isActive);
+
+
 }

@@ -471,7 +471,7 @@
     if (existingToken && existingUser) redirectByRole(existingUser.role);
 
     function redirectByRole(role) {
-        const map = { admin: 'admin.html', trainer: 'trainer.html', member: 'member.html' };
+        const map = { admin: 'admin.html', trainer: 'trainer.html', member: 'member.html', reception: 'reception.html' };
         const page = map[role] || 'member.html';
         window.location.href = page;
     }

@@ -1,9 +1,7 @@
-// ===== CheckIn.java =====
 package sk.fitness.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -36,5 +34,3 @@ public class CheckIn {
         if (this.checkedInAt == null) this.checkedInAt = LocalDateTime.now();
     }
 }
-
-

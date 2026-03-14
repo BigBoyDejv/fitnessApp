@@ -55,7 +55,7 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 "/", "/index.html", "/member.html", "/admin.html", "/trainer.html",
-                                "/favicon.ico", "/static/**", "/css/**", "/js/**"
+                                "/favicon.ico", "/static/**", "/css/**", "/js/**","/reception.html"
                         ).permitAll()
 
                         .anyRequest().authenticated()
