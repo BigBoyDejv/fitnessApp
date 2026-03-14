@@ -662,11 +662,15 @@
                 ctx.drawImage(video,0,0,canvas.width,canvas.height);
                 const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
                 const code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
-                if(code){
-                    scanningActive=false;
+                if (code) {
+                    scanningActive = false;
                     stopCamera();
-                    document.getElementById('checkinInput').value=code.data;
-                    toast('QR kód naskenovaný!','ok');
+                    //
+                    const qrData = code.data;
+                    const parts = qrData.split(':');
+                    const userId = parts[1]; // gym-entry:{userId}:...
+                    document.getElementById('checkinInput').value = userId;
+                    toast('QR kód naskenovaný!', 'ok');
                     doCheckin();
                     return;
                 }

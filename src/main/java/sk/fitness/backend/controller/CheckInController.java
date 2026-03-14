@@ -65,6 +65,13 @@ public class CheckInController {
     @PostMapping("/scan")
     public ResponseEntity<?> scan(@RequestBody Map<String, String> body) {
         String userId = body.get("userId");
+
+        // Ak je to plný QR string, extrahuj userId
+        if (userId != null && userId.startsWith("gym-entry:")) {
+            String[] parts = userId.split(":");
+            if (parts.length >= 2) userId = parts[1];
+        }
+
         if (userId == null) return ResponseEntity.badRequest().body("Chýba userId");
 
         User user = userRepository.findByIdEquals(UUID.fromString(userId))
