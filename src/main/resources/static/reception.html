@@ -562,6 +562,7 @@
         ? 'http://localhost:8080' : 'https://fitnessapp-5ogv.onrender.com';
 
     let token=localStorage.getItem('fp_token');
+    let kasaCart = [];
     let user=JSON.parse(localStorage.getItem('fp_user')||'null');
     let allMembers=[]; let allClasses=[];
 
@@ -600,7 +601,7 @@
         if(id==='checkin'){if(!allMembers.length)loadMembers();loadTodayCheckins();setTimeout(()=>document.getElementById('checkinInput').focus(),100);}
         if(id==='members'){loadMembers();loadMembershipTypes();}
         if(id==='classes') loadClasses();
-        if(id==='kasa'){populateMemberSelects();renderTransactions();}
+        if(id==='kasa'){populateMemberSelects();loadProducts();loadTodayTransactions();}
         if(id==='music') renderPlaylist();
         if(id==='profile') loadProfile();
     }
@@ -1060,26 +1061,51 @@
         }));
     }
 
-    // ── KASA ──────────────────────────────────────────────────────────────────
-    const PRODUCTS=[
-        {name:'Proteínový bar',price:2.50},{name:'Protein shake',price:4.00},
-        {name:'Izotonický nápoj',price:1.80},{name:'Voda 0,5L',price:0.80},
-        {name:'Energetický nápoj',price:2.20},{name:'Kreatin 100g',price:12.00},
-        {name:'Protein 1kg',price:35.00},{name:'Fitness rukavice',price:15.00},
-        {name:'Vstupenka - jednorazová',price:8.00},
-    ];
-    let kasaCart=[];
+    let PRODUCTS = [];
+
+    async function loadProducts() {
+        try {
+            const res = await authFetch('/api/sales/products');
+            if (res.ok) {
+                PRODUCTS = await res.json();
+                renderProductGrid();
+            }
+        } catch(e) { toast('Chyba načítania produktov', 'err'); }
+    }
 
     function renderProductGrid(){
+        if (!PRODUCTS.length) {
+            document.getElementById('productGrid').innerHTML='<div style="color:var(--muted);font-size:0.8rem">Načítavam produkty...</div>';
+            return;
+        }
         document.getElementById('productGrid').innerHTML=PRODUCTS.map((p,i)=>
-            `<div class="product-btn" onclick="addToKasa(${i})"><div class="p-name">${p.name}</div><div class="p-price">${fmtEur(p.price)}</div></div>`
+            `<div class="product-btn" onclick="addToKasa(${i})" style="position:relative">
+            <div class="p-name">${p.name}</div>
+            <div class="p-price">${fmtEur(p.priceEuros)}</div>
+            <div style="font-size:0.65rem;color:${p.stock<=3?'var(--red)':p.stock<=10?'var(--orange)':'var(--muted)'};margin-top:0.2rem">
+                ${p.stock<=0?'⚠ Vypredané':'Sklad: '+p.stock+' ks'}
+            </div>
+        </div>`
         ).join('');
     }
+
     function addToKasa(idx){
-        const p=PRODUCTS[idx];const ex=kasaCart.find(i=>i.name===p.name);
-        if(ex)ex.qty++;else kasaCart.push({name:p.name,price:p.price,qty:1});
+        const p=PRODUCTS[idx];
+        if (p.stock <= 0) return toast('Produkt je vypredaný','err');
+        const ex=kasaCart.find(i=>i.name===p.name);
+        if(ex) {
+            if (ex.qty >= p.stock) return toast('Nedostatok na sklade','err');
+            ex.qty++;
+        } else {
+            kasaCart.push({name:p.name, price:p.priceEuros, priceCents:p.priceCents, productId:p.id, qty:1});
+        }
         renderKasaCart();
     }
+
+
+
+
+
     function addCustomProduct(){
         const name=document.getElementById('customProductName').value.trim();
         const price=parseFloat(document.getElementById('customProductPrice').value);
@@ -1109,44 +1135,79 @@
     function changeQty(idx,delta){kasaCart[idx].qty+=delta;if(kasaCart[idx].qty<=0)kasaCart.splice(idx,1);renderKasaCart();}
     function removeFromKasa(idx){kasaCart.splice(idx,1);renderKasaCart();}
     function clearKasa(){kasaCart=[];renderKasaCart();showMsg('kasaMsg','','');}
+
+
     async function processPayment(method){
         if(!kasaCart.length)return showMsg('kasaMsg','Košík je prázdny','err');
         const total=kasaCart.reduce((s,i)=>s+i.price*i.qty,0);
         const sel=document.getElementById('kasaMemberSelect');
-        const memberId=sel.value;
+        const memberId=sel.value||null;
         const memberName=memberId?sel.options[sel.selectedIndex].text:null;
-        const tx={id:Date.now(),time:new Date().toISOString(),items:[...kasaCart],total,method,memberId:memberId||null,memberName:memberName||null};
-        const key='kasa_transactions_'+getTodayKey();
-        const existing=JSON.parse(localStorage.getItem(key)||'[]');
-        existing.push(tx);localStorage.setItem(key,JSON.stringify(existing));
-        const dt=getDailyTotal();
-        document.getElementById('kpi-revenue').textContent=fmtEur(dt);
-        document.getElementById('kasaDailyTotal').textContent=fmtEur(dt);
-        toast(`✓ Platba ${fmtEur(total)} — ${method==='cash'?'hotovosť':'karta'}`,'ok');
-        showMsg('kasaMsg',`Platba ${fmtEur(total)} úspešná (${method==='cash'?'hotovosť':'karta'})${memberName?' — '+memberName:''}`, 'ok');
-        kasaCart=[];renderKasaCart();renderTransactions();
+
+        try {
+            const res = await authFetch('/api/sales/transaction', {
+                method: 'POST',
+                body: JSON.stringify({
+                    paymentMethod: method,
+                    memberId: memberId,
+                    items: kasaCart.map(i=>({
+                        productId: i.productId||null,
+                        productName: i.name,
+                        priceCents: Math.round(i.price*100),
+                        quantity: i.qty
+                    }))
+                })
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message||'Chyba');
+
+            toast(`✓ Platba ${fmtEur(total)} — ${method==='cash'?'hotovosť':'karta'}`,'ok');
+            showMsg('kasaMsg',`Platba ${fmtEur(total)} uložená do databázy`,'ok');
+            kasaCart=[];
+            renderKasaCart();
+            loadProducts(); // refresh skladu
+            loadTodayTransactions();
+        } catch(e) { showMsg('kasaMsg', e.message, 'err'); }
     }
-    function renderTransactions(){
+
+    async function loadTodaySalesRevenue(){
+        try {
+            const res = await authFetch('/api/sales/today');
+            if (res.ok) {
+                const d = await res.json();
+                document.getElementById('kpi-revenue').textContent = fmtEur(d.totalEuros);
+                document.getElementById('kasaDailyTotal').textContent = fmtEur(d.totalEuros);
+            }
+        } catch {}
+    }
+
+
+    async function loadTodayTransactions(){
         const el=document.getElementById('transactionsEl');
-        const txs=JSON.parse(localStorage.getItem('kasa_transactions_'+getTodayKey())||'[]').slice().reverse();
-        if(!txs.length){el.innerHTML='<div class="empty-state"><i class="fas fa-receipt"></i><p>Žiadne transakcie dnes</p></div>';return;}
-        const dayTotal=txs.reduce((s,t)=>s+t.total,0);
-        let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:0.8rem;background:var(--surface2);border-radius:4px">
-        <span style="font-size:0.8rem;color:var(--muted)">Celkovo dnes: <b style="color:var(--text)">${txs.length} transakcií</b></span>
-        <span style="font-family:var(--font-d);font-size:1.2rem;font-weight:900;color:var(--orange)">${fmtEur(dayTotal)}</span>
-    </div><table class="dt"><thead><tr><th>Čas</th><th>Položky</th><th>Člen</th><th>Platba</th><th>Suma</th></tr></thead><tbody>`;
-        txs.forEach(tx=>{
-            const t=new Date(tx.time).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});
-            const items=tx.items.map(i=>`${i.name} ×${i.qty}`).join(', ');
-            html+=`<tr>
-            <td data-label="Čas" style="color:var(--muted);font-size:0.8rem">${t}</td>
-            <td data-label="Položky" style="font-size:0.8rem">${items}</td>
-            <td data-label="Člen" style="color:var(--muted);font-size:0.8rem">${tx.memberName||'—'}</td>
-            <td data-label="Platba"><span class="badge ${tx.method==='cash'?'b-orange':'b-purple'}">${tx.method==='cash'?'Hotovosť':'Karta'}</span></td>
-            <td data-label="Suma" style="font-family:var(--font-d);font-weight:700;color:var(--acid)">${fmtEur(tx.total)}</td>
-        </tr>`;
-        });
-        el.innerHTML=html+'</tbody></table>';
+        try {
+            const res = await authFetch('/api/sales/today');
+            if (!res.ok) { renderTransactions(); return; } // fallback na localStorage
+            const data = await res.json();
+            const txs = data.transactions || [];
+            document.getElementById('kpi-revenue').textContent = fmtEur(data.totalEuros||0);
+            document.getElementById('kasaDailyTotal').textContent = fmtEur(data.totalEuros||0);
+            if (!txs.length) { el.innerHTML='<div class="empty-state"><i class="fas fa-receipt"></i><p>Žiadne transakcie dnes</p></div>'; return; }
+            let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:0.8rem;background:var(--surface2);border-radius:4px">
+            <span style="font-size:0.8rem;color:var(--muted)">Celkovo dnes: <b>${txs.length} transakcií</b></span>
+            <span style="font-family:var(--font-d);font-size:1.2rem;font-weight:900;color:var(--orange)">${fmtEur(data.totalEuros)}</span>
+        </div><table class="dt"><thead><tr><th>Čas</th><th>Položky</th><th>Platba</th><th>Suma</th></tr></thead><tbody>`;
+            txs.forEach(tx=>{
+                const t=new Date(tx.createdAt).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});
+                const items=(tx.items||[]).map(i=>`${i.productName} ×${i.quantity}`).join(', ');
+                html+=`<tr>
+                <td style="color:var(--muted);font-size:0.8rem">${t}</td>
+                <td style="font-size:0.8rem">${items}</td>
+                <td><span class="badge ${tx.paymentMethod==='cash'?'b-orange':'b-purple'}">${tx.paymentMethod==='cash'?'Hotovosť':'Karta'}</span></td>
+                <td style="font-family:var(--font-d);font-weight:700;color:var(--acid)">${fmtEur(tx.totalEuros)}</td>
+            </tr>`;
+            });
+            el.innerHTML=html+'</tbody></table>';
+        } catch(e) { renderTransactions(); } // fallback
     }
 
     // ── MUSIC ─────────────────────────────────────────────────────────────────
@@ -1266,6 +1327,8 @@
     function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('hamburger').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
     renderProductGrid();
+    loadProducts();
+
     authFetch('/api/auth/me').then(r=>r.json()).then(d=>{
         const av=document.getElementById('sideAvatar');
         if(d.avatarUrl){
