@@ -121,6 +121,29 @@
         .ctab{flex:1;padding:0.55rem;font-family:var(--font-d);font-size:0.82rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.15s;}
         .ctab.active{background:var(--purple);color:#fff;}
         .ctab.inactive{background:var(--surface2);color:var(--muted);}
+
+        /* SKLAD */
+        .sklad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.8rem;margin-bottom:1rem;}
+        .sklad-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:1rem;position:relative;transition:border-color 0.15s;}
+        .sklad-card:hover{border-color:var(--purple);}
+        .sklad-card.low-stock{border-color:rgba(255,149,0,0.4);}
+        .sklad-card.out-stock{border-color:rgba(255,45,85,0.4);}
+        .sklad-card.inactive{opacity:0.45;}
+        .sk-name{font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .sk-cat{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.6rem;}
+        .sk-price{font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:var(--acid);margin-bottom:0.5rem;}
+        .sk-stock{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;margin-bottom:0.8rem;}
+        .sk-stock-dot{width:8px;height:8px;border-radius:50%;}
+        .sk-actions{display:flex;gap:0.4rem;}
+        .sk-actions button{flex:1;font-size:0.7rem;padding:0.3rem 0.4rem;}
+        .sklad-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+        .sklad-modal-overlay.open{display:flex;}
+        .sklad-modal{background:var(--surface);border:1px solid var(--border2);border-radius:8px;width:420px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+        .sklad-modal-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .sklad-modal-head h3{font-size:1rem;font-family:var(--font-d);letter-spacing:0.05em;}
+        .sklad-modal-body{padding:1.5rem;}
+        .sklad-modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:0.6rem;justify-content:flex-end;}
+
         /* CAMERA */
         .camera-wrap{display:none;margin-top:0.8rem;}
         .camera-inner{background:var(--surface2);border:1px solid var(--border);border-radius:6px;overflow:hidden;position:relative;}
@@ -257,6 +280,7 @@
         <a class="nav-item" onclick="showPage('classes')" href="#"><i class="fas fa-calendar-alt"></i> Lekcie</a>
         <a class="nav-item" onclick="showPage('kasa')" href="#"><i class="fas fa-cash-register"></i> Pokladňa</a>
         <a class="nav-item" onclick="showPage('music')" href="#"><i class="fas fa-music"></i> Hudba</a>
+        <a class="nav-item" onclick="showPage('sklad')" href="#"><i class="fas fa-boxes"></i> Sklad</a>
         <div class="nav-section">Účet</div>
         <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user"></i> Môj profil</a>
     </nav>
@@ -521,6 +545,110 @@
             </div>
         </div>
 
+
+        <!-- Toolbar -->
+        <div class="page-section" id="page-sklad">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.7rem">
+                <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
+                    <input class="fi" type="text" id="skladSearch" placeholder="Hľadaj produkt..." oninput="filterSklad()" style="width:200px;font-size:0.83rem;padding:0.45rem 0.75rem">
+                    <select class="fi" id="skladCatFilter" onchange="filterSklad()" style="width:160px;font-size:0.83rem;padding:0.45rem 0.75rem">
+                        <option value="">Všetky kategórie</option>
+                    </select>
+                    <select class="fi" id="skladStatusFilter" onchange="filterSklad()" style="width:140px;font-size:0.83rem;padding:0.45rem 0.75rem">
+                        <option value="active">Aktívne</option>
+                        <option value="all">Všetky</option>
+                        <option value="low">Málo na sklade</option>
+                        <option value="out">Vypredané</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:0.6rem">
+                    <button class="btn btn-ghost btn-sm" onclick="loadSklad()"><i class="fas fa-sync-alt"></i> Obnoviť</button>
+                    <button class="btn btn-acid btn-sm" onclick="openProductModal(null)"><i class="fas fa-plus"></i> Nový produkt</button>
+                </div>
+            </div>
+
+            <!-- Súhrn -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;margin-bottom:1.2rem" id="skladStats">
+                <div class="panel" style="margin:0"><div class="pb" style="padding:0.9rem 1rem;text-align:center"><div style="font-family:var(--font-d);font-size:1.8rem;font-weight:900;color:var(--acid)" id="ss-total">—</div><div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">Produktov</div></div></div>
+                <div class="panel" style="margin:0"><div class="pb" style="padding:0.9rem 1rem;text-align:center"><div style="font-family:var(--font-d);font-size:1.8rem;font-weight:900;color:var(--orange)" id="ss-low">—</div><div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">Málo na sklade</div></div></div>
+                <div class="panel" style="margin:0"><div class="pb" style="padding:0.9rem 1rem;text-align:center"><div style="font-family:var(--font-d);font-size:1.8rem;font-weight:900;color:var(--red)" id="ss-out">—</div><div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">Vypredané</div></div></div>
+                <div class="panel" style="margin:0"><div class="pb" style="padding:0.9rem 1rem;text-align:center"><div style="font-family:var(--font-d);font-size:1.8rem;font-weight:900;color:var(--acid2)" id="ss-value">—</div><div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">Hodnota skladu</div></div></div>
+            </div>
+
+            <!-- Grid produktov -->
+            <div class="sklad-grid" id="skladGrid">
+                <div class="empty-state"><span class="spinner"></span></div>
+            </div>
+        </div>
+
+        <!-- Modal: Nový / Upraviť produkt -->
+        <div class="sklad-modal-overlay" id="produktModalOverlay" onclick="closeSkladModal(event)">
+            <div class="sklad-modal">
+                <div class="sklad-modal-head">
+                    <h3 id="produktModalTitle">Nový produkt</h3>
+                    <button class="btn btn-ghost btn-sm" onclick="closeProduktModal()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="sklad-modal-body">
+                    <input type="hidden" id="produktModalId">
+                    <div class="fg">
+                        <label class="fl">Názov *</label>
+                        <input class="fi" type="text" id="pmName" placeholder="napr. Proteínový bar">
+                    </div>
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl">Cena (€) *</label>
+                            <input class="fi" type="number" id="pmPrice" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Počet na sklade</label>
+                            <input class="fi" type="number" id="pmStock" min="0" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="fg">
+                        <label class="fl">Kategória</label>
+                        <input class="fi" type="text" id="pmCategory" placeholder="napr. nápoj, jedlo, doplnok">
+                    </div>
+                    <div class="fg">
+                        <label class="fl">Popis (voliteľné)</label>
+                        <input class="fi" type="text" id="pmDescription" placeholder="Krátky popis">
+                    </div>
+                    <div class="fg" id="pmActiveWrap" style="display:none">
+                        <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;font-size:0.85rem">
+                            <input type="checkbox" id="pmActive" checked>
+                            Aktívny produkt (viditeľný v pokladni)
+                        </label>
+                    </div>
+                    <div class="fm" id="produktModalMsg"></div>
+                </div>
+                <div class="sklad-modal-foot">
+                    <button class="btn btn-ghost" onclick="closeProduktModal()">Zrušiť</button>
+                    <button class="btn btn-acid" onclick="saveProdukt()"><i class="fas fa-save"></i> Uložiť</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sklad-modal-overlay" id="stockModalOverlay" onclick="closeStockModal(event)">
+            <div class="sklad-modal" style="width:320px">
+                <div class="sklad-modal-head">
+                    <h3>Doplniť zásoby</h3>
+                    <button class="btn btn-ghost btn-sm" onclick="closeStockModal()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="sklad-modal-body">
+                    <div style="font-size:0.9rem;font-weight:600;margin-bottom:0.4rem" id="stockModalName">—</div>
+                    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem">Aktuálny stav: <span id="stockModalCurrent" style="color:var(--text);font-weight:600">—</span> ks</div>
+                    <div class="fg">
+                        <label class="fl">Pridať kusov</label>
+                        <input class="fi" type="number" id="stockDelta" min="1" value="10">
+                    </div>
+                    <div class="fm" id="stockModalMsg"></div>
+                </div>
+                <div class="sklad-modal-foot">
+                    <button class="btn btn-ghost" onclick="closeStockModal()">Zrušiť</button>
+                    <button class="btn btn-purple" onclick="saveStock()"><i class="fas fa-plus"></i> Doplniť</button>
+                </div>
+            </div>
+        </div>
+
         <!-- PROFILE -->
         <div class="page-section" id="page-profile">
             <div class="grid-2">
@@ -587,7 +715,7 @@
         document.getElementById('clockDisplay').textContent=n.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     },1000);
 
-    const pageTitles={overview:'Prehľad',checkin:'Check-in',members:'Členovia',classes:'Lekcie',kasa:'Pokladňa',music:'Hudba',profile:'Môj profil'};
+    const pageTitles={overview:'Prehľad',checkin:'Check-in',members:'Členovia',classes:'Lekcie',kasa:'Pokladňa',music:'Hudba',profile:'Môj profil',sklad:'Sklad'};
 
     function showPage(id){
         closeSidebar();
@@ -604,6 +732,7 @@
         if(id==='kasa'){populateMemberSelects();loadProducts();loadTodayTransactions();}
         if(id==='music') renderPlaylist();
         if(id==='profile') loadProfile();
+        if(id==='sklad') loadSklad();
     }
 
     async function authFetch(url,opts={}){
@@ -1065,9 +1194,16 @@
 
     async function loadProducts() {
         try {
-            const res = await authFetch('/api/sales/products');
+            const res = await authFetch('/api/products');
             if (res.ok) {
-                PRODUCTS = await res.json();
+                const data = await res.json();
+                PRODUCTS = data.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    priceEuros: p.priceCents / 100,
+                    priceCents: p.priceCents,
+                    stock: p.stock
+                }));
                 renderProductGrid();
             }
         } catch(e) { toast('Chyba načítania produktov', 'err'); }
@@ -1325,6 +1461,214 @@
 
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('hamburger').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open');}
     function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('hamburger').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+
+    let allProducts = [];
+    let stockEditId = null;
+
+    async function loadSklad() {
+        document.getElementById('skladGrid').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/products/all');
+            allProducts = res.ok ? await res.json() : [];
+            buildCatFilter();
+            renderSkladStats();
+            filterSklad();
+        } catch(e) {
+            document.getElementById('skladGrid').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Chyba načítania</p></div>';
+        }
+    }
+
+    function buildCatFilter() {
+        const cats = [...new Set(allProducts.map(p => p.category).filter(Boolean))].sort();
+        const sel = document.getElementById('skladCatFilter');
+        sel.innerHTML = '<option value="">Všetky kategórie</option>' +
+            cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function renderSkladStats() {
+        const active = allProducts.filter(p => p.active);
+        const low = active.filter(p => p.stock > 0 && p.stock <= 5);
+        const out = active.filter(p => p.stock === 0);
+        const value = active.reduce((s, p) => s + (p.priceCents / 100) * p.stock, 0);
+        document.getElementById('ss-total').textContent = active.length;
+        document.getElementById('ss-low').textContent = low.length;
+        document.getElementById('ss-out').textContent = out.length;
+        document.getElementById('ss-value').textContent = value.toFixed(2) + ' €';
+    }
+
+    function filterSklad() {
+        const q = document.getElementById('skladSearch').value.toLowerCase();
+        const cat = document.getElementById('skladCatFilter').value;
+        const status = document.getElementById('skladStatusFilter').value;
+        let filtered = allProducts.filter(p => {
+            const matchQ = !q || p.name.toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q);
+            const matchCat = !cat || p.category === cat;
+            const matchStatus =
+                status === 'all' ? true :
+                    status === 'active' ? p.active :
+                        status === 'low' ? (p.active && p.stock > 0 && p.stock <= 5) :
+                            status === 'out' ? (p.active && p.stock === 0) : true;
+            return matchQ && matchCat && matchStatus;
+        });
+        renderSkladGrid(filtered);
+    }
+
+    function renderSkladGrid(products) {
+        const el = document.getElementById('skladGrid');
+        if (!products.length) {
+            el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-box-open"></i><p>Žiadne produkty</p></div>';
+            return;
+        }
+        el.innerHTML = products.map(p => {
+            const stockColor = p.stock === 0 ? 'var(--red)' : p.stock <= 5 ? 'var(--orange)' : 'var(--acid)';
+            const stockLabel = p.stock === 0 ? 'Vypredané' : p.stock <= 5 ? `Zostatok: ${p.stock} ks` : `${p.stock} ks`;
+            const cardCls = p.stock === 0 ? 'out-stock' : p.stock <= 5 ? 'low-stock' : '';
+            const inactiveCls = !p.active ? 'inactive' : '';
+            return `<div class="sklad-card ${cardCls} ${inactiveCls}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.3rem">
+                <div class="sk-name" title="${p.name}">${p.name}</div>
+                ${!p.active ? '<span class="badge b-grey" style="font-size:0.58rem;flex-shrink:0;margin-left:0.4rem">OFF</span>' : ''}
+            </div>
+            <div class="sk-cat">${p.category || '—'}</div>
+            <div class="sk-price">${(p.priceCents / 100).toFixed(2)} €</div>
+            <div class="sk-stock">
+                <div class="sk-stock-dot" style="background:${stockColor}"></div>
+                <span style="color:${stockColor};font-size:0.78rem">${stockLabel}</span>
+            </div>
+            <div class="sk-actions">
+                <button class="btn btn-purple btn-sm" onclick="openStockModal(${p.id})"><i class="fas fa-plus"></i> Zásoby</button>
+                <button class="btn btn-ghost btn-sm" onclick="openProductModal(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-red btn-sm" onclick="toggleProductActive(${p.id},${p.active})">
+                    <i class="fas fa-${p.active ? 'eye-slash' : 'eye'}"></i>
+                </button>
+            </div>
+        </div>`;
+        }).join('');
+    }
+
+    // ── Produkt modal ─────────────────────────────────────────────────────────────
+    function openProductModal(id) {
+        const p = id ? allProducts.find(x => x.id === id) : null;
+        document.getElementById('produktModalTitle').textContent = p ? 'Upraviť produkt' : 'Nový produkt';
+        document.getElementById('produktModalId').value = p ? p.id : '';
+        document.getElementById('pmName').value = p ? p.name : '';
+        document.getElementById('pmPrice').value = p ? (p.priceCents / 100).toFixed(2) : '';
+        document.getElementById('pmStock').value = p ? p.stock : 0;
+        document.getElementById('pmCategory').value = p ? (p.category || '') : '';
+        document.getElementById('pmDescription').value = p ? (p.description || '') : '';
+        document.getElementById('pmActive').checked = p ? p.active : true;
+        document.getElementById('pmActiveWrap').style.display = p ? 'block' : 'none';
+        document.getElementById('produktModalMsg').className = 'fm';
+        document.getElementById('produktModalMsg').textContent = '';
+        document.getElementById('produktModalOverlay').classList.add('open');
+        setTimeout(() => document.getElementById('pmName').focus(), 100);
+    }
+
+    function closeProduktModal() {
+        document.getElementById('produktModalOverlay').classList.remove('open');
+    }
+
+    function closeSkladModal(e) {
+        if (e.target === document.getElementById('produktModalOverlay')) closeProduktModal();
+    }
+
+    async function saveProdukt() {
+        const id = document.getElementById('produktModalId').value;
+        const name = document.getElementById('pmName').value.trim();
+        const price = parseFloat(document.getElementById('pmPrice').value);
+        const stock = parseInt(document.getElementById('pmStock').value) || 0;
+        const category = document.getElementById('pmCategory').value.trim() || 'ostatné';
+        const description = document.getElementById('pmDescription').value.trim();
+        const active = document.getElementById('pmActive').checked;
+        const msgEl = document.getElementById('produktModalMsg');
+
+        if (!name) { showMsg('produktModalMsg', 'Názov je povinný', 'err'); return; }
+        if (isNaN(price) || price < 0) { showMsg('produktModalMsg', 'Zadaj platnú cenu', 'err'); return; }
+
+        const body = { name, price, stock, category, description, active };
+
+        try {
+            const url = id ? `/api/products/${id}` : '/api/products';
+            const method = id ? 'PUT' : 'POST';
+            const res = await authFetch(url, { method, body: JSON.stringify(body) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Chyba');
+            toast(`✓ Produkt ${id ? 'upravený' : 'pridaný'}`, 'ok');
+            closeProduktModal();
+            loadSklad();
+            loadProductsForKasa(); // obnov aj pokladňu
+        } catch(e) {
+            showMsg('produktModalMsg', e.message, 'err');
+        }
+    }
+
+    // ── Zásoby modal ──────────────────────────────────────────────────────────────
+    function openStockModal(id) {
+        const p = allProducts.find(x => x.id === id);
+        if (!p) return;
+        stockEditId = id;
+        document.getElementById('stockModalName').textContent = p.name;
+        document.getElementById('stockModalCurrent').textContent = p.stock;
+        document.getElementById('stockDelta').value = 10;
+        document.getElementById('stockModalMsg').className = 'fm';
+        document.getElementById('stockModalOverlay').classList.add('open');
+        setTimeout(() => document.getElementById('stockDelta').select(), 100);
+    }
+
+    function closeStockModal(e) {
+        if (e && e.target !== document.getElementById('stockModalOverlay')) return;
+        document.getElementById('stockModalOverlay').classList.remove('open');
+        stockEditId = null;
+    }
+
+    async function saveStock() {
+        const delta = parseInt(document.getElementById('stockDelta').value);
+        if (!delta || delta <= 0) { showMsg('stockModalMsg', 'Zadaj kladné číslo', 'err'); return; }
+        try {
+            const res = await authFetch(`/api/products/${stockEditId}/stock`, {
+                method: 'PATCH', body: JSON.stringify({ delta })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Chyba');
+            toast(`✓ Zásoby doplnené (+${delta} ks)`, 'ok');
+            document.getElementById('stockModalOverlay').classList.remove('open');
+            stockEditId = null;
+            loadSklad();
+        } catch(e) {
+            showMsg('stockModalMsg', e.message, 'err');
+        }
+    }
+
+    async function toggleProductActive(id, currentActive) {
+        if (!confirm(currentActive ? 'Deaktivovať produkt?' : 'Aktivovať produkt?')) return;
+        try {
+            const res = await authFetch(`/api/products/${id}`, {
+                method: 'PUT', body: JSON.stringify({ active: !currentActive })
+            });
+            if (!res.ok) throw new Error('Chyba');
+            toast(currentActive ? 'Produkt deaktivovaný' : 'Produkt aktivovaný', 'ok');
+            loadSklad();
+            loadProductsForKasa();
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    // ── Pokladňa — načítaj produkty z DB namiesto hardcoded ──────────────────────
+    async function loadProductsForKasa() {
+        try {
+            const res = await authFetch('/api/products');
+            if (!res.ok) return;
+            const products = await res.json();
+            // Prepíš globálne PRODUCTS pole ak existuje
+            if (typeof PRODUCTS !== 'undefined') {
+                PRODUCTS.length = 0;
+                products.forEach(p => PRODUCTS.push({ name: p.name, price: p.priceCents / 100, id: p.id, stock: p.stock }));
+            }
+            renderProductGrid();
+        } catch(e) { /* fallback na hardcoded */ }
+    }
+
+
+
 
     renderProductGrid();
     loadProducts();
