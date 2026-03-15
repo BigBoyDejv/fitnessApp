@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+    <script src="/jsQR.js"></script>
     <style>
         :root{
             --acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;--purple:#BF5AF2;
@@ -1311,7 +1311,7 @@
             ['p-cur-pass','p-new-pass','p-new-pass2'].forEach(id=>document.getElementById(id).value='');
             toast('Heslo zmenené','ok');
         }catch(e){showMsg('passMsg',e.message,'err');}
-    }
+    }   
 
     function avatarHtml(user, size=36){
         const s=`width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0`;

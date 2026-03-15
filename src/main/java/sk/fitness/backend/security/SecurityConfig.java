@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/qr-code").authenticated()
                         .requestMatchers(
                                 "/", "/index.html", "/member.html", "/admin.html", "/trainer.html",
-                                "/favicon.ico", "/static/**", "/css/**", "/js/**","/reception.html"
+                                "/favicon.ico", "/static/**", "/css/**", "/js/**","/reception.html","/jsQR.js"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
