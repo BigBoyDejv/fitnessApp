@@ -33,4 +33,6 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     @Query("SELECT m FROM Membership m WHERE " +
             "YEAR(m.startDate) = :year AND MONTH(m.startDate) = :month AND m.status <> 'cancelled'")
     List<Membership> findByStartMonth(@Param("year") int year, @Param("month") int month);
+
+    List<Membership> findByEndDate(LocalDate endDate);
 }

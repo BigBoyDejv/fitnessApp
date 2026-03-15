@@ -277,6 +277,7 @@
         <div class="nav-section">Operácie</div>
         <a class="nav-item" onclick="showPage('checkin')" href="#"><i class="fas fa-qrcode"></i> Check-in</a>
         <a class="nav-item" onclick="showPage('members')" href="#"><i class="fas fa-users"></i> Členovia</a>
+        <a class="nav-item" onclick="showPage('messages')" href="#"><i class="fas fa-envelope"></i> Správy členom</a>
         <a class="nav-item" onclick="showPage('classes')" href="#"><i class="fas fa-calendar-alt"></i> Lekcie</a>
         <a class="nav-item" onclick="showPage('kasa')" href="#"><i class="fas fa-cash-register"></i> Pokladňa</a>
         <a class="nav-item" onclick="showPage('music')" href="#"><i class="fas fa-music"></i> Hudba</a>
@@ -682,6 +683,63 @@
             </div>
         </div>
 
+        <div class="page-section" id="page-messages">
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="ph"><span class="pt">Odoslať správu členom</span></div>
+                    <div class="pb">
+                        <div class="fg">
+                            <label class="fl">Príjemca</label>
+                            <select class="fi" id="recMsgTarget">
+                                <option value="">👥 Všetci aktívni členovia</option>
+                            </select>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Nadpis *</label>
+                            <input class="fi" type="text" id="recMsgTitle" placeholder="napr. Zmena otváracích hodín">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Správa *</label>
+                            <textarea class="fi" id="recMsgBody" rows="4"
+                                      style="resize:vertical;font-family:var(--font-b);line-height:1.6"
+                                      placeholder="Text správy..."></textarea>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Typ</label>
+                            <div style="display:flex;gap:0.5rem">
+                                <button id="rs-info" onclick="setRecSev('info')"
+                                        class="btn btn-sm" style="background:rgba(0,255,209,0.1);color:var(--acid2);border-color:var(--acid2)">
+                                    <i class="fas fa-info-circle"></i> Info
+                                </button>
+                                <button id="rs-warning" onclick="setRecSev('warning')"
+                                        class="btn btn-sm" style="background:transparent;color:var(--muted);border-color:var(--border2)">
+                                    <i class="fas fa-exclamation-triangle"></i> Upozornenie
+                                </button>
+                                <button id="rs-danger" onclick="setRecSev('danger')"
+                                        class="btn btn-sm" style="background:transparent;color:var(--muted);border-color:var(--border2)">
+                                    <i class="fas fa-exclamation-circle"></i> Dôležité
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn-purple btn-block" onclick="sendReceptionMessage()" style="margin-top:0.5rem">
+                            <i class="fas fa-paper-plane"></i> Odoslať
+                        </button>
+                        <div class="fm" id="recMsgResult"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt">Odoslané správy</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadReceptionSent()"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                    <div class="pb" id="recSentList">
+                        <div class="empty-state"><i class="fas fa-inbox"></i><p>Žiadne správy</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </main>
 
@@ -715,9 +773,7 @@
         document.getElementById('clockDisplay').textContent=n.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     },1000);
 
-    const pageTitles={overview:'Prehľad',checkin:'Check-in',members:'Členovia',classes:'Lekcie',kasa:'Pokladňa',music:'Hudba',profile:'Môj profil',sklad:'Sklad'};
-
-    function showPage(id){
+    const pageTitles={overview:'Prehľad',checkin:'Check-in',members:'Členovia',classes:'Lekcie',kasa:'Pokladňa',music:'Hudba',profile:'Môj profil',sklad:'Sklad',messages:'Správy'};    function showPage(id){
         closeSidebar();
         stopCamera();
         document.querySelectorAll('.page-section').forEach(el=>el.classList.remove('active'));
@@ -733,6 +789,7 @@
         if(id==='music') renderPlaylist();
         if(id==='profile') loadProfile();
         if(id==='sklad') loadSklad();
+        if(id==='messages') loadReceptionMessages();
     }
 
     async function authFetch(url,opts={}){
@@ -1005,6 +1062,100 @@
             </div>
         </div>`;
         }).join('');
+    }
+
+    //spravy
+
+    let recMsgSeverity = 'info';
+
+    function setRecSev(sev) {
+        recMsgSeverity = sev;
+        ['info','warning','danger'].forEach(s => {
+            const btn = document.getElementById('rs-' + s);
+            const colors = {
+                info:    { bg: 'rgba(0,255,209,0.1)',  color: 'var(--acid2)',  border: 'var(--acid2)'  },
+                warning: { bg: 'rgba(255,149,0,0.1)',  color: 'var(--orange)', border: 'var(--orange)' },
+                danger:  { bg: 'rgba(255,45,85,0.1)',  color: 'var(--red)',    border: 'var(--red)'    },
+            };
+            if (s === sev) {
+                btn.style.background  = colors[s].bg;
+                btn.style.color       = colors[s].color;
+                btn.style.borderColor = colors[s].border;
+            } else {
+                btn.style.background  = 'transparent';
+                btn.style.color       = 'var(--muted)';
+                btn.style.borderColor = 'var(--border2)';
+            }
+        });
+    }
+
+    async function loadReceptionMessages() {
+        // Načítaj členov do selectu
+        if (!allMembers.length) await loadMembers();
+        const members = allMembers.filter(m => m.role === 'member' && m.active);
+        document.getElementById('recMsgTarget').innerHTML =
+            '<option value="">👥 Všetci aktívni členovia (' + members.length + ')</option>' +
+            members.map(m => `<option value="${m.id}">${m.fullName} (${m.email})</option>`).join('');
+        loadReceptionSent();
+    }
+
+    async function sendReceptionMessage() {
+        const title  = document.getElementById('recMsgTitle').value.trim();
+        const body   = document.getElementById('recMsgBody').value.trim();
+        const userId = document.getElementById('recMsgTarget').value;
+
+        if (!title) return showMsg('recMsgResult', 'Zadaj nadpis správy', 'err');
+        if (!body)  return showMsg('recMsgResult', 'Zadaj text správy', 'err');
+
+        const payload = { title, message: body, severity: recMsgSeverity };
+        if (userId) payload.userId = userId;
+
+        try {
+            const res = await authFetch('/api/notifications/admin-message', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message || 'Chyba');
+
+            const target = userId
+                ? document.getElementById('recMsgTarget').selectedOptions[0]?.text
+                : 'všetkým členom';
+            showMsg('recMsgResult', `✓ Odoslané: ${target} (${d.recipients || 1} príjemcov)`, 'ok');
+            toast('Správa odoslaná!', 'ok');
+            document.getElementById('recMsgTitle').value = '';
+            document.getElementById('recMsgBody').value  = '';
+            loadReceptionSent();
+        } catch(e) {
+            showMsg('recMsgResult', e.message, 'err');
+        }
+    }
+
+    async function loadReceptionSent() {
+        const el = document.getElementById('recSentList');
+        try {
+            const res = await authFetch('/api/notifications/sent');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            if (!data.length) {
+                el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-inbox"></i><p>Žiadne odoslané správy</p></div>';
+                return;
+            }
+            el.innerHTML = data.slice(0, 15).map(n => {
+                const time = new Date(n.createdAt).toLocaleString('sk-SK', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+                const sevColor = n.severity==='danger'?'var(--red)':n.severity==='warning'?'var(--orange)':'var(--acid2)';
+                return `<div style="padding:0.7rem 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.2rem">
+                    <span style="font-size:0.84rem;font-weight:500">${n.title}</span>
+                    <span style="font-size:0.68rem;color:var(--muted)">${time}</span>
+                </div>
+                <div style="font-size:0.75rem;color:var(--muted)">${n.message}</div>
+                <span style="font-size:0.63rem;color:${sevColor};text-transform:uppercase">${n.severity}</span>
+            </div>`;
+            }).join('');
+        } catch {
+            el.innerHTML = '<div style="font-size:0.8rem;color:var(--muted);padding:0.5rem">Dostupné po implementácii</div>';
+        }
     }
 
     // ── MEMBERS ───────────────────────────────────────────────────────────────

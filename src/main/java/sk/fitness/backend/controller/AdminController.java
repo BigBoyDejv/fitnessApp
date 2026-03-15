@@ -2,9 +2,11 @@ package sk.fitness.backend.controller;
 
 import sk.fitness.backend.model.Membership;
 import sk.fitness.backend.model.MembershipType;
+import sk.fitness.backend.model.Product;
 import sk.fitness.backend.model.User;
 import sk.fitness.backend.repository.MembershipRepository;
 import sk.fitness.backend.repository.MembershipTypeRepository;
+import sk.fitness.backend.repository.ProductRepository;
 import sk.fitness.backend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,13 +24,16 @@ public class AdminController {
     private final UserRepository userRepository;
     private final MembershipRepository membershipRepository;
     private final MembershipTypeRepository membershipTypeRepository;
+    private final ProductRepository productRepository;
 
     public AdminController(UserRepository userRepository,
                            MembershipRepository membershipRepository,
-                           MembershipTypeRepository membershipTypeRepository) {
+                           MembershipTypeRepository membershipTypeRepository,
+                           ProductRepository productRepository) {
         this.userRepository = userRepository;
         this.membershipRepository = membershipRepository;
         this.membershipTypeRepository = membershipTypeRepository;
+        this.productRepository = productRepository;
     }
 
     // ── GET /api/admin/users ── zoznam všetkých užívateľov ───────────────────
@@ -110,6 +115,42 @@ public class AdminController {
         membershipRepository.save(m);
 
         return ResponseEntity.ok(membershipDto(m));
+    }
+    // ── GET /api/admin/stats/inventory ────────────────────────────────────────
+    @GetMapping("/inventory")
+    public ResponseEntity<?> inventoryStatus(@AuthenticationPrincipal UserDetails ud) {
+        if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+
+        List<Product> all = productRepository.findAll();
+
+        List<Map<String, Object>> items = all.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getActive()))
+                .sorted(Comparator.comparingInt(Product::getStock))
+                .map(p -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id",       p.getId());
+                    m.put("name",     p.getName());
+                    m.put("category", p.getCategory());
+                    m.put("stock",    p.getStock());
+                    m.put("price",    p.getPriceCents() / 100.0);
+                    m.put("value",    p.getStock() * p.getPriceCents() / 100.0);
+                    m.put("status",   p.getStock() == 0 ? "out" : p.getStock() <= 5 ? "low" : "ok");
+                    return m;
+                })
+                .toList();
+
+        int totalProducts = items.size();
+        long outOfStock   = items.stream().filter(i -> "out".equals(i.get("status"))).count();
+        long lowStock     = items.stream().filter(i -> "low".equals(i.get("status"))).count();
+        double totalValue = items.stream().mapToDouble(i -> (double) i.get("value")).sum();
+
+        return ResponseEntity.ok(Map.of(
+                "items",        items,
+                "totalProducts", totalProducts,
+                "outOfStock",   outOfStock,
+                "lowStock",     lowStock,
+                "totalValue",   Math.round(totalValue * 100.0) / 100.0
+        ));
     }
 
     // ── PUT /api/admin/memberships/cancel/{userId} ── zrušiť predplatné ──────

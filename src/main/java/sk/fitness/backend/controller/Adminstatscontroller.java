@@ -58,7 +58,8 @@ public class Adminstatscontroller {
         if (!isAdmin(ud)) return ResponseEntity.status(403).build();
 
         int m = months != null ? months : 1;
-        LocalDateTime from = LocalDateTime.now().minusMonths(m).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime from = LocalDateTime.now().minusMonths(m)
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime to = LocalDateTime.now();
 
         List<Object[]> rows = receptionSaleRepository.topSellingProducts(from, to);
@@ -82,7 +83,8 @@ public class Adminstatscontroller {
         if (!isAdmin(ud)) return ResponseEntity.status(403).build();
 
         int m = months != null ? months : 1;
-        LocalDateTime from = LocalDateTime.now().minusMonths(m).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime from = LocalDateTime.now().minusMonths(m)
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime to = LocalDateTime.now();
 
         List<Object[]> rows = receptionSaleRepository.salesByCategory(from, to);
@@ -106,7 +108,8 @@ public class Adminstatscontroller {
         if (!isAdmin(ud)) return ResponseEntity.status(403).build();
 
         int m = months != null ? months : 1;
-        LocalDateTime from = LocalDateTime.now().minusMonths(m).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime from = LocalDateTime.now().minusMonths(m)
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime to = LocalDateTime.now();
 
         List<Object[]> rows = receptionSaleRepository.salesByPaymentMethod(from, to);
@@ -130,7 +133,8 @@ public class Adminstatscontroller {
         if (!isAdmin(ud)) return ResponseEntity.status(403).build();
 
         int m = months != null ? months : 1;
-        LocalDateTime from = LocalDateTime.now().minusMonths(m).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime from = LocalDateTime.now().minusMonths(m)
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime to = LocalDateTime.now();
 
         Long revenueCents = receptionSaleRepository.totalRevenueCents(from, to);

@@ -290,13 +290,16 @@
         <a class="nav-item active" onclick="showPage('overview')" href="#"><i class="fas fa-chart-line"></i> Dashboard</a>
         <div class="nav-section">Správa</div>
         <a class="nav-item" onclick="showPage('users')" href="#"><i class="fas fa-users"></i> Profily</a>
+        <a class="nav-item" onclick="showPage('messages')" href="#"><i class="fas fa-envelope"></i> Správy členom</a>
         <a class="nav-item" onclick="showPage('memberships')" href="#"><i class="fas fa-id-card"></i> Predplatné</a>
         <a class="nav-item" onclick="showPage('classes-admin')" href="#"><i class="fas fa-calendar-alt"></i> Lekcie</a>
         <a class="nav-item" onclick="showPage('create-class')" href="#"><i class="fas fa-plus-circle"></i> Nová lekcia</a>
         <div class="nav-section">Analytika</div>
         <a class="nav-item" onclick="showPage('stats')" href="#"><i class="fas fa-chart-bar"></i> Štatistiky</a>
+        <a class="nav-item" onclick="showPage('inventory')" href="#"><i class="fas fa-boxes"></i> Sklad</a>
         <div class="nav-section">Nastavenia</div>
         <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user-cog"></i> Môj profil</a>
+
     </nav>
     <div class="sb-footer">
         <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Odhlásiť sa</button>
@@ -741,6 +744,141 @@
                 <div class="pb"><div class="chart-wrap"><canvas id="chartDailyCheckins"></canvas></div></div>
             </div>
 
+
+
+        </div>
+
+        <!-- INVENTORY -->
+        <div class="page-section" id="page-inventory">
+            <!-- KPI súhrn -->
+            <div class="stats-hero" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem" id="invHero">
+                <div class="sh-card" style="--sh-accent:var(--acid)"><div class="sh-icon"><i class="fas fa-boxes"></i></div><div class="sh-val" id="inv-total">—</div><div class="sh-lbl">Aktívnych produktov</div></div>
+                <div class="sh-card" style="--sh-accent:var(--red)"><div class="sh-icon"><i class="fas fa-times-circle"></i></div><div class="sh-val" id="inv-out">—</div><div class="sh-lbl">Vypredané</div></div>
+                <div class="sh-card" style="--sh-accent:var(--orange)"><div class="sh-icon"><i class="fas fa-exclamation-triangle"></i></div><div class="sh-val" id="inv-low">—</div><div class="sh-lbl">Málo na sklade (≤5)</div></div>
+                <div class="sh-card" style="--sh-accent:var(--acid2)"><div class="sh-icon"><i class="fas fa-euro-sign"></i></div><div class="sh-val" id="inv-value">—</div><div class="sh-lbl">Hodnota skladu</div></div>
+            </div>
+
+            <!-- Tabuľka -->
+            <div class="panel">
+                <div class="ph">
+                    <span class="pt">Stav skladu</span>
+                    <div style="display:flex;gap:0.6rem;align-items:center">
+                        <select id="invCatFilter" onchange="filterInventory()" style="font-family:var(--font-b);font-size:0.8rem;padding:0.3rem 0.6rem;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:3px">
+                            <option value="">Všetky kategórie</option>
+                        </select>
+                        <select id="invStatusFilter" onchange="filterInventory()" style="font-family:var(--font-b);font-size:0.8rem;padding:0.3rem 0.6rem;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:3px">
+                            <option value="">Všetky</option>
+                            <option value="out">Vypredané</option>
+                            <option value="low">Málo na sklade</option>
+                            <option value="ok">V poriadku</option>
+                        </select>
+                        <button class="btn btn-ghost btn-sm" onclick="loadInventory()"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+                <div class="pb" id="inventoryTable"><div class="empty-state"><span class="spinner"></span></div></div>
+            </div>
+        </div>
+
+        <div class="page-section" id="page-messages">
+            <div class="grid-2">
+                <!-- Odoslať správu -->
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt">Odoslať správu</span>
+                        <span class="method m-post">POST /api/notifications/admin-message</span>
+                    </div>
+                    <div class="pb">
+                        <!-- Prepínač: všetci / konkrétny člen -->
+                        <div style="display:flex;gap:0;margin-bottom:1.2rem;border:1px solid var(--border);border-radius:3px;overflow:hidden">
+                            <button id="msgTabAll" onclick="switchMsgTab('all')"
+                                    style="flex:1;padding:0.5rem;font-family:var(--font-d);font-size:0.8rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border:none;cursor:pointer;background:var(--red);color:#fff;transition:all 0.15s">
+                                <i class="fas fa-users"></i> Všetci členovia
+                            </button>
+                            <button id="msgTabOne" onclick="switchMsgTab('one')"
+                                    style="flex:1;padding:0.5rem;font-family:var(--font-d);font-size:0.8rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border:none;cursor:pointer;background:var(--surface2);color:var(--muted);transition:all 0.15s">
+                                <i class="fas fa-user"></i> Konkrétny člen
+                            </button>
+                        </div>
+
+                        <!-- Výber konkrétneho člena -->
+                        <div id="msgMemberSelect" style="display:none;margin-bottom:1rem">
+                            <label class="fl">Vyber člena</label>
+                            <select class="fi" id="msgTargetUser">
+                                <option value="">— načítavam... —</option>
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Nadpis správy *</label>
+                            <input class="fi" type="text" id="msgTitle" placeholder="napr. Dôležité oznámenie">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Text správy *</label>
+                            <textarea class="fi" id="msgBody" rows="4"
+                                      style="resize:vertical;font-family:var(--font-b);line-height:1.6"
+                                      placeholder="Text správy ktorú dostanú členovia v notifikáciách..."></textarea>
+                        </div>
+
+                        <!-- Závažnosť -->
+                        <div class="fg">
+                            <label class="fl">Typ / závažnosť</label>
+                            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                                <button id="sev-info" onclick="setSeverity('info')"
+                                        class="btn btn-sm"
+                                        style="background:rgba(0,255,209,0.1);color:var(--acid2);border-color:var(--acid2)">
+                                    <i class="fas fa-info-circle"></i> Info
+                                </button>
+                                <button id="sev-warning" onclick="setSeverity('warning')"
+                                        class="btn btn-sm"
+                                        style="background:transparent;color:var(--muted);border-color:var(--border2)">
+                                    <i class="fas fa-exclamation-triangle"></i> Upozornenie
+                                </button>
+                                <button id="sev-danger" onclick="setSeverity('danger')"
+                                        class="btn btn-sm"
+                                        style="background:transparent;color:var(--muted);border-color:var(--border2)">
+                                    <i class="fas fa-exclamation-circle"></i> Dôležité
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-red btn-block" onclick="sendAdminMessage()" style="margin-top:0.5rem">
+                            <i class="fas fa-paper-plane"></i> Odoslať správu
+                        </button>
+                        <div class="fm" id="msgResult"></div>
+                    </div>
+                </div>
+
+                <!-- Náhľad + história odoslaných -->
+                <div>
+                    <!-- Náhľad -->
+                    <div class="panel">
+                        <div class="ph"><span class="pt">Náhľad notifikácie</span></div>
+                        <div class="pb" id="msgPreview">
+                            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1rem;display:flex;gap:0.9rem;align-items:flex-start">
+                                <div id="prevIcon" style="width:34px;height:34px;border-radius:50%;background:rgba(0,255,209,0.1);color:var(--acid2);display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div style="flex:1">
+                                    <div id="prevTitle" style="font-size:0.86rem;font-weight:500;margin-bottom:0.12rem">Nadpis správy</div>
+                                    <div id="prevBody" style="font-size:0.76rem;color:var(--muted)">Text správy sa zobrazí tu...</div>
+                                </div>
+                                <div style="font-size:0.7rem;color:var(--muted)">Teraz</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Posledné odoslané -->
+                    <div class="panel">
+                        <div class="ph">
+                            <span class="pt">Odoslané správy</span>
+                            <button class="btn btn-ghost btn-sm" onclick="loadSentMessages()"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div class="pb" id="sentMsgList">
+                            <div class="empty-state"><i class="fas fa-inbox"></i><p>Žiadne odoslané správy</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div><!-- /content -->
@@ -774,7 +912,11 @@
     }
 
     // ── NAV ───────────────────────────────────────────────────────────────────────
-    const pageTitles = {overview:'Dashboard',users:'Správa profilov',memberships:'Predplatné','classes-admin':'Lekcie','create-class':'Nová lekcia',profile:'Môj profil',stats:'Štatistiky'};
+    const pageTitles = {
+        overview:'Dashboard', users:'Správa profilov', memberships:'Predplatné',
+        'classes-admin':'Lekcie', 'create-class':'Nová lekcia', profile:'Môj profil',
+        stats:'Štatistiky', inventory:'Sklad', messages:'Správy členom'  // ← PRIDAJ
+    };
     function showPage(id) {
         closeSidebar();
         document.querySelectorAll('.page-section').forEach(el=>el.classList.remove('active'));
@@ -789,6 +931,9 @@
         if (id==='create-class')   loadTrainersForPicker();
         if (id==='profile')        loadAdminProfile();
         if (id==='stats')          loadStatsPage();
+        if(id==='inventory') loadInventory();
+        if(id==='messages') loadMessagesPage();
+
     }
 
     async function authFetch(url, opts={}) {
@@ -808,6 +953,138 @@
     function userStatusBadge(u) {
         if (!Boolean(u.active)) return '<span class="badge b-frozen"><i class="fas fa-snowflake"></i> Zmrazený</span>';
         return '<span class="badge b-acid">Aktívny</span>';
+    }
+
+    // ── SPRÁVY ČLENOM ─────────────────────────────────────────────────────────
+    let msgTab = 'all';
+    let msgSeverity = 'info';
+
+    function switchMsgTab(tab) {
+        msgTab = tab;
+        const isAll = tab === 'all';
+        document.getElementById('msgTabAll').style.background    = isAll ? 'var(--red)' : 'var(--surface2)';
+        document.getElementById('msgTabAll').style.color         = isAll ? '#fff' : 'var(--muted)';
+        document.getElementById('msgTabOne').style.background    = !isAll ? 'var(--red)' : 'var(--surface2)';
+        document.getElementById('msgTabOne').style.color         = !isAll ? '#fff' : 'var(--muted)';
+        document.getElementById('msgMemberSelect').style.display = isAll ? 'none' : 'block';
+    }
+
+    function setSeverity(sev) {
+        msgSeverity = sev;
+        ['info','warning','danger'].forEach(s => {
+            const btn = document.getElementById('sev-' + s);
+            const colors = {
+                info:    { bg: 'rgba(0,255,209,0.1)',  color: 'var(--acid2)',   border: 'var(--acid2)'   },
+                warning: { bg: 'rgba(255,149,0,0.1)',  color: 'var(--orange)',  border: 'var(--orange)'  },
+                danger:  { bg: 'rgba(255,45,85,0.1)',  color: 'var(--red)',     border: 'var(--red)'     },
+            };
+            if (s === sev) {
+                btn.style.background   = colors[s].bg;
+                btn.style.color        = colors[s].color;
+                btn.style.borderColor  = colors[s].border;
+            } else {
+                btn.style.background  = 'transparent';
+                btn.style.color       = 'var(--muted)';
+                btn.style.borderColor = 'var(--border2)';
+            }
+        });
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const title = document.getElementById('msgTitle').value || 'Nadpis správy';
+        const body  = document.getElementById('msgBody').value  || 'Text správy sa zobrazí tu...';
+        document.getElementById('prevTitle').textContent = title;
+        document.getElementById('prevBody').textContent  = body;
+
+        const iconEl = document.getElementById('prevIcon');
+        const iconMap = {
+            info:    { icon: 'fas fa-envelope',             bg: 'rgba(0,255,209,0.1)',  color: 'var(--acid2)'  },
+            warning: { icon: 'fas fa-exclamation-triangle', bg: 'rgba(255,149,0,0.1)',  color: 'var(--orange)' },
+            danger:  { icon: 'fas fa-exclamation-circle',   bg: 'rgba(255,45,85,0.1)',  color: 'var(--red)'    },
+        };
+        const cfg = iconMap[msgSeverity] || iconMap.info;
+        iconEl.style.background = cfg.bg;
+        iconEl.style.color      = cfg.color;
+        iconEl.innerHTML        = `<i class="${cfg.icon}"></i>`;
+    }
+
+    async function loadMessagesPage() {
+        if (!allUsersCache.length) await loadUsers();
+        const members = allUsersCache.filter(u => u.role === 'member');
+        document.getElementById('msgTargetUser').innerHTML =
+            '<option value="">— vyber člena —</option>' +
+            members.map(u => `<option value="${u.id}">${u.fullName} (${u.email})</option>`).join('');
+
+        document.getElementById('msgTitle').addEventListener('input', updatePreview);
+        document.getElementById('msgBody').addEventListener('input', updatePreview);
+
+        loadSentMessages();
+    }
+
+    async function sendAdminMessage() {
+        const title  = document.getElementById('msgTitle').value.trim();
+        const body   = document.getElementById('msgBody').value.trim();
+        const userId = msgTab === 'one' ? document.getElementById('msgTargetUser').value : null;
+
+        if (!title) return showMsg('msgResult', 'Zadaj nadpis správy', 'err');
+        if (!body)  return showMsg('msgResult', 'Zadaj text správy', 'err');
+        if (msgTab === 'one' && !userId) return showMsg('msgResult', 'Vyber člena', 'err');
+
+        const payload = { title, message: body, severity: msgSeverity };
+        if (userId) payload.userId = userId;
+
+        try {
+            const res = await authFetch('/api/notifications/admin-message', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.message || 'Chyba');
+
+            const target = msgTab === 'all'
+                ? 'všetkým členom'
+                : (document.getElementById('msgTargetUser').selectedOptions[0]?.text || '');
+            showMsg('msgResult', `✓ Správa odoslaná: ${target}`, 'ok');
+            toast('Správa odoslaná!', 'ok');
+
+            // Reset formulára
+            document.getElementById('msgTitle').value = '';
+            document.getElementById('msgBody').value  = '';
+            updatePreview();
+            loadSentMessages();
+        } catch(e) {
+            showMsg('msgResult', e.message, 'err');
+        }
+    }
+
+    async function loadSentMessages() {
+        const el = document.getElementById('sentMsgList');
+        try {
+            const res = await authFetch('/api/notifications/sent');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            if (!data.length) {
+                el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-inbox"></i><p>Žiadne odoslané správy</p></div>';
+                return;
+            }
+            el.innerHTML = data.slice(0, 20).map(n => {
+                const time = new Date(n.createdAt).toLocaleString('sk-SK', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+                const sevColor = n.severity === 'danger' ? 'var(--red)' : n.severity === 'warning' ? 'var(--orange)' : 'var(--acid2)';
+                return `<div style="padding:0.7rem 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:0.8rem;align-items:flex-start">
+                <div style="flex:1">
+                    <div style="font-size:0.85rem;font-weight:500;margin-bottom:0.15rem">${n.title}</div>
+                    <div style="font-size:0.75rem;color:var(--muted)">${n.message}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                    <div style="font-size:0.68rem;color:var(--muted)">${time}</div>
+                    <div style="font-size:0.65rem;color:${sevColor};margin-top:0.15rem;text-transform:uppercase">${n.severity}</div>
+                </div>
+            </div>`;
+            }).join('');
+        } catch {
+            el.innerHTML = '<div style="font-size:0.8rem;color:var(--muted);padding:0.5rem">História správ bude dostupná po implementácii /api/notifications/sent</div>';
+        }
     }
 
     // ── OVERVIEW ─────────────────────────────────────────────────────────────────
@@ -1944,6 +2221,84 @@
                 }
             });
         } catch(e) { console.warn('Daily checkins error:', e); }
+    }
+
+    // ── INVENTORY ─────────────────────────────────────────────────────────────
+    let allInventory = [];
+
+    async function loadInventory() {
+        document.getElementById('inventoryTable').innerHTML = '<div class="empty-state"><span class="spinner"></span></div>';
+        try {
+            const res = await authFetch('/api/admin/inventory');
+            const data = await res.json();
+            allInventory = data.items || [];
+
+            // KPI
+            document.getElementById('inv-total').textContent = data.totalProducts;
+            document.getElementById('inv-out').textContent = data.outOfStock;
+            document.getElementById('inv-low').textContent = data.lowStock;
+            document.getElementById('inv-value').textContent = (data.totalValue||0).toFixed(2) + ' €';
+
+            // Kategórie filter
+            const cats = [...new Set(allInventory.map(p => p.category).filter(Boolean))].sort();
+            document.getElementById('invCatFilter').innerHTML =
+                '<option value="">Všetky kategórie</option>' +
+                cats.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            filterInventory();
+        } catch(e) {
+            document.getElementById('inventoryTable').innerHTML = '<div class="empty-state"><p>Chyba načítania</p></div>';
+        }
+    }
+
+    function filterInventory() {
+        const cat    = document.getElementById('invCatFilter').value;
+        const status = document.getElementById('invStatusFilter').value;
+        const filtered = allInventory.filter(p =>
+            (!cat    || p.category === cat) &&
+            (!status || p.status   === status)
+        );
+        renderInventoryTable(filtered);
+    }
+
+    function renderInventoryTable(items) {
+        if (!items.length) {
+            document.getElementById('inventoryTable').innerHTML =
+                '<div class="empty-state"><i class="fas fa-box-open"></i><p>Žiadne produkty</p></div>';
+            return;
+        }
+
+        const statusBadge = s =>
+            s === 'out' ? '<span class="badge b-red"><i class="fas fa-times"></i> Vypredané</span>' :
+                s === 'low' ? '<span class="badge b-orange"><i class="fas fa-exclamation-triangle"></i> Málo</span>' :
+                    '<span class="badge b-acid"><i class="fas fa-check"></i> OK</span>';
+
+        const stockColor = s =>
+            s === 'out' ? 'var(--red)' : s === 'low' ? 'var(--orange)' : 'var(--acid)';
+
+        let html = `<table class="dt">
+        <thead><tr>
+            <th>Produkt</th><th>Kategória</th><th>Cena</th>
+            <th>Sklad</th><th>Hodnota</th><th>Status</th>
+        </tr></thead><tbody>`;
+
+        items.forEach(p => {
+            html += `<tr>
+            <td><b>${p.name}</b></td>
+            <td style="color:var(--muted);font-size:0.8rem">${p.category || '—'}</td>
+            <td style="font-family:var(--font-d);font-weight:700">${p.price.toFixed(2)} €</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:0.5rem">
+                    <span style="font-family:var(--font-d);font-size:1.1rem;font-weight:900;color:${stockColor(p.status)}">${p.stock}</span>
+                    <span style="font-size:0.72rem;color:var(--muted)">ks</span>
+                </div>
+            </td>
+            <td style="font-family:var(--font-d);color:var(--acid2)">${p.value.toFixed(2)} €</td>
+            <td>${statusBadge(p.status)}</td>
+        </tr>`;
+        });
+
+        document.getElementById('inventoryTable').innerHTML = html + '</tbody></table>';
     }
 
     // Boot
