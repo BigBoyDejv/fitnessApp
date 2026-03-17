@@ -286,6 +286,7 @@
         <a class="nav-item" onclick="go('classes')" href="#"><i class="fas fa-calendar-alt"></i> Moje lekcie</a>
         <a class="nav-item" onclick="go('book')" href="#"><i class="fas fa-plus-circle"></i> Rezervovať lekciu</a>
         <a class="nav-item" onclick="go('trainers')" href="#"><i class="fas fa-dumbbell"></i> Naši tréneri</a>
+        <a class="nav-item" onclick="go('messages')" href="#"><i class="fas fa-comments"></i> Správy</a>
         <div class="nav-sec">Vstup & Štatistiky</div>
         <a class="nav-item" onclick="go('qr')" href="#"><i class="fas fa-qrcode"></i> QR Vstupný kód</a>
         <a class="nav-item" onclick="go('checkin')" href="#"><i class="fas fa-history"></i> História vstupov</a>
@@ -313,6 +314,37 @@
 
 
     <div class="content">
+        <!-- SPRÁVY (pre člena) -->
+        <div class="ps" id="pg-messages">
+            <div class="panel">
+                <div class="ph">
+                    <span class="pt">Správy s trénerom</span>
+                </div>
+                <div class="pb">
+                    <div style="display:flex; gap:10px; height:500px; border:1px solid var(--border); border-radius:6px; overflow:hidden;">
+                        <!-- Ľavá časť – zoznam trénerov (zatiaľ len jeden tréner) -->
+                        <div style="width:220px; border-right:1px solid var(--border); overflow-y:auto; background:var(--surface);" id="chatTrainers">
+                            <!-- Sem sa načítajú tréneri (zatiaľ placeholder) -->
+                            <div style="padding:1rem; color:var(--muted);">Načítavam trénerov...</div>
+                        </div>
+
+                        <!-- Pravá časť – chat -->
+                        <div style="flex:1; display:flex; flex-direction:column;">
+                            <div id="chatMessages" style="flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; background:var(--bg);">
+                                <div style="text-align:center; color:var(--muted); padding:2rem;">
+                                    Vyber trénera zo zoznamu vľavo
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:8px; padding:12px; border-top:1px solid var(--border); background:var(--surface);">
+                                <input class="fi" id="chatInput" placeholder="Napíš správu..." style="flex:1;">
+                                <button class="btn btn-acid" onclick="sendMessageMember()">Poslať</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- OVERVIEW -->
         <div class="ps active" id="pg-overview">
@@ -652,7 +684,7 @@
     loadMyClassesOv();
 
     // ===== NAV =====
-    const titles = {overview:'Prehľad',profile:'Môj profil',notifications:'Notifikácie',membership:'Moje členstvo',pricing:'Cenník',classes:'Moje lekcie',book:'Rezervácia lekcií',trainers:'Naši tréneri',qr:'QR Vstupný kód',checkin:'História vstupov',stats:'Moje štatistiky',rules:'Pravidlá centra'};
+    const titles = {overview:'Prehľad',messages: 'Správy',profile:'Môj profil',notifications:'Notifikácie',membership:'Moje členstvo',pricing:'Cenník',classes:'Moje lekcie',book:'Rezervácia lekcií',trainers:'Naši tréneri',qr:'QR Vstupný kód',checkin:'História vstupov',stats:'Moje štatistiky',rules:'Pravidlá centra'};
     function go(id) {
         closeSidebar();
         document.querySelectorAll('.ps').forEach(el => el.classList.remove('active'));
@@ -674,6 +706,8 @@
         if (id==='stats')      loadStats();
         if (id==='pricing')    loadPricing();
         if (id==='qr')         genQR();
+        if (id === 'messages') {loadTrainersForChat();
+        }
     }
 
     // ===== API =====
@@ -685,6 +719,8 @@
         if (res.status===401) { logout(); throw new Error('Session vypršala'); }
         return res;
     }
+
+
     function setOut(id,v){document.getElementById(id).textContent=v;}
 
     // ===== LIVE =====
@@ -1324,6 +1360,178 @@
         setTimeout(()=>t.classList.remove('show'),3200);
     }
     function logout(){localStorage.removeItem('fp_token');localStorage.removeItem('fp_user');window.location.href='index.html';}
+
+    let currentTrainerId = null;
+
+    async function loadMyTrainer() {
+        const trainerListEl = document.getElementById('chatTrainers');
+        trainerListEl.innerHTML = '<div style="padding:1rem;"><span class="spin"></span></div>';
+
+        try {
+            const response = await af('/api/users/my-trainer');
+            const data = await response.json();
+
+            // Skontrolujeme, či prišla chybová správa
+            if (data.message && data.message.includes('Nemáš priradeného')) {
+                trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--muted); font-size:0.8rem;">
+                Nemáš priradeného trénera.
+            </div>`;
+                return;
+            }
+
+            // Ak máme trénera, data by mali byť objekt s údajmi
+            if (data.id) {
+                currentTrainerId = data.id;
+
+                trainerListEl.innerHTML = `
+                <div class="cl-row cl-row-selected" onclick="selectTrainer('${data.id}')">
+                    <div class="cl-row-main">
+                        <div class="cl-row-name">${data.fullName || 'Tréner'}</div>
+                        <div class="cl-row-meta">
+                            <span><i class="fas fa-dumbbell"></i> ${data.specialization || 'Osobný tréner'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+                // Po načítaní trénera hneď načítame aj správy
+                loadMessagesMember();
+            } else {
+                trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--muted);">Nepodarilo sa načítať trénera</div>`;
+            }
+        } catch (e) {
+            console.error("Chyba pri načítaní trénera:", e);
+            trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--red);">Chyba načítania</div>`;
+        }
+    }
+
+
+
+
+    async function loadTrainersForChat() {
+        const listEl = document.getElementById('chatTrainers');
+        listEl.innerHTML = '<div style="padding:1rem;"><span class="spin"></span></div>';
+
+        try {
+            // Najprv získame profil člena
+            const meRes = await af('/api/auth/me');
+            const me = await meRes.json();
+
+            if (!me.trainerId) {
+                listEl.innerHTML = '<div style="padding:1rem; color:var(--muted);">Nemáš priradeného trénera.</div>';
+                return;
+            }
+
+            // Potom získame detail trénera
+            const trainerRes = await af('/api/users/my-trainer');
+            const trainer = await trainerRes.json();
+
+            // Skontrolujeme, či neprišla chybová správa
+            if (trainer.message) {
+                listEl.innerHTML = `<div style="padding:1rem; color:var(--muted);">${trainer.message}</div>`;
+                return;
+            }
+
+            if (trainer && trainer.id) {
+                listEl.innerHTML = `
+                <div class="cl-row cl-row-selected" onclick="selectTrainer('${trainer.id}')">
+                    <div class="cl-row-main">
+                        <div class="cl-row-name">${trainer.fullName}</div>
+                        <div class="cl-row-meta">
+                            <span><i class="fas fa-dumbbell"></i> ${trainer.specialization || 'Osobný tréner'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+                selectTrainer(trainer.id);
+            }
+        } catch (e) {
+            listEl.innerHTML = `<div style="padding:1rem; color:var(--red);">Chyba: ${e.message}</div>`;
+        }
+    }
+
+    function selectTrainer(id) {
+        currentTrainerId = id;
+        // Vizuálne označenie v zozname
+        document.querySelectorAll('.cl-row').forEach(r => r.classList.remove('cl-row-selected'));
+        // Načítanie správ
+        loadMessagesMember();
+    }
+
+
+
+    function openChatWithTrainer(trainerId, trainerName) {
+        currentTrainerId = trainerId;
+        document.getElementById('chatMessages').innerHTML = `<div style="text-align:center; padding:2rem; color:var(--muted);">
+        <b>Chat s trénerom ${trainerName}</b><br><br>Načítavam správy...
+    </div>`;
+        loadMessagesMember();
+    }
+
+    // Načítanie správ (obojstranné)
+    async function loadMessagesMember() {
+        if (!currentTrainerId) return;
+
+        try {
+            const res = await af(`/api/messages/chat?user1=${user.id}&user2=${currentTrainerId}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const messages = await res.json();
+
+            let html = '';
+            messages.forEach(m => {
+                const isMe = m.senderId === user.id;
+                html += `
+                <div class="chat-msg ${isMe ? 'chat-me' : 'chat-other'}">
+                    <div style="font-size:11px; opacity:0.6; margin-bottom:4px;">
+                        ${isMe ? 'Ja' : 'Tréner'}
+                    </div>
+                    ${m.text}
+                </div>`;
+            });
+
+            const box = document.getElementById('chatMessages');
+            box.innerHTML = html || '<div style="text-align:center; padding:2rem; color:var(--muted);">Zatiaľ žiadne správy</div>';
+            box.scrollTop = box.scrollHeight;
+        } catch (e) {
+            document.getElementById('chatMessages').innerHTML = `<div style="color:var(--red); padding:2rem;">Chyba: ${e.message}</div>`;
+        }
+    }
+
+    // Odoslanie správy od člena
+    async function sendMessageMember() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text || !currentTrainerId) return;
+
+        try {
+            await af('/api/messages', {
+                method: 'POST',
+                body: JSON.stringify({
+                    senderId: user.id,
+                    receiverId: currentTrainerId,
+                    text: text
+                })
+            });
+
+            input.value = '';
+            loadMessagesMember(); // refresh chatu
+        } catch (e) {
+            toast('Nepodarilo sa odoslať: ' + e.message, 'err');
+        }
+    }
+
+    // Automatický refresh každých 5 sekúnd (ak je chat otvorený)
+    setInterval(() => {
+        if (document.getElementById('pg-messages').classList.contains('active') && currentTrainerId) {
+            loadMessagesMember();
+        }
+    }, 5000);
+
+    // Pri otvorení stránky "Správy" načítať trénerov
+    if (go.toString().includes('messages')) { // alebo lepšie cez event
+        loadTrainersForChat();
+    }
 
 </script>
 </body>

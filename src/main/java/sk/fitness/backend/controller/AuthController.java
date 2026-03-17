@@ -145,7 +145,8 @@ public class AuthController {
                 user.getRole(),
                 user.getAvatarUrl(),
                 Boolean.TRUE.equals(user.getIsActive()),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getTrainerId()
         );
 
         return ResponseEntity.ok(response);

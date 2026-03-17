@@ -157,6 +157,29 @@
         .df{font-size:0.83rem;}
         .df .dk{font-size:0.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.1rem;}
 
+        /* sprava */
+
+        .chat-msg{
+            max-width:70%;
+            padding:8px 12px;
+            border-radius:8px;
+            margin-bottom:6px;
+            font-size:13px;
+        }
+
+        .chat-me{
+            background:#4da3ff;
+            margin-left:auto;
+            color:white;
+        }
+
+        .chat-other{
+            background:#2a2a2a;
+            margin-right:auto;
+            color:#ddd;
+        }
+
+
         /* MISC */
         .page-section{display:none;}
         .page-section.active{display:block;animation:fi 0.2s ease;}
@@ -254,6 +277,11 @@
         <a class="nav-item" onclick="showPage('schedule')" href="#"><i class="fas fa-clock"></i> Týždenný rozvrh</a>
         <div class="nav-section">Klienti</div>
         <a class="nav-item" onclick="showPage('clients')" href="#"><i class="fas fa-users"></i> Moji klienti</a>
+
+        <a class="nav-item" onclick="showPage('messages')" href="#">
+            <i class="fas fa-comments"></i> Správy
+        </a>
+
         <div class="nav-section">Účet</div>
         <a class="nav-item" onclick="showPage('profile')" href="#"><i class="fas fa-user"></i> Môj profil</a>
     </nav>
@@ -409,6 +437,41 @@
             </div>
         </div>
 
+        <!-- ═══ MESSAGES ═══ -->
+        <div class="page-section" id="page-messages">
+
+            <div class="panel">
+                <div class="ph">
+                    <span class="pt">Správy</span>
+                </div>
+
+                <div class="pb">
+
+                    <div style="display:flex;gap:10px;height:400px">
+
+                        <div style="width:220px;border-right:1px solid var(--border);overflow-y:auto" id="chatUsers">
+                        </div>
+
+                        <div style="flex:1;display:flex;flex-direction:column">
+
+                            <div id="chatMessages"
+                                 style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column">
+                            </div>
+
+                            <div style="display:flex;gap:6px;margin-top:10px">
+                                <input class="fi" id="chatInput" placeholder="Napíš správu...">
+                                <button class="btn btn-blue" onclick="sendMessage()">Poslať</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
         <!-- ═══ PROFILE ═══ -->
         <div class="page-section" id="page-profile">
             <div class="panel" id="profileInfoPanel" style="display:none">
@@ -469,7 +532,15 @@
         document.getElementById('sideEmail').textContent = user.email || '—';
     }
 
-    const pageTitles = {overview:'Prehľad','my-classes':'Moje lekcie',schedule:'Týždenný rozvrh',clients:'Moji klienti',profile:'Môj profil'};
+    const pageTitles = {
+        overview:'Prehľad',
+        'my-classes':'Moje lekcie',
+        schedule:'Týždenný rozvrh',
+        clients:'Moji klienti',
+        messages:'Správy',
+        profile:'Môj profil'
+    };
+
 
     function showPage(id) {
         closeSidebar();
@@ -483,13 +554,50 @@
         if (id==='schedule')    renderSchedule();
         if (id==='clients')     { loadClients(); loadAvailableMembers(); }
         if (id==='profile')     loadProfile();
+        if (id==='messages') loadChatUsers();
     }
 
-    async function authFetch(url, opts={}) {
-        const res = await fetch(API+url, {...opts, headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
-        if (res.status===401) { logout(); throw new Error('Session vypršala'); }
+    async function authFetch(url, opts = {}) {
+        console.log(`[authFetch] Volám: ${opts.method || 'GET'} ${API + url}`);
+
+        const headers = {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            ...(opts.headers || {})
+        };
+
+        console.log('[authFetch] Headers:', headers);
+
+        const res = await fetch(API + url, {
+            ...opts,
+            headers
+        });
+
+        console.log(`[authFetch] Odpoveď: ${res.status} ${res.statusText}`);
+
+        if (res.status === 401) {
+            console.warn('[authFetch] 401 → odhlasujem');
+            logout();
+            throw new Error('Session vypršala');
+        }
+
+        if (res.status === 403) {
+            const text = await res.text().catch(() => '');
+            console.error('[authFetch] 403 Forbidden → server zakázal prístup');
+            console.error('[authFetch] Response body:', text);
+            throw new Error(`Prístup zamietnutý (403) – pravdepodobne chýba rola alebo právo`);
+        }
+
+        if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            console.error(`[authFetch] Chyba ${res.status}: ${text}`);
+            throw new Error(`Server error: ${res.status} - ${text}`);
+        }
+
         return res;
     }
+
+
     function showMsg(id,msg,type){ const el=document.getElementById(id); el.textContent=msg; el.className='fm '+type; }
     function toast(msg,type='ok'){
         const t=document.getElementById('toast');
@@ -957,6 +1065,120 @@
         const ini=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
         return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:${Math.round(size*0.38)}px;font-weight:900;color:#fff;flex-shrink:0">${ini}</div>`;
     }
+
+    let currentChatUser = null;
+
+    async function loadChatUsers(){
+
+        const res = await authFetch('/api/trainer/clients');
+        const users = await res.json();
+
+        let html="";
+
+        users.forEach(u=>{
+            html+=`
+        <div class="client-card" onclick="openChat('${u.id}','${u.fullName}')">
+            ${u.fullName}
+        </div>`;
+        });
+
+        document.getElementById("chatUsers").innerHTML = html;
+
+    }
+
+    async function openChat(userId,name){
+
+        currentChatUser = userId;
+
+        document.getElementById("chatMessages").innerHTML =
+            "<b>Chat s "+name+"</b><br><br>";
+
+        loadMessages();
+
+    }
+
+    async function loadMessages(){
+
+        if(!currentChatUser) return;
+
+        const res = await authFetch(
+            "/api/messages/chat?user1="+user.id+"&user2="+currentChatUser
+        );
+
+        if(!res.ok){
+            console.log("Chat error",res.status);
+            return;
+        }
+
+        const data = await res.json();
+
+        let html="";
+
+        data.forEach(m=>{
+
+            const myMsg = m.senderId == user.id;
+
+            html += `
+        <div class="chat-msg ${myMsg ? 'chat-me':'chat-other'}">
+            <div style="font-size:11px;opacity:0.6">
+                ${myMsg ? 'Ty':'Klient'}
+            </div>
+            ${m.text}
+        </div>
+        `;
+
+        });
+
+        const box = document.getElementById("chatMessages");
+
+        box.innerHTML = html;
+
+        box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const text = document.getElementById("chatInput").value.trim();
+        if (!text) return;
+
+        if (!currentChatUser) {
+            toast("Najprv vyberte klienta!", "err");
+            return;
+        }
+
+        if (currentChatUser === user.id) {
+            toast("Nemôžete písať sám sebe", "err");
+            return;
+        }
+
+        try {
+            const payload = {
+                senderId:   user.id,
+                receiverId: currentChatUser,
+                text:       text
+            };
+
+            console.log("→ Odosielam správu:", payload); // ← remove later
+
+            const res = await authFetch("/api/messages", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `HTTP ${res.status}`);
+            }
+
+            document.getElementById("chatInput").value = "";
+            loadMessages();
+
+        } catch (err) {
+            console.error(err);
+            toast("Chyba pri odosielaní: " + err.message, "err");
+        }
+    }
+
+    setInterval(loadMessages,2000);
 
     // Boot
 

@@ -93,6 +93,21 @@ public class UserController {
         User saved = userRepository.save(user);
         return ResponseEntity.ok(toDto(saved));
     }
+    // ── GET /api/users/my-trainer ─────────────────────────────────────────────
+    @GetMapping("/my-trainer")
+    public ResponseEntity<?> getMyTrainer(@AuthenticationPrincipal UserDetails userDetails) {
+        User me = resolveUser(userDetails);
+        if (me == null) return ResponseEntity.status(401).build();
+
+        if (me.getTrainerId() == null) {
+            return ResponseEntity.ok(Map.of("message", "Nemáš priradeného žiadneho trénera."));
+        }
+
+        return userRepository.findByIdEquals(me.getTrainerId())
+                .map(trainer -> ResponseEntity.ok(toDto(trainer)))
+                .orElse(ResponseEntity.status(404).body(Map.of("message", "Tréner sa nenašiel.")));
+    }
+
 
     // ── PUT /api/users/{id}/password ──────────────────────────────────────────
     // Body: { currentPassword, newPassword }

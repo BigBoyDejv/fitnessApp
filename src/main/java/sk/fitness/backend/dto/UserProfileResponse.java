@@ -11,5 +11,6 @@ public record UserProfileResponse(
         String role,
         String avatarUrl,
         boolean isActive,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        UUID trainerId
 ) {}

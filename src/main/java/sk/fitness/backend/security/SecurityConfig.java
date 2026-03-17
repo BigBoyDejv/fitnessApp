@@ -2,6 +2,7 @@ package sk.fitness.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -45,23 +46,30 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/register").permitAll()
-                        .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/api/auth/qr-code").authenticated()
+                        // Najvyššia priorita – toto musí byť úplne hore!
+                        .requestMatchers("/api/messages/**").authenticated()   // alebo .hasAnyRole("MEMBER", "TRAINER")
+
+
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Ostatné chránené
+                        .requestMatchers("/api/auth/me", "/api/auth/qr-code").authenticated()
+                        .requestMatchers("/api/users/my-trainer").authenticated()
                         .requestMatchers("/api/products").permitAll()
                         .requestMatchers("/api/products/**").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
+
+                        // Statické súbory a frontend stránky
                         .requestMatchers(
                                 "/", "/index.html", "/member.html", "/admin.html", "/trainer.html",
-                                "/favicon.ico", "/static/**", "/css/**", "/js/**","/reception.html","/jsQR.js"
+                                "/favicon.ico", "/static/**", "/css/**", "/js/**", "/reception.html", "/jsQR.js"
                         ).permitAll()
+
+                        // Všetko ostatné musí byť autentifikované
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
