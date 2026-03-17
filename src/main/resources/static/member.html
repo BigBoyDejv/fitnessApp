@@ -57,6 +57,362 @@
         .sc-val{font-family:var(--font-d);font-size:2.2rem;font-weight:900;line-height:1;}
         .sc-lbl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
 
+        /* === CHAT - KOMPAKTNÝ DIZAJN S VIDITEĽNÝM TEXTOM === */
+        .chat-container {
+            display: flex;
+            gap: 0;
+            height: 500px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Ľavý panel - zoznam trénerov */
+        .chat-sidebar {
+            width: 200px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            background: var(--surface);
+        }
+
+        /* Pravý panel - chat okno */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        /* Chat správy - kontajner */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--bg);
+        }
+
+        /* Chat bubliny - kompaktnejšie */
+        .chat-bubble {
+            max-width: 70%;
+            padding: 8px 12px;
+            border-radius: 14px;
+            word-wrap: break-word;
+            position: relative;
+            animation: fadeIn 0.2s;
+        }
+
+        .chat-bubble-left {
+            align-self: flex-start;
+            background: var(--surface2);
+            border-bottom-left-radius: 4px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-bubble-right {
+            align-self: flex-end;
+            background: var(--acid);
+            border-bottom-right-radius: 4px;
+            box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* HLAVIČKA SPRÁVY */
+        .chat-header {
+            font-size: 0.6rem;
+            margin-bottom: 3px;
+            display: flex;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        /* Farba mena odosielateľa */
+        .chat-bubble-left .chat-header span:first-child {
+            color: var(--acid);
+        }
+
+        .chat-bubble-right .chat-header span:first-child {
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .chat-time {
+            font-size: 0.55rem;
+            color: inherit;
+            opacity: 0.6;
+        }
+
+        /* OBSAH SPRÁVY - HLAVNÉ PRAVIDLÁ PRE VIDITEĽNOSŤ TEXTU */
+        .chat-content {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* Tvoje správy (zelené) - ČIERNY TEXT */
+        .chat-bubble-right .chat-content {
+            color: #000000 !important;
+            font-weight: 500;
+        }
+
+        /* Správy od trénera (tmavé) - BIELY TEXT */
+        .chat-bubble-left .chat-content {
+            color: #FFFFFF !important;
+            font-weight: 400;
+        }
+
+        /* Debug - pre istotu nastav farby priamo na bubliny */
+        .chat-bubble-right {
+            color: #000000;
+        }
+
+        .chat-bubble-left {
+            color: #FFFFFF;
+        }
+
+        /* Neprečítaná správa - indikátor */
+        .chat-unread {
+            position: relative;
+        }
+
+        .chat-unread::after {
+            content: '●';
+            color: var(--acid);
+            font-size: 0.8rem;
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Vstupná lišta */
+        .chat-input-area {
+            display: flex;
+            gap: 6px;
+            padding: 10px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 14px;
+            color: var(--text);
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--acid);
+        }
+
+        .chat-input::placeholder {
+            color: var(--muted);
+            opacity: 0.7;
+        }
+
+        .chat-send-btn {
+            background: var(--acid);
+            color: #000000;
+            border: none;
+            border-radius: 20px;
+            padding: 0 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .chat-send-btn:hover {
+            background: transparent;
+            color: var(--acid);
+            border: 2px solid var(--acid);
+            padding: 0 14px;
+        }
+
+        /* Tlačidlo pre návrat na zoznam (mobil) */
+        .chat-back-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Štýly pre položky v zozname trénerov */
+        .trainer-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .trainer-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .trainer-item.active {
+            background: rgba(200, 255, 0, 0.05);
+            border-left: 3px solid var(--acid);
+        }
+
+        .trainer-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+            color: var(--text);
+        }
+
+        .trainer-specialization {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        /* Empty stav */
+        .chat-empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* ===== RESPONZÍVNA VERZIA PRE MOBILY ===== */
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: calc(100vh - 200px);
+                position: relative;
+                border-radius: 6px;
+            }
+
+            .chat-sidebar {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                left: 0;
+                top: 0;
+                z-index: 10;
+                background: var(--surface);
+                transform: translateX(0);
+                transition: transform 0.3s ease;
+            }
+
+            .chat-sidebar.hidden {
+                transform: translateX(-100%);
+            }
+
+            .chat-main {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                left: 0;
+                top: 0;
+                z-index: 5;
+            }
+
+            .chat-back-btn {
+                display: block;
+                position: absolute;
+                left: 8px;
+                top: 8px;
+                z-index: 20;
+                background: var(--surface2);
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                color: var(--text);
+            }
+
+            .chat-bubble {
+                max-width: 80%;
+                padding: 7px 11px;
+            }
+
+            .chat-content {
+                font-size: 0.9rem;
+            }
+
+            .chat-messages {
+                padding: 12px 8px;
+                gap: 5px;
+            }
+
+            .chat-input-area {
+                padding: 8px;
+            }
+
+            .chat-input {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+
+            .chat-send-btn {
+                padding: 0 14px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Pre veľmi malé displeje */
+        @media (max-width: 480px) {
+            .chat-bubble {
+                max-width: 85%;
+                padding: 6px 10px;
+            }
+
+            .chat-content {
+                font-size: 0.85rem;
+                line-height: 1.3;
+            }
+
+            .chat-header {
+                font-size: 0.55rem;
+                gap: 4px;
+            }
+
+            .chat-time {
+                font-size: 0.5rem;
+            }
+
+            .chat-input {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+
+            .chat-send-btn {
+                padding: 0 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+
+
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
         .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
 
@@ -314,31 +670,34 @@
 
 
     <div class="content">
-        <!-- SPRÁVY (pre člena) -->
+        <!-- SPRÁVY (pre člena) - RESPONZÍVNA VERZIA -->
         <div class="ps" id="pg-messages">
             <div class="panel">
                 <div class="ph">
                     <span class="pt">Správy s trénerom</span>
                 </div>
-                <div class="pb">
-                    <div style="display:flex; gap:10px; height:500px; border:1px solid var(--border); border-radius:6px; overflow:hidden;">
-                        <!-- Ľavá časť – zoznam trénerov (zatiaľ len jeden tréner) -->
-                        <div style="width:220px; border-right:1px solid var(--border); overflow-y:auto; background:var(--surface);" id="chatTrainers">
-                            <!-- Sem sa načítajú tréneri (zatiaľ placeholder) -->
+                <div class="pb" style="padding: 0;">
+                    <div class="chat-container" id="chatContainer">
+                        <!-- Ľavá časť – zoznam trénerov -->
+                        <div class="chat-sidebar" id="chatTrainers">
+                            <button class="chat-back-btn" onclick="hideTrainerList()" style="display: none;">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
                             <div style="padding:1rem; color:var(--muted);">Načítavam trénerov...</div>
                         </div>
 
                         <!-- Pravá časť – chat -->
-                        <div style="flex:1; display:flex; flex-direction:column;">
-                            <div id="chatMessages" style="flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; background:var(--bg);">
-                                <div style="text-align:center; color:var(--muted); padding:2rem;">
-                                    Vyber trénera zo zoznamu vľavo
+                        <div class="chat-main" id="chatMain">
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="chat-empty">
+                                    <i class="fas fa-comments" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                                    <p>Vyber trénera zo zoznamu vľavo</p>
                                 </div>
                             </div>
 
-                            <div style="display:flex; gap:8px; padding:12px; border-top:1px solid var(--border); background:var(--surface);">
-                                <input class="fi" id="chatInput" placeholder="Napíš správu..." style="flex:1;">
-                                <button class="btn btn-acid" onclick="sendMessageMember()">Poslať</button>
+                            <div class="chat-input-area">
+                                <input class="chat-input" id="chatInput" placeholder="Napíš správu..." onkeypress="if(event.key==='Enter') sendMessageMember()">
+                                <button class="chat-send-btn" onclick="sendMessageMember()">Poslať</button>
                             </div>
                         </div>
                     </div>
@@ -658,10 +1017,8 @@
         ? 'http://localhost:8080'
         : 'https://fitnessapp-5ogv.onrender.com';
 
-
-
     let token = localStorage.getItem('fp_token');
-    let user  = JSON.parse(localStorage.getItem('fp_user') || 'null');
+    let user = JSON.parse(localStorage.getItem('fp_user') || 'null');
 
     if (!token || !user) { window.location.href = 'index.html'; }
     if (user && user.role !== 'member') {
@@ -672,8 +1029,8 @@
     if (user) {
         const ini = (user.fullName||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
         document.getElementById('sideAvatar').textContent = ini;
-        document.getElementById('sideName').textContent   = user.fullName||'—';
-        document.getElementById('sideEmail').textContent  = user.email||'—';
+        document.getElementById('sideName').textContent = user.fullName||'—';
+        document.getElementById('sideEmail').textContent = user.email||'—';
     }
 
     initNotifs();
@@ -694,20 +1051,18 @@
             if (el.getAttribute('onclick')?.includes("'"+id+"'")) el.classList.add('active');
         });
         document.getElementById('topTitle').textContent = titles[id]||id;
-        // Auto-load pri otvorení sekcie
-        if (id==='overview')   { loadMe(); loadMyClassesOv(); }
+        if (id==='overview') { loadMe(); loadMyClassesOv(); }
         if (id==='membership') { loadMembership(); loadMemHistory(); }
-        if (id==='profile')    loadProfile();
-        if (id==='classes')    loadMyClasses();
-        if (id==='book')       loadAllCl();
-        if (id==='classes')    loadMyClasses();
-        if (id==='trainers')   loadTrainers();
-        if (id==='checkin')    loadCheckins();
-        if (id==='stats')      loadStats();
-        if (id==='pricing')    loadPricing();
-        if (id==='qr')         genQR();
-        if (id === 'messages') {loadTrainersForChat();
-        }
+        if (id==='profile') loadProfile();
+        if (id==='classes') loadMyClasses();
+        if (id==='book') loadAllCl();
+        if (id==='classes') loadMyClasses();
+        if (id==='trainers') loadTrainers();
+        if (id==='checkin') loadCheckins();
+        if (id==='stats') loadStats();
+        if (id==='pricing') loadPricing();
+        if (id==='qr') genQR();
+        if (id === 'messages') {loadTrainersForChat();}
     }
 
     // ===== API =====
@@ -720,19 +1075,18 @@
         return res;
     }
 
-
     function setOut(id,v){document.getElementById(id).textContent=v;}
 
     // ===== LIVE =====
     function refreshLive() {
         const total = Math.floor(Math.random()*42)+8;
-        const men   = Math.floor(total*(0.52+Math.random()*0.18));
+        const men = Math.floor(total*(0.52+Math.random()*0.18));
         const women = total-men;
-        const pct   = Math.round(total/80*100);
+        const pct = Math.round(total/80*100);
         document.getElementById('lv-total').textContent = total;
-        document.getElementById('lv-men').textContent   = men;
+        document.getElementById('lv-men').textContent = men;
         document.getElementById('lv-women').textContent = women;
-        document.getElementById('lv-pct').textContent   = pct+'%';
+        document.getElementById('lv-pct').textContent = pct+'%';
         const bar = document.getElementById('lv-bar');
         bar.style.width = pct+'%';
         bar.style.background = pct>75 ? 'var(--red)' : pct>55 ? 'var(--orange)' : 'linear-gradient(90deg,var(--acid),var(--acid2))';
@@ -750,35 +1104,34 @@
                 ? `<img src="${d.avatarUrl}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0">`
                 : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--acid),var(--acid2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:900;font-size:1.1rem;color:#000;flex-shrink:0">${ini}</div>`;
 
-
-            // Update sidebar
             const sideAv = document.getElementById('sideAvatar');
             if (d.avatarUrl) {
                 sideAv.innerHTML = `<img src="${d.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`;
             } else {
                 sideAv.innerHTML = ini;
             }
-            document.getElementById('sideName').textContent  = d.fullName || '—';
+            document.getElementById('sideName').textContent = d.fullName || '—';
             document.getElementById('sideEmail').textContent = d.email || '—';
 
             el.innerHTML = `
-            <div style="display:flex;align-items:center;gap:0.9rem;margin-bottom:1rem;padding-bottom:0.9rem;border-bottom:1px solid var(--border)">
-                ${av}
-                <div>
-                    <div style="font-weight:600;font-size:0.95rem">${d.fullName||'—'}</div>
-                    <div style="font-size:0.78rem;color:var(--muted)">${d.email||'—'}</div>
-                </div>
+        <div style="display:flex;align-items:center;gap:0.9rem;margin-bottom:1rem;padding-bottom:0.9rem;border-bottom:1px solid var(--border)">
+            ${av}
+            <div>
+                <div style="font-weight:600;font-size:0.95rem">${d.fullName||'—'}</div>
+                <div style="font-size:0.78rem;color:var(--muted)">${d.email||'—'}</div>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
-                <div><div class="fl">Rola</div><span class="badge b-acid">${d.role||'—'}</span></div>
-                <div><div class="fl">Stav</div>${d.isActive ? '<span class="badge b-acid">Aktívny</span>' : '<span class="badge b-red">Neaktívny</span>'}</div>
-                <div><div class="fl">Telefón</div><div style="font-size:0.83rem;margin-top:0.15rem">${d.phone||'—'}</div></div>
-                <div><div class="fl">Registrovaný</div><div style="font-size:0.83rem;margin-top:0.15rem">${new Date(d.createdAt).toLocaleDateString('sk-SK')}</div></div>
-            </div>`;
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
+            <div><div class="fl">Rola</div><span class="badge b-acid">${d.role||'—'}</span></div>
+            <div><div class="fl">Stav</div>${d.isActive ? '<span class="badge b-acid">Aktívny</span>' : '<span class="badge b-red">Neaktívny</span>'}</div>
+            <div><div class="fl">Telefón</div><div style="font-size:0.83rem;margin-top:0.15rem">${d.phone||'—'}</div></div>
+            <div><div class="fl">Registrovaný</div><div style="font-size:0.83rem;margin-top:0.15rem">${new Date(d.createdAt).toLocaleDateString('sk-SK')}</div></div>
+        </div>`;
         } catch(e) {
             el.innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
         }
     }
+
     async function loadMyClassesOv() {
         const el = document.getElementById('ov-clOut');
         try {
@@ -796,48 +1149,47 @@
                 const dt = new Date(c.startTime).toLocaleString('sk-SK', {weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
                 const dur = c.durationMinutes ? c.durationMinutes + ' min' : '';
                 return `
-            <div class="cl-row">
-                <div class="cl-row-main">
-                    <div class="cl-row-name">${c.name}</div>
-                    <div class="cl-row-meta">
-                        <span><i class="fas fa-clock" style="opacity:0.5"></i> ${dt}${dur ? ' · '+dur : ''}</span>
-                        <span><i class="fas fa-map-marker-alt" style="opacity:0.5"></i> ${c.location||'—'}</span>
-                    </div>
+        <div class="cl-row">
+            <div class="cl-row-main">
+                <div class="cl-row-name">${c.name}</div>
+                <div class="cl-row-meta">
+                    <span><i class="fas fa-clock" style="opacity:0.5"></i> ${dt}${dur ? ' · '+dur : ''}</span>
+                    <span><i class="fas fa-map-marker-alt" style="opacity:0.5"></i> ${c.location||'—'}</span>
                 </div>
-                <span class="badge b-acid" style="font-size:0.6rem"><i class="fas fa-check"></i> Res.</span>
-            </div>`;
+            </div>
+            <span class="badge b-acid" style="font-size:0.6rem"><i class="fas fa-check"></i> Res.</span>
+        </div>`;
             }).join('') + (upcoming.length > 5 ? `<div style="text-align:center;padding:0.6rem;font-size:0.78rem;color:var(--muted)">+ ${upcoming.length-5} ďalších</div>` : '');
         } catch(e) {
             el.innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
         }
     }
 
-    // ===== PROFILE — opravené =====
+    // ===== PROFILE =====
     async function loadProfile() {
         try {
             const res=await af('/api/auth/me'); const d=await res.json();
             if(!res.ok) throw new Error(d.message);
             const pd=document.getElementById('profileData');
             pd.style.display='grid';
-            document.getElementById('p-name').textContent    = d.fullName||'—';
-            document.getElementById('p-email').textContent   = d.email||'—';
-            document.getElementById('p-phone').textContent   = d.phone||'—';
-            document.getElementById('p-role').innerHTML      = `<span class="badge b-acid">${d.role||'—'}</span>`;
-            document.getElementById('p-active').innerHTML    = d.active||d.isActive
+            document.getElementById('p-name').textContent = d.fullName||'—';
+            document.getElementById('p-email').textContent = d.email||'—';
+            document.getElementById('p-phone').textContent = d.phone||'—';
+            document.getElementById('p-role').innerHTML = `<span class="badge b-acid">${d.role||'—'}</span>`;
+            document.getElementById('p-active').innerHTML = d.active||d.isActive
                 ? '<span class="badge b-acid">Aktívny</span>'
                 : '<span class="badge b-red">Neaktívny</span>';
             document.getElementById('p-created').textContent = d.createdAt
                 ? new Date(d.createdAt).toLocaleDateString('sk-SK') : '—';
-            // Predvyplň formulár
-            document.getElementById('e-name').value   = d.fullName||'';
-            document.getElementById('e-phone').value  = d.phone||'';
+            document.getElementById('e-name').value = d.fullName||'';
+            document.getElementById('e-phone').value = d.phone||'';
             document.getElementById('e-avatar').value = d.avatarUrl||'';
         } catch(e) { showMsg('profMsg',e.message,'err'); }
     }
 
     async function saveProfile() {
-        const fullName  = document.getElementById('e-name').value.trim();
-        const phone     = document.getElementById('e-phone').value.trim();
+        const fullName = document.getElementById('e-name').value.trim();
+        const phone = document.getElementById('e-phone').value.trim();
         const avatarUrl = document.getElementById('e-avatar').value.trim();
         if (!fullName) return showMsg('profMsg','Meno je povinné','err');
         const uid = user?.id || user?.userId;
@@ -862,12 +1214,12 @@
     }
 
     async function changePassword() {
-        const cur  = document.getElementById('e-cur-pass').value;
-        const np   = document.getElementById('e-new-pass').value;
-        const np2  = document.getElementById('e-new-pass2').value;
-        if (!cur)          return showMsg('passMsg','Zadaj aktuálne heslo','err');
+        const cur = document.getElementById('e-cur-pass').value;
+        const np = document.getElementById('e-new-pass').value;
+        const np2 = document.getElementById('e-new-pass2').value;
+        if (!cur) return showMsg('passMsg','Zadaj aktuálne heslo','err');
         if (np.length < 6) return showMsg('passMsg','Nové heslo musí mať aspoň 6 znakov','err');
-        if (np !== np2)    return showMsg('passMsg','Heslá sa nezhodujú','err');
+        if (np !== np2) return showMsg('passMsg','Heslá sa nezhodujú','err');
         const uid = user?.id || user?.userId;
         if (!uid) return showMsg('passMsg','Chyba: ID nenájdené','err');
         try {
@@ -908,7 +1260,6 @@
         try {
             await af('/api/notifications/' + id + '/read', { method: 'PATCH' });
             el.classList.remove('unread', 'warn', 'danger');
-            // Aktualizuj badge
             const badge = document.getElementById('notifBadge');
             const current = parseInt(badge.textContent) || 0;
             const newCount = Math.max(0, current - 1);
@@ -928,7 +1279,6 @@
             const notifications = data.notifications || [];
             const unread = data.unreadCount || 0;
 
-            // Aktualizuj badge
             const badge = document.getElementById('notifBadge');
             badge.textContent = unread;
             badge.style.display = unread > 0 ? 'inline-block' : 'none';
@@ -938,19 +1288,18 @@
                 return;
             }
 
-            // Ikony a farby podľa typu
             const typeConfig = {
-                membership_expiry:   { icon: 'fas fa-exclamation-triangle', cls: 'o' },
-                membership_assigned: { icon: 'fas fa-id-card',              cls: 'g' },
-                class_booked:        { icon: 'fas fa-calendar-check',       cls: 'c' },
-                class_cancelled:     { icon: 'fas fa-calendar-times',       cls: 'r' },
-                admin_message:       { icon: 'fas fa-envelope',             cls: 'c' },
+                membership_expiry: { icon: 'fas fa-exclamation-triangle', cls: 'o' },
+                membership_assigned: { icon: 'fas fa-id-card', cls: 'g' },
+                class_booked: { icon: 'fas fa-calendar-check', cls: 'c' },
+                class_cancelled: { icon: 'fas fa-calendar-times', cls: 'r' },
+                admin_message: { icon: 'fas fa-envelope', cls: 'c' },
             };
 
             const severityClass = {
-                info:    '',
+                info: '',
                 warning: 'warn',
-                danger:  'danger'
+                danger: 'danger'
             };
 
             el.innerHTML = notifications.map(n => {
@@ -959,19 +1308,36 @@
                 const unreadCls = !n.isRead ? 'unread' : '';
                 const time = timeAgo(n.createdAt);
                 return `<div class="ni ${unreadCls} ${sevCls}" onclick="markRead('${n.id}', this)" style="cursor:pointer">
-                <div class="ni-icon ${cfg.cls}"><i class="${cfg.icon}"></i></div>
-                <div style="flex:1">
-                    <div class="ni-title">${n.title}</div>
-                    <div class="ni-desc">${n.message}</div>
-                </div>
-                <div class="ni-time">${time}</div>
-            </div>`;
+            <div class="ni-icon ${cfg.cls}"><i class="${cfg.icon}"></i></div>
+            <div style="flex:1">
+                <div class="ni-title">${n.title}</div>
+                <div class="ni-desc">${n.message}</div>
+            </div>
+            <div class="ni-time">${time}</div>
+        </div>`;
             }).join('');
 
         } catch(e) {
-            // Fallback na statické dáta ak API nefunguje
             el.innerHTML = `<div class="empty"><i class="fas fa-exclamation-circle"></i><p>${e.message}</p></div>`;
         }
+    }
+
+    let isMobileView = window.innerWidth <= 768;
+
+    function checkMobileView() {
+        isMobileView = window.innerWidth <= 768;
+        if (!isMobileView) {
+            document.querySelector('.chat-sidebar')?.classList.remove('hidden');
+        }
+    }
+    function showChatWithTrainer() {
+        if (isMobileView) {
+            document.querySelector('.chat-sidebar')?.classList.add('hidden');
+        }
+    }
+
+    function hideTrainerList() {
+        document.querySelector('.chat-sidebar')?.classList.remove('hidden');
     }
 
     // ===== MEMBERSHIP =====
@@ -985,32 +1351,33 @@
             const daysLeft=Math.max(0,Math.ceil((new Date(d.endDate)-new Date())/864e5));
             const prog=Math.round((1-daysLeft/daysTotal)*100);
             document.getElementById('memCard').innerHTML=`
-      <div class="mc">
-        <div class="mc-type">${d.membershipTypeName||'Členstvo'}</div>
-        <div class="mc-status"><div class="mc-dot"></div>${d.status||'active'}</div>
-        <div class="mc-row">
-          <div><div class="mc-days">${daysLeft}</div><div class="mc-days-lbl">dní ostáva</div></div>
-          <div class="mc-meta">
-            <div class="mc-f"><label>Začiatok</label><p>${d.startDate||'—'}</p></div>
-            <div class="mc-f"><label>Koniec</label><p>${d.endDate||'—'}</p></div>
-            <div class="mc-f"><label>Cena</label><p>${d.priceEuros||'—'} €</p></div>
-          </div>
-        </div>
-        <div class="prog"><div class="prog-fill" style="width:${prog}%"></div></div>
-        <div style="display:flex;justify-content:space-between;margin-top:0.35rem">
-          <span style="font-size:0.67rem;color:var(--muted)">${d.startDate}</span>
-          <span style="font-size:0.67rem;color:var(--muted)">${d.endDate}</span>
-        </div>
-        <div style="margin-top:1.1rem">
-          <button class="btn btn-acid btn-sm" onclick="go('pricing')"><i class="fas fa-sync-alt"></i> Obnoviť / Upgradovať</button>
-        </div>
-      </div>`;
+  <div class="mc">
+    <div class="mc-type">${d.membershipTypeName||'Členstvo'}</div>
+    <div class="mc-status"><div class="mc-dot"></div>${d.status||'active'}</div>
+    <div class="mc-row">
+      <div><div class="mc-days">${daysLeft}</div><div class="mc-days-lbl">dní ostáva</div></div>
+      <div class="mc-meta">
+        <div class="mc-f"><label>Začiatok</label><p>${d.startDate||'—'}</p></div>
+        <div class="mc-f"><label>Koniec</label><p>${d.endDate||'—'}</p></div>
+        <div class="mc-f"><label>Cena</label><p>${d.priceEuros||'—'} €</p></div>
+      </div>
+    </div>
+    <div class="prog"><div class="prog-fill" style="width:${prog}%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:0.35rem">
+      <span style="font-size:0.67rem;color:var(--muted)">${d.startDate}</span>
+      <span style="font-size:0.67rem;color:var(--muted)">${d.endDate}</span>
+    </div>
+    <div style="margin-top:1.1rem">
+      <button class="btn btn-acid btn-sm" onclick="go('pricing')"><i class="fas fa-sync-alt"></i> Obnoviť / Upgradovať</button>
+    </div>
+  </div>`;
         } catch {
             document.getElementById('memCard').innerHTML=`
-      <div class="empty"><i class="fas fa-id-card" style="color:var(--red)"></i><p>Nemáš aktívne členstvo</p>
-      <button class="btn btn-acid" style="margin-top:1rem" onclick="go('pricing')"><i class="fas fa-plus"></i> Kúpiť členstvo</button></div>`;
+  <div class="empty"><i class="fas fa-id-card" style="color:var(--red)"></i><p>Nemáš aktívne členstvo</p>
+  <button class="btn btn-acid" style="margin-top:1rem" onclick="go('pricing')"><i class="fas fa-plus"></i> Kúpiť členstvo</button></div>`;
         }
     }
+
     async function loadMemHistory() {
         document.getElementById('memHistory').innerHTML='<div class="empty"><span class="spin"></span></div>';
         try {
@@ -1023,16 +1390,16 @@
             });
             document.getElementById('memHistory').innerHTML=html+'</tbody></table>';
         } catch {
-            // Fiktívna história
             document.getElementById('memHistory').innerHTML=`
-      <div style="margin-bottom:0.7rem;font-size:0.73rem;color:var(--muted);padding:0.45rem 0.7rem;background:rgba(255,255,255,0.03);border-radius:3px">Ukážkové dáta</div>
-      <table class="dt"><thead><tr><th>Typ</th><th>Od</th><th>Do</th><th>Cena</th><th>Status</th></tr></thead><tbody>
-        <tr><td>Premium</td><td>01.02.2026</td><td>28.02.2026</td><td>79 €</td><td><span class="badge b-acid">active</span></td></tr>
-        <tr><td>Štandard</td><td>01.01.2026</td><td>31.01.2026</td><td>49 €</td><td><span class="badge b-grey">expired</span></td></tr>
-        <tr><td>Štandard</td><td>01.12.2025</td><td>31.12.2025</td><td>49 €</td><td><span class="badge b-grey">expired</span></td></tr>
-      </tbody></table>`;
+  <div style="margin-bottom:0.7rem;font-size:0.73rem;color:var(--muted);padding:0.45rem 0.7rem;background:rgba(255,255,255,0.03);border-radius:3px">Ukážkové dáta</div>
+  <table class="dt"><thead><tr><th>Typ</th><th>Od</th><th>Do</th><th>Cena</th><th>Status</th></tr></thead><tbody>
+    <tr><td>Premium</td><td>01.02.2026</td><td>28.02.2026</td><td>79 €</td><td><span class="badge b-acid">active</span></td></tr>
+    <tr><td>Štandard</td><td>01.01.2026</td><td>31.01.2026</td><td>49 €</td><td><span class="badge b-grey">expired</span></td></tr>
+    <tr><td>Štandard</td><td>01.12.2025</td><td>31.12.2025</td><td>49 €</td><td><span class="badge b-grey">expired</span></td></tr>
+  </tbody></table>`;
         }
     }
+
     async function buyMem(typeId) {
         try {
             const res=await af('/api/memberships/purchase',{method:'POST',body:JSON.stringify({membershipTypeId:typeId})});
@@ -1043,6 +1410,7 @@
             setTimeout(()=>{ go('membership'); loadMembership(); loadMemHistory(); },1400);
         } catch(e){showMsg('buyMsg',e.message,'err');}
     }
+
     async function loadPricing() {
         try {
             const res=await af('/api/memberships/types'); const data=await res.json();
@@ -1055,12 +1423,12 @@
                 const price=t.priceCents?Math.round(t.priceCents/100):(t.price||'?');
                 const per=t.durationDays>=300?'rok':'mes';
                 html+=`<div class="pc${feat?' feat':''}">
-        ${feat?'<div class="feat-tag">Najpopulárnejší</div>':''}
-        <div class="pc-name">${t.name}</div>
-        <div class="pc-price">${price}€<sub>/${per}</sub></div>
-        <p style="color:var(--muted);font-size:0.75rem;margin-bottom:0.6rem">${t.description||''}</p>
-        <button class="btn ${colors[i]||'btn-ghost'} btn-block btn-sm" onclick="buyMem(${t.id})">Kúpiť</button>
-      </div>`;
+    ${feat?'<div class="feat-tag">Najpopulárnejší</div>':''}
+    <div class="pc-name">${t.name}</div>
+    <div class="pc-price">${price}€<sub>/${per}</sub></div>
+    <p style="color:var(--muted);font-size:0.75rem;margin-bottom:0.6rem">${t.description||''}</p>
+    <button class="btn ${colors[i]||'btn-ghost'} btn-block btn-sm" onclick="buyMem(${t.id})">Kúpiť</button>
+  </div>`;
             });
             document.getElementById('pricingDyn').innerHTML=html+'</div>';
         } catch{/* fallback */}
@@ -1083,11 +1451,11 @@
                 const dur = c.durationMinutes ? c.durationMinutes+' min' : '—';
                 const isPast = c.startTime && new Date(c.startTime) < new Date();
                 html+=`<tr>
-        <td><b>${c.name||'—'}</b></td>
-        <td style="color:var(--muted)">${c.instructor||'—'}</td>
-        <td>${dt}</td>
-        <td style="color:var(--muted)">${dur}</td>
-        <td>${isPast
+    <td><b>${c.name||'—'}</b></td>
+    <td style="color:var(--muted)">${c.instructor||'—'}</td>
+    <td>${dt}</td>
+    <td style="color:var(--muted)">${dur}</td>
+    <td>${isPast
                     ? '<span class="badge b-grey">Prebehnutá</span>'
                     : '<button class="btn btn-red btn-sm" onclick="cancelById('+c.id+')"><i class="fas fa-times"></i> Zrušiť</button>'
                 }</td></tr>`;
@@ -1095,15 +1463,17 @@
             document.getElementById('myClTable').innerHTML=html+'</tbody></table>';
         } catch(e){document.getElementById('myClTable').innerHTML=`<div class="empty"><i class="fas fa-exclamation-circle"></i><p>❌ ${e.message}</p></div>`;}
     }
+
     async function cancelById(id) {
         if(!confirm('Naozaj zrušiť rezerváciu?')) return;
         try {
             const res=await af('/api/classes/'+id+'/cancel',{method:'DELETE'});
-            await res.text(); // konzumuj body, vyhne sa JSON parse chybe
+            await res.text();
             toast(res.ok?'Rezervácia zrušená':'Chyba',res.ok?'ok':'err');
             if(res.ok) loadMyClasses();
         } catch(e){toast(e.message,'err');}
     }
+
     async function loadAllCl() {
         document.getElementById('allClTable').innerHTML='<div class="empty" style="padding:2rem"><span class="spin"></span></div>';
         try {
@@ -1114,7 +1484,6 @@
                 document.getElementById('allClTable').innerHTML='<div class="empty" style="padding:2rem"><i class="fas fa-dumbbell"></i><p>Žiadne dostupné lekcie</p></div>';
                 return;
             }
-            // Uložiť do cache pre detail
             window._classesCache = data;
 
             let html = '';
@@ -1156,7 +1525,6 @@
         const c = (window._classesCache || []).find(x => x.id == id);
         if (!c) return;
 
-        // Zvýrazni vybraný riadok
         document.querySelectorAll('.cl-row').forEach(el => el.classList.remove('cl-row-selected'));
         const rows = document.querySelectorAll('.cl-row');
         rows.forEach(el => { if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('(' + id + ')')) el.classList.add('cl-row-selected'); });
@@ -1165,7 +1533,7 @@
         const full = c.isFull || free <= 0;
         const reserved = c.isReserved;
         const dtStart = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK', {weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '—';
-        const dtEnd   = c.endTime   ? new Date(c.endTime).toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'}) : '';
+        const dtEnd = c.endTime ? new Date(c.endTime).toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'}) : '';
         const dur = c.durationMinutes ? c.durationMinutes + ' min' : '—';
 
         const pct = c.capacity ? Math.round((c.booked / c.capacity) * 100) : 0;
@@ -1216,27 +1584,6 @@
         }
     }
 
-    async function cancelById(id) {
-        if (!confirm('Naozaj zrušiť rezerváciu?')) return;
-        try {
-            const res = await af('/api/classes/' + id + '/cancel', {method: 'DELETE'});
-            const text = await res.text();
-            let d = {}; try { d = JSON.parse(text); } catch { d = {message: text || 'OK'}; }
-            if (!res.ok) throw new Error(d.message || text || 'Chyba servera (' + res.status + ')');
-            toast('Rezervácia zrušená', 'ok');
-            await loadAllCl();
-            selectClass(id);
-            loadMyClasses();
-        } catch(e) {
-            const out = document.getElementById('bookOut');
-            if (out) { out.textContent = '❌ ' + e.message; out.className = 'fm err'; }
-        }
-    }
-
-    // Starý cancelById alias — zachovaný pre loadMyClasses tlačidlá
-    async function cancelByIdFromTable(id) { return cancelById(id); }
-
-
     async function loadTrainers() {
         try {
             const res=await af('/api/trainer/list'); const data=await res.json();
@@ -1245,7 +1592,7 @@
             document.getElementById('trGrid').innerHTML=data.map((t,i)=>{
                 const ini=(t.fullName||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
                 return `<div class="tr-card"><div class="tr-av" style="background:linear-gradient(135deg,${grads[i%grads.length]})">${ini}</div>
-        <div class="tr-name">${t.fullName||'—'}</div><div class="tr-spec">${t.specialization||'Tréner'}</div></div>`;
+    <div class="tr-name">${t.fullName||'—'}</div><div class="tr-spec">${t.specialization||'Tréner'}</div></div>`;
             }).join('');
         } catch{/* fallback na statické */}
     }
@@ -1278,13 +1625,12 @@
             data.forEach(c=>{
                 const dt=new Date(c.checkedInAt||c.createdAt);
                 html+=`<div class="ci"><div class="ci-date">${dt.getDate()}.${dt.getMonth()+1}</div>
-        <div class="ci-info"><div class="ci-time">${dt.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}</div>
-        <div class="ci-method"><span class="badge b-grey">${c.method||'qr'}</span></div></div>
-        <div class="ci-dur">${c.durationMinutes?c.durationMinutes+' min':'—'}</div></div>`;
+    <div class="ci-info"><div class="ci-time">${dt.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}</div>
+    <div class="ci-method"><span class="badge b-grey">${c.method||'qr'}</span></div></div>
+    <div class="ci-dur">${c.durationMinutes?c.durationMinutes+' min':'—'}</div></div>`;
             });
             document.getElementById('checkinList').innerHTML=html;
         } catch {
-            // Fiktívne dáta
             const fake=[{d:'7.3',t:'07:12',m:'qr',dur:'95 min'},{d:'5.3',t:'18:45',m:'qr',dur:'60 min'},{d:'3.3',t:'07:08',m:'qr',dur:'110 min'},{d:'1.3',t:'10:30',m:'qr',dur:'75 min'},{d:'27.2',t:'17:55',m:'nfc',dur:'85 min'},{d:'25.2',t:'07:15',m:'qr',dur:'90 min'},{d:'22.2',t:'19:00',m:'qr',dur:'60 min'}];
             const note='<div style="font-size:0.72rem;color:var(--muted);padding:0.4rem 0.68rem;background:rgba(255,255,255,0.03);border-radius:3px;margin-bottom:0.6rem">Ukážkové dáta — CheckIn endpoint bude dostupný po implementácii CheckIn entity</div>';
             document.getElementById('checkinList').innerHTML=note+fake.map(e=>`<div class="ci"><div class="ci-date">${e.d}</div><div class="ci-info"><div class="ci-time">${e.t}</div><div class="ci-method"><span class="badge b-grey">${e.m}</span></div></div><div class="ci-dur">${e.dur}</div></div>`).join('');
@@ -1297,11 +1643,12 @@
         const vals=[8,5,9,4,7,3,1];
         const max=Math.max(...vals);
         document.getElementById('barChart').innerHTML=vals.map((v,i)=>`
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-      <div style="width:100%;height:${Math.round(v/max*68)}px;background:${v===max?'var(--acid)':'rgba(200,255,0,0.28)'};border-radius:2px 2px 0 0"></div>
-    </div>`).join('');
+<div style="flex:1;display:flex;flex-direction:column;align-items:center">
+  <div style="width:100%;height:${Math.round(v/max*68)}px;background:${v===max?'var(--acid)':'rgba(200,255,0,0.28)'};border-radius:2px 2px 0 0"></div>
+</div>`).join('');
         document.getElementById('barLabels').innerHTML=days.map(d=>`<div style="flex:1;text-align:center;font-size:0.63rem;color:var(--muted)">${d}</div>`).join('');
     }
+
     async function loadStats() {
         setOut('statsOut','Načítavam...');
         try {
@@ -1312,7 +1659,6 @@
     }
 
     // ===== UTILS =====
-
     function toggleSidebar(){
         const s=document.getElementById('sidebar');
         const h=document.getElementById('hamburger');
@@ -1337,19 +1683,17 @@
         return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:${Math.round(size*0.38)}px;font-weight:900;color:#fff;flex-shrink:0">${ini}</div>`;
     }
 
-
     function timeAgo(dateStr) {
         const diff = Date.now() - new Date(dateStr).getTime();
-        const mins  = Math.floor(diff / 60000);
+        const mins = Math.floor(diff / 60000);
         const hours = Math.floor(diff / 3600000);
-        const days  = Math.floor(diff / 86400000);
-        if (mins  < 1)  return 'Práve teraz';
-        if (mins  < 60) return mins + ' min';
+        const days = Math.floor(diff / 86400000);
+        if (mins < 1) return 'Práve teraz';
+        if (mins < 60) return mins + ' min';
         if (hours < 24) return hours + ' hod';
-        if (days  < 7)  return days + ' dní';
+        if (days < 7) return days + ' dní';
         return new Date(dateStr).toLocaleDateString('sk-SK');
     }
-
 
     function showMsg(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='fm '+type;}
     function toast(msg,type='ok'){
@@ -1371,30 +1715,27 @@
             const response = await af('/api/users/my-trainer');
             const data = await response.json();
 
-            // Skontrolujeme, či prišla chybová správa
             if (data.message && data.message.includes('Nemáš priradeného')) {
                 trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--muted); font-size:0.8rem;">
-                Nemáš priradeného trénera.
-            </div>`;
+            Nemáš priradeného trénera.
+        </div>`;
                 return;
             }
 
-            // Ak máme trénera, data by mali byť objekt s údajmi
             if (data.id) {
                 currentTrainerId = data.id;
 
                 trainerListEl.innerHTML = `
-                <div class="cl-row cl-row-selected" onclick="selectTrainer('${data.id}')">
-                    <div class="cl-row-main">
-                        <div class="cl-row-name">${data.fullName || 'Tréner'}</div>
-                        <div class="cl-row-meta">
-                            <span><i class="fas fa-dumbbell"></i> ${data.specialization || 'Osobný tréner'}</span>
-                        </div>
+            <div class="cl-row cl-row-selected" onclick="selectTrainer('${data.id}')">
+                <div class="cl-row-main">
+                    <div class="cl-row-name">${data.fullName || 'Tréner'}</div>
+                    <div class="cl-row-meta">
+                        <span><i class="fas fa-dumbbell"></i> ${data.specialization || 'Osobný tréner'}</span>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
 
-                // Po načítaní trénera hneď načítame aj správy
                 loadMessagesMember();
             } else {
                 trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--muted);">Nepodarilo sa načítať trénera</div>`;
@@ -1405,15 +1746,11 @@
         }
     }
 
-
-
-
     async function loadTrainersForChat() {
         const listEl = document.getElementById('chatTrainers');
         listEl.innerHTML = '<div style="padding:1rem;"><span class="spin"></span></div>';
 
         try {
-            // Najprv získame profil člena
             const meRes = await af('/api/auth/me');
             const me = await meRes.json();
 
@@ -1422,11 +1759,9 @@
                 return;
             }
 
-            // Potom získame detail trénera
             const trainerRes = await af('/api/users/my-trainer');
             const trainer = await trainerRes.json();
 
-            // Skontrolujeme, či neprišla chybová správa
             if (trainer.message) {
                 listEl.innerHTML = `<div style="padding:1rem; color:var(--muted);">${trainer.message}</div>`;
                 return;
@@ -1434,15 +1769,11 @@
 
             if (trainer && trainer.id) {
                 listEl.innerHTML = `
-                <div class="cl-row cl-row-selected" onclick="selectTrainer('${trainer.id}')">
-                    <div class="cl-row-main">
-                        <div class="cl-row-name">${trainer.fullName}</div>
-                        <div class="cl-row-meta">
-                            <span><i class="fas fa-dumbbell"></i> ${trainer.specialization || 'Osobný tréner'}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
+            <div class="trainer-item active" data-trainer-id="${trainer.id}" onclick="selectTrainer('${trainer.id}')">
+                <div class="trainer-name">${trainer.fullName || 'Tréner'}</div>
+                <div class="trainer-specialization">${trainer.specialization || 'Osobný tréner'}</div>
+            </div>
+        `;
                 selectTrainer(trainer.id);
             }
         } catch (e) {
@@ -1452,60 +1783,133 @@
 
     function selectTrainer(id) {
         currentTrainerId = id;
-        // Vizuálne označenie v zozname
-        document.querySelectorAll('.cl-row').forEach(r => r.classList.remove('cl-row-selected'));
-        // Načítanie správ
+
+        document.querySelectorAll('.trainer-item').forEach(r => r.classList.remove('active'));
+        const selectedItem = document.querySelector(`[data-trainer-id="${id}"]`);
+        if (selectedItem) selectedItem.classList.add('active');
+
+        if (isMobileView) {
+            document.querySelector('.chat-sidebar')?.classList.add('hidden');
+        }
+
         loadMessagesMember();
     }
 
+    function addMessageToChat(message) {
+        const chatBox = document.getElementById('chatMessages');
+        if (!chatBox) return;
 
+        const isMe = message.senderId === user.id;
+        // Opravené: používame senderId na určenie odosielateľa
+        const senderName = isMe ? 'Ja' : 'Tréner';  // Žiadna diakritika v kóde, len v zobrazení
+
+        // Skontrolujeme, či správa už neexistuje (predchádzanie duplicitám)
+        const messageId = `msg-${message.timestamp}-${message.senderId}`;
+        if (document.getElementById(messageId)) return;
+
+        const time = message.timestamp ? formatMessageTime(message.timestamp) : '';
+
+        const messageHtml = `
+        <div id="${messageId}" class="chat-bubble ${isMe ? 'chat-bubble-right' : 'chat-bubble-left'} ${!isMe && !message.read ? 'chat-unread' : ''}">
+            <div class="chat-header">
+                <span>${senderName}</span>
+                <span class="chat-time">${time}</span>
+            </div>
+            <div class="chat-content">${escapeHtml(message.content)}</div>
+        </div>
+    `;
+
+        chatBox.innerHTML += messageHtml;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    window.addEventListener('resize', checkMobileView);
 
     function openChatWithTrainer(trainerId, trainerName) {
         currentTrainerId = trainerId;
         document.getElementById('chatMessages').innerHTML = `<div style="text-align:center; padding:2rem; color:var(--muted);">
-        <b>Chat s trénerom ${trainerName}</b><br><br>Načítavam správy...
-    </div>`;
+    <b>Chat s trénerom ${trainerName}</b><br><br>Načítavam správy...
+</div>`;
         loadMessagesMember();
     }
 
-    // Načítanie správ (obojstranné)
     async function loadMessagesMember() {
         if (!currentTrainerId) return;
 
+        const chatBox = document.getElementById('chatMessages');
+        if (!chatBox) return;
+
+        chatBox.innerHTML = '<div class="chat-empty"><span class="spin"></span> Načítavam správy...</div>';
+
         try {
             const res = await af(`/api/messages/chat?user1=${user.id}&user2=${currentTrainerId}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
             const messages = await res.json();
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            if (!messages || messages.length === 0) {
+                chatBox.innerHTML = '<div class="chat-empty">Zatiaľ žiadne správy. Napíš prvú!</div>';
+                return;
+            }
 
             let html = '';
             messages.forEach(m => {
                 const isMe = m.senderId === user.id;
+                const senderName = isMe ? 'Ja' : 'Tréner';
+
+                // SPRÁVNE MAPOVANIE - API vracia 'text' a 'createdAt'
+                const messageText = m.text || m.content || '';
+                const messageTime = m.createdAt || m.timestamp;
+                const time = messageTime ? new Date(messageTime).toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'}) : '';
+
                 html += `
-                <div class="chat-msg ${isMe ? 'chat-me' : 'chat-other'}">
-                    <div style="font-size:11px; opacity:0.6; margin-bottom:4px;">
-                        ${isMe ? 'Ja' : 'Tréner'}
+                <div class="chat-bubble ${isMe ? 'chat-bubble-right' : 'chat-bubble-left'}">
+                    <div class="chat-header">
+                        <span>${senderName}</span>
+                        <span class="chat-time">${time}</span>
                     </div>
-                    ${m.text}
-                </div>`;
+                    <div class="chat-content">${escapeHtml(messageText)}</div>
+                </div>
+            `;
             });
 
-            const box = document.getElementById('chatMessages');
-            box.innerHTML = html || '<div style="text-align:center; padding:2rem; color:var(--muted);">Zatiaľ žiadne správy</div>';
-            box.scrollTop = box.scrollHeight;
+            chatBox.innerHTML = html;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
         } catch (e) {
-            document.getElementById('chatMessages').innerHTML = `<div style="color:var(--red); padding:2rem;">Chyba: ${e.message}</div>`;
+            console.error('Chyba pri načítaní správ:', e);
+            chatBox.innerHTML = `<div class="chat-empty">Chyba: ${e.message}</div>`;
         }
     }
 
-    // Odoslanie správy od člena
+    function formatMessageTime(timestamp) {
+        if (!timestamp) return '';
+
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            return 'dnes ' + date.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+        } else if (diffDays === 1) {
+            return 'včera ' + date.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+        } else {
+            return date.toLocaleDateString('sk-SK') + ' ' + date.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+        }
+    }
+
     async function sendMessageMember() {
         const input = document.getElementById('chatInput');
         const text = input.value.trim();
+
+        console.log('📤 Text na odoslanie:', text);
+
         if (!text || !currentTrainerId) return;
 
         try {
-            await af('/api/messages', {
+            const response = await af('/api/messages', {
                 method: 'POST',
                 body: JSON.stringify({
                     senderId: user.id,
@@ -1514,23 +1918,41 @@
                 })
             });
 
+            const responseText = await response.text();
+            console.log('📡 Odpoveď pri odosielaní:', {
+                status: response.status,
+                body: responseText
+            });
+
+            if (!response.ok) {
+                throw new Error(responseText || 'Chyba pri odosielaní');
+            }
+
             input.value = '';
-            loadMessagesMember(); // refresh chatu
+
+            // Načítaj správy znova
+            await loadMessagesMember();
+
         } catch (e) {
+            console.error('❌ Chyba pri odosielaní:', e);
             toast('Nepodarilo sa odoslať: ' + e.message, 'err');
         }
     }
 
-    // Automatický refresh každých 5 sekúnd (ak je chat otvorený)
-    setInterval(() => {
-        if (document.getElementById('pg-messages').classList.contains('active') && currentTrainerId) {
-            loadMessagesMember();
-        }
-    }, 5000);
 
-    // Pri otvorení stránky "Správy" načítať trénerov
-    if (go.toString().includes('messages')) { // alebo lepšie cez event
+
+    if (go.toString().includes('messages')) {
         loadTrainersForChat();
+    }
+
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 </script>
