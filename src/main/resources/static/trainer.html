@@ -437,6 +437,7 @@
             </div>
         </div>
 
+
         <!-- ═══ MESSAGES ═══ -->
         <div class="page-section" id="page-messages">
 
@@ -488,6 +489,8 @@
                         <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="tp-phone" placeholder="+421..."></div>
                         <div class="fg"><label class="fl">Špecializácia</label><input class="fi" type="text" id="tp-spec" placeholder="napr. CrossFit, Strength Training..."></div>
                         <div class="fg"><label class="fl">URL avatara</label><input class="fi" type="url" id="tp-avatar" placeholder="https://..."></div>
+                        <div class="fg"><label class="fl">Bio / O mne</label><textarea class="fi" id="tp-bio" rows="4" placeholder="Napíš niečo o sebe, svojich skúsenostiach, certifikátoch..."></textarea>
+                        </div>
                         <button class="btn btn-blue" onclick="saveProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                         <div class="fm" id="profileMsg"></div>
                     </div>
@@ -1000,11 +1003,13 @@
         const phone=document.getElementById('tp-phone').value.trim();
         const specialization=document.getElementById('tp-spec').value.trim();
         const avatarUrl=document.getElementById('tp-avatar').value.trim();
+        const bio = document.getElementById('tp-bio').value.trim();
+
         if (!fullName) return showMsg('profileMsg','Meno je povinné','err');
         const uid=user?.id||user?.userId;
         if (!uid) return showMsg('profileMsg','Chyba: ID nenájdené','err');
         try {
-            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,specialization,avatarUrl})});
+            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,specialization,avatarUrl,bio})});
             let d; try{d=await res.json()}catch{d={}}
             if (!res.ok) throw new Error(d.message||'Chyba servera');
             showMsg('profileMsg','Profil aktualizovaný!','ok');

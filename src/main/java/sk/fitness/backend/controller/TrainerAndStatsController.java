@@ -42,6 +42,7 @@ public class TrainerAndStatsController {
                     m.put("fullName",       t.getFullName() != null ? t.getFullName() : "—");
                     m.put("email",          t.getEmail());
                     m.put("specialization", t.getSpecialization() != null ? t.getSpecialization() : "Tréner");
+                    m.put("avatarUrl",      t.getAvatarUrl());
                     return m;
                 })
                 .toList();

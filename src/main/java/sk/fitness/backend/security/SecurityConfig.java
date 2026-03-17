@@ -59,6 +59,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/products").permitAll()
                         .requestMatchers("/api/products/**").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/trainer/list").authenticated()
+
 
                         // Statické súbory a frontend stránky
                         .requestMatchers(
