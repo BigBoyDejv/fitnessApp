@@ -82,6 +82,9 @@ public class UserController {
         if (body.containsKey("specialization")) {
             user.setSpecialization(body.get("specialization") != null ? body.get("specialization").trim() : null);
         }
+        if (body.containsKey("bio")) {
+            user.setBio(body.get("bio") != null ? body.get("bio").trim() : null);
+        }
         // Len admin môže meniť rolu
         if (isAdmin && body.containsKey("role")) {
             String newRole = body.get("role");
@@ -173,6 +176,7 @@ public class UserController {
         m.put("active",         Boolean.TRUE.equals(u.getIsActive()));
         m.put("createdAt",      u.getCreatedAt() != null ? u.getCreatedAt().toString() : null);
         m.put("updatedAt",      u.getUpdatedAt() != null ? u.getUpdatedAt().toString() : null);
+        m.put("bio", u.getBio());
         return m;
     }
 }

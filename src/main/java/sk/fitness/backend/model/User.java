@@ -51,6 +51,8 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
 
     @PrePersist
     protected void onCreate() {

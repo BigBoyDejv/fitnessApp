@@ -489,8 +489,7 @@
                         <div class="fg"><label class="fl">Telefón</label><input class="fi" type="tel" id="tp-phone" placeholder="+421..."></div>
                         <div class="fg"><label class="fl">Špecializácia</label><input class="fi" type="text" id="tp-spec" placeholder="napr. CrossFit, Strength Training..."></div>
                         <div class="fg"><label class="fl">URL avatara</label><input class="fi" type="url" id="tp-avatar" placeholder="https://..."></div>
-                        <div class="fg"><label class="fl">Bio / O mne</label><textarea class="fi" id="tp-bio" rows="4" placeholder="Napíš niečo o sebe, svojich skúsenostiach, certifikátoch..."></textarea>
-                        </div>
+                        <div class="fg"><label class="fl">Bio / O mne</label><textarea class="fi" id="tp-bio" rows="3" placeholder="Napíš niečo o sebe, svojej filozofii trénovania..."></textarea></div>                        </div>
                         <button class="btn btn-blue" onclick="saveProfile()"><i class="fas fa-save"></i> Uložiť zmeny</button>
                         <div class="fm" id="profileMsg"></div>
                     </div>
@@ -995,6 +994,7 @@
             document.getElementById('tp-phone').value=d.phone||'';
             document.getElementById('tp-spec').value  = d.specialization||'';
             document.getElementById('tp-avatar').value = d.avatarUrl||'';
+            document.getElementById('tp-bio').value = d.bio||'';
         } catch(e) { toast(e.message,'err'); }
     }
 
@@ -1009,7 +1009,7 @@
         const uid=user?.id||user?.userId;
         if (!uid) return showMsg('profileMsg','Chyba: ID nenájdené','err');
         try {
-            const res=await authFetch('/api/users/'+uid,{method:'PUT',body:JSON.stringify({fullName,phone,specialization,avatarUrl,bio})});
+            const res=await authFetch('/api/users/'+uid,{method:'PUT',body: JSON.stringify({fullName, phone, specialization, avatarUrl, bio: document.getElementById('tp-bio').value.trim()})});
             let d; try{d=await res.json()}catch{d={}}
             if (!res.ok) throw new Error(d.message||'Chyba servera');
             showMsg('profileMsg','Profil aktualizovaný!','ok');

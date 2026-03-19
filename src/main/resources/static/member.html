@@ -4,6 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>FITNESS PRO — Môj Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -41,6 +42,9 @@
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
         .content{padding:1.8rem 2rem;flex:1;}
 
+        /* ── LAYOUT GRIDS ── */
+        .g2{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
+        .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
         .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.6rem;}
         .ph{padding:0.95rem 1.4rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
         .pt{font-size:1rem;font-weight:800;letter-spacing:0.05em;}
@@ -120,46 +124,192 @@
             box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        /* treneri  */
-        .tr-av {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            color: white;
-            font-weight: bold;
-            font-size: 24px;
-        }
-
-        /* Možnosť 2 */
-        .tr-av {
+        /* TRAINER CAROUSEL */
+        .trainer-carousel-wrap {
             position: relative;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
+            border-radius: 8px;
+            height: 420px;
+            background: var(--surface2);
         }
-
-        .tr-av-img {
-            width: 100%;
+        .trainer-carousel-track {
+            display: flex;
             height: 100%;
-            object-fit: cover;
+            transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+        }
+        .trainer-slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .trainer-slide-bg {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
+            background-size: 160px 160px;
+            background-repeat: no-repeat;
+            background-position: center 60px;
+            transition: transform 0.6s ease;
         }
 
-        .tr-av span {
+        .trainer-slide:hover .trainer-slide-bg {
+            transform: scale(1.04);
+        }
+        .trainer-slide-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center 90px, transparent 90px, rgba(0,0,0,0.6) 160px),
+            linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+        }
+
+        .trainer-slide-content {
             position: relative;
             z-index: 2;
-            color: white;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            padding: 1.8rem;
+            width: 100%;
+        }
+        .trainer-slide-initials {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-d);
+            font-size: 6rem;
+            font-weight: 900;
+            opacity: 0.12;
+            letter-spacing: 0.1em;
+        }
+        .trainer-slide-name {
+            font-family: var(--font-d);
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        .trainer-slide-spec {
+            font-size: 0.78rem;
+            color: var(--acid);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .trainer-slide-bio {
+            font-size: 0.83rem;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.65;
+            max-width: 520px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .trainer-slide:hover .trainer-slide-bio,
+        .trainer-slide.expanded .trainer-slide-bio {
+            max-height: 120px;
+        }
+        .trainer-carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s;
+            backdrop-filter: blur(6px);
+        }
+        .trainer-carousel-btn:hover {
+            background: var(--acid);
+            color: #000;
+            border-color: var(--acid);
+        }
+        .trainer-carousel-prev { left: 12px; }
+        .trainer-carousel-next { right: 12px; }
+        .trainer-carousel-dots {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+        .trainer-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .trainer-dot.active {
+            background: var(--acid);
+            width: 20px;
+            border-radius: 3px;
+        }
+
+        /* STATS CHARTS */
+        .stats-chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        .stats-kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+        }
+        .stats-kpi-card {
+            background: var(--surface);
+            padding: 1.1rem 1rem;
+            text-align: center;
+        }
+        .stats-kpi-val {
+            font-family: var(--font-d);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--acid);
+            line-height: 1;
+        }
+        .stats-kpi-lbl {
+            font-size: 0.62rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.25rem;
+        }
+        .chart-panel-inner {
+            position: relative;
+            height: 200px;
+        }
+        .chart-panel-inner canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        @media(max-width:600px) {
+            .stats-chart-grid { grid-template-columns: 1fr; }
+            .stats-kpi-row { grid-template-columns: 1fr 1fr; }
+            .trainer-carousel-wrap { height: 340px; }
+            .trainer-slide-name { font-size: 1.4rem; }
         }
 
 
@@ -454,12 +604,6 @@
             }
         }
 
-
-
-
-        .g2{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
-        .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
-
         .btn{font-family:var(--font-d);font-size:0.86rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.5rem 1.2rem;border:2px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.18s;display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;}
         .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
         .btn-acid:hover{background:transparent;color:var(--acid);}
@@ -577,6 +721,8 @@
         .sb{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
         .sb-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--acid),var(--acid2));}
 
+
+
         /* RULES */
         .rule-sec{margin-bottom:1.4rem;}
         .rule-sec h4{font-size:1.15rem;font-weight:800;color:var(--acid);margin-bottom:0.7rem;display:flex;align-items:center;gap:0.45rem;}
@@ -656,10 +802,244 @@
         .cl-row-meta{display:flex;gap:1rem;font-size:0.75rem;color:var(--muted);flex-wrap:wrap;}
         .cl-row-meta span{display:flex;align-items:center;gap:0.3rem;}
         .cl-row-status{flex-shrink:0;}
+
+        /* WORKOUT DIARY */
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .cal-day:hover { background: rgba(255,255,255,0.06); }
+        .cal-day.has-workout { background: rgba(200,255,0,0.12); color: var(--acid); font-weight: 700; }
+        .cal-day.has-workout::after { content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:var(--acid); }
+        .cal-day.selected { background: var(--acid) !important; color: #000 !important; font-weight: 900; }
+        .cal-day.today { border: 1px solid var(--acid); }
+        .cal-day.other-month { opacity: 0.25; }
+        .cal-header-day { font-family: var(--font-d); font-size: 0.62rem; letter-spacing: 0.1em; color: var(--muted); padding: 0.3rem 0; }
+        .exercise-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 0.9rem; margin-bottom: 0.8rem; }
+        .exercise-block-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.7rem; }
+        .exercise-name-input { flex:1; background:var(--bg); border:1px solid var(--border2); border-radius:3px; color:var(--text); padding:0.45rem 0.7rem; font-size:0.85rem; font-family:var(--font-b); }
+        .exercise-name-input:focus { outline:none; border-color:var(--acid); }
+        .set-row { display:grid; grid-template-columns:28px 1fr 1fr auto auto; gap:0.4rem; align-items:center; margin-bottom:0.4rem; }
+        .set-num { font-family:var(--font-d); font-size:0.8rem; color:var(--muted); text-align:center; }
+        .set-input { background:var(--bg); border:1px solid var(--border2); border-radius:3px; color:var(--text); padding:0.35rem 0.5rem; font-size:0.82rem; text-align:center; font-family:var(--font-b); width:100%; }
+        .set-input:focus { outline:none; border-color:var(--acid); }
+        .set-pr-btn { background:none; border:1px solid var(--border2); border-radius:3px; color:var(--muted); padding:0.3rem 0.5rem; cursor:pointer; font-size:0.75rem; transition:all 0.15s; }
+        .set-pr-btn.active { background:rgba(200,255,0,0.1); border-color:var(--acid); color:var(--acid); }
+        .workout-exercise-view { margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+        .workout-exercise-view:last-child { border-bottom:none; margin-bottom:0; }
+        .feeling-emoji { font-size:1.3rem; }
+
+        @media(max-width:600px) {
+            .set-row { grid-template-columns: 28px 1fr 1fr auto; gap: 0.3rem; }
+            .exercise-block-header { flex-wrap: wrap; }
+            .exercise-name-input { width: 100%; }
+        }
+
+        /* ── EXERCISE AUTOCOMPLETE ── */
+        .exercise-autocomplete {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            z-index: 100;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .exercise-autocomplete-item {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.82rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: background 0.12s;
+        }
+        .exercise-autocomplete-item:hover { background: rgba(200,255,0,0.07); color: var(--acid); }
+        .exercise-autocomplete-item .ex-ac-cat {
+            font-family: var(--font-d);
+            font-size: 0.58rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        .exercise-name-wrap { position: relative; flex: 1; }
+
+        /* ── TRACK TYPE MODAL ── */
+        .track-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 500;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+        .track-modal-overlay.open { display: flex; }
+        .track-modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 420px;
+            margin: 1rem;
+        }
+        .track-modal-title {
+            font-family: var(--font-d);
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            margin-bottom: 1rem;
+            color: var(--acid);
+        }
+        .track-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .track-option:hover { border-color: var(--acid); background: rgba(200,255,0,0.04); }
+        .track-option.selected { border-color: var(--acid); background: rgba(200,255,0,0.08); }
+        .track-option-icon { font-size: 1.3rem; width: 32px; text-align: center; flex-shrink: 0; }
+        .track-option-info { flex: 1; }
+        .track-option-name { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .track-option-desc { font-size: 0.72rem; color: var(--muted); }
+        .track-custom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+
+        @media(max-width:600px) {
+            /* Workout editor */
+            .exercise-block-header {
+                flex-wrap: wrap;
+                gap: 0.4rem;
+            }
+            .exercise-name-wrap {
+                width: 100%;
+                order: -1;
+            }
+            /* Set row — menej stĺpcov */
+            .set-row {
+                grid-template-columns: 22px 1fr 1fr auto auto;
+                gap: 0.25rem;
+            }
+            .set-input {
+                padding: 0.3rem 0.25rem;
+                font-size: 0.78rem;
+            }
+            .set-pr-btn {
+                padding: 0.3rem 0.3rem;
+                font-size: 0.7rem;
+            }
+            /* Kalendár — väčšie dni */
+            .cal-day {
+                font-size: 0.75rem;
+                min-height: 36px;
+            }
+            /* Feeling tlačidlá — zmenšiť */
+            #feelingBtns {
+                flex-wrap: wrap;
+                gap: 0.3rem;
+            }
+            #feelingBtns button {
+                font-size: 0.65rem;
+                padding: 0.28rem 0.55rem;
+            }
+            /* Track modal */
+            .track-modal {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+            .track-option {
+                padding: 0.55rem 0.7rem;
+            }
+            .track-option-icon {
+                font-size: 1.1rem;
+                width: 26px;
+            }
+            .track-option-desc {
+                display: none;
+            }
+            /* Weekly stats — zmenšiť čísla */
+            #weeklyStatsContent .sc-val,
+            #weeklyStatsContent [style*="2.2rem"] {
+                font-size: 1.6rem !important;
+            }
+            /* Chat */
+            .chat-container {
+                height: calc(100vh - 180px);
+                min-height: 320px;
+            }
+        }
+
+        @media(max-width:400px) {
+            /* Veľmi malé displeje */
+            .set-row {
+                grid-template-columns: 18px 1fr 1fr auto;
+                gap: 0.2rem;
+            }
+            /* Skry tlačidlo odstrániť sériu na veľmi malom displeji */
+            .set-row button[title="Odstrániť sériu"] {
+                display: none;
+            }
+            .exercise-block-header .btn-ghost,
+            .exercise-block-header .btn-red {
+                padding: 0.28rem 0.5rem;
+                font-size: 0.65rem;
+            }
+            .cal-header-day {
+                font-size: 0.55rem;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
+<!-- TRACK TYPE MODAL -->
+<div class="track-modal-overlay" id="trackModalOverlay">
+    <div class="track-modal">
+        <div class="track-modal-title" id="trackModalTitle">Čo sledovať?</div>
+        <div id="trackModalOptions"></div>
+        <div class="track-custom-row" id="trackCustomRow" style="display:none">
+            <div>
+                <label class="fl">Popisok stĺpca 1</label>
+                <input class="fi" type="text" id="trackCustomCol1" placeholder="napr. Váha (kg)">
+            </div>
+            <div>
+                <label class="fl">Popisok stĺpca 2</label>
+                <input class="fi" type="text" id="trackCustomCol2" placeholder="napr. Reps">
+            </div>
+        </div>
+        <div style="display:flex;gap:0.6rem;margin-top:1rem">
+            <button class="btn btn-acid" style="flex:1" onclick="confirmTrackType()">Potvrdiť</button>
+            <button class="btn btn-ghost" onclick="closeTrackModal()">Zrušiť</button>
+        </div>
+    </div>
+</div>
+
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <aside class="sidebar" id="sidebar">
@@ -685,6 +1065,7 @@
         <div class="nav-sec">Tréning</div>
         <a class="nav-item" onclick="go('classes')" href="#"><i class="fas fa-calendar-alt"></i> Moje lekcie</a>
         <a class="nav-item" onclick="go('book')" href="#"><i class="fas fa-plus-circle"></i> Rezervovať lekciu</a>
+        <a class="nav-item" onclick="go('workout')" href="#"><i class="fas fa-dumbbell"></i> Denník tréningov</a>
         <a class="nav-item" onclick="go('trainers')" href="#"><i class="fas fa-dumbbell"></i> Naši tréneri</a>
         <a class="nav-item" onclick="go('messages')" href="#"><i class="fas fa-comments"></i> Správy</a>
         <div class="nav-sec">Vstup & Štatistiky</div>
@@ -852,7 +1233,6 @@
             <div class="panel">
                 <div class="ph"><span class="pt">Aktívne členstvo</span></div>
                 <div class="pb">
-                    <div class="api-url">/api/memberships/my</div>
                     <button class="btn btn-ghost btn-sm" onclick="loadMembership()" style="margin-bottom:1.1rem"><i class="fas fa-sync-alt"></i> Načítať</button>
                     <div id="memCard"><div class="empty"><i class="fas fa-id-card"></i><p>Klikni Načítať</p></div></div>
                 </div>
@@ -860,7 +1240,6 @@
             <div class="panel">
                 <div class="ph"><span class="pt">História platieb</span></div>
                 <div class="pb">
-                    <div class="api-url">/api/memberships/my/history</div>
                     <button class="btn btn-ghost btn-sm" onclick="loadMemHistory()" style="margin-bottom:0.9rem"><i class="fas fa-history"></i> Načítať históriu</button>
                     <div id="memHistory"><div class="empty"><i class="fas fa-receipt"></i><p>Klikni Načítať históriu</p></div></div>
                 </div>
@@ -872,8 +1251,7 @@
             <div class="panel">
                 <div class="ph"><span class="pt">Cenník členstva</span></div>
                 <div class="pb">
-                    <div class="api-url">/api/memberships/types</div>
-                    <button class="btn btn-ghost btn-sm" onclick="loadPricing()" style="margin-bottom:1.4rem"><i class="fas fa-sync-alt"></i> Načítať z API</button>
+                    <button class="btn btn-ghost btn-sm" onclick="loadPricing()" style="margin-bottom:1.4rem"><i class="fas fa-sync-alt"></i> Načítať</button>
                     <div id="pricingDyn"></div>
                     <div class="pricing-grid" id="pricingStatic">
                         <div class="pc">
@@ -901,7 +1279,7 @@
                             <ul class="pc-feats"><li class="on"><i class="fas fa-check"></i>Všetko z Premium</li><li class="on"><i class="fas fa-check"></i>Prioritná rezervácia</li><li class="on"><i class="fas fa-check"></i>Výživový plán</li><li class="on"><i class="fas fa-check"></i>Ušetríš 449€</li></ul>
                             <button class="btn btn-ghost btn-block btn-sm" onclick="buyMem(4)">Kúpiť</button>
                         </div>
-                    </div>
+                                            </div>
                     <div class="fm" id="buyMsg"></div>
                 </div>
             </div>
@@ -948,19 +1326,21 @@
         </div>
 
         <!-- TRAINERS -->
+        <!-- TRAINERS -->
         <div class="ps" id="pg-trainers">
             <div class="panel">
-                <div class="ph"><span class="pt">Naši tréneri</span><span class="method m-get">GET /api/trainer/list</span></div>
-                <div class="pb">
-                    <div class="api-url">/api/trainer/list</div>
-                    <button class="btn btn-ghost btn-sm" onclick="loadTrainers()" style="margin-bottom:1.3rem"><i class="fas fa-sync-alt"></i> Načítať z API</button>
-                    <div class="tr-grid" id="trGrid">
-                        <div class="tr-card"><div class="tr-av" style="background:linear-gradient(135deg,#C8FF00,#00FFD1)">MH</div><div class="tr-name">Martin Horváth</div><div class="tr-spec">CrossFit & Silový tréning</div><div class="tr-tags"><span class="badge b-acid">CrossFit</span><span class="badge b-cyan">Sila</span><span class="badge b-grey">HIIT</span></div></div>
-                        <div class="tr-card"><div class="tr-av" style="background:linear-gradient(135deg,#FF2D55,#FF9500)">LK</div><div class="tr-name">Lucia Kováčová</div><div class="tr-spec">Joga & Pilates</div><div class="tr-tags"><span class="badge b-cyan">Joga</span><span class="badge b-orange">Pilates</span><span class="badge b-grey">Meditácia</span></div></div>
-                        <div class="tr-card"><div class="tr-av" style="background:linear-gradient(135deg,#0A84FF,#00FFD1)">PV</div><div class="tr-name">Peter Varga</div><div class="tr-spec">Box & Bojové umenia</div><div class="tr-tags"><span class="badge b-red">Boxing</span><span class="badge b-cyan">MMA</span><span class="badge b-grey">Kickbox</span></div></div>
-                        <div class="tr-card"><div class="tr-av" style="background:linear-gradient(135deg,#C8FF00,#FF9500)">ZN</div><div class="tr-name">Zuzana Novák</div><div class="tr-spec">Body Pump & Výživa</div><div class="tr-tags"><span class="badge b-acid">Body Pump</span><span class="badge b-orange">Výživa</span></div></div>
-                        <div class="tr-card"><div class="tr-av" style="background:linear-gradient(135deg,#FF2D55,#C8FF00)">TS</div><div class="tr-name">Tomáš Sloboda</div><div class="tr-spec">HIIT & Funkčný tréning</div><div class="tr-tags"><span class="badge b-acid">HIIT</span><span class="badge b-cyan">Funkčný</span></div></div>
-                        <div class="tr-card"><div class="tr-av" style="background:linear-gradient(135deg,#0A84FF,#FF2D55)">AB</div><div class="tr-name">Andrea Blaho</div><div class="tr-spec">Spinning & Kardio</div><div class="tr-tags"><span class="badge b-blue">Spinning</span><span class="badge b-grey">Kardio</span></div></div>
+                <div class="ph">
+                    <span class="pt">Naši tréneri</span>
+                    <button class="btn btn-ghost btn-sm" onclick="loadTrainers()"><i class="fas fa-sync-alt"></i> Načítať</button>
+                </div>
+                <div class="pb" style="padding:1rem">
+                    <div style="position:relative">
+                        <div class="trainer-carousel-wrap" id="trainerCarousel">
+                            <div class="trainer-carousel-track" id="trainerTrack"></div>
+                            <button class="trainer-carousel-btn trainer-carousel-prev" onclick="carouselPrev()"><i class="fas fa-chevron-left"></i></button>
+                            <button class="trainer-carousel-btn trainer-carousel-next" onclick="carouselNext()"><i class="fas fa-chevron-right"></i></button>
+                            <div class="trainer-carousel-dots" id="trainerDots"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -987,12 +1367,10 @@
                 <div class="ph">
                     <span class="pt">História vstupov</span>
                     <div style="display:flex;gap:0.7rem;align-items:center">
-                        <span class="method m-get">GET /api/checkin/history/{id}</span>
                         <button class="btn btn-ghost btn-sm" onclick="loadCheckins()"><i class="fas fa-sync-alt"></i> Načítať</button>
                     </div>
                 </div>
                 <div class="pb">
-                    <div class="api-url">/api/checkin/history/{userId}</div>
                     <div id="checkinList"><div class="empty"><i class="fas fa-history"></i><p>Klikni Načítať</p></div></div>
                 </div>
             </div>
@@ -1000,37 +1378,123 @@
 
         <!-- STATS -->
         <div class="ps" id="pg-stats">
-            <div class="stat-row">
-                <div class="sc"><div class="sc-icon"><i class="fas fa-calendar-check"></i></div><div class="sc-val">47</div><div class="sc-lbl">Celkovo lekcií</div></div>
-                <div class="sc"><div class="sc-icon"><i class="fas fa-fire"></i></div><div class="sc-val">14</div><div class="sc-lbl">Najdlhší streak</div></div>
-                <div class="sc"><div class="sc-icon"><i class="fas fa-clock"></i></div><div class="sc-val">94h</div><div class="sc-lbl">Hodín celkovo</div></div>
-                <div class="sc"><div class="sc-icon"><i class="fas fa-times-circle"></i></div><div class="sc-val" style="color:var(--red)">2</div><div class="sc-lbl">No-show</div></div>
+            <!-- KPI karty -->
+            <div class="stats-kpi-row">
+                <div class="stats-kpi-card"><div class="stats-kpi-val" id="st-total">47</div><div class="stats-kpi-lbl">Celkovo lekcií</div></div>
+                <div class="stats-kpi-card"><div class="stats-kpi-val" id="st-streak">14</div><div class="stats-kpi-lbl">Najdlhší streak</div></div>
+                <div class="stats-kpi-card"><div class="stats-kpi-val" id="st-hours">94h</div><div class="stats-kpi-lbl">Hodín celkovo</div></div>
+                <div class="stats-kpi-card"><div class="stats-kpi-val" style="color:var(--red)" id="st-noshow">2</div><div class="stats-kpi-lbl">No-show</div></div>
             </div>
-            <div class="g2">
+            <!-- Grafy -->
+            <div class="stats-chart-grid">
                 <div class="panel">
                     <div class="ph"><span class="pt">Aktivita podľa dňa</span></div>
-                    <div class="pb">
-                        <div style="display:flex;align-items:flex-end;gap:6px;height:75px;margin-bottom:0.45rem" id="barChart"></div>
-                        <div style="display:flex;gap:6px" id="barLabels"></div>
-                    </div>
+                    <div class="pb"><div class="chart-panel-inner"><canvas id="chartActivity"></canvas></div></div>
                 </div>
                 <div class="panel">
                     <div class="ph"><span class="pt">Obľúbené lekcie</span></div>
-                    <div class="pb">
-                        <div class="sb-row"><div class="sb-hdr"><span class="sb-lbl">CrossFit</span><span class="sb-val">12×</span></div><div class="sb"><div class="sb-fill" style="width:80%"></div></div></div>
-                        <div class="sb-row"><div class="sb-hdr"><span class="sb-lbl">HIIT</span><span class="sb-val">8×</span></div><div class="sb"><div class="sb-fill" style="width:54%"></div></div></div>
-                        <div class="sb-row"><div class="sb-hdr"><span class="sb-lbl">Boxing</span><span class="sb-val">5×</span></div><div class="sb"><div class="sb-fill" style="width:34%"></div></div></div>
-                        <div class="sb-row"><div class="sb-hdr"><span class="sb-lbl">Joga</span><span class="sb-val">3×</span></div><div class="sb"><div class="sb-fill" style="width:20%"></div></div></div>
-                        <div class="sb-row"><div class="sb-hdr"><span class="sb-lbl">Body Pump</span><span class="sb-val">2×</span></div><div class="sb"><div class="sb-fill" style="width:13%"></div></div></div>
-                    </div>
+                    <div class="pb"><div class="chart-panel-inner"><canvas id="chartFavLessons"></canvas></div></div>
                 </div>
             </div>
             <div class="panel">
-                <div class="ph"><span class="pt">Štatistiky z API</span><span class="method m-get">GET /api/stats/my</span></div>
+                <div class="ph"><span class="pt">Štatistiky z API</span></div>
                 <div class="pb">
-                    <div class="api-url">/api/stats/my</div>
                     <button class="btn btn-ghost btn-sm" onclick="loadStats()"><i class="fas fa-sync-alt"></i> Načítať</button>
                     <div class="api-out" id="statsOut">Klikni načítať...</div>
+                </div>
+            </div>
+        </div>
+        <!-- WORKOUT DIARY -->
+        <div class="ps" id="pg-workout">
+
+            <div class="g2" style="margin-bottom:1.2rem">
+                <!-- Kalendár -->
+                <div class="panel">
+                    <div class="ph">
+                        <button class="btn btn-ghost btn-sm" onclick="calPrev()"><i class="fas fa-chevron-left"></i></button>
+                        <span class="pt" id="calTitle">—</span>
+                        <button class="btn btn-ghost btn-sm" onclick="calNext()"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="pb" style="padding:0.8rem">
+                        <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center"></div>
+                    </div>
+                </div>
+
+                <!-- Detail dňa -->
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt" id="workoutDayTitle">Vyber deň</span>
+                        <div style="display:flex;gap:0.5rem">
+                            <button class="btn btn-ghost btn-sm" id="editWorkoutBtn" style="display:none" onclick="editWorkout()"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-red btn-sm" id="deleteWorkoutBtn" style="display:none" onclick="deleteWorkout()"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="pb" id="workoutDayContent">
+                        <div class="empty"><i class="fas fa-calendar-day"></i><p>Vyber deň v kalendári</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly stats — full width pod gridom -->
+            <div class="panel" id="weeklyStatsPanel" style="margin-bottom:1.2rem">
+                <div class="ph">
+                    <span class="pt"><i class="fas fa-balance-scale" style="margin-right:0.4rem;opacity:0.6"></i>Tento týždeň vs minulý</span>
+                    <button class="btn btn-ghost btn-sm" onclick="loadWeeklyStats()"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                <div class="pb" id="weeklyStatsContent">
+                    <div class="empty" style="padding:1rem"><span class="spin"></span></div>
+                </div>
+            </div>
+            <!-- Editor tréning -->
+            <div class="panel" id="workoutEditor" style="display:none">
+                <div class="ph">
+                    <span class="pt" id="editorTitle">Nový tréning</span>
+                    <button class="btn btn-ghost btn-sm" onclick="closeEditor()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="pb">
+                    <div class="fr" style="margin-bottom:1rem">
+                        <div class="form-group">
+                            <label class="fl">Názov tréning</label>
+                            <input class="fi" type="text" id="wTitle" placeholder="napr. Push Day, Nohy...">
+                        </div>
+                        <div class="form-group">
+                            <label class="fl">Pocit (1–5)</label>
+                            <div style="display:flex;gap:0.5rem;margin-top:0.3rem" id="feelingBtns">
+                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(1)">😴 1</button>
+                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(2)">😐 2</button>
+                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(3)">💪 3</button>
+                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(4)">🔥 4</button>
+                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(5)">⚡ 5</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="fl">Poznámky</label>
+                        <textarea class="fi" id="wNotes" rows="2" placeholder="Ako sa ti darilo..."></textarea>
+                    </div>
+                    <!-- Cviky -->
+                    <div id="exerciseList" style="margin-bottom:1rem"></div>
+                    <button class="btn btn-ghost btn-sm" onclick="addExercise()" style="margin-bottom:1.2rem">
+                        <i class="fas fa-plus"></i> Pridať cvik
+                    </button>
+                    <div style="display:flex;gap:0.7rem">
+                        <button class="btn btn-acid" onclick="saveWorkout()"><i class="fas fa-save"></i> Uložiť tréning</button>
+                        <button class="btn btn-ghost" onclick="closeEditor()">Zrušiť</button>
+                    </div>
+                    <div class="fm" id="workoutMsg"></div>
+                </div>
+            </div>
+            <!-- Progress graf -->
+            <div class="panel">
+                <div class="ph">
+                    <span class="pt"><i class="fas fa-chart-line" style="margin-right:0.4rem;opacity:0.6"></i>Progres cviku</span>
+                </div>
+                <div class="pb">
+                    <div style="display:flex;gap:0.7rem;margin-bottom:1rem;flex-wrap:wrap">
+                        <input class="fi" type="text" id="progressExercise" placeholder="Názov cviku napr. Bench Press" style="max-width:280px">
+                        <button class="btn btn-ghost btn-sm" onclick="loadProgress()"><i class="fas fa-search"></i> Zobraziť</button>
+                    </div>
+                    <div style="position:relative;height:200px"><canvas id="chartProgress"></canvas></div>
                 </div>
             </div>
         </div>
@@ -1052,6 +1516,7 @@
                 </div>
             </div>
         </div>
+
 
     </div>
 </main>
@@ -1077,15 +1542,16 @@
         document.getElementById('sideEmail').textContent = user.email||'—';
     }
 
+    // ── BOOT ──
     initNotifs();
     refreshLive();
     initBarChart();
-    setInterval(refreshLive, 30000);
     loadMe();
     loadMyClassesOv();
+    setInterval(refreshLive, 30000);
 
     // ===== NAV =====
-    const titles = {overview:'Prehľad',messages: 'Správy',profile:'Môj profil',notifications:'Notifikácie',membership:'Moje členstvo',pricing:'Cenník',classes:'Moje lekcie',book:'Rezervácia lekcií',trainers:'Naši tréneri',qr:'QR Vstupný kód',checkin:'História vstupov',stats:'Moje štatistiky',rules:'Pravidlá centra'};
+    const titles = {overview:'Prehľad',workout:'Denník tréningov',messages: 'Správy',profile:'Môj profil',notifications:'Notifikácie',membership:'Moje členstvo',pricing:'Cenník',classes:'Moje lekcie',book:'Rezervácia lekcií',trainers:'Naši tréneri',qr:'QR Vstupný kód',checkin:'História vstupov',stats:'Moje štatistiky',rules:'Pravidlá centra'};
     function go(id) {
         closeSidebar();
         document.querySelectorAll('.ps').forEach(el => el.classList.remove('active'));
@@ -1107,6 +1573,8 @@
         if (id==='pricing') loadPricing();
         if (id==='qr') genQR();
         if (id === 'messages') {loadTrainersForChat();}
+        if (id==='workout') initWorkoutPage();
+
     }
 
     // ===== API =====
@@ -1374,12 +1842,6 @@
             document.querySelector('.chat-sidebar')?.classList.remove('hidden');
         }
     }
-    function showChatWithTrainer() {
-        if (isMobileView) {
-            document.querySelector('.chat-sidebar')?.classList.add('hidden');
-        }
-    }
-
     function hideTrainerList() {
         document.querySelector('.chat-sidebar')?.classList.remove('hidden');
     }
@@ -1455,6 +1917,7 @@
         } catch(e){showMsg('buyMsg',e.message,'err');}
     }
 
+
     async function loadPricing() {
         try {
             const res=await af('/api/memberships/types'); const data=await res.json();
@@ -1465,7 +1928,15 @@
             data.forEach((t,i)=>{
                 const feat=i===2;
                 const price=t.priceCents?Math.round(t.priceCents/100):(t.price||'?');
-                const per=t.durationDays>=300?'rok':'mes';
+
+                // Určenie periódy podľa dĺžky trvania
+                let per;
+                if (t.durationDays === 1) {
+                    per = 'deň'; // Jednorazový vstup
+                } else {
+                    per = t.durationDays >= 300 ? 'rok' : 'mes';
+                }
+
                 html+=`<div class="pc${feat?' feat':''}">
     ${feat?'<div class="feat-tag">Najpopulárnejší</div>':''}
     <div class="pc-name">${t.name}</div>
@@ -1477,6 +1948,754 @@
             document.getElementById('pricingDyn').innerHTML=html+'</div>';
         } catch{/* fallback */}
     }
+
+
+    // ===== WORKOUT DIARY =====
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth() + 1;
+    let calWorkoutDates = [];
+    let selectedDate = null;
+    let currentWorkoutId = null;
+    let editorFeeling = 3;
+    let progressChart = null;
+
+    // ── LOCAL STORAGE SYNC ───────────────────────────────────────────────────────
+    function saveWorkoutLocal(dateStr, data) {
+        const key = 'workout_' + user.id + '_' + dateStr;
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function getWorkoutLocal(dateStr) {
+        const key = 'workout_' + user.id + '_' + dateStr;
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+    }
+
+    function saveCalendarDatesLocal(year, month, dates) {
+        localStorage.setItem(`cal_${user.id}_${year}_${month}`, JSON.stringify(dates));
+    }
+
+    function getCalendarDatesLocal(year, month) {
+        const raw = localStorage.getItem(`cal_${user.id}_${year}_${month}`);
+        return raw ? JSON.parse(raw) : null;
+    }
+
+    async function initWorkoutPage() {
+        await renderCalendar();
+        loadWeeklyStats();
+    }
+
+    async function renderCalendar() {
+        const title = document.getElementById('calTitle');
+        const grid = document.getElementById('calGrid');
+        const monthNames = ['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'];
+        title.textContent = monthNames[calMonth-1] + ' ' + calYear;
+
+        const cached = getCalendarDatesLocal(calYear, calMonth);
+        if (cached) calWorkoutDates = cached;
+
+        try {
+            const res = await af(`/api/workouts/calendar?year=${calYear}&month=${calMonth}`);
+            if (res.ok) {
+                calWorkoutDates = await res.json();
+                saveCalendarDatesLocal(calYear, calMonth, calWorkoutDates);
+            }
+        } catch {}
+
+        const days = ['Po','Ut','St','Šv','Pi','So','Ne'];
+        let html = days.map(d => `<div class="cal-header-day">${d}</div>`).join('');
+
+        const firstDay = new Date(calYear, calMonth-1, 1);
+        const lastDay = new Date(calYear, calMonth, 0);
+        let startDow = (firstDay.getDay() + 6) % 7; // 0=Po
+
+        // Predchádzajúci mesiac
+        for (let i = 0; i < startDow; i++) {
+            const d = new Date(calYear, calMonth-1, -startDow+i+1);
+            html += `<div class="cal-day other-month">${d.getDate()}</div>`;
+        }
+
+        const today = new Date();
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const isToday = today.getFullYear()===calYear && today.getMonth()+1===calMonth && today.getDate()===d;
+            const hasWorkout = calWorkoutDates.includes(dateStr);
+            const isSelected = selectedDate === dateStr;
+            const cls = [
+                'cal-day',
+                isToday ? 'today' : '',
+                hasWorkout ? 'has-workout' : '',
+                isSelected ? 'selected' : ''
+            ].filter(Boolean).join(' ');
+            html += `<div class="${cls}" onclick="selectCalDay('${dateStr}')">${d}</div>`;
+        }
+
+        grid.innerHTML = html;
+    }
+    async function selectCalDay(dateStr) {
+        selectedDate = dateStr;
+        renderCalendar();
+
+        const title = document.getElementById('workoutDayTitle');
+        const content = document.getElementById('workoutDayContent');
+        const editBtn = document.getElementById('editWorkoutBtn');
+        const delBtn = document.getElementById('deleteWorkoutBtn');
+
+        const d = new Date(dateStr);
+        title.textContent = d.toLocaleDateString('sk-SK', {weekday:'long', day:'numeric', month:'long'});
+
+        // Najprv skús localStorage
+        const localWorkout = getWorkoutLocal(dateStr);
+        if (localWorkout) {
+            currentWorkoutId = localWorkout.id || null;
+            editBtn.style.display = currentWorkoutId ? 'inline-flex' : 'none';
+            delBtn.style.display = currentWorkoutId ? 'inline-flex' : 'none';
+            renderWorkoutDetail(localWorkout, content);
+        } else {
+            content.innerHTML = '<div class="empty"><span class="spin"></span></div>';
+        }
+
+        try {
+            const res = await af(`/api/workouts/day?date=${dateStr}`);
+            const text = await res.text();
+            const workout = text ? JSON.parse(text) : null;
+
+            if (workout) {
+                saveWorkoutLocal(dateStr, workout);
+            }
+
+            if (!workout) {
+                currentWorkoutId = null;
+                editBtn.style.display = 'none';
+                delBtn.style.display = 'none';
+                content.innerHTML = `
+                <div class="empty" style="padding:1.5rem">
+                    <i class="fas fa-plus-circle"></i>
+                    <p style="margin-bottom:1rem">Žiadny tréning</p>
+                    <button class="btn btn-acid btn-sm" onclick="openEditor('${dateStr}')">
+                        <i class="fas fa-plus"></i> Pridať tréning
+                    </button>
+                </div>`;
+            } else {
+                currentWorkoutId = workout.id;
+                editBtn.style.display = 'inline-flex';
+                delBtn.style.display = 'inline-flex';
+                renderWorkoutDetail(workout, content);
+            }
+        } catch(e) {
+            if (!localWorkout) {
+                content.innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
+            }
+        }
+    }
+
+
+    function renderWorkoutDetail(w, el) {
+        const feelings = ['','😴','😐','💪','🔥','⚡'];
+        let html = `<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border)">
+        <div>
+            <div style="font-family:var(--font-d);font-size:1.2rem;font-weight:900">${w.title||'Tréning'}</div>
+            ${w.feeling ? `<div class="feeling-emoji">${feelings[w.feeling]} ${['','Slabý','Priemerný','Dobrý','Výborný','Epický'][w.feeling]}</div>` : ''}
+        </div>
+        <div style="margin-left:auto;text-align:right">
+            <div style="font-family:var(--font-d);font-size:1.5rem;font-weight:900;color:var(--acid)">${w.totalVolume||0} kg</div>
+            <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">Celkový objem</div>
+        </div>
+    </div>`;
+
+        if (w.notes) html += `<div style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;font-style:italic">"${w.notes}"</div>`;
+
+        (w.exercises || []).forEach(ex => {
+            const hasPr = ex.sets?.some(s => s.isPr);
+            html += `<div class="workout-exercise-view">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">
+                <b style="font-size:0.9rem">${ex.name}</b>
+                ${hasPr ? '<span class="badge b-acid" style="font-size:0.6rem">🏆 PR</span>' : ''}
+                <span style="margin-left:auto;font-size:0.72rem;color:var(--acid)">${ex.totalVolume} kg objem</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
+                <thead><tr>
+                    <th style="text-align:left;color:var(--muted);font-family:var(--font-d);font-size:0.62rem;letter-spacing:0.1em;padding:0.2rem 0.4rem">Séria</th>
+                    <th style="text-align:center;color:var(--muted);font-family:var(--font-d);font-size:0.62rem;letter-spacing:0.1em;padding:0.2rem 0.4rem">Váha (kg)</th>
+                    <th style="text-align:center;color:var(--muted);font-family:var(--font-d);font-size:0.62rem;letter-spacing:0.1em;padding:0.2rem 0.4rem">Reps</th>
+                    <th style="text-align:center;color:var(--muted);font-family:var(--font-d);font-size:0.62rem;letter-spacing:0.1em;padding:0.2rem 0.4rem">Objem</th>
+                </tr></thead>
+                <tbody>
+                ${(ex.sets||[]).map(s => `<tr style="${s.isPr?'background:rgba(200,255,0,0.05)':''}">
+                    <td style="padding:0.25rem 0.4rem;color:var(--muted)">#${s.setNumber}</td>
+                    <td style="text-align:center;padding:0.25rem 0.4rem;font-weight:${s.isPr?700:400};color:${s.isPr?'var(--acid)':'inherit'}">${s.weight||'—'}</td>
+                    <td style="text-align:center;padding:0.25rem 0.4rem">${s.reps||'—'}</td>
+                    <td style="text-align:center;padding:0.25rem 0.4rem;color:var(--muted)">${s.weight&&s.reps ? Math.round(s.weight*s.reps) : '—'} kg</td>
+                </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>`;
+        });
+
+        el.innerHTML = html;
+    }
+
+    function calPrev() { if(--calMonth < 1){calMonth=12;calYear--;} renderCalendar(); }
+    function calNext() { if(++calMonth > 12){calMonth=1;calYear++;} renderCalendar(); }
+
+    // ── EDITOR ───────────────────────────────────────────────────────────────────
+    let editorExercises = [];
+
+    function openEditor(dateStr) {
+        selectedDate = dateStr || selectedDate;
+        currentWorkoutId = null;
+        editorExercises = [];
+        editorFeeling = 3;
+        document.getElementById('wTitle').value = '';
+        document.getElementById('wNotes').value = '';
+        document.getElementById('exerciseList').innerHTML = '';
+        document.getElementById('editorTitle').textContent = 'Nový tréning — ' + new Date(selectedDate+'T00:00').toLocaleDateString('sk-SK',{day:'numeric',month:'long'});
+        document.getElementById('workoutMsg').className = 'fm';
+        updateFeelingBtns();
+        addExercise();
+        document.getElementById('workoutEditor').style.display = 'block';
+        document.getElementById('workoutEditor').scrollIntoView({behavior:'smooth'});
+    }
+
+    function editWorkout() {
+        if (!currentWorkoutId) return;
+        af(`/api/workouts/day?date=${selectedDate}`).then(r => r.text()).then(text => {
+            const w = text ? JSON.parse(text) : null;
+            if (!w) return;
+            document.getElementById('wTitle').value = w.title || '';
+            document.getElementById('wNotes').value = w.notes || '';
+            editorFeeling = w.feeling || 3;
+            updateFeelingBtns();
+            document.getElementById('exerciseList').innerHTML = '';
+            editorExercises = [];
+            document.getElementById('editorTitle').textContent = 'Upraviť tréning';
+            (w.exercises || []).forEach(ex => {
+                addExercise(ex.name, ex.sets || [], ex.category || 'sila', ex.trackType || 'weight_reps');
+            });
+            document.getElementById('workoutEditor').style.display = 'block';
+            document.getElementById('workoutEditor').scrollIntoView({behavior:'smooth'});
+        });
+    }
+
+    function closeEditor() {
+        document.getElementById('workoutEditor').style.display = 'none';
+    }
+
+    function setFeeling(val) {
+        editorFeeling = val;
+        updateFeelingBtns();
+    }
+
+    function updateFeelingBtns() {
+        document.querySelectorAll('#feelingBtns button').forEach((btn, i) => {
+            btn.className = 'btn btn-sm ' + (i+1 === editorFeeling ? 'btn-acid' : 'btn-ghost');
+        });
+    }
+
+
+    // ── EXERCISE TEMPLATES ───────────────────────────────────────────────────────
+    let exerciseTemplateCache = [];
+
+    async function loadExerciseTemplates(query = '') {
+        try {
+            const url = query ? `/api/exercise-templates?q=${encodeURIComponent(query)}` : '/api/exercise-templates';
+            const res = await af(url);
+            if (res.ok) {
+                const data = await res.json();
+                if (!query) exerciseTemplateCache = data; // cache len pre prázdny query
+                return data;
+            }
+        } catch {}
+        // Fallback na localStorage
+        const raw = localStorage.getItem('ex_history_' + user.id);
+        const local = raw ? JSON.parse(raw) : [];
+        return query ? local.filter(e => e.name.toLowerCase().includes(query.toLowerCase())) : local;
+    }
+
+    async function saveExerciseTemplate(name, category, trackType, customLabels = null) {
+        if (!name || !name.trim()) return;
+        try {
+            await af('/api/exercise-templates', {
+                method: 'POST',
+                body: JSON.stringify({ name: name.trim(), category, trackType, customLabels })
+            });
+        } catch {
+            // Fallback localStorage
+            const raw = localStorage.getItem('ex_history_' + user.id);
+            const local = raw ? JSON.parse(raw) : [];
+            const filtered = local.filter(e => e.name.toLowerCase() !== name.toLowerCase());
+            filtered.unshift({ name: name.trim(), category, trackType, customLabels, usedAt: Date.now() });
+            localStorage.setItem('ex_history_' + user.id, JSON.stringify(filtered.slice(0, 50)));
+        }
+    }
+
+    async function showExerciseSuggestions(inputEl, exId) {
+        const existing = document.getElementById('ac-' + exId);
+        if (existing) existing.remove();
+
+        const query = inputEl.value;
+        const results = await loadExerciseTemplates(query);
+        if (!results.length) return;
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'exercise-autocomplete';
+        dropdown.id = 'ac-' + exId;
+
+        results.slice(0, 8).forEach(ex => {
+            const item = document.createElement('div');
+            item.className = 'exercise-autocomplete-item';
+            const trackLabel = getTrackTypeLabel(ex.trackType || 'weight_reps');
+            item.innerHTML = `
+            <span>${ex.name}</span>
+            <span class="ex-ac-cat">${ex.category === 'kardio' ? '🏃 ' : '💪 '}${trackLabel}</span>`;
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                inputEl.value = ex.name;
+                const block = document.getElementById(exId);
+                const select = block.querySelector('.category-select');
+                if (select) {
+                    select.value = ex.category || 'sila';
+                    applyTrackType(exId, ex.category || 'sila', ex.trackType || 'weight_reps', ex.customLabels);
+                }
+                dropdown.remove();
+            });
+            dropdown.appendChild(item);
+        });
+
+        inputEl.closest('.exercise-name-wrap').appendChild(dropdown);
+    }
+
+    function hideExerciseSuggestions(exId) {
+        setTimeout(() => {
+            const el = document.getElementById('ac-' + exId);
+            if (el) el.remove();
+        }, 150);
+    }
+
+    function getTrackTypeLabel(trackType) {
+        const map = {
+            weight_reps: 'váha + reps',
+            time_only: 'len čas',
+            time_distance: 'čas + km',
+            reps_only: 'opakovania',
+            custom: 'vlastné'
+        };
+        return map[trackType] || trackType;
+    }
+
+    // ── TRACK TYPE MODAL ─────────────────────────────────────────────────────────
+    let trackModalExId = null;
+    let trackModalSelectedType = 'weight_reps';
+
+    const TRACK_OPTIONS_SILA = [
+        { key: 'weight_reps', icon: '🏋️', name: 'Váha + Opakovania', desc: 'napr. 80kg × 8 reps — klasický silový tréning' },
+        { key: 'reps_only',   icon: '🔁', name: 'Len opakovania',    desc: 'napr. kliky, drepy bez váhy, angličáky' },
+        { key: 'custom',      icon: '✏️', name: 'Vlastné stĺpce',    desc: 'Nastav si vlastné popisky podľa potreby' },
+    ];
+
+    const TRACK_OPTIONS_KARDIO = [
+        { key: 'time_only',     icon: '⏱',  name: 'Len čas',          desc: 'napr. 5 min skákania, 3 min planku' },
+        { key: 'time_distance', icon: '📍', name: 'Čas + vzdialenosť', desc: 'napr. beh 30 min / 5 km' },
+        { key: 'reps_only',     icon: '🔁', name: 'Len opakovania',    desc: 'napr. 50 angličákov, 20 burpees' },
+        { key: 'custom',        icon: '✏️', name: 'Vlastné stĺpce',    desc: 'Nastav si vlastné popisky podľa potreby' },
+    ];
+
+    function openTrackModal(exId) {
+        trackModalExId = exId;
+        const block = document.getElementById(exId);
+        const category = block.querySelector('.category-select')?.value || 'sila';
+        const currentType = block.dataset.trackType || (category === 'kardio' ? 'time_only' : 'weight_reps');
+        trackModalSelectedType = currentType;
+
+        const options = category === 'kardio' ? TRACK_OPTIONS_KARDIO : TRACK_OPTIONS_SILA;
+        document.getElementById('trackModalTitle').textContent =
+            (category === 'kardio' ? '🏃 Kardio' : '💪 Sila') + ' — čo sledovať?';
+
+        document.getElementById('trackModalOptions').innerHTML = options.map(o => `
+        <div class="track-option ${o.key === currentType ? 'selected' : ''}"
+             onclick="selectTrackOption('${o.key}', this)">
+            <div class="track-option-icon">${o.icon}</div>
+            <div class="track-option-info">
+                <div class="track-option-name">${o.name}</div>
+                <div class="track-option-desc">${o.desc}</div>
+            </div>
+        </div>`).join('');
+
+        const customRow = document.getElementById('trackCustomRow');
+        if (currentType === 'custom') {
+            customRow.style.display = 'grid';
+            const labels = block.dataset.customLabels ? JSON.parse(block.dataset.customLabels) : ['', ''];
+            document.getElementById('trackCustomCol1').value = labels[0] || '';
+            document.getElementById('trackCustomCol2').value = labels[1] || '';
+        } else {
+            customRow.style.display = 'none';
+        }
+
+        document.getElementById('trackModalOverlay').classList.add('open');
+    }
+
+    function selectTrackOption(key, el) {
+        trackModalSelectedType = key;
+        document.querySelectorAll('.track-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('trackCustomRow').style.display = key === 'custom' ? 'grid' : 'none';
+    }
+
+    function confirmTrackType() {
+        if (!trackModalExId) return;
+        let customLabels = null;
+        if (trackModalSelectedType === 'custom') {
+            const c1 = document.getElementById('trackCustomCol1').value.trim() || 'Hodnota 1';
+            const c2 = document.getElementById('trackCustomCol2').value.trim() || 'Hodnota 2';
+            customLabels = JSON.stringify([c1, c2]);
+        }
+        const block = document.getElementById(trackModalExId);
+        const category = block.querySelector('.category-select')?.value || 'sila';
+        applyTrackType(trackModalExId, category, trackModalSelectedType, customLabels);
+        closeTrackModal();
+    }
+
+    function closeTrackModal() {
+        document.getElementById('trackModalOverlay').classList.remove('open');
+        trackModalExId = null;
+    }
+
+    function applyTrackType(exId, category, trackType, customLabels = null) {
+        const block = document.getElementById(exId);
+        block.dataset.trackType = trackType;
+        block.dataset.category = category;
+        if (customLabels) block.dataset.customLabels = customLabels;
+
+        // Aktualizuj header
+        const col1 = document.getElementById(exId + '-col1');
+        const col2 = document.getElementById(exId + '-col2');
+        const trackBtn = document.getElementById(exId + '-trackbtn');
+
+        const headers = getTrackHeaders(trackType, customLabels);
+        if (col1) col1.textContent = headers[0];
+        if (col2) col2.textContent = headers[1];
+        if (trackBtn) trackBtn.title = getTrackTypeLabel(trackType);
+
+        // Vymaž série a pridaj novú
+        document.getElementById(exId + '-sets').innerHTML = '';
+        addSet(exId, trackType, customLabels);
+    }
+
+    function getTrackHeaders(trackType, customLabels = null) {
+        if (trackType === 'custom' && customLabels) {
+            const labels = JSON.parse(customLabels);
+            return [labels[0] || 'Hodnota 1', labels[1] || 'Hodnota 2'];
+        }
+        const map = {
+            weight_reps:   ['VÁHA (kg)', 'REPS'],
+            time_only:     ['ČAS (min)', '—'],
+            time_distance: ['ČAS (min)', 'KM'],
+            reps_only:     ['—',         'REPS'],
+            custom:        ['Hodnota 1', 'Hodnota 2'],
+        };
+        return map[trackType] || ['VÁHA (kg)', 'REPS'];
+    }
+
+    // ── EXERCISE BLOCK ────────────────────────────────────────────────────────────
+    let exCounter = 0;
+    function addExercise(name = '', sets = [], category = 'sila', trackType = '', customLabels = null) {
+        const id = 'ex-' + (++exCounter);
+        const defaultTrackType = trackType || (category === 'kardio' ? 'time_only' : 'weight_reps');
+        const headers = getTrackHeaders(defaultTrackType, customLabels);
+
+        const div = document.createElement('div');
+        div.className = 'exercise-block';
+        div.id = id;
+        div.dataset.trackType = defaultTrackType;
+        div.dataset.category = category;
+        if (customLabels) div.dataset.customLabels = customLabels;
+
+        div.innerHTML = `
+        <div class="exercise-block-header">
+            <div class="exercise-name-wrap">
+                <input class="exercise-name-input" type="text"
+                    placeholder="Názov cviku..."
+                    value="${name}"
+                    autocomplete="off"
+                    oninput="showExerciseSuggestions(this,'${id}')"
+                    onfocus="showExerciseSuggestions(this,'${id}')"
+                    onblur="hideExerciseSuggestions('${id}')">
+            </div>
+            <select class="fi category-select" style="max-width:90px;padding:0.4rem 0.5rem;font-size:0.75rem"
+                    onchange="onCategoryChange('${id}', this.value)">
+                <option value="sila"   ${category==='sila'  ?'selected':''}>💪 Sila</option>
+                <option value="kardio" ${category==='kardio'?'selected':''}>🏃 Kardio</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" id="${id}-trackbtn"
+                    onclick="openTrackModal('${id}')"
+                    title="${getTrackTypeLabel(defaultTrackType)}"
+                    style="font-size:0.7rem">
+                <i class="fas fa-sliders-h"></i>
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="addSetToExercise('${id}')">
+                <i class="fas fa-plus"></i>
+            </button>
+            <button class="btn btn-red btn-sm" onclick="document.getElementById('${id}').remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="set-row" id="${id}-header" style="margin-bottom:0.3rem">
+            <div></div>
+            <div id="${id}-col1" style="font-family:var(--font-d);font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);text-align:center">${headers[0]}</div>
+            <div id="${id}-col2" style="font-family:var(--font-d);font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);text-align:center">${headers[1]}</div>
+            <div style="font-family:var(--font-d);font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);text-align:center">PR</div>
+        </div>
+        <div class="sets-container" id="${id}-sets"></div>`;
+
+        document.getElementById('exerciseList').appendChild(div);
+
+        if (sets.length > 0) {
+            sets.forEach(s => addSet(id, defaultTrackType, customLabels, s));
+        } else {
+            addSet(id, defaultTrackType, customLabels);
+        }
+    }
+
+    function onCategoryChange(exId, category) {
+        const defaultType = category === 'kardio' ? 'time_only' : 'weight_reps';
+        applyTrackType(exId, category, defaultType, null);
+        // Aktualizuj select
+        document.getElementById(exId).querySelector('.category-select').value = category;
+    }
+
+    // ── SET ROW ───────────────────────────────────────────────────────────────────
+    let setCounter = 0;
+    function addSet(exId, trackType = 'weight_reps', customLabels = null, data = {}) {
+        const container = document.getElementById(exId + '-sets');
+        const setNum = container.children.length + 1;
+        const row = document.createElement('div');
+        row.className = 'set-row';
+        row.id = 'set-' + (++setCounter);
+
+        const isPr = data.isPr || false;
+        let input1, input2;
+
+        switch (trackType) {
+            case 'time_only':
+                input1 = `<input class="set-input" type="number" placeholder="min" min="0" step="1" value="${data.duration ? Math.round(data.duration/60) : ''}" title="Čas v minútach">`;
+                input2 = `<div class="set-input" style="background:transparent;border-color:transparent;display:flex;align-items:center;justify-content:center;color:var(--muted)">—</div>`;
+                break;
+            case 'time_distance':
+                input1 = `<input class="set-input" type="number" placeholder="min" min="0" step="1" value="${data.duration ? Math.round(data.duration/60) : ''}" title="Čas">`;
+                input2 = `<input class="set-input" type="number" placeholder="km" min="0" step="0.1" value="${data.reps ? data.reps/10 : ''}" title="Vzdialenosť">`;
+                break;
+            case 'reps_only':
+                input1 = `<div class="set-input" style="background:transparent;border-color:transparent;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-d)">${setNum}</div>`;
+                input2 = `<input class="set-input" type="number" placeholder="reps" min="0" step="1" value="${data.reps || ''}" title="Opakovania">`;
+                break;
+            case 'custom': {
+                const labels = customLabels ? JSON.parse(customLabels) : ['', ''];
+                input1 = `<input class="set-input" type="number" placeholder="${labels[0]||'Hodn. 1'}" min="0" step="0.5" value="${data.weight || ''}" title="${labels[0]}">`;
+                input2 = `<input class="set-input" type="number" placeholder="${labels[1]||'Hodn. 2'}" min="0" step="1" value="${data.reps || ''}" title="${labels[1]}">`;
+                break;
+            }
+            default: // weight_reps
+                input1 = `<input class="set-input" type="number" placeholder="kg" min="0" step="0.5" value="${data.weight || ''}" title="Váha">`;
+                input2 = `<input class="set-input" type="number" placeholder="reps" min="0" step="1" value="${data.reps || ''}" title="Opakovania">`;
+        }
+
+        row.innerHTML = `
+        <div class="set-num">${setNum}</div>
+        ${input1}
+        ${input2}
+<button class="set-pr-btn ${isPr?'active':''}" onclick="this.classList.toggle('active')" title="PR">🏆</button>
+        <button onclick="this.closest('.set-row').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:0.3rem;font-size:0.75rem" title="Odstrániť sériu">✕</button>`;        container.appendChild(row);
+    }
+
+    function addSetToExercise(exId) {
+        const block = document.getElementById(exId);
+        const trackType = block.dataset.trackType || 'weight_reps';
+        const customLabels = block.dataset.customLabels || null;
+        addSet(exId, trackType, customLabels);
+    }
+
+    async function saveWorkout() {
+        if (!selectedDate) return showMsg('workoutMsg', 'Vyber deň v kalendári', 'err');
+
+        const exercises = [];
+        document.querySelectorAll('.exercise-block').forEach(block => {
+            const name = block.querySelector('.exercise-name-input').value.trim();
+            if (!name) return;
+            const category = block.dataset.category || block.querySelector('.category-select')?.value || 'sila';
+            const trackType = block.dataset.trackType || 'weight_reps';
+            const customLabels = block.dataset.customLabels || null;
+
+            // Ulož do histórie
+            saveExerciseTemplate(name, category, trackType, customLabels);
+
+            const sets = [];
+            block.querySelectorAll('.sets-container .set-row').forEach(row => {
+                const realInputs = row.querySelectorAll('input.set-input');
+                if (!realInputs.length) return;
+                const isPr = row.querySelector('.set-pr-btn')?.classList.contains('active') || false;
+
+                switch (trackType) {
+                    case 'time_only': {
+                        const dur = parseInt(realInputs[0]?.value) || null;
+                        if (dur) sets.push({ weight: null, reps: null, duration: dur * 60, isPr });
+                        break;
+                    }
+                    case 'time_distance': {
+                        const dur = parseInt(realInputs[0]?.value) || null;
+                        const dist = parseFloat(realInputs[1]?.value) || null;
+                        if (dur || dist) sets.push({ weight: null, reps: dist ? Math.round(dist * 10) : null, duration: dur ? dur * 60 : null, isPr });
+                        break;
+                    }
+                    case 'reps_only': {
+                        const r = parseInt(realInputs[0]?.value) || null;
+                        if (r) sets.push({ weight: null, reps: r, duration: null, isPr });
+                        break;
+                    }
+                    default: {
+                        const weight = parseFloat(realInputs[0]?.value) || null;
+                        const reps = parseInt(realInputs[1]?.value) || null;
+                        if (weight || reps) sets.push({ weight, reps, duration: null, isPr });
+                    }
+                }
+            });
+
+            if (sets.length > 0) exercises.push({ name, category, trackType, sets });
+        });
+
+        if (exercises.length === 0) return showMsg('workoutMsg', 'Pridaj aspoň jeden cvik so sériami', 'err');
+
+        const body = {
+            date: selectedDate,
+            title: document.getElementById('wTitle').value.trim() || 'Tréning',
+            notes: document.getElementById('wNotes').value.trim(),
+            feeling: editorFeeling,
+            exercises
+        };
+
+        try {
+            const url = currentWorkoutId ? `/api/workouts/${currentWorkoutId}` : '/api/workouts';
+            const method = currentWorkoutId ? 'PUT' : 'POST';
+            const res = await af(url, {method, body: JSON.stringify(body)});
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || 'Chyba uloženia');
+            }
+            const savedData = await res.json();
+            saveWorkoutLocal(selectedDate, savedData);
+            saveCalendarDatesLocal(calYear, calMonth, null);
+            toast('Tréning uložený! 💪', 'ok');
+
+            closeEditor();
+            await renderCalendar();
+            await selectCalDay(selectedDate);
+
+        } catch(e) { showMsg('workoutMsg', e.message, 'err'); }
+    }
+
+    async function deleteWorkout() {
+        if (!currentWorkoutId || !confirm('Zmazať tréning?')) return;
+        try {
+            const res = await af(`/api/workouts/${currentWorkoutId}`, {method:'DELETE'});
+            if (!res.ok) throw new Error('Chyba');
+            toast('Tréning zmazaný', 'ok');
+            localStorage.removeItem('workout_' + user.id + '_' + selectedDate);
+            saveCalendarDatesLocal(calYear, calMonth, null);
+            currentWorkoutId = null;
+            await renderCalendar();
+            await selectCalDay(selectedDate);
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    // ── PROGRES GRAF ─────────────────────────────────────────────────────────────
+    async function loadProgress() {
+        const exercise = document.getElementById('progressExercise').value.trim();
+        if (!exercise) return toast('Zadaj názov cviku', 'err');
+
+        try {
+            const res = await af(`/api/workouts/progress?exercise=${encodeURIComponent(exercise)}`);
+            const data = await res.json();
+
+            if (!data || !data.length) {
+                toast('Žiadne dáta pre tento cvik', 'err');
+                return;
+            }
+
+            if (progressChart) progressChart.destroy();
+
+            progressChart = new Chart(document.getElementById('chartProgress'), {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.date).toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'})),
+                    datasets: [{
+                        label: `Max váha — ${exercise}`,
+                        data: data.map(d => d.maxWeight),
+                        borderColor: '#C8FF00',
+                        backgroundColor: 'rgba(200,255,0,0.08)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#C8FF00',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: false, ticks: { callback: v => v + ' kg' } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' kg' } }
+                    }
+                }
+            });
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+        async function loadWeeklyStats() {
+            const el = document.getElementById('weeklyStatsContent');
+            try {
+                const res = await af('/api/workouts/weekly-stats');
+                if (!res.ok) throw new Error();
+                const d = await res.json();
+
+                const volDiff = d.volumeDiff || 0;
+                const wrkDiff = d.workoutDiff || 0;
+                const volColor = volDiff >= 0 ? 'var(--acid)' : 'var(--red)';
+                const wrkColor = wrkDiff >= 0 ? 'var(--acid)' : 'var(--red)';
+                const volArrow = volDiff >= 0 ? '↑' : '↓';
+                const wrkArrow = wrkDiff >= 0 ? '↑' : '↓';
+
+                el.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:1rem">
+            <div style="background:var(--surface2);padding:1rem;text-align:center">
+                <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem">Tréningy tento týždeň</div>
+              <div style="font-family:var(--font-d);font-size:2.2rem;font-weight:900;color:var(--acid)">${d.thisWeekWorkouts}</div>
+                <div style="font-size:0.72rem;color:var(--muted);margin-top:0.1rem">${d.thisWeekDays || d.thisWeekWorkouts} ${(d.thisWeekDays || d.thisWeekWorkouts) === 1 ? 'deň' : 'dní'}</div>
+                <div style="font-size:0.75rem;color:${wrkColor};margin-top:0.2rem">${wrkArrow} ${Math.abs(wrkDiff)} vs minulý</div>
+                 </div>
+            <div style="background:var(--surface2);padding:1rem;text-align:center">
+                <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem">Objem tento týždeň</div>
+                <div style="font-family:var(--font-d);font-size:2.2rem;font-weight:900;color:var(--acid)">${d.thisWeekVolume} kg</div>
+                <div style="font-size:0.75rem;color:${volColor};margin-top:0.2rem">${volArrow} ${Math.abs(volDiff)} kg vs minulý týždeň</div>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+            <div>
+                <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem">Minulý týždeň — tréningy</div>
+                <div style="font-size:0.9rem;color:var(--muted)">${d.lastWeekWorkouts}× tréningov</div>
+            </div>
+            <div>
+                <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem">Minulý týždeň — objem</div>
+                <div style="font-size:0.9rem;color:var(--muted)">${d.lastWeekVolume} kg</div>
+            </div>
+        </div>`;
+            } catch {
+                el.innerHTML = '<div style="color:var(--muted);font-size:0.83rem">Žiadne dáta</div>';
+            }
+        }
 
     // ===== CLASSES =====
     async function loadMyClasses() {
@@ -1628,40 +2847,93 @@
         }
     }
 
+    let carouselIndex = 0;
+    let carouselTotal = 0;
+
     async function loadTrainers() {
+        const track = document.getElementById('trainerTrack');
+        const dots = document.getElementById('trainerDots');
+        track.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--muted)"><span class="spin"></span></div>';
+
+        const staticTrainers = [
+            {fullName:'Martin Horváth', specialization:'CrossFit & Silový tréning', avatarUrl:'', bio:'Certifikovaný CrossFit tréner s 8 rokmi skúseností. Špecializuje sa na funkčný tréning a budovanie sily.', grad:'135deg,#C8FF00,#00FFD1'},
+            {fullName:'Lucia Kováčová', specialization:'Joga & Pilates', avatarUrl:'', bio:'Inštruktorka jogy a pilates. Pomáha klientom nájsť rovnováhu medzi telom a mysľou.', grad:'135deg,#FF2D55,#FF9500'},
+            {fullName:'Peter Varga', specialization:'Box & Bojové umenia', avatarUrl:'', bio:'Profesionálny boxer a tréner bojových umení. 10 rokov v ringu, teraz odovzdáva skúsenosti ďalej.', grad:'135deg,#0A84FF,#00FFD1'},
+            {fullName:'Zuzana Novák', specialization:'Body Pump & Výživa', avatarUrl:'', bio:'Odborníčka na skupinové cvičenie a výživové poradenstvo. Pomáha dosiahnuť ciele zdravo a trvalo.', grad:'135deg,#C8FF00,#FF9500'},
+            {fullName:'Tomáš Sloboda', specialization:'HIIT & Funkčný tréning', avatarUrl:'', bio:'HIIT špecialista s vášňou pre funkčný tréning. Každý tréning je iný — nikdy sa nenudíš.', grad:'135deg,#FF2D55,#C8FF00'},
+            {fullName:'Andrea Blaho', specialization:'Spinning & Kardio', avatarUrl:'', bio:'Spinning inštruktorka a kardio nadšenkyňa. Jej hodiny sú plné energie a motivácie.', grad:'135deg,#0A84FF,#FF2D55'},
+        ];
+
+        let trainers = staticTrainers;
         try {
             const res = await af('/api/trainer/list');
-            const data = await res.json();
-            if (!res.ok || !Array.isArray(data)) return;
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length) {
+                    trainers = data.map((t, i) => ({
+                        ...t,
+                        bio: t.bio && t.bio.trim() ? t.bio : (staticTrainers[i % staticTrainers.length]?.bio || 'Certifikovaný tréner FITNESS PRO.'),                        grad: staticTrainers[i % staticTrainers.length]?.grad || '135deg,#C8FF00,#00FFD1'
+                    }));
+                }
+            }
+        } catch {}
 
-            const grads = [
-                '#C8FF00,#00FFD1',
-                '#FF2D55,#FF9500',
-                '#0A84FF,#00FFD1',
-                '#C8FF00,#FF9500',
-                '#FF2D55,#C8FF00',
-                '#0A84FF,#FF2D55'
-            ];
+        carouselTotal = trainers.length;
+        carouselIndex = 0;
 
-            document.getElementById('trGrid').innerHTML = data.map((t, i) => {
-                const ini = (t.fullName || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        track.innerHTML = trainers.map((t, i) => {
+            const ini = (t.fullName || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+            const bgStyle = t.avatarUrl
+                ? `background-image: url('${t.avatarUrl}'); background-color: #1a1a1a;`
+                : `background: linear-gradient(${t.grad || '135deg,#C8FF00,#00FFD1'});`;
+            return `
+        <div class="trainer-slide" onclick="this.classList.toggle('expanded')">
+            <div class="trainer-slide-bg" style="${bgStyle}"></div>
+            <div class="trainer-slide-initials">${ini}</div>
+            <div class="trainer-slide-overlay"></div>
+            <div class="trainer-slide-content">
+                <div class="trainer-slide-name">${t.fullName || '—'}</div>
+                <div class="trainer-slide-spec">${t.specialization || 'Tréner'}</div>
+                <div class="trainer-slide-bio">${t.bio || ''}</div>
+            </div>
+        </div>`;
+        }).join('');
 
-                return `<div class="tr-card">
-                <div class="tr-av" style="background: ${t.avatarUrl
-                    ? `url('${t.avatarUrl}'), linear-gradient(135deg, ${grads[i % grads.length]})`
-                    : `linear-gradient(135deg, ${grads[i % grads.length]})`};
-                    background-size: cover; background-position: center;">
-                    ${!t.avatarUrl ? ini : ''}
-                </div>
-                <div class="tr-name">${t.fullName || '—'}</div>
-                <div class="tr-spec">${t.specialization || 'Tréner'}</div>
-            </div>`;
-            }).join('');
+        dots.innerHTML = trainers.map((_, i) =>
+            `<div class="trainer-dot ${i===0?'active':''}" onclick="carouselGo(${i})"></div>`
+        ).join('');
 
-        } catch {
-            // fallback na statické
-        }
+        updateCarousel();
     }
+
+    function updateCarousel() {
+        document.getElementById('trainerTrack').style.transform = `translateX(-${carouselIndex * 100}%)`;
+        document.querySelectorAll('.trainer-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === carouselIndex);
+        });
+    }
+
+    function carouselNext() {
+        carouselIndex = (carouselIndex + 1) % carouselTotal;
+        updateCarousel();
+    }
+
+    function carouselPrev() {
+        carouselIndex = (carouselIndex - 1 + carouselTotal) % carouselTotal;
+        updateCarousel();
+    }
+
+    function carouselGo(i) {
+        carouselIndex = i;
+        updateCarousel();
+    }
+
+    // Auto-advance každých 5 sekúnd
+    setInterval(() => {
+        if (document.getElementById('pg-trainers')?.classList.contains('active')) {
+            carouselNext();
+        }
+    }, 5000);
 
     // ===== QR =====
     async function genQR() {
@@ -1705,14 +2977,59 @@
 
     // ===== STATS =====
     function initBarChart() {
-        const days=['Po','Ut','St','Šv','Pi','So','Ne'];
-        const vals=[8,5,9,4,7,3,1];
-        const max=Math.max(...vals);
-        document.getElementById('barChart').innerHTML=vals.map((v,i)=>`
-<div style="flex:1;display:flex;flex-direction:column;align-items:center">
-  <div style="width:100%;height:${Math.round(v/max*68)}px;background:${v===max?'var(--acid)':'rgba(200,255,0,0.28)'};border-radius:2px 2px 0 0"></div>
-</div>`).join('');
-        document.getElementById('barLabels').innerHTML=days.map(d=>`<div style="flex:1;text-align:center;font-size:0.63rem;color:var(--muted)">${d}</div>`).join('');
+        Chart.defaults.color = '#6E6E73';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+        Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+        // Graf aktivity podľa dňa
+        new Chart(document.getElementById('chartActivity'), {
+            type: 'bar',
+            data: {
+                labels: ['Po','Ut','St','Šv','Pi','So','Ne'],
+                datasets: [{
+                    label: 'Návštevy',
+                    data: [8,5,9,4,7,3,1],
+                    backgroundColor: [
+                        'rgba(200,255,0,0.85)','rgba(200,255,0,0.45)','rgba(200,255,0,0.85)',
+                        'rgba(200,255,0,0.45)','rgba(200,255,0,0.85)','rgba(200,255,0,0.3)','rgba(200,255,0,0.2)'
+                    ],
+                    borderRadius: 4,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { stepSize: 2 } }
+                }
+            }
+        });
+
+        // Koláčový graf obľúbených lekcií
+        new Chart(document.getElementById('chartFavLessons'), {
+            type: 'doughnut',
+            data: {
+                labels: ['CrossFit','HIIT','Boxing','Joga','Body Pump'],
+                datasets: [{
+                    data: [12,8,5,3,2],
+                    backgroundColor: ['#C8FF00','#00FFD1','#FF2D55','#FF9500','#0A84FF'],
+                    borderColor: '#111111',
+                    borderWidth: 3,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: { position: 'right', labels: { font: { size: 11 }, padding: 12 } }
+                }
+            }
+        });
     }
 
     async function loadStats() {
@@ -1773,45 +3090,6 @@
 
     let currentTrainerId = null;
 
-    async function loadMyTrainer() {
-        const trainerListEl = document.getElementById('chatTrainers');
-        trainerListEl.innerHTML = '<div style="padding:1rem;"><span class="spin"></span></div>';
-
-        try {
-            const response = await af('/api/users/my-trainer');
-            const data = await response.json();
-
-            if (data.message && data.message.includes('Nemáš priradeného')) {
-                trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--muted); font-size:0.8rem;">
-            Nemáš priradeného trénera.
-        </div>`;
-                return;
-            }
-
-            if (data.id) {
-                currentTrainerId = data.id;
-
-                trainerListEl.innerHTML = `
-            <div class="cl-row cl-row-selected" onclick="selectTrainer('${data.id}')">
-                <div class="cl-row-main">
-                    <div class="cl-row-name">${data.fullName || 'Tréner'}</div>
-                    <div class="cl-row-meta">
-                        <span><i class="fas fa-dumbbell"></i> ${data.specialization || 'Osobný tréner'}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-
-                loadMessagesMember();
-            } else {
-                trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--muted);">Nepodarilo sa načítať trénera</div>`;
-            }
-        } catch (e) {
-            console.error("Chyba pri načítaní trénera:", e);
-            trainerListEl.innerHTML = `<div style="padding:1rem; color:var(--red);">Chyba načítania</div>`;
-        }
-    }
-
     async function loadTrainersForChat() {
         const listEl = document.getElementById('chatTrainers');
         listEl.innerHTML = '<div style="padding:1rem;"><span class="spin"></span></div>';
@@ -1860,44 +3138,7 @@
 
         loadMessagesMember();
     }
-
-    function addMessageToChat(message) {
-        const chatBox = document.getElementById('chatMessages');
-        if (!chatBox) return;
-
-        const isMe = message.senderId === user.id;
-        // Opravené: používame senderId na určenie odosielateľa
-        const senderName = isMe ? 'Ja' : 'Tréner';  // Žiadna diakritika v kóde, len v zobrazení
-
-        // Skontrolujeme, či správa už neexistuje (predchádzanie duplicitám)
-        const messageId = `msg-${message.timestamp}-${message.senderId}`;
-        if (document.getElementById(messageId)) return;
-
-        const time = message.timestamp ? formatMessageTime(message.timestamp) : '';
-
-        const messageHtml = `
-        <div id="${messageId}" class="chat-bubble ${isMe ? 'chat-bubble-right' : 'chat-bubble-left'} ${!isMe && !message.read ? 'chat-unread' : ''}">
-            <div class="chat-header">
-                <span>${senderName}</span>
-                <span class="chat-time">${time}</span>
-            </div>
-            <div class="chat-content">${escapeHtml(message.content)}</div>
-        </div>
-    `;
-
-        chatBox.innerHTML += messageHtml;
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
     window.addEventListener('resize', checkMobileView);
-
-    function openChatWithTrainer(trainerId, trainerName) {
-        currentTrainerId = trainerId;
-        document.getElementById('chatMessages').innerHTML = `<div style="text-align:center; padding:2rem; color:var(--muted);">
-    <b>Chat s trénerom ${trainerName}</b><br><br>Načítavam správy...
-</div>`;
-        loadMessagesMember();
-    }
 
     async function loadMessagesMember() {
         if (!currentTrainerId) return;
@@ -2003,12 +3244,6 @@
             console.error('❌ Chyba pri odosielaní:', e);
             toast('Nepodarilo sa odoslať: ' + e.message, 'err');
         }
-    }
-
-
-
-    if (go.toString().includes('messages')) {
-        loadTrainersForChat();
     }
 
     function escapeHtml(unsafe) {
