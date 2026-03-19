@@ -52,6 +52,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/workout-presets/**").permitAll()
 
                         // Ostatné chránené
                         .requestMatchers("/api/auth/me", "/api/auth/qr-code").authenticated()

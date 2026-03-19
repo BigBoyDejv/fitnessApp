@@ -1014,6 +1014,40 @@
                 font-size: 0.55rem;
             }
         }
+
+        /* ── PRESET CARDS ── */
+        .preset-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.12s;
+        }
+        .preset-card:last-child { border-bottom: none; }
+        .preset-card:hover { background: rgba(255,255,255,0.03); }
+        .preset-card.selected {
+            background: rgba(200,255,0,0.05);
+            border-left: 3px solid var(--acid);
+        }
+        .preset-name {
+            font-weight: 700;
+            font-size: 0.92rem;
+            margin-bottom: 0.2rem;
+        }
+        .preset-meta {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+        .preset-card-main { flex: 1; }
+        .preset-exercise-row {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -1445,6 +1479,55 @@
                     <div class="empty" style="padding:1rem"><span class="spin"></span></div>
                 </div>
             </div>
+
+            <!-- PRESET PANEL -->
+            <div class="panel" id="presetPanel" style="margin-bottom:1.2rem">
+                <div class="ph">
+                    <span class="pt"><i class="fas fa-bookmark" style="margin-right:0.4rem;opacity:0.6"></i>Moje tréningové plány</span>
+                    <button class="btn btn-acid btn-sm" onclick="openCreatePreset()">
+                        <i class="fas fa-plus"></i> Nový plán
+                    </button>
+                </div>
+                <div class="pb" id="presetList">
+                    <div class="empty"><span class="spin"></span></div>
+                </div>
+            </div>
+
+            <!-- PRESET DETAIL MODAL (in-flow, nie fixed) -->
+            <div id="presetDetailWrap" style="display:none;margin-bottom:1.2rem">
+                <div class="panel">
+                    <div class="ph">
+                        <span class="pt" id="presetDetailName">—</span>
+                        <div style="display:flex;gap:0.5rem">
+                            <button class="btn btn-ghost btn-sm" onclick="editPresetName()">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-red btn-sm" onclick="deletePreset()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-ghost btn-sm" onclick="closePresetDetail()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="pb">
+                        <div id="presetExerciseList" style="margin-bottom:1rem"></div>
+                        <button class="btn btn-ghost btn-sm" onclick="addExerciseToPreset()" style="margin-bottom:1rem">
+                            <i class="fas fa-plus"></i> Pridať cvik
+                        </button>
+                        <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
+                            <button class="btn btn-acid" onclick="startWorkoutFromPreset()">
+                                <i class="fas fa-play"></i> Spustiť tréning
+                            </button>
+                            <button class="btn btn-ghost btn-sm" onclick="savePresetChanges()">
+                                <i class="fas fa-save"></i> Uložiť zmeny
+                            </button>
+                        </div>
+                        <div class="fm" id="presetMsg"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Editor tréning -->
             <div class="panel" id="workoutEditor" style="display:none">
                 <div class="ph">
@@ -1540,6 +1623,327 @@
         document.getElementById('sideAvatar').textContent = ini;
         document.getElementById('sideName').textContent = user.fullName||'—';
         document.getElementById('sideEmail').textContent = user.email||'—';
+    }
+    // ── WORKOUT PRESETS ──
+    let currentPreset = null;
+
+    async function loadPresets() {
+        const el = document.getElementById('presetList');
+        el.innerHTML = '<div class="empty"><span class="spin"></span></div>';
+        try {
+            const res = await af('/api/workout-presets');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            if (!Array.isArray(data) || !data.length) {
+                el.innerHTML = `<div class="empty" style="padding:1.5rem">
+                <i class="fas fa-bookmark"></i>
+                <p style="margin-bottom:0.8rem">Žiadne plány — vytvor prvý preset</p>
+                <button class="btn btn-ghost btn-sm" onclick="openCreatePreset()">
+                    <i class="fas fa-plus"></i> Vytvoriť plán
+                </button>
+            </div>`;
+                return;
+            }
+            el.innerHTML = data.map(p => {
+                const lastUsed = p.lastUsedAt
+                    ? new Date(p.lastUsedAt).toLocaleDateString('sk-SK', {day:'numeric', month:'short'})
+                    : 'nikdy';
+                return `
+            <div class="preset-card" id="pc-${p.id}" onclick="openPresetDetail('${p.id}')">
+                <div class="preset-card-main">
+                    <div class="preset-name">${p.name}</div>
+                    <div class="preset-meta">${p.exerciseCount} cvikov · použitý ${lastUsed} · ${p.useCount}× celkovo</div>
+                </div>
+                <div style="display:flex;gap:0.4rem;flex-shrink:0">
+                    <button class="btn btn-acid btn-sm" onclick="event.stopPropagation();quickStart('${p.id}')">
+                        <i class="fas fa-play"></i> Štart
+                    </button>
+                </div>
+            </div>`;
+            }).join('');
+        } catch(e) {
+            el.innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
+        }
+    }
+
+    async function openPresetDetail(id) {
+        // Highlight karta
+        document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('pc-' + id)?.classList.add('selected');
+
+        const wrap = document.getElementById('presetDetailWrap');
+        wrap.style.display = 'block';
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        document.getElementById('presetExerciseList').innerHTML = '<div class="empty"><span class="spin"></span></div>';
+
+        try {
+            const res = await af('/api/workout-presets/' + id);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            currentPreset = data;
+            document.getElementById('presetDetailName').textContent = data.name;
+            renderPresetExercises(data.exercises || []);
+        } catch(e) {
+            document.getElementById('presetExerciseList').innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
+        }
+    }
+
+    function renderPresetExercises(exercises) {
+        const el = document.getElementById('presetExerciseList');
+        if (!exercises.length) {
+            el.innerHTML = '<div style="color:var(--muted);font-size:0.83rem;padding:0.5rem 0">Žiadne cviky — klikni Pridať cvik</div>';
+            return;
+        }
+        el.innerHTML = exercises.map((ex, idx) => {
+            // Posledná váha = prvý set (alebo "—")
+            const lastSet = ex.sets && ex.sets.length ? ex.sets[0] : null;
+            const lastWeight = lastSet ? (lastSet.weight ? lastSet.weight + ' kg' : (lastSet.duration ? Math.round(lastSet.duration/60)+ ' min' : '—')) : '—';
+            const lastReps = lastSet ? (lastSet.reps || '—') : '—';
+            const setsCount = ex.sets ? ex.sets.length : 0;
+
+            return `
+        <div class="preset-exercise-row" id="per-${idx}" data-idx="${idx}">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
+                <span style="font-size:0.85rem;font-weight:600;flex:1">${ex.name}</span>
+                <span class="badge b-grey" style="font-size:0.6rem">${getCategoryIcon(ex.category)} ${ex.category || 'sila'}</span>
+                <button class="btn btn-red btn-sm" style="padding:0.2rem 0.5rem;font-size:0.65rem"
+                    onclick="removePresetExercise(${idx})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="display:grid;grid-template-columns:60px 1fr 80px 80px;gap:0.4rem;align-items:center">
+                <span style="font-size:0.65rem;color:var(--muted);font-family:var(--font-d);letter-spacing:0.1em">SÉRIE</span>
+                <span></span>
+                <span style="font-size:0.65rem;color:var(--muted);font-family:var(--font-d);letter-spacing:0.1em;text-align:center">${getCol1Label(ex.trackType)}</span>
+                <span style="font-size:0.65rem;color:var(--muted);font-family:var(--font-d);letter-spacing:0.1em;text-align:center">${getCol2Label(ex.trackType)}</span>
+            </div>
+            ${(ex.sets || []).map((s, si) => `
+            <div style="display:grid;grid-template-columns:60px 1fr 80px 80px;gap:0.4rem;align-items:center;margin-top:0.25rem">
+                <span style="font-size:0.75rem;color:var(--muted)">#${si+1}</span>
+                <div style="display:flex;align-items:center;gap:0.35rem">
+                    <button class="btn btn-ghost" style="padding:0.2rem 0.4rem;font-size:0.65rem;opacity:0.5"
+                        onclick="removePresetSet(${idx},${si})">−</button>
+                    <button class="btn btn-ghost" style="padding:0.2rem 0.4rem;font-size:0.65rem;opacity:0.5"
+                        onclick="addPresetSet(${idx})">+</button>
+                </div>
+                <input class="set-input" type="number" min="0" step="0.5"
+                    value="${s.weight || s.duration ? (s.duration ? Math.round(s.duration/60) : s.weight) || '' : ''}"
+                    placeholder="—"
+                    onchange="updatePresetSet(${idx},${si},'col1',this.value)"
+                    style="text-align:center">
+                <input class="set-input" type="number" min="0"
+                    value="${s.reps || ''}"
+                    placeholder="—"
+                    onchange="updatePresetSet(${idx},${si},'col2',this.value)"
+                    style="text-align:center">
+            </div>`).join('')}
+            <button class="btn btn-ghost btn-sm" style="margin-top:0.4rem;font-size:0.68rem;opacity:0.7"
+                onclick="addPresetSet(${idx})">
+                <i class="fas fa-plus"></i> Séria
+            </button>
+        </div>`;
+        }).join('<div style="height:0.6rem;border-top:1px solid var(--border);margin:0.6rem 0"></div>');
+    }
+
+    function getCategoryIcon(cat) { return cat === 'kardio' ? '🏃' : '💪'; }
+    function getCol1Label(trackType) {
+        const m = {weight_reps:'Váha',time_only:'Min',time_distance:'Min',reps_only:'—',custom:'Hod. 1'};
+        return m[trackType] || 'Váha';
+    }
+    function getCol2Label(trackType) {
+        const m = {weight_reps:'Reps',time_only:'—',time_distance:'KM',reps_only:'Reps',custom:'Hod. 2'};
+        return m[trackType] || 'Reps';
+    }
+
+    // In-place edit hodnoty v presete
+    function updatePresetSet(exIdx, setIdx, col, val) {
+        if (!currentPreset || !currentPreset.exercises) return;
+        const ex = currentPreset.exercises[exIdx];
+        if (!ex || !ex.sets) return;
+        const s = ex.sets[setIdx];
+        const numVal = parseFloat(val) || 0;
+        if (col === 'col1') {
+            if (ex.trackType === 'time_only' || ex.trackType === 'time_distance') {
+                s.duration = numVal * 60; // ulož ako sekundy
+            } else {
+                s.weight = numVal;
+            }
+        } else {
+            if (ex.trackType === 'time_distance') s.distance = numVal;
+            else s.reps = numVal;
+        }
+    }
+
+    function addPresetSet(exIdx) {
+        if (!currentPreset?.exercises) return;
+        const ex = currentPreset.exercises[exIdx];
+        if (!ex) return;
+        if (!ex.sets) ex.sets = [];
+        // Skopíruj poslednú sériu ako základ
+        const last = ex.sets[ex.sets.length - 1];
+        ex.sets.push(last ? { ...last } : { weight: 0, reps: 0, setNumber: ex.sets.length + 1 });
+        renderPresetExercises(currentPreset.exercises);
+    }
+
+    function removePresetSet(exIdx, setIdx) {
+        if (!currentPreset?.exercises) return;
+        const ex = currentPreset.exercises[exIdx];
+        if (!ex?.sets) return;
+        ex.sets.splice(setIdx, 1);
+        ex.sets.forEach((s, i) => s.setNumber = i + 1);
+        renderPresetExercises(currentPreset.exercises);
+    }
+
+    function removePresetExercise(idx) {
+        if (!currentPreset?.exercises) return;
+        currentPreset.exercises.splice(idx, 1);
+        renderPresetExercises(currentPreset.exercises);
+    }
+
+    function addExerciseToPreset() {
+        if (!currentPreset) return;
+        const name = prompt('Názov cviku:');
+        if (!name?.trim()) return;
+        const cat = confirm('Kardio? (OK = kardio, Zrušiť = sila)') ? 'kardio' : 'sila';
+        const trackType = cat === 'kardio' ? 'time_only' : 'weight_reps';
+        if (!currentPreset.exercises) currentPreset.exercises = [];
+        currentPreset.exercises.push({
+            name: name.trim(), category: cat, trackType,
+            sets: [{ setNumber: 1, weight: 0, reps: 0 }]
+        });
+        renderPresetExercises(currentPreset.exercises);
+    }
+
+    async function savePresetChanges() {
+        if (!currentPreset) return;
+        try {
+            const res = await af('/api/workout-presets/' + currentPreset.id, {
+                method: 'PUT',
+                body: JSON.stringify({ exercises: currentPreset.exercises })
+            });
+            if (!res.ok) throw new Error('Chyba');
+            showMsg('presetMsg', '✓ Plán uložený!', 'ok');
+            toast('Plán uložený', 'ok');
+            loadPresets();
+        } catch(e) { showMsg('presetMsg', e.message, 'err'); }
+    }
+
+    async function deletePreset() {
+        if (!currentPreset || !confirm(`Zmazať plán "${currentPreset.name}"?`)) return;
+        try {
+            const res = await af('/api/workout-presets/' + currentPreset.id, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Chyba');
+            toast('Plán zmazaný', 'ok');
+            closePresetDetail();
+            loadPresets();
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    function closePresetDetail() {
+        document.getElementById('presetDetailWrap').style.display = 'none';
+        document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+        currentPreset = null;
+    }
+
+    // Rýchly štart bez otvárania detailu
+    async function quickStart(id) {
+        try {
+            const res = await af('/api/workout-presets/' + id);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            currentPreset = data;
+            startWorkoutFromPreset();
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    // ⭐ Hlavná funkcia — otvorí editor s predvyplnenými cvikmi
+    function startWorkoutFromPreset() {
+        if (!currentPreset) return;
+
+        // Označenie použitia (async, neblokuj UI)
+        af('/api/workout-presets/' + currentPreset.id + '/use', { method: 'POST' }).catch(() => {});
+
+        // Nastav editor
+        selectedDate = selectedDate || new Date().toISOString().split('T')[0];
+        currentWorkoutId = null;
+        editorFeeling = 3;
+        document.getElementById('wTitle').value = currentPreset.name;
+        document.getElementById('wNotes').value = '';
+        document.getElementById('exerciseList').innerHTML = '';
+        document.getElementById('editorTitle').textContent =
+            'Tréning z plánu: ' + currentPreset.name;
+        document.getElementById('workoutMsg').className = 'fm';
+        updateFeelingBtns();
+
+        // Pridaj cviky z presetu s poslednými váhami
+        (currentPreset.exercises || []).forEach(ex => {
+            addExercise(ex.name, ex.sets || [], ex.category || 'sila', ex.trackType || 'weight_reps');
+        });
+
+        document.getElementById('workoutEditor').style.display = 'block';
+        document.getElementById('presetDetailWrap').style.display = 'none';
+        document.getElementById('workoutEditor').scrollIntoView({ behavior: 'smooth' });
+        toast('Plán načítaný — uprav váhy a štartuj!', 'ok');
+    }
+
+    // ─── Po uložení workout → aktualizuj preset s novými váhami ───
+    // Toto volaj na konci saveWorkout() po úspešnom uložení
+    async function syncPresetAfterWorkout(savedExercises) {
+        if (!currentPreset?.id) return;
+        // Zober posledné váhy z uloženého tréningu a aktualizuj preset
+        const updatedExercises = (currentPreset.exercises || []).map(pEx => {
+            const match = savedExercises.find(sEx =>
+                sEx.name.toLowerCase() === pEx.name.toLowerCase()
+            );
+            if (!match || !match.sets?.length) return pEx;
+            // Aktualizuj váhy v presete podľa posledného tréningu
+            return { ...pEx, sets: match.sets.map(s => ({ ...s })) };
+        });
+        try {
+            await af('/api/workout-presets/' + currentPreset.id + '/use', {
+                method: 'POST',
+                body: JSON.stringify({ exercises: updatedExercises })
+            });
+        } catch {} // tichý fail — nie kritické
+    }
+
+    // Vytvorenie nového presetu
+    function openCreatePreset() {
+        const name = prompt('Názov plánu (napr. "Upper A", "Push Day"):');
+        if (!name?.trim()) return;
+        createPresetFromScratch(name.trim());
+    }
+
+    async function createPresetFromScratch(name) {
+        try {
+            const res = await af('/api/workout-presets', {
+                method: 'POST',
+                body: JSON.stringify({ name, exercises: [] })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            toast('Plán vytvorený!', 'ok');
+            currentPreset = data;
+            loadPresets();
+            setTimeout(() => openPresetDetail(data.id), 400);
+        } catch(e) { toast(e.message, 'err'); }
+    }
+
+    async function editPresetName() {
+        if (!currentPreset) return;
+        const name = prompt('Nový názov:', currentPreset.name);
+        if (!name?.trim() || name.trim() === currentPreset.name) return;
+        try {
+            const res = await af('/api/workout-presets/' + currentPreset.id, {
+                method: 'PUT', body: JSON.stringify({ name: name.trim() })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            currentPreset.name = data.name;
+            document.getElementById('presetDetailName').textContent = data.name;
+            loadPresets();
+            toast('Názov zmenený', 'ok');
+        } catch(e) { toast(e.message, 'err'); }
     }
 
     // ── BOOT ──
@@ -1983,6 +2387,7 @@
     async function initWorkoutPage() {
         await renderCalendar();
         loadWeeklyStats();
+        loadPresets(); // ← pridaj tento riadok
     }
 
     async function renderCalendar() {
@@ -2584,6 +2989,9 @@
             saveWorkoutLocal(selectedDate, savedData);
             saveCalendarDatesLocal(calYear, calMonth, null);
             toast('Tréning uložený! 💪', 'ok');
+            if (currentPreset?.id) {
+                syncPresetAfterWorkout(collectedExercises); // collectedExercises = pole čo buduješ počas saveWorkout
+            }
 
             closeEditor();
             await renderCalendar();
