@@ -9,18 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <style>
-        :root{--acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;--bg:#0A0A0A;--surface:#111111;--surface2:#1A1A1A;--border:#222222;--text:#F0F0F0;--muted:#666666;--font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;}
+        :root{--acid:#C8FF00;--acid2:#00FFD1;--red:#FF2D55;--orange:#FF9500;--blue:#0A84FF;--bg:#0A0A0A;--surface:#111111;--surface2:#1A1A1A;--border:#222222;--border2:#2E2E32;--text:#F0F0F0;--muted:#666666;--font-d:'Barlow Condensed',sans-serif;--font-b:'DM Sans',sans-serif;}
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;min-height:100vh;}
         h1,h2,h3,h4{font-family:var(--font-d);letter-spacing:0.02em;text-transform:uppercase;}
         ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--acid);}
-
         .sidebar{width:255px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
         .sidebar-logo{padding:1.4rem 1.5rem;border-bottom:1px solid var(--border);}
         .sidebar-logo .logo{font-family:var(--font-d);font-size:1.7rem;font-weight:900;color:var(--acid);letter-spacing:0.12em;}
         .role-tag{display:inline-block;font-family:var(--font-d);font-size:0.63rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:rgba(200,255,0,0.1);color:var(--acid);border:1px solid rgba(200,255,0,0.22);padding:0.15rem 0.6rem;border-radius:2px;margin-top:0.4rem;}
         .sidebar-user{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.8rem;}
-        .avatar img{width:38px;height:38px;border-radius:50%;object-fit:cover;}
         .user-info .name{font-size:0.87rem;font-weight:500;}
         .user-info .email{font-size:0.7rem;color:var(--muted);}
         .sidebar-nav{flex:1;padding:0.7rem 0;}
@@ -33,7 +31,6 @@
         .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);}
         .logout-btn{display:flex;align-items:center;gap:0.8rem;color:var(--muted);font-size:0.84rem;cursor:pointer;transition:color 0.2s;background:none;border:none;width:100%;font-family:var(--font-b);}
         .logout-btn:hover{color:var(--red);}
-
         .main{margin-left:255px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
         .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;background:rgba(10,10,10,0.96);backdrop-filter:blur(12px);z-index:50;}
         .page-title{font-size:1.3rem;font-weight:800;letter-spacing:0.05em;}
@@ -41,569 +38,17 @@
         .live-dot{width:7px;height:7px;border-radius:50%;background:var(--acid);box-shadow:0 0 6px var(--acid);animation:blink 2s infinite;}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
         .content{padding:1.8rem 2rem;flex:1;}
-
-        /* ── LAYOUT GRIDS ── */
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
         .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
         .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.6rem;}
         .ph{padding:0.95rem 1.4rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
         .pt{font-size:1rem;font-weight:800;letter-spacing:0.05em;}
         .pb{padding:1.3rem;}
-        .method{font-family:var(--font-d);font-size:0.63rem;font-weight:700;letter-spacing:0.1em;padding:0.17rem 0.52rem;border-radius:2px;}
-        .m-get{background:rgba(0,255,209,0.12);color:var(--acid2);}
-        .m-post{background:rgba(200,255,0,0.12);color:var(--acid);}
-        .m-put{background:rgba(255,149,0,0.12);color:var(--orange);}
-        .m-del{background:rgba(255,45,85,0.12);color:var(--red);}
-
         .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.6rem;}
         .sc{background:var(--surface);padding:1.2rem 1rem;}
         .sc-icon{font-size:1rem;color:var(--acid);margin-bottom:0.5rem;}
         .sc-val{font-family:var(--font-d);font-size:2.2rem;font-weight:900;line-height:1;}
         .sc-lbl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;}
-
-        /* === CHAT - KOMPAKTNÝ DIZAJN S VIDITEĽNÝM TEXTOM === */
-        .chat-container {
-            display: flex;
-            gap: 0;
-            height: 500px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-            background: var(--surface);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Ľavý panel - zoznam trénerov */
-        .chat-sidebar {
-            width: 200px;
-            border-right: 1px solid var(--border);
-            overflow-y: auto;
-            background: var(--surface);
-        }
-
-        /* Pravý panel - chat okno */
-        .chat-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg);
-        }
-
-        /* Chat správy - kontajner */
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: var(--bg);
-        }
-
-        /* Chat bubliny - kompaktnejšie */
-        .chat-bubble {
-            max-width: 70%;
-            padding: 8px 12px;
-            border-radius: 14px;
-            word-wrap: break-word;
-            position: relative;
-            animation: fadeIn 0.2s;
-        }
-
-        .chat-bubble-left {
-            align-self: flex-start;
-            background: var(--surface2);
-            border-bottom-left-radius: 4px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .chat-bubble-right {
-            align-self: flex-end;
-            background: var(--acid);
-            border-bottom-right-radius: 4px;
-            box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* TRAINER CAROUSEL */
-        .trainer-carousel-wrap {
-            position: relative;
-            overflow: hidden;
-            border-radius: 8px;
-            height: 420px;
-            background: var(--surface2);
-        }
-        .trainer-carousel-track {
-            display: flex;
-            height: 100%;
-            transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
-        }
-        .trainer-slide {
-            min-width: 100%;
-            height: 100%;
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        .trainer-slide-bg {
-            position: absolute;
-            inset: 0;
-            background-size: 160px 160px;
-            background-repeat: no-repeat;
-            background-position: center 60px;
-            transition: transform 0.6s ease;
-        }
-
-        .trainer-slide:hover .trainer-slide-bg {
-            transform: scale(1.04);
-        }
-        .trainer-slide-overlay {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center 90px, transparent 90px, rgba(0,0,0,0.6) 160px),
-            linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
-        }
-
-        .trainer-slide-content {
-            position: relative;
-            z-index: 2;
-            padding: 1.8rem;
-            width: 100%;
-        }
-        .trainer-slide-initials {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-d);
-            font-size: 6rem;
-            font-weight: 900;
-            opacity: 0.12;
-            letter-spacing: 0.1em;
-        }
-        .trainer-slide-name {
-            font-family: var(--font-d);
-            font-size: 1.8rem;
-            font-weight: 900;
-            letter-spacing: 0.06em;
-            color: #fff;
-            text-transform: uppercase;
-            margin-bottom: 0.3rem;
-        }
-        .trainer-slide-spec {
-            font-size: 0.78rem;
-            color: var(--acid);
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-        }
-        .trainer-slide-bio {
-            font-size: 0.83rem;
-            color: rgba(255,255,255,0.75);
-            line-height: 1.65;
-            max-width: 520px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-        }
-        .trainer-slide:hover .trainer-slide-bio,
-        .trainer-slide.expanded .trainer-slide-bio {
-            max-height: 120px;
-        }
-        .trainer-carousel-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.55);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: #fff;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: all 0.2s;
-            backdrop-filter: blur(6px);
-        }
-        .trainer-carousel-btn:hover {
-            background: var(--acid);
-            color: #000;
-            border-color: var(--acid);
-        }
-        .trainer-carousel-prev { left: 12px; }
-        .trainer-carousel-next { right: 12px; }
-        .trainer-carousel-dots {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 6px;
-            z-index: 10;
-        }
-        .trainer-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.35);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .trainer-dot.active {
-            background: var(--acid);
-            width: 20px;
-            border-radius: 3px;
-        }
-
-        /* STATS CHARTS */
-        .stats-chart-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.2rem;
-            margin-bottom: 1.2rem;
-        }
-        .stats-kpi-row {
-            display: grid;
-            grid-template-columns: repeat(4,1fr);
-            gap: 1px;
-            background: var(--border);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 1.2rem;
-        }
-        .stats-kpi-card {
-            background: var(--surface);
-            padding: 1.1rem 1rem;
-            text-align: center;
-        }
-        .stats-kpi-val {
-            font-family: var(--font-d);
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--acid);
-            line-height: 1;
-        }
-        .stats-kpi-lbl {
-            font-size: 0.62rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-top: 0.25rem;
-        }
-        .chart-panel-inner {
-            position: relative;
-            height: 200px;
-        }
-        .chart-panel-inner canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        @media(max-width:600px) {
-            .stats-chart-grid { grid-template-columns: 1fr; }
-            .stats-kpi-row { grid-template-columns: 1fr 1fr; }
-            .trainer-carousel-wrap { height: 340px; }
-            .trainer-slide-name { font-size: 1.4rem; }
-        }
-
-
-
-        /* HLAVIČKA SPRÁVY */
-        .chat-header {
-            font-size: 0.6rem;
-            margin-bottom: 3px;
-            display: flex;
-            gap: 6px;
-            font-weight: 500;
-        }
-
-        /* Farba mena odosielateľa */
-        .chat-bubble-left .chat-header span:first-child {
-            color: var(--acid);
-        }
-
-        .chat-bubble-right .chat-header span:first-child {
-            color: #000000;
-            font-weight: 700;
-        }
-
-        .chat-time {
-            font-size: 0.55rem;
-            color: inherit;
-            opacity: 0.6;
-        }
-
-        /* OBSAH SPRÁVY - HLAVNÉ PRAVIDLÁ PRE VIDITEĽNOSŤ TEXTU */
-        .chat-content {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            word-break: break-word;
-            white-space: pre-wrap;
-        }
-
-        /* Tvoje správy (zelené) - ČIERNY TEXT */
-        .chat-bubble-right .chat-content {
-            color: #000000 !important;
-            font-weight: 500;
-        }
-
-        /* Správy od trénera (tmavé) - BIELY TEXT */
-        .chat-bubble-left .chat-content {
-            color: #FFFFFF !important;
-            font-weight: 400;
-        }
-
-        /* Debug - pre istotu nastav farby priamo na bubliny */
-        .chat-bubble-right {
-            color: #000000;
-        }
-
-        .chat-bubble-left {
-            color: #FFFFFF;
-        }
-
-        /* Neprečítaná správa - indikátor */
-        .chat-unread {
-            position: relative;
-        }
-
-        .chat-unread::after {
-            content: '●';
-            color: var(--acid);
-            font-size: 0.8rem;
-            position: absolute;
-            right: -8px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        /* Vstupná lišta */
-        .chat-input-area {
-            display: flex;
-            gap: 6px;
-            padding: 10px;
-            border-top: 1px solid var(--border);
-            background: var(--surface);
-        }
-
-        .chat-input {
-            flex: 1;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 8px 14px;
-            color: var(--text);
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--acid);
-        }
-
-        .chat-input::placeholder {
-            color: var(--muted);
-            opacity: 0.7;
-        }
-
-        .chat-send-btn {
-            background: var(--acid);
-            color: #000000;
-            border: none;
-            border-radius: 20px;
-            padding: 0 16px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .chat-send-btn:hover {
-            background: transparent;
-            color: var(--acid);
-            border: 2px solid var(--acid);
-            padding: 0 14px;
-        }
-
-        /* Tlačidlo pre návrat na zoznam (mobil) */
-        .chat-back-btn {
-            display: none;
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        /* Štýly pre položky v zozname trénerov */
-        .trainer-item {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .trainer-item:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .trainer-item.active {
-            background: rgba(200, 255, 0, 0.05);
-            border-left: 3px solid var(--acid);
-        }
-
-        .trainer-name {
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 2px;
-            color: var(--text);
-        }
-
-        .trainer-specialization {
-            font-size: 0.7rem;
-            color: var(--muted);
-        }
-
-        /* Empty stav */
-        .chat-empty {
-            text-align: center;
-            padding: 2rem;
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-
-        /* ===== RESPONZÍVNA VERZIA PRE MOBILY ===== */
-        @media (max-width: 768px) {
-            .chat-container {
-                flex-direction: column;
-                height: calc(100vh - 200px);
-                position: relative;
-                border-radius: 6px;
-            }
-
-            .chat-sidebar {
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                left: 0;
-                top: 0;
-                z-index: 10;
-                background: var(--surface);
-                transform: translateX(0);
-                transition: transform 0.3s ease;
-            }
-
-            .chat-sidebar.hidden {
-                transform: translateX(-100%);
-            }
-
-            .chat-main {
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                left: 0;
-                top: 0;
-                z-index: 5;
-            }
-
-            .chat-back-btn {
-                display: block;
-                position: absolute;
-                left: 8px;
-                top: 8px;
-                z-index: 20;
-                background: var(--surface2);
-                border-radius: 50%;
-                width: 32px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1rem;
-                color: var(--text);
-            }
-
-            .chat-bubble {
-                max-width: 80%;
-                padding: 7px 11px;
-            }
-
-            .chat-content {
-                font-size: 0.9rem;
-            }
-
-            .chat-messages {
-                padding: 12px 8px;
-                gap: 5px;
-            }
-
-            .chat-input-area {
-                padding: 8px;
-            }
-
-            .chat-input {
-                font-size: 0.9rem;
-                padding: 8px 12px;
-            }
-
-            .chat-send-btn {
-                padding: 0 14px;
-                font-size: 0.85rem;
-            }
-        }
-
-        /* Pre veľmi malé displeje */
-        @media (max-width: 480px) {
-            .chat-bubble {
-                max-width: 85%;
-                padding: 6px 10px;
-            }
-
-            .chat-content {
-                font-size: 0.85rem;
-                line-height: 1.3;
-            }
-
-            .chat-header {
-                font-size: 0.55rem;
-                gap: 4px;
-            }
-
-            .chat-time {
-                font-size: 0.5rem;
-            }
-
-            .chat-input {
-                padding: 8px 10px;
-                font-size: 0.85rem;
-            }
-
-            .chat-send-btn {
-                padding: 0 12px;
-                font-size: 0.8rem;
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .btn{font-family:var(--font-d);font-size:0.86rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.5rem 1.2rem;border:2px solid transparent;border-radius:3px;cursor:pointer;transition:all 0.18s;display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;}
         .btn-acid{background:var(--acid);color:#000;border-color:var(--acid);}
         .btn-acid:hover{background:transparent;color:var(--acid);}
@@ -611,10 +56,8 @@
         .btn-ghost:hover{border-color:var(--acid);color:var(--acid);}
         .btn-red{background:transparent;color:var(--red);border-color:var(--red);}
         .btn-red:hover{background:var(--red);color:#fff;}
-        .btn-orange{background:transparent;color:var(--orange);border-color:var(--orange);}
         .btn-sm{font-size:0.7rem;padding:0.33rem 0.82rem;}
         .btn-block{width:100%;justify-content:center;}
-
         .form-group{margin-bottom:0.9rem;}
         .fl{display:block;font-size:0.65rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem;}
         .fi{width:100%;padding:0.65rem 0.88rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-b);font-size:0.87rem;transition:border-color 0.2s;}
@@ -623,12 +66,10 @@
         .fm{margin-top:0.6rem;padding:0.55rem 0.78rem;border-radius:3px;font-size:0.77rem;display:none;}
         .fm.err{background:rgba(255,45,85,0.1);color:var(--red);border:1px solid rgba(255,45,85,0.3);display:block;}
         .fm.ok{background:rgba(200,255,0,0.07);color:var(--acid);border:1px solid rgba(200,255,0,0.18);display:block;}
-
         .dt{width:100%;border-collapse:collapse;}
         .dt th{font-family:var(--font-d);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:0.72rem 0.9rem;text-align:left;border-bottom:1px solid var(--border);}
         .dt td{padding:0.8rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.84rem;vertical-align:middle;}
         .dt tr:hover td{background:var(--surface2);}
-
         .badge{display:inline-block;font-family:var(--font-d);font-size:0.63rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;padding:0.13rem 0.55rem;border-radius:2px;}
         .b-acid{background:rgba(200,255,0,0.12);color:var(--acid);}
         .b-cyan{background:rgba(0,255,209,0.12);color:var(--acid2);}
@@ -636,11 +77,6 @@
         .b-orange{background:rgba(255,149,0,0.12);color:var(--orange);}
         .b-blue{background:rgba(10,132,255,0.12);color:var(--blue);}
         .b-grey{background:rgba(255,255,255,0.07);color:var(--muted);}
-
-        .api-url{font-family:monospace;font-size:0.74rem;color:var(--muted);padding:0.4rem 0.72rem;background:var(--bg);border:1px solid var(--border);border-radius:2px;margin-bottom:0.85rem;word-break:break-all;}
-        .api-out{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:0.85rem;font-family:monospace;font-size:0.72rem;color:#a0aec0;min-height:65px;max-height:190px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6;margin-top:0.7rem;}
-
-        /* MEMBERSHIP CARD */
         .mc{background:linear-gradient(135deg,#0d1800 0%,#111 65%);border:1px solid rgba(200,255,0,0.28);border-radius:8px;padding:1.8rem;position:relative;overflow:hidden;}
         .mc::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(200,255,0,0.07) 0%,transparent 70%);}
         .mc-type{font-family:var(--font-d);font-size:1.9rem;font-weight:900;color:var(--acid);}
@@ -654,8 +90,6 @@
         .mc-f p{font-size:0.88rem;}
         .prog{height:3px;background:var(--border);border-radius:2px;margin-top:1.2rem;overflow:hidden;}
         .prog-fill{height:100%;background:linear-gradient(90deg,var(--acid),var(--acid2));border-radius:2px;transition:width 0.6s;}
-
-        /* LIVE */
         .live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.5rem;}
         .lc{background:var(--surface);padding:1.2rem;text-align:center;}
         .ln{font-family:var(--font-d);font-size:2.8rem;font-weight:900;line-height:1;}
@@ -663,8 +97,6 @@
         .ln.cyan{color:var(--acid2);}
         .ln.red{color:var(--red);}
         .ll{font-size:0.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.3rem;}
-
-        /* PRICING */
         .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
         .pc{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:1.4rem;position:relative;transition:border-color 0.2s;}
         .pc:hover{border-color:rgba(200,255,0,0.28);}
@@ -679,17 +111,57 @@
         .pc-feats li i{font-size:0.6rem;}
         .pc-feats li.on i{color:var(--acid);}
         .pc-feats li.off{opacity:0.3;}
-
-        /* TRAINERS */
-        .tr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;}
-        .tr-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:1.4rem;text-align:center;transition:border-color 0.2s;}
-        .tr-card:hover{border-color:rgba(200,255,0,0.28);}
-        .tr-av{width:56px;height:56px;border-radius:50%;margin:0 auto 0.85rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.6rem;font-weight:900;color:#000;}
-        .tr-name{font-size:0.95rem;font-weight:700;margin-bottom:0.2rem;}
-        .tr-spec{font-size:0.75rem;color:var(--muted);margin-bottom:0.7rem;}
-        .tr-tags{display:flex;flex-wrap:wrap;gap:0.25rem;justify-content:center;}
-
-        /* NOTIFS */
+        .trainer-carousel-wrap{position:relative;overflow:hidden;border-radius:8px;height:420px;background:var(--surface2);}
+        .trainer-carousel-track{display:flex;height:100%;transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);}
+        .trainer-slide{min-width:100%;height:100%;position:relative;display:flex;align-items:flex-end;overflow:hidden;cursor:pointer;}
+        .trainer-slide-bg{position:absolute;inset:0;background-size:160px 160px;background-repeat:no-repeat;background-position:center 60px;transition:transform 0.6s ease;}
+        .trainer-slide:hover .trainer-slide-bg{transform:scale(1.04);}
+        .trainer-slide-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.2) 60%,transparent 100%);}
+        .trainer-slide-content{position:relative;z-index:2;padding:1.8rem;width:100%;}
+        .trainer-slide-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:6rem;font-weight:900;opacity:0.12;letter-spacing:0.1em;}
+        .trainer-slide-name{font-family:var(--font-d);font-size:1.8rem;font-weight:900;letter-spacing:0.06em;color:#fff;text-transform:uppercase;margin-bottom:0.3rem;}
+        .trainer-slide-spec{font-size:0.78rem;color:var(--acid);letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:0.75rem;}
+        .trainer-slide-bio{font-size:0.83rem;color:rgba(255,255,255,0.75);line-height:1.65;max-width:520px;max-height:0;overflow:hidden;transition:max-height 0.4s ease;}
+        .trainer-slide:hover .trainer-slide-bio,.trainer-slide.expanded .trainer-slide-bio{max-height:120px;}
+        .trainer-carousel-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.15);color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all 0.2s;backdrop-filter:blur(6px);}
+        .trainer-carousel-btn:hover{background:var(--acid);color:#000;border-color:var(--acid);}
+        .trainer-carousel-prev{left:12px;}
+        .trainer-carousel-next{right:12px;}
+        .trainer-carousel-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10;}
+        .trainer-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.35);cursor:pointer;transition:all 0.2s;}
+        .trainer-dot.active{background:var(--acid);width:20px;border-radius:3px;}
+        .stats-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem;}
+        .stats-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.2rem;}
+        .stats-kpi-card{background:var(--surface);padding:1.1rem 1rem;text-align:center;}
+        .stats-kpi-val{font-family:var(--font-d);font-size:2rem;font-weight:900;color:var(--acid);line-height:1;}
+        .stats-kpi-lbl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.25rem;}
+        .chart-panel-inner{position:relative;height:200px;}
+        .chart-panel-inner canvas{width:100%!important;height:100%!important;}
+        .chat-container{display:flex;gap:0;height:500px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);}
+        .chat-sidebar{width:200px;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);}
+        .chat-main{flex:1;display:flex;flex-direction:column;background:var(--bg);}
+        .chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;}
+        .chat-bubble{max-width:70%;padding:8px 12px;border-radius:14px;word-wrap:break-word;position:relative;}
+        .chat-bubble-left{align-self:flex-start;background:var(--surface2);border-bottom-left-radius:4px;}
+        .chat-bubble-right{align-self:flex-end;background:var(--acid);border-bottom-right-radius:4px;}
+        .chat-header{font-size:0.6rem;margin-bottom:3px;display:flex;gap:6px;font-weight:500;}
+        .chat-bubble-left .chat-header span:first-child{color:var(--acid);}
+        .chat-bubble-right .chat-header span:first-child{color:#000;font-weight:700;}
+        .chat-time{font-size:0.55rem;opacity:0.6;}
+        .chat-content{font-size:0.9rem;line-height:1.4;word-break:break-word;}
+        .chat-bubble-right .chat-content{color:#000!important;font-weight:500;}
+        .chat-bubble-left .chat-content{color:#fff!important;}
+        .chat-bubble-right{color:#000;}
+        .chat-bubble-left{color:#fff;}
+        .chat-input-area{display:flex;gap:6px;padding:10px;border-top:1px solid var(--border);background:var(--surface);}
+        .chat-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:8px 14px;color:var(--text);font-size:0.85rem;transition:all 0.2s;}
+        .chat-input:focus{outline:none;border-color:var(--acid);}
+        .chat-send-btn{background:var(--acid);color:#000;border:none;border-radius:20px;padding:0 16px;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+        .trainer-item{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s;}
+        .trainer-item:hover{background:rgba(255,255,255,0.03);}
+        .trainer-item.active{background:rgba(200,255,0,0.05);border-left:3px solid var(--acid);}
+        .trainer-name{font-weight:600;font-size:0.85rem;margin-bottom:2px;color:var(--text);}
+        .trainer-specialization{font-size:0.7rem;color:var(--muted);}
         .notif-list{display:flex;flex-direction:column;gap:0.65rem;}
         .ni{display:flex;align-items:flex-start;gap:0.9rem;padding:0.9rem;background:var(--surface2);border:1px solid var(--border);border-radius:5px;}
         .ni.unread{border-left:3px solid var(--acid);}
@@ -702,9 +174,7 @@
         .ni-icon.c{background:rgba(0,255,209,0.1);color:var(--acid2);}
         .ni-title{font-size:0.86rem;font-weight:500;margin-bottom:0.12rem;}
         .ni-desc{font-size:0.76rem;color:var(--muted);}
-        .ni-time{margin-left:auto;font-size:0.7rem;color:var(--muted);flex-shrink:0;padding-top:0.1rem;}
-
-        /* CHECKIN */
+        .ni-time{margin-left:auto;font-size:0.7rem;color:var(--muted);flex-shrink:0;}
         .ci{display:flex;align-items:center;gap:1rem;padding:0.72rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
         .ci:last-child{border-bottom:none;}
         .ci-date{font-family:var(--font-d);font-size:1rem;font-weight:700;color:var(--acid);min-width:48px;}
@@ -712,24 +182,26 @@
         .ci-time{font-size:0.84rem;}
         .ci-method{font-size:0.7rem;color:var(--muted);}
         .ci-dur{font-size:0.78rem;color:var(--acid2);margin-left:auto;}
-
-        /* STAT BARS */
         .sb-row{margin-bottom:0.9rem;}
         .sb-hdr{display:flex;justify-content:space-between;margin-bottom:0.35rem;}
         .sb-lbl{font-size:0.76rem;color:var(--muted);}
         .sb-val{font-size:0.76rem;}
         .sb{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
         .sb-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--acid),var(--acid2));}
-
-
-
-        /* RULES */
+        .cl-row{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.2rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;gap:1rem;}
+        .cl-row:last-child{border-bottom:none;}
+        .cl-row:hover{background:rgba(255,255,255,0.03);}
+        .cl-row-selected{background:rgba(200,255,0,0.05)!important;border-left:2px solid var(--acid);}
+        .cl-row-main{flex:1;min-width:0;}
+        .cl-row-name{font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .cl-row-meta{display:flex;gap:1rem;font-size:0.75rem;color:var(--muted);flex-wrap:wrap;}
+        .cl-row-meta span{display:flex;align-items:center;gap:0.3rem;}
+        .cl-row-status{flex-shrink:0;}
         .rule-sec{margin-bottom:1.4rem;}
         .rule-sec h4{font-size:1.15rem;font-weight:800;color:var(--acid);margin-bottom:0.7rem;display:flex;align-items:center;gap:0.45rem;}
         .rule-list{list-style:none;}
         .rule-list li{padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.86rem;color:var(--muted);display:flex;gap:0.65rem;line-height:1.5;}
         .rule-list li::before{content:'—';color:var(--acid);flex-shrink:0;}
-
         .ps{display:none;}
         .ps.active{display:block;animation:fi 0.2s ease;}
         @keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
@@ -741,19 +213,89 @@
         .toast.show{transform:translateY(0);opacity:1;}
         .toast.t-ok{border-color:var(--acid);color:var(--acid);}
         .toast.t-err{border-color:var(--red);color:var(--red);}
-
-
-
-
         .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none;z-index:200;}
         .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all 0.25s;}
         .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
         .hamburger.open span:nth-child(2){opacity:0;}
         .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
         .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;opacity:0;pointer-events:none;transition:opacity 0.28s;backdrop-filter:blur(3px);}
-
-
-
+        /* ── TRACK MODAL ── */
+        .track-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+        .track-modal-overlay.open{display:flex;}
+        .track-modal{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;width:100%;max-width:420px;margin:1rem;}
+        .track-modal-title{font-family:var(--font-d);font-size:1.1rem;font-weight:900;letter-spacing:0.06em;margin-bottom:1rem;color:var(--acid);}
+        .track-option{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0.9rem;border:1px solid var(--border);border-radius:5px;margin-bottom:0.5rem;cursor:pointer;transition:all 0.15s;}
+        .track-option:hover{border-color:var(--acid);background:rgba(200,255,0,0.04);}
+        .track-option.selected{border-color:var(--acid);background:rgba(200,255,0,0.08);}
+        .track-option-icon{font-size:1.3rem;width:32px;text-align:center;flex-shrink:0;}
+        .track-option-info{flex:1;}
+        .track-option-name{font-size:0.88rem;font-weight:600;margin-bottom:0.15rem;}
+        .track-option-desc{font-size:0.72rem;color:var(--muted);}
+        .track-custom-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid var(--border);}
+        /* ══ WORKOUT DIARY NOVÝ CSS ══ */
+        .wd-top-grid{display:grid;grid-template-columns:280px 1fr;gap:1.2rem;margin-bottom:1.2rem;align-items:start;}
+        @media(max-width:900px){.wd-top-grid{grid-template-columns:1fr;}}
+        .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:0.78rem;cursor:pointer;transition:all 0.15s;position:relative;user-select:none;}
+        .cal-day:hover{background:rgba(255,255,255,0.07);}
+        .cal-day.has-workout{background:rgba(200,255,0,0.12);color:var(--acid);font-weight:700;}
+        .cal-day.has-workout::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--acid);}
+        .cal-day.selected{background:var(--acid)!important;color:#000!important;font-weight:900;}
+        .cal-day.today{border:1.5px solid rgba(200,255,0,0.6);}
+        .cal-day.other-month{opacity:0.2;pointer-events:none;}
+        .cal-header-day{font-family:var(--font-d);font-size:0.58rem;letter-spacing:0.1em;color:var(--muted);padding:0.25rem 0;text-align:center;text-transform:uppercase;}
+        .wd-empty-day{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;color:var(--muted);text-align:center;min-height:120px;}
+        .wd-empty-icon{font-size:1.8rem;opacity:0.3;margin-bottom:0.6rem;}
+        .wd-empty-text{font-size:0.82rem;}
+        .wd-stats-panel{margin-bottom:1.2rem;}
+        .wd-stat-item{text-align:center;padding:0.8rem 0.5rem;}
+        .wd-stat-val{font-family:var(--font-d);font-size:1.8rem;font-weight:900;color:var(--acid);line-height:1;}
+        .wd-stat-lbl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:0.2rem;}
+        .wd-stat-delta{font-size:0.7rem;margin-top:0.15rem;font-weight:600;}
+        .preset-card{display:flex;align-items:center;gap:0.8rem;padding:0.85rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;}
+        .preset-card:last-child{border-bottom:none;}
+        .preset-card:hover{background:rgba(255,255,255,0.03);}
+        .preset-card.selected{background:rgba(200,255,0,0.05);border-left:3px solid var(--acid);}
+        .preset-card-icon{width:36px;height:36px;border-radius:6px;background:rgba(200,255,0,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;color:var(--acid);}
+        .preset-card-main{flex:1;min-width:0;}
+        .preset-name{font-weight:700;font-size:0.88rem;margin-bottom:0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .preset-meta{font-size:0.7rem;color:var(--muted);}
+        .wd-preset-title-input{background:transparent;border:none;border-bottom:1.5px solid transparent;color:var(--text);font-family:var(--font-d);font-size:1rem;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;outline:none;width:100%;transition:border-color 0.2s;padding:0.1rem 0.2rem;}
+        .wd-preset-title-input:hover{border-bottom-color:rgba(200,255,0,0.3);}
+        .wd-preset-title-input:focus{border-bottom-color:var(--acid);}
+        .preset-exercise-row{padding:0.7rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+        .preset-exercise-row:last-child{border-bottom:none;}
+        .preset-ex-header{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;}
+        .preset-ex-name{font-size:0.88rem;font-weight:600;flex:1;}
+        .preset-set-grid{display:grid;grid-template-columns:44px 1fr 1fr auto;gap:0.35rem;align-items:center;margin-bottom:0.3rem;}
+        .preset-set-num{font-family:var(--font-d);font-size:0.72rem;color:var(--muted);text-align:center;}
+        .wd-editor-top{display:flex;gap:1rem;margin-bottom:0.8rem;flex-wrap:wrap;}
+        .wd-feeling-row{display:flex;gap:0.3rem;}
+        .wd-feel-btn{width:36px;height:36px;border-radius:6px;border:1.5px solid var(--border);background:transparent;font-size:1.1rem;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;line-height:1;}
+        .wd-feel-btn:hover{border-color:var(--acid);background:rgba(200,255,0,0.05);transform:scale(1.08);}
+        .wd-feel-btn.active{border-color:var(--acid);background:rgba(200,255,0,0.12);transform:scale(1.12);}
+        .exercise-block{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.85rem;margin-bottom:0.7rem;transition:border-color 0.2s;}
+        .exercise-block:focus-within{border-color:rgba(200,255,0,0.25);}
+        .exercise-block-header{display:flex;align-items:center;gap:0.45rem;margin-bottom:0.6rem;flex-wrap:wrap;}
+        .exercise-name-wrap{position:relative;flex:1;min-width:150px;}
+        .exercise-name-input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:3px;color:var(--text);padding:0.45rem 0.7rem;font-size:0.87rem;font-family:var(--font-b);transition:border-color 0.15s;}
+        .exercise-name-input:focus{outline:none;border-color:var(--acid);}
+        .set-row{display:grid;grid-template-columns:26px 1fr 1fr auto auto;gap:0.35rem;align-items:center;margin-bottom:0.35rem;}
+        .set-num{font-family:var(--font-d);font-size:0.75rem;color:var(--muted);text-align:center;}
+        .set-input{background:var(--bg);border:1px solid var(--border2);border-radius:3px;color:var(--text);padding:0.32rem 0.4rem;font-size:0.82rem;text-align:center;font-family:var(--font-b);width:100%;transition:border-color 0.15s;}
+        .set-input:focus{outline:none;border-color:var(--acid);}
+        .set-pr-btn{background:none;border:1px solid var(--border2);border-radius:3px;color:var(--muted);padding:0.28rem 0.4rem;cursor:pointer;font-size:0.72rem;transition:all 0.15s;line-height:1;}
+        .set-pr-btn.active{background:rgba(200,255,0,0.1);border-color:var(--acid);color:var(--acid);}
+        .set-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:0.28rem;font-size:0.72rem;transition:color 0.15s;line-height:1;}
+        .set-del-btn:hover{color:var(--red);}
+        .exercise-autocomplete{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 5px 5px;z-index:200;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+        .exercise-autocomplete-item{padding:0.5rem 0.75rem;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.1s;gap:0.5rem;}
+        .exercise-autocomplete-item:last-child{border-bottom:none;}
+        .exercise-autocomplete-item:hover{background:rgba(200,255,0,0.07);color:var(--acid);}
+        .ex-ac-cat{font-family:var(--font-d);font-size:0.58rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;flex-shrink:0;}
+        .workout-exercise-view{margin-bottom:0.9rem;padding-bottom:0.9rem;border-bottom:1px solid rgba(255,255,255,0.05);}
+        .workout-exercise-view:last-child{border-bottom:none;margin-bottom:0;}
+        .progress-tag{display:inline-flex;align-items:center;padding:0.2rem 0.65rem;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:0.72rem;cursor:pointer;transition:all 0.15s;color:var(--muted);}
+        .progress-tag:hover{border-color:var(--acid);color:var(--acid);background:rgba(200,255,0,0.05);}
         @media(max-width:1100px){.pricing-grid{grid-template-columns:1fr 1fr}}
         @media(max-width:900px){
             .sidebar{transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
@@ -761,17 +303,17 @@
             .main{margin-left:0}
             .stat-row{grid-template-columns:1fr 1fr}
             .g2{grid-template-columns:1fr}
-            .tr-grid{grid-template-columns:1fr 1fr}
             .content{padding:1rem;}
             .topbar{padding:0 1rem;}
             .hamburger{display:flex;}
             .sidebar-overlay{display:block;}
             .sidebar-overlay.open{opacity:1;pointer-events:all;}
+            .stats-chart-grid{grid-template-columns:1fr;}
+            .trainer-carousel-wrap{height:340px;}
         }
         @media(max-width:600px){
             .stat-row{grid-template-columns:1fr 1fr;}
             .pricing-grid{grid-template-columns:1fr;}
-            .tr-grid{grid-template-columns:1fr;}
             .g2{grid-template-columns:1fr;}
             .fr{grid-template-columns:1fr;}
             .mc-row{flex-direction:column;gap:1rem;}
@@ -784,269 +326,21 @@
             .dt td::before{content:attr(data-label);font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-d);}
             .pb{padding:1rem;}
             .ph{padding:0.75rem 1rem;}
-            .topbar{padding:0 0.8rem;}
-            .page-title{font-size:1.05rem;}
             .content{padding:0.75rem;}
             .panel{margin-bottom:1rem;}
             .btn{font-size:0.78rem;padding:0.45rem 0.9rem;}
+            .wd-editor-top{flex-direction:column;gap:0.6rem;}
+            .wd-feel-btn{width:32px;height:32px;font-size:1rem;}
+            .exercise-block-header{gap:0.35rem;}
+            .exercise-name-wrap{width:100%;order:-1;}
+            .set-row{grid-template-columns:22px 1fr 1fr auto auto;gap:0.25rem;}
+            .set-input{padding:0.28rem 0.25rem;font-size:0.78rem;}
+            .preset-set-grid{grid-template-columns:36px 1fr 1fr auto;}
+            .chat-container{height:calc(100vh - 200px);}
         }
-
-
-        /* ── CLASS ROWS ── */
-        .cl-row{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.2rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;gap:1rem;}
-        .cl-row:last-child{border-bottom:none;}
-        .cl-row:hover{background:rgba(255,255,255,0.03);}
-        .cl-row-selected{background:rgba(200,255,0,0.05)!important;border-left:2px solid var(--acid);}
-        .cl-row-main{flex:1;min-width:0;}
-        .cl-row-name{font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .cl-row-meta{display:flex;gap:1rem;font-size:0.75rem;color:var(--muted);flex-wrap:wrap;}
-        .cl-row-meta span{display:flex;align-items:center;gap:0.3rem;}
-        .cl-row-status{flex-shrink:0;}
-
-        /* WORKOUT DIARY */
-        .cal-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.15s;
-            position: relative;
-        }
-        .cal-day:hover { background: rgba(255,255,255,0.06); }
-        .cal-day.has-workout { background: rgba(200,255,0,0.12); color: var(--acid); font-weight: 700; }
-        .cal-day.has-workout::after { content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:var(--acid); }
-        .cal-day.selected { background: var(--acid) !important; color: #000 !important; font-weight: 900; }
-        .cal-day.today { border: 1px solid var(--acid); }
-        .cal-day.other-month { opacity: 0.25; }
-        .cal-header-day { font-family: var(--font-d); font-size: 0.62rem; letter-spacing: 0.1em; color: var(--muted); padding: 0.3rem 0; }
-        .exercise-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 0.9rem; margin-bottom: 0.8rem; }
-        .exercise-block-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.7rem; }
-        .exercise-name-input { flex:1; background:var(--bg); border:1px solid var(--border2); border-radius:3px; color:var(--text); padding:0.45rem 0.7rem; font-size:0.85rem; font-family:var(--font-b); }
-        .exercise-name-input:focus { outline:none; border-color:var(--acid); }
-        .set-row { display:grid; grid-template-columns:28px 1fr 1fr auto auto; gap:0.4rem; align-items:center; margin-bottom:0.4rem; }
-        .set-num { font-family:var(--font-d); font-size:0.8rem; color:var(--muted); text-align:center; }
-        .set-input { background:var(--bg); border:1px solid var(--border2); border-radius:3px; color:var(--text); padding:0.35rem 0.5rem; font-size:0.82rem; text-align:center; font-family:var(--font-b); width:100%; }
-        .set-input:focus { outline:none; border-color:var(--acid); }
-        .set-pr-btn { background:none; border:1px solid var(--border2); border-radius:3px; color:var(--muted); padding:0.3rem 0.5rem; cursor:pointer; font-size:0.75rem; transition:all 0.15s; }
-        .set-pr-btn.active { background:rgba(200,255,0,0.1); border-color:var(--acid); color:var(--acid); }
-        .workout-exercise-view { margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
-        .workout-exercise-view:last-child { border-bottom:none; margin-bottom:0; }
-        .feeling-emoji { font-size:1.3rem; }
-
-        @media(max-width:600px) {
-            .set-row { grid-template-columns: 28px 1fr 1fr auto; gap: 0.3rem; }
-            .exercise-block-header { flex-wrap: wrap; }
-            .exercise-name-input { width: 100%; }
-        }
-
-        /* ── EXERCISE AUTOCOMPLETE ── */
-        .exercise-autocomplete {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-            z-index: 100;
-            max-height: 180px;
-            overflow-y: auto;
-        }
-        .exercise-autocomplete-item {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.82rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            transition: background 0.12s;
-        }
-        .exercise-autocomplete-item:hover { background: rgba(200,255,0,0.07); color: var(--acid); }
-        .exercise-autocomplete-item .ex-ac-cat {
-            font-family: var(--font-d);
-            font-size: 0.58rem;
-            letter-spacing: 0.1em;
-            color: var(--muted);
-            text-transform: uppercase;
-        }
-        .exercise-name-wrap { position: relative; flex: 1; }
-
-        /* ── TRACK TYPE MODAL ── */
-        .track-modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 500;
-            backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
-        }
-        .track-modal-overlay.open { display: flex; }
-        .track-modal {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            width: 100%;
-            max-width: 420px;
-            margin: 1rem;
-        }
-        .track-modal-title {
-            font-family: var(--font-d);
-            font-size: 1.1rem;
-            font-weight: 900;
-            letter-spacing: 0.06em;
-            margin-bottom: 1rem;
-            color: var(--acid);
-        }
-        .track-option {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 0.9rem;
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .track-option:hover { border-color: var(--acid); background: rgba(200,255,0,0.04); }
-        .track-option.selected { border-color: var(--acid); background: rgba(200,255,0,0.08); }
-        .track-option-icon { font-size: 1.3rem; width: 32px; text-align: center; flex-shrink: 0; }
-        .track-option-info { flex: 1; }
-        .track-option-name { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.15rem; }
-        .track-option-desc { font-size: 0.72rem; color: var(--muted); }
-        .track-custom-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-top: 0.8rem;
-            padding-top: 0.8rem;
-            border-top: 1px solid var(--border);
-        }
-
-        @media(max-width:600px) {
-            /* Workout editor */
-            .exercise-block-header {
-                flex-wrap: wrap;
-                gap: 0.4rem;
-            }
-            .exercise-name-wrap {
-                width: 100%;
-                order: -1;
-            }
-            /* Set row — menej stĺpcov */
-            .set-row {
-                grid-template-columns: 22px 1fr 1fr auto auto;
-                gap: 0.25rem;
-            }
-            .set-input {
-                padding: 0.3rem 0.25rem;
-                font-size: 0.78rem;
-            }
-            .set-pr-btn {
-                padding: 0.3rem 0.3rem;
-                font-size: 0.7rem;
-            }
-            /* Kalendár — väčšie dni */
-            .cal-day {
-                font-size: 0.75rem;
-                min-height: 36px;
-            }
-            /* Feeling tlačidlá — zmenšiť */
-            #feelingBtns {
-                flex-wrap: wrap;
-                gap: 0.3rem;
-            }
-            #feelingBtns button {
-                font-size: 0.65rem;
-                padding: 0.28rem 0.55rem;
-            }
-            /* Track modal */
-            .track-modal {
-                padding: 1rem;
-                margin: 0.5rem;
-            }
-            .track-option {
-                padding: 0.55rem 0.7rem;
-            }
-            .track-option-icon {
-                font-size: 1.1rem;
-                width: 26px;
-            }
-            .track-option-desc {
-                display: none;
-            }
-            /* Weekly stats — zmenšiť čísla */
-            #weeklyStatsContent .sc-val,
-            #weeklyStatsContent [style*="2.2rem"] {
-                font-size: 1.6rem !important;
-            }
-            /* Chat */
-            .chat-container {
-                height: calc(100vh - 180px);
-                min-height: 320px;
-            }
-        }
-
-        @media(max-width:400px) {
-            /* Veľmi malé displeje */
-            .set-row {
-                grid-template-columns: 18px 1fr 1fr auto;
-                gap: 0.2rem;
-            }
-            /* Skry tlačidlo odstrániť sériu na veľmi malom displeji */
-            .set-row button[title="Odstrániť sériu"] {
-                display: none;
-            }
-            .exercise-block-header .btn-ghost,
-            .exercise-block-header .btn-red {
-                padding: 0.28rem 0.5rem;
-                font-size: 0.65rem;
-            }
-            .cal-header-day {
-                font-size: 0.55rem;
-            }
-        }
-
-        /* ── PRESET CARDS ── */
-        .preset-card {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.9rem 1rem;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.12s;
-        }
-        .preset-card:last-child { border-bottom: none; }
-        .preset-card:hover { background: rgba(255,255,255,0.03); }
-        .preset-card.selected {
-            background: rgba(200,255,0,0.05);
-            border-left: 3px solid var(--acid);
-        }
-        .preset-name {
-            font-weight: 700;
-            font-size: 0.92rem;
-            margin-bottom: 0.2rem;
-        }
-        .preset-meta {
-            font-size: 0.72rem;
-            color: var(--muted);
-        }
-        .preset-card-main { flex: 1; }
-        .preset-exercise-row {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
+        @media(max-width:400px){
+            .set-row{grid-template-columns:18px 1fr 1fr auto;}
+            .set-del-btn{display:none;}
         }
     </style>
 </head>
@@ -1438,149 +732,238 @@
                 </div>
             </div>
         </div>
+
+
         <!-- WORKOUT DIARY -->
+        <!-- ══════════════════════════════════════════════════════════════════
+  NÁHRADA: <div class="ps" id="pg-workout"> ... </div>
+  Nahraď CELÝ pôvodný pg-workout div týmto.
+══════════════════════════════════════════════════════════════════ -->
+
         <div class="ps" id="pg-workout">
 
-            <div class="g2" style="margin-bottom:1.2rem">
-                <!-- Kalendár -->
-                <div class="panel">
-                    <div class="ph">
+            <!-- ── 1. KALENDÁR + DEŇ ── -->
+            <div class="wd-top-grid">
+
+                <!-- Kalendár — kompaktný, fixná šírka -->
+                <div class="panel" style="margin-bottom:0">
+                    <div class="ph" style="padding:0.6rem 0.8rem">
                         <button class="btn btn-ghost btn-sm" onclick="calPrev()"><i class="fas fa-chevron-left"></i></button>
-                        <span class="pt" id="calTitle">—</span>
+                        <span class="pt" id="calTitle" style="font-size:0.88rem">—</span>
                         <button class="btn btn-ghost btn-sm" onclick="calNext()"><i class="fas fa-chevron-right"></i></button>
                     </div>
-                    <div class="pb" style="padding:0.8rem">
-                        <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center"></div>
+                    <div style="padding:0.5rem 0.6rem">
+                        <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center"></div>
+                    </div>
+                    <div style="padding:0 0.7rem 0.6rem;display:flex;gap:1rem">
+                        <span style="display:flex;align-items:center;gap:0.3rem;font-size:0.62rem;color:var(--muted)"><span style="width:7px;height:7px;border-radius:50%;background:var(--acid);display:inline-block"></span> Tréning</span>
+                        <span style="display:flex;align-items:center;gap:0.3rem;font-size:0.62rem;color:var(--muted)"><span style="width:7px;height:7px;border-radius:2px;border:1px solid var(--acid);display:inline-block"></span> Dnes</span>
                     </div>
                 </div>
 
                 <!-- Detail dňa -->
-                <div class="panel">
-                    <div class="ph">
-                        <span class="pt" id="workoutDayTitle">Vyber deň</span>
-                        <div style="display:flex;gap:0.5rem">
+                <div class="panel" style="margin-bottom:0" id="dayDetailPanel">
+                    <div class="ph" style="padding:0.6rem 1rem">
+                        <span class="pt" id="workoutDayTitle" style="font-size:0.88rem">Vyber deň v kalendári</span>
+                        <div style="display:flex;gap:0.4rem">
                             <button class="btn btn-ghost btn-sm" id="editWorkoutBtn" style="display:none" onclick="editWorkout()"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-red btn-sm" id="deleteWorkoutBtn" style="display:none" onclick="deleteWorkout()"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
-                    <div class="pb" id="workoutDayContent">
-                        <div class="empty"><i class="fas fa-calendar-day"></i><p>Vyber deň v kalendári</p></div>
+                    <div id="workoutDayContent" style="padding:1rem;min-height:160px">
+                        <div class="wd-empty-day">
+                            <div class="wd-empty-icon"><i class="fas fa-calendar-day"></i></div>
+                            <div class="wd-empty-text">Klikni na deň v kalendári</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Weekly stats — full width pod gridom -->
-            <div class="panel" id="weeklyStatsPanel" style="margin-bottom:1.2rem">
-                <div class="ph">
-                    <span class="pt"><i class="fas fa-balance-scale" style="margin-right:0.4rem;opacity:0.6"></i>Tento týždeň vs minulý</span>
-                    <button class="btn btn-ghost btn-sm" onclick="loadWeeklyStats()"><i class="fas fa-sync-alt"></i></button>
+
+
+            <!-- ── 3. TRÉNINGOVÉ PLÁNY ── -->
+            <div class="panel">
+                <div class="ph" style="padding:0.7rem 1rem">
+                    <span class="pt" style="font-size:0.9rem"><i class="fas fa-bookmark" style="opacity:0.6;margin-right:0.35rem"></i>Tréningové plány</span>
+                    <button class="btn btn-acid btn-sm" onclick="toggleNewPresetForm()"><i class="fas fa-plus"></i> Nový plán</button>
                 </div>
-                <div class="pb" id="weeklyStatsContent">
-                    <div class="empty" style="padding:1rem"><span class="spin"></span></div>
+
+                <!-- Inline formulár — vytvorenie presetu, skrytý -->
+                <div id="newPresetFormWrap" style="display:none;padding:0.75rem 1rem;border-bottom:1px solid var(--border);background:rgba(200,255,0,0.025)">
+                    <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem">Názov nového plánu</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                        <input class="fi" type="text" id="newPresetName"
+                               placeholder='napr. "Upper A", "Push Day", "Nohy"'
+                               onkeydown="if(event.key==='Enter')confirmCreatePreset()"
+                               style="flex:1;min-width:180px;font-size:0.84rem;padding:0.5rem 0.75rem">
+                        <button class="btn btn-acid btn-sm" onclick="confirmCreatePreset()"><i class="fas fa-check"></i> Vytvoriť</button>
+                        <button class="btn btn-ghost btn-sm" onclick="cancelNewPreset()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="fm" id="newPresetFormMsg"></div>
+                </div>
+
+                <!-- Zoznam presetov -->
+                <div id="presetList">
+                    <div style="padding:1.5rem;text-align:center"><span class="spin"></span></div>
                 </div>
             </div>
 
-            <!-- PRESET PANEL -->
-            <div class="panel" id="presetPanel" style="margin-bottom:1.2rem">
-                <div class="ph">
-                    <span class="pt"><i class="fas fa-bookmark" style="margin-right:0.4rem;opacity:0.6"></i>Moje tréningové plány</span>
-                    <button class="btn btn-acid btn-sm" onclick="openCreatePreset()">
-                        <i class="fas fa-plus"></i> Nový plán
-                    </button>
+            <!-- ── 2. TÝŽDENNÉ ŠTATISTIKY — kompaktný panel ── -->
+            <div class="panel" style="margin-top:1rem">
+                <div class="ph" style="padding:0.6rem 1rem">
+                    <span class="pt" style="font-size:0.85rem"><i class="fas fa-chart-bar" style="opacity:0.5;margin-right:0.35rem"></i>Tento týždeň</span>
+                    <button class="btn btn-ghost btn-sm" onclick="loadWeeklyStats()" style="padding:0.22rem 0.55rem;font-size:0.65rem"><i class="fas fa-sync-alt"></i></button>
                 </div>
-                <div class="pb" id="presetList">
-                    <div class="empty"><span class="spin"></span></div>
+                <div id="weeklyStatsContent" style="padding:0.7rem 1rem">
+                    <div style="text-align:center;padding:0.5rem"><span class="spin"></span></div>
                 </div>
             </div>
 
-            <!-- PRESET DETAIL MODAL (in-flow, nie fixed) -->
-            <div id="presetDetailWrap" style="display:none;margin-bottom:1.2rem">
+            <!-- ── 4. PRESET DETAIL (in-flow, skrytý kým nie je vybraný) ── -->
+            <div id="presetDetailWrap" style="display:none">
                 <div class="panel">
-                    <div class="ph">
-                        <span class="pt" id="presetDetailName">—</span>
-                        <div style="display:flex;gap:0.5rem">
-                            <button class="btn btn-ghost btn-sm" onclick="editPresetName()">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-red btn-sm" onclick="deletePreset()">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <button class="btn btn-ghost btn-sm" onclick="closePresetDetail()">
-                                <i class="fas fa-times"></i>
-                            </button>
+                    <!-- Hlavička — inline editovateľný názov -->
+                    <div class="ph" style="padding:0.65rem 1rem;gap:0.5rem">
+                        <div style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0">
+                            <i class="fas fa-bookmark" style="color:var(--acid);font-size:0.8rem;flex-shrink:0"></i>
+                            <input class="wd-preset-title-input" id="presetDetailNameInput" type="text" value="—"
+                                   onblur="savePresetNameInline()"
+                                   onkeydown="if(event.key==='Enter')this.blur()"
+                                   placeholder="Názov plánu">
+                        </div>
+                        <div style="display:flex;gap:0.35rem;flex-shrink:0">
+                            <button class="btn btn-acid btn-sm" onclick="startWorkoutFromPreset()"><i class="fas fa-play"></i> Štart</button>
+                            <button class="btn btn-red btn-sm" onclick="deletePreset()" title="Zmazať plán"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-ghost btn-sm" onclick="closePresetDetail()"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
-                    <div class="pb">
-                        <div id="presetExerciseList" style="margin-bottom:1rem"></div>
-                        <button class="btn btn-ghost btn-sm" onclick="addExerciseToPreset()" style="margin-bottom:1rem">
-                            <i class="fas fa-plus"></i> Pridať cvik
-                        </button>
-                        <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
-                            <button class="btn btn-acid" onclick="startWorkoutFromPreset()">
-                                <i class="fas fa-play"></i> Spustiť tréning
-                            </button>
-                            <button class="btn btn-ghost btn-sm" onclick="savePresetChanges()">
-                                <i class="fas fa-save"></i> Uložiť zmeny
-                            </button>
+
+                    <!-- Zoznam cvikov v presete -->
+                    <div id="presetExerciseList" style="padding:0"></div>
+
+                    <!-- Inline formulár — pridanie cviku do presetu, skrytý -->
+                    <div id="addExToPresetWrap" style="display:none;padding:0.75rem 1rem;border-top:1px solid var(--border);background:rgba(255,255,255,0.015)">
+                        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem">Pridať cvik do plánu</div>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem">
+                            <!-- Autocomplete input -->
+                            <div style="flex:1;min-width:160px;position:relative">
+                                <input class="fi" type="text" id="newPresetExName"
+                                       placeholder="Názov cviku..."
+                                       autocomplete="off"
+                                       oninput="showPresetExSuggestions(this)"
+                                       onblur="hidePresetExSuggestions()"
+                                       onkeydown="if(event.key==='Enter')confirmAddExToPreset()"
+                                       style="font-size:0.83rem;padding:0.48rem 0.7rem">
+                                <div id="presetExAcDropdown" class="exercise-autocomplete" style="display:none"></div>
+                            </div>
+                            <select class="fi" id="newPresetExCat"
+                                    style="max-width:105px;padding:0.48rem 0.5rem;font-size:0.78rem"
+                                    onchange="updatePresetExTrackType()">
+                                <option value="sila">💪 Sila</option>
+                                <option value="kardio">🏃 Kardio</option>
+                            </select>
+                            <select class="fi" id="newPresetExTrack"
+                                    style="max-width:135px;padding:0.48rem 0.5rem;font-size:0.78rem">
+                                <option value="weight_reps">Váha + Reps</option>
+                                <option value="reps_only">Len opakovania</option>
+                                <option value="custom">Vlastné</option>
+                            </select>
                         </div>
-                        <div class="fm" id="presetMsg"></div>
+                        <div style="display:flex;gap:0.5rem">
+                            <button class="btn btn-acid btn-sm" onclick="confirmAddExToPreset()"><i class="fas fa-plus"></i> Pridať</button>
+                            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('addExToPresetWrap').style.display='none'">Zrušiť</button>
+                        </div>
+                    </div>
+
+                    <!-- Akcie presetu -->
+                    <div style="padding:0.7rem 1rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                        <button class="btn btn-ghost btn-sm" onclick="toggleAddExToPreset()"><i class="fas fa-plus"></i> Pridať cvik</button>
+                        <button class="btn btn-ghost btn-sm" onclick="savePresetChanges()"><i class="fas fa-save"></i> Uložiť</button>
+                        <div class="fm" id="presetMsg" style="margin:0;flex:1;display:inline-block"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Editor tréning -->
+            <!-- ── 5. EDITOR TRÉNINGU ── -->
             <div class="panel" id="workoutEditor" style="display:none">
-                <div class="ph">
-                    <span class="pt" id="editorTitle">Nový tréning</span>
+                <div class="ph" style="padding:0.7rem 1rem">
+                    <span class="pt" id="editorTitle" style="font-size:0.9rem">Nový tréning</span>
                     <button class="btn btn-ghost btn-sm" onclick="closeEditor()"><i class="fas fa-times"></i></button>
                 </div>
-                <div class="pb">
-                    <div class="fr" style="margin-bottom:1rem">
-                        <div class="form-group">
-                            <label class="fl">Názov tréning</label>
-                            <input class="fi" type="text" id="wTitle" placeholder="napr. Push Day, Nohy...">
+                <div style="padding:1rem">
+                    <!-- Názov + Pocit v jednom riadku -->
+                    <div class="wd-editor-top">
+                        <div style="flex:1;min-width:180px">
+                            <label class="fl">Názov tréningu</label>
+                            <input class="fi" type="text" id="wTitle" placeholder='napr. "Push Day", "Nohy A"' style="font-size:0.88rem">
                         </div>
-                        <div class="form-group">
-                            <label class="fl">Pocit (1–5)</label>
-                            <div style="display:flex;gap:0.5rem;margin-top:0.3rem" id="feelingBtns">
-                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(1)">😴 1</button>
-                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(2)">😐 2</button>
-                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(3)">💪 3</button>
-                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(4)">🔥 4</button>
-                                <button class="btn btn-ghost btn-sm" onclick="setFeeling(5)">⚡ 5</button>
+                        <div>
+                            <label class="fl">Pocit</label>
+                            <div class="wd-feeling-row" id="feelingBtns">
+                                <button class="wd-feel-btn" onclick="setFeeling(1)" data-val="1" title="Slabý">😴</button>
+                                <button class="wd-feel-btn" onclick="setFeeling(2)" data-val="2" title="Priemerný">😐</button>
+                                <button class="wd-feel-btn active" onclick="setFeeling(3)" data-val="3" title="Dobrý">💪</button>
+                                <button class="wd-feel-btn" onclick="setFeeling(4)" data-val="4" title="Výborný">🔥</button>
+                                <button class="wd-feel-btn" onclick="setFeeling(5)" data-val="5" title="Epický">⚡</button>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="fl">Poznámky</label>
-                        <textarea class="fi" id="wNotes" rows="2" placeholder="Ako sa ti darilo..."></textarea>
+                    <div style="margin-bottom:1rem">
+                        <label class="fl">Poznámky (voliteľné)</label>
+                        <textarea class="fi" id="wNotes" rows="2" placeholder="Ako sa ti darilo..." style="font-size:0.83rem;resize:vertical"></textarea>
                     </div>
                     <!-- Cviky -->
-                    <div id="exerciseList" style="margin-bottom:1rem"></div>
-                    <button class="btn btn-ghost btn-sm" onclick="addExercise()" style="margin-bottom:1.2rem">
+                    <div id="exerciseList" style="margin-bottom:0.8rem"></div>
+                    <button class="btn btn-ghost" onclick="addExercise()"
+                            style="width:100%;justify-content:center;border-style:dashed;margin-bottom:1.2rem;opacity:0.7">
                         <i class="fas fa-plus"></i> Pridať cvik
                     </button>
-                    <div style="display:flex;gap:0.7rem">
+                    <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
                         <button class="btn btn-acid" onclick="saveWorkout()"><i class="fas fa-save"></i> Uložiť tréning</button>
                         <button class="btn btn-ghost" onclick="closeEditor()">Zrušiť</button>
                     </div>
                     <div class="fm" id="workoutMsg"></div>
                 </div>
             </div>
-            <!-- Progress graf -->
+
+            <!-- ── 6. PROGRES CVIKU ── -->
             <div class="panel">
-                <div class="ph">
-                    <span class="pt"><i class="fas fa-chart-line" style="margin-right:0.4rem;opacity:0.6"></i>Progres cviku</span>
+                <div class="ph" style="padding:0.7rem 1rem">
+                    <span class="pt" style="font-size:0.9rem"><i class="fas fa-chart-line" style="opacity:0.6;margin-right:0.35rem"></i>Progres cviku</span>
                 </div>
-                <div class="pb">
-                    <div style="display:flex;gap:0.7rem;margin-bottom:1rem;flex-wrap:wrap">
-                        <input class="fi" type="text" id="progressExercise" placeholder="Názov cviku napr. Bench Press" style="max-width:280px">
-                        <button class="btn btn-ghost btn-sm" onclick="loadProgress()"><i class="fas fa-search"></i> Zobraziť</button>
+                <div style="padding:1rem">
+                    <!-- Search s autocomplete + quick tags -->
+                    <div style="margin-bottom:0.7rem">
+                        <div style="display:flex;gap:0.6rem;margin-bottom:0.5rem">
+                            <div style="flex:1;position:relative">
+                                <input class="fi" type="text" id="progressExercise"
+                                       placeholder="Začni písať alebo vyber zo zoznamu..."
+                                       autocomplete="off"
+                                       oninput="showProgressSuggestions(this)"
+                                       onblur="hideProgressSuggestions()"
+                                       onkeydown="if(event.key==='Enter'){hideProgressSuggestions();loadProgress();}"
+                                       style="font-size:0.86rem">
+                                <div id="progressAcDropdown" class="exercise-autocomplete" style="display:none"></div>
+                            </div>
+                            <button class="btn btn-ghost btn-sm" onclick="loadProgress()" style="white-space:nowrap">
+                                <i class="fas fa-search"></i> Zobraziť
+                            </button>
+                        </div>
+                        <!-- Najčastejšie cviky ako klikateľné tagy -->
+                        <div id="progressQuickTags" style="display:flex;gap:0.3rem;flex-wrap:wrap"></div>
                     </div>
                     <div style="position:relative;height:200px"><canvas id="chartProgress"></canvas></div>
+                    <div id="progressEmpty" style="display:none;text-align:center;padding:1.5rem;color:var(--muted);font-size:0.82rem">
+                        <i class="fas fa-chart-line" style="font-size:1.4rem;display:block;margin-bottom:0.4rem;opacity:0.25"></i>
+                        Žiadne dáta pre tento cvik
+                    </div>
                 </div>
             </div>
+
         </div>
+        <!-- ══════════════════════════════════════════════════════════════
+          KONIEC pg-workout
+        ══════════════════════════════════════════════════════════════ -->
 
         <!-- RULES -->
         <div class="ps" id="pg-rules">
@@ -1627,285 +1010,291 @@
     // ── WORKOUT PRESETS ──
     let currentPreset = null;
 
+    // ── Preset panel toggle ──
+    function toggleNewPresetForm() {
+        const wrap = document.getElementById('newPresetFormWrap');
+        const isOpen = wrap.style.display !== 'none';
+        wrap.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            document.getElementById('newPresetName').value = '';
+            document.getElementById('newPresetFormMsg').className = 'fm';
+            setTimeout(() => document.getElementById('newPresetName').focus(), 50);
+        }
+    }
+    function cancelNewPreset() {
+        document.getElementById('newPresetFormWrap').style.display = 'none';
+        document.getElementById('newPresetName').value = '';
+    }
+    async function confirmCreatePreset() {
+        const name = document.getElementById('newPresetName').value.trim();
+        if (!name) { showMsg('newPresetFormMsg', 'Zadaj názov plánu', 'err'); return; }
+        try {
+            const res = await af('/api/workout-presets', { method: 'POST', body: JSON.stringify({ name, exercises: [] }) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            toast('Plán vytvorený!', 'ok');
+            cancelNewPreset();
+            currentPreset = data;
+            await loadPresets();
+            setTimeout(() => openPresetDetail(data.id), 300);
+        } catch(e) { showMsg('newPresetFormMsg', e.message, 'err'); }
+    }
+
     async function loadPresets() {
         const el = document.getElementById('presetList');
-        el.innerHTML = '<div class="empty"><span class="spin"></span></div>';
+        el.innerHTML = '<div style="padding:1rem;text-align:center"><span class="spin"></span></div>';
         try {
             const res = await af('/api/workout-presets');
             const data = await res.json();
             if (!res.ok) throw new Error(data.message);
             if (!Array.isArray(data) || !data.length) {
-                el.innerHTML = `<div class="empty" style="padding:1.5rem">
-                <i class="fas fa-bookmark"></i>
-                <p style="margin-bottom:0.8rem">Žiadne plány — vytvor prvý preset</p>
-                <button class="btn btn-ghost btn-sm" onclick="openCreatePreset()">
-                    <i class="fas fa-plus"></i> Vytvoriť plán
-                </button>
+                el.innerHTML = `<div style="padding:1.5rem;text-align:center;color:var(--muted)">
+                <div style="font-size:1.4rem;margin-bottom:0.4rem;opacity:0.25"><i class="fas fa-bookmark"></i></div>
+                <div style="font-size:0.8rem">Žiadne plány — klikni <b style="color:var(--acid)">Nový plán</b></div>
             </div>`;
                 return;
             }
             el.innerHTML = data.map(p => {
-                const lastUsed = p.lastUsedAt
+                const last = p.lastUsedAt
                     ? new Date(p.lastUsedAt).toLocaleDateString('sk-SK', {day:'numeric', month:'short'})
                     : 'nikdy';
-                return `
-            <div class="preset-card" id="pc-${p.id}" onclick="openPresetDetail('${p.id}')">
+                return `<div class="preset-card" id="pc-${p.id}" onclick="openPresetDetail('${p.id}')">
+                <div class="preset-card-icon"><i class="fas fa-bookmark"></i></div>
                 <div class="preset-card-main">
                     <div class="preset-name">${p.name}</div>
-                    <div class="preset-meta">${p.exerciseCount} cvikov · použitý ${lastUsed} · ${p.useCount}× celkovo</div>
+                    <div class="preset-meta">${p.exerciseCount || 0} cvikov · naposledy ${last} · ${p.useCount || 0}×</div>
                 </div>
-                <div style="display:flex;gap:0.4rem;flex-shrink:0">
-                    <button class="btn btn-acid btn-sm" onclick="event.stopPropagation();quickStart('${p.id}')">
-                        <i class="fas fa-play"></i> Štart
-                    </button>
-                </div>
+                <button class="btn btn-acid btn-sm" onclick="event.stopPropagation();quickStart('${p.id}')" style="flex-shrink:0" title="Rýchly štart">
+                    <i class="fas fa-play"></i>
+                </button>
             </div>`;
             }).join('');
         } catch(e) {
-            el.innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
+            el.innerHTML = `<div style="padding:1rem;color:var(--red);font-size:0.82rem">❌ ${e.message}</div>`;
         }
     }
 
     async function openPresetDetail(id) {
-        // Highlight karta
         document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
         document.getElementById('pc-' + id)?.classList.add('selected');
-
         const wrap = document.getElementById('presetDetailWrap');
         wrap.style.display = 'block';
+        document.getElementById('addExToPresetWrap').style.display = 'none';
+        document.getElementById('presetExerciseList').innerHTML =
+            '<div style="padding:1rem;text-align:center"><span class="spin"></span></div>';
         wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        document.getElementById('presetExerciseList').innerHTML = '<div class="empty"><span class="spin"></span></div>';
-
         try {
             const res = await af('/api/workout-presets/' + id);
             const data = await res.json();
             if (!res.ok) throw new Error(data.message);
             currentPreset = data;
-            document.getElementById('presetDetailName').textContent = data.name;
+            document.getElementById('presetDetailNameInput').value = data.name;
             renderPresetExercises(data.exercises || []);
         } catch(e) {
-            document.getElementById('presetExerciseList').innerHTML = `<div class="empty"><p>❌ ${e.message}</p></div>`;
+            document.getElementById('presetExerciseList').innerHTML =
+                `<div style="padding:1rem;color:var(--red)">❌ ${e.message}</div>`;
         }
     }
 
     function renderPresetExercises(exercises) {
         const el = document.getElementById('presetExerciseList');
         if (!exercises.length) {
-            el.innerHTML = '<div style="color:var(--muted);font-size:0.83rem;padding:0.5rem 0">Žiadne cviky — klikni Pridať cvik</div>';
+            el.innerHTML = '<div style="padding:0.8rem 1rem;color:var(--muted);font-size:0.8rem">Žiadne cviky — klikni <b>Pridať cvik</b></div>';
             return;
         }
+        const trackLabel = t => ({weight_reps:'váha+reps',time_only:'čas',time_distance:'čas+km',reps_only:'opakovania',custom:'vlastné'}[t] || t);
         el.innerHTML = exercises.map((ex, idx) => {
-            // Posledná váha = prvý set (alebo "—")
-            const lastSet = ex.sets && ex.sets.length ? ex.sets[0] : null;
-            const lastWeight = lastSet ? (lastSet.weight ? lastSet.weight + ' kg' : (lastSet.duration ? Math.round(lastSet.duration/60)+ ' min' : '—')) : '—';
-            const lastReps = lastSet ? (lastSet.reps || '—') : '—';
-            const setsCount = ex.sets ? ex.sets.length : 0;
+            const tt = ex.trackType || 'weight_reps';
+            const cat = ex.category === 'kardio' ? '🏃' : '💪';
+            const c1h = (tt === 'time_only' || tt === 'time_distance') ? 'ČAS (min)' : 'VÁHA (kg)';
+            const c2h = tt === 'time_only' ? '—' : tt === 'time_distance' ? 'KM' : 'REPS';
 
-            return `
-        <div class="preset-exercise-row" id="per-${idx}" data-idx="${idx}">
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
-                <span style="font-size:0.85rem;font-weight:600;flex:1">${ex.name}</span>
-                <span class="badge b-grey" style="font-size:0.6rem">${getCategoryIcon(ex.category)} ${ex.category || 'sila'}</span>
-                <button class="btn btn-red btn-sm" style="padding:0.2rem 0.5rem;font-size:0.65rem"
-                    onclick="removePresetExercise(${idx})">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div style="display:grid;grid-template-columns:60px 1fr 80px 80px;gap:0.4rem;align-items:center">
-                <span style="font-size:0.65rem;color:var(--muted);font-family:var(--font-d);letter-spacing:0.1em">SÉRIE</span>
-                <span></span>
-                <span style="font-size:0.65rem;color:var(--muted);font-family:var(--font-d);letter-spacing:0.1em;text-align:center">${getCol1Label(ex.trackType)}</span>
-                <span style="font-size:0.65rem;color:var(--muted);font-family:var(--font-d);letter-spacing:0.1em;text-align:center">${getCol2Label(ex.trackType)}</span>
-            </div>
-            ${(ex.sets || []).map((s, si) => `
-            <div style="display:grid;grid-template-columns:60px 1fr 80px 80px;gap:0.4rem;align-items:center;margin-top:0.25rem">
-                <span style="font-size:0.75rem;color:var(--muted)">#${si+1}</span>
-                <div style="display:flex;align-items:center;gap:0.35rem">
-                    <button class="btn btn-ghost" style="padding:0.2rem 0.4rem;font-size:0.65rem;opacity:0.5"
-                        onclick="removePresetSet(${idx},${si})">−</button>
-                    <button class="btn btn-ghost" style="padding:0.2rem 0.4rem;font-size:0.65rem;opacity:0.5"
-                        onclick="addPresetSet(${idx})">+</button>
-                </div>
+            const setsHtml = (ex.sets || []).map((s, si) => {
+                const v1 = s.duration ? Math.round(s.duration / 60) : (s.weight || '');
+                const v2 = s.reps || '';
+                return `<div class="preset-set-grid">
+                <span class="preset-set-num">#${si + 1}</span>
                 <input class="set-input" type="number" min="0" step="0.5"
-                    value="${s.weight || s.duration ? (s.duration ? Math.round(s.duration/60) : s.weight) || '' : ''}"
-                    placeholder="—"
-                    onchange="updatePresetSet(${idx},${si},'col1',this.value)"
-                    style="text-align:center">
-                <input class="set-input" type="number" min="0"
-                    value="${s.reps || ''}"
-                    placeholder="—"
-                    onchange="updatePresetSet(${idx},${si},'col2',this.value)"
-                    style="text-align:center">
-            </div>`).join('')}
-            <button class="btn btn-ghost btn-sm" style="margin-top:0.4rem;font-size:0.68rem;opacity:0.7"
-                onclick="addPresetSet(${idx})">
+                    value="${v1}" placeholder="—"
+                    onchange="updatePresetSet(${idx},${si},'col1',this.value)">
+                ${tt === 'time_only'
+                    ? `<div class="set-input" style="background:transparent;border-color:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:0.7rem">—</div>`
+                    : `<input class="set-input" type="number" min="0" step="1" value="${v2}" placeholder="—" onchange="updatePresetSet(${idx},${si},'col2',this.value)">`
+                }
+                <button class="set-del-btn" onclick="removePresetSet(${idx},${si})" title="Odstrániť sériu"><i class="fas fa-times"></i></button>
+            </div>`;
+            }).join('');
+
+            return `<div class="preset-exercise-row">
+            <div class="preset-ex-header">
+                <span style="font-size:0.9rem">${cat}</span>
+                <span class="preset-ex-name">${ex.name}</span>
+                <span class="badge b-grey" style="font-size:0.57rem">${trackLabel(tt)}</span>
+                <button class="set-del-btn" onclick="removePresetExercise(${idx})" title="Odstrániť cvik" style="margin-left:0.2rem"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr auto;gap:0.3rem;font-family:var(--font-d);font-size:0.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.28rem">
+                <span></span><span>${c1h}</span><span>${c2h}</span><span></span>
+            </div>
+            ${setsHtml}
+            <button class="btn btn-ghost btn-sm" onclick="addPresetSet(${idx})"
+                style="margin-top:0.3rem;font-size:0.66rem;opacity:0.65">
                 <i class="fas fa-plus"></i> Séria
             </button>
         </div>`;
-        }).join('<div style="height:0.6rem;border-top:1px solid var(--border);margin:0.6rem 0"></div>');
+        }).join('');
     }
 
-    function getCategoryIcon(cat) { return cat === 'kardio' ? '🏃' : '💪'; }
-    function getCol1Label(trackType) {
-        const m = {weight_reps:'Váha',time_only:'Min',time_distance:'Min',reps_only:'—',custom:'Hod. 1'};
-        return m[trackType] || 'Váha';
-    }
-    function getCol2Label(trackType) {
-        const m = {weight_reps:'Reps',time_only:'—',time_distance:'KM',reps_only:'Reps',custom:'Hod. 2'};
-        return m[trackType] || 'Reps';
-    }
-
-    // In-place edit hodnoty v presete
-    function updatePresetSet(exIdx, setIdx, col, val) {
-        if (!currentPreset || !currentPreset.exercises) return;
-        const ex = currentPreset.exercises[exIdx];
-        if (!ex || !ex.sets) return;
-        const s = ex.sets[setIdx];
-        const numVal = parseFloat(val) || 0;
-        if (col === 'col1') {
-            if (ex.trackType === 'time_only' || ex.trackType === 'time_distance') {
-                s.duration = numVal * 60; // ulož ako sekundy
-            } else {
-                s.weight = numVal;
-            }
-        } else {
-            if (ex.trackType === 'time_distance') s.distance = numVal;
-            else s.reps = numVal;
+    async function savePresetNameInline() {
+        if (!currentPreset) return;
+        const newName = document.getElementById('presetDetailNameInput').value.trim();
+        if (!newName || newName === currentPreset.name) return;
+        try {
+            const res = await af('/api/workout-presets/' + currentPreset.id, { method: 'PUT', body: JSON.stringify({ name: newName }) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            currentPreset.name = newName;
+            toast('Názov uložený', 'ok');
+            loadPresets();
+        } catch(e) {
+            toast(e.message, 'err');
+            document.getElementById('presetDetailNameInput').value = currentPreset.name;
         }
     }
 
+    function toggleAddExToPreset() {
+        const wrap = document.getElementById('addExToPresetWrap');
+        const isOpen = wrap.style.display !== 'none';
+        wrap.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            document.getElementById('newPresetExName').value = '';
+            setTimeout(() => document.getElementById('newPresetExName').focus(), 50);
+        }
+    }
+    function updatePresetExTrackType() {
+        const cat = document.getElementById('newPresetExCat').value;
+        const sel = document.getElementById('newPresetExTrack');
+        if (cat === 'kardio') {
+            sel.innerHTML = `<option value="time_only">⏱ Len čas</option><option value="time_distance">📍 Čas + KM</option><option value="reps_only">🔁 Opakovania</option><option value="custom">✏️ Vlastné</option>`;
+        } else {
+            sel.innerHTML = `<option value="weight_reps">🏋️ Váha + Reps</option><option value="reps_only">🔁 Len opakovania</option><option value="custom">✏️ Vlastné</option>`;
+        }
+    }
+    async function confirmAddExToPreset() {
+        if (!currentPreset) return;
+        const name = document.getElementById('newPresetExName').value.trim();
+        if (!name) { document.getElementById('newPresetExName').focus(); return; }
+        const cat = document.getElementById('newPresetExCat').value;
+        const tt = document.getElementById('newPresetExTrack').value;
+        if (!currentPreset.exercises) currentPreset.exercises = [];
+        currentPreset.exercises.push({ name, category: cat, trackType: tt, sets: [{ setNumber: 1, weight: 0, reps: 0 }] });
+        renderPresetExercises(currentPreset.exercises);
+        document.getElementById('addExToPresetWrap').style.display = 'none';
+        document.getElementById('newPresetExName').value = '';
+        await savePresetChanges(true);
+    }
+
+    // Autocomplete pre preset ex input
+    async function showPresetExSuggestions(inputEl) {
+        const dd = document.getElementById('presetExAcDropdown');
+        if (!inputEl.value.trim()) { dd.style.display = 'none'; return; }
+        const results = await loadExerciseTemplates(inputEl.value);
+        if (!results.length) { dd.style.display = 'none'; return; }
+        dd.innerHTML = results.slice(0, 6).map(ex =>
+            `<div class="exercise-autocomplete-item"
+            onmousedown="document.getElementById('newPresetExName').value='${ex.name.replace(/'/g,"\\'")}';document.getElementById('presetExAcDropdown').style.display='none'">
+            <span>${ex.name}</span>
+            <span class="ex-ac-cat">${ex.category === 'kardio' ? '🏃' : '💪'} ${ex.trackType || 'weight_reps'}</span>
+        </div>`
+        ).join('');
+        dd.style.display = 'block';
+    }
+    function hidePresetExSuggestions() {
+        setTimeout(() => { const d = document.getElementById('presetExAcDropdown'); if (d) d.style.display = 'none'; }, 150);
+    }
+
+    function updatePresetSet(exIdx, setIdx, col, val) {
+        if (!currentPreset?.exercises) return;
+        const ex = currentPreset.exercises[exIdx]; if (!ex?.sets) return;
+        const s = ex.sets[setIdx]; const n = parseFloat(val) || 0;
+        if (col === 'col1') { if (ex.trackType === 'time_only' || ex.trackType === 'time_distance') s.duration = n * 60; else s.weight = n; }
+        else { if (ex.trackType === 'time_distance') s.distance = n; else s.reps = n; }
+    }
     function addPresetSet(exIdx) {
         if (!currentPreset?.exercises) return;
-        const ex = currentPreset.exercises[exIdx];
-        if (!ex) return;
+        const ex = currentPreset.exercises[exIdx]; if (!ex) return;
         if (!ex.sets) ex.sets = [];
-        // Skopíruj poslednú sériu ako základ
         const last = ex.sets[ex.sets.length - 1];
-        ex.sets.push(last ? { ...last } : { weight: 0, reps: 0, setNumber: ex.sets.length + 1 });
+        ex.sets.push(last ? { ...last, setNumber: ex.sets.length + 1 } : { setNumber: ex.sets.length + 1, weight: 0, reps: 0 });
         renderPresetExercises(currentPreset.exercises);
     }
-
     function removePresetSet(exIdx, setIdx) {
         if (!currentPreset?.exercises) return;
-        const ex = currentPreset.exercises[exIdx];
-        if (!ex?.sets) return;
-        ex.sets.splice(setIdx, 1);
-        ex.sets.forEach((s, i) => s.setNumber = i + 1);
+        const ex = currentPreset.exercises[exIdx]; if (!ex?.sets) return;
+        ex.sets.splice(setIdx, 1); ex.sets.forEach((s, i) => s.setNumber = i + 1);
         renderPresetExercises(currentPreset.exercises);
     }
-
     function removePresetExercise(idx) {
         if (!currentPreset?.exercises) return;
         currentPreset.exercises.splice(idx, 1);
         renderPresetExercises(currentPreset.exercises);
     }
-
-    function addExerciseToPreset() {
-        if (!currentPreset) return;
-        const name = prompt('Názov cviku:');
-        if (!name?.trim()) return;
-        const cat = confirm('Kardio? (OK = kardio, Zrušiť = sila)') ? 'kardio' : 'sila';
-        const trackType = cat === 'kardio' ? 'time_only' : 'weight_reps';
-        if (!currentPreset.exercises) currentPreset.exercises = [];
-        currentPreset.exercises.push({
-            name: name.trim(), category: cat, trackType,
-            sets: [{ setNumber: 1, weight: 0, reps: 0 }]
-        });
-        renderPresetExercises(currentPreset.exercises);
-    }
-
-    async function savePresetChanges() {
+    async function savePresetChanges(silent = false) {
         if (!currentPreset) return;
         try {
-            const res = await af('/api/workout-presets/' + currentPreset.id, {
-                method: 'PUT',
-                body: JSON.stringify({ exercises: currentPreset.exercises })
-            });
+            const res = await af('/api/workout-presets/' + currentPreset.id, { method: 'PUT', body: JSON.stringify({ exercises: currentPreset.exercises }) });
             if (!res.ok) throw new Error('Chyba');
-            showMsg('presetMsg', '✓ Plán uložený!', 'ok');
-            toast('Plán uložený', 'ok');
-            loadPresets();
-        } catch(e) { showMsg('presetMsg', e.message, 'err'); }
+            if (!silent) { showMsg('presetMsg', '✓ Uložené', 'ok'); toast('Plán uložený', 'ok'); loadPresets(); }
+        } catch(e) { if (!silent) showMsg('presetMsg', e.message, 'err'); }
     }
-
     async function deletePreset() {
         if (!currentPreset || !confirm(`Zmazať plán "${currentPreset.name}"?`)) return;
         try {
             const res = await af('/api/workout-presets/' + currentPreset.id, { method: 'DELETE' });
             if (!res.ok) throw new Error('Chyba');
-            toast('Plán zmazaný', 'ok');
-            closePresetDetail();
-            loadPresets();
+            toast('Plán zmazaný', 'ok'); closePresetDetail(); loadPresets();
         } catch(e) { toast(e.message, 'err'); }
     }
-
     function closePresetDetail() {
         document.getElementById('presetDetailWrap').style.display = 'none';
         document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
         currentPreset = null;
     }
-
-    // Rýchly štart bez otvárania detailu
     async function quickStart(id) {
         try {
             const res = await af('/api/workout-presets/' + id);
             const data = await res.json();
             if (!res.ok) throw new Error(data.message);
-            currentPreset = data;
-            startWorkoutFromPreset();
+            currentPreset = data; startWorkoutFromPreset();
         } catch(e) { toast(e.message, 'err'); }
     }
-
-    // ⭐ Hlavná funkcia — otvorí editor s predvyplnenými cvikmi
     function startWorkoutFromPreset() {
         if (!currentPreset) return;
-
-        // Označenie použitia (async, neblokuj UI)
         af('/api/workout-presets/' + currentPreset.id + '/use', { method: 'POST' }).catch(() => {});
-
-        // Nastav editor
         selectedDate = selectedDate || new Date().toISOString().split('T')[0];
-        currentWorkoutId = null;
-        editorFeeling = 3;
+        currentWorkoutId = null; editorFeeling = 3;
         document.getElementById('wTitle').value = currentPreset.name;
         document.getElementById('wNotes').value = '';
         document.getElementById('exerciseList').innerHTML = '';
-        document.getElementById('editorTitle').textContent =
-            'Tréning z plánu: ' + currentPreset.name;
+        document.getElementById('editorTitle').textContent = 'Tréning z plánu: ' + currentPreset.name;
         document.getElementById('workoutMsg').className = 'fm';
         updateFeelingBtns();
-
-        // Pridaj cviky z presetu s poslednými váhami
-        (currentPreset.exercises || []).forEach(ex => {
-            addExercise(ex.name, ex.sets || [], ex.category || 'sila', ex.trackType || 'weight_reps');
-        });
-
+        (currentPreset.exercises || []).forEach(ex =>
+            addExercise(ex.name, ex.sets || [], ex.category || 'sila', ex.trackType || 'weight_reps')
+        );
         document.getElementById('workoutEditor').style.display = 'block';
         document.getElementById('presetDetailWrap').style.display = 'none';
         document.getElementById('workoutEditor').scrollIntoView({ behavior: 'smooth' });
-        toast('Plán načítaný — uprav váhy a štartuj!', 'ok');
+        toast('Plán načítaný — uprav váhy a štartuj! 💪', 'ok');
     }
-
-    // ─── Po uložení workout → aktualizuj preset s novými váhami ───
-    // Toto volaj na konci saveWorkout() po úspešnom uložení
     async function syncPresetAfterWorkout(savedExercises) {
         if (!currentPreset?.id) return;
-        // Zober posledné váhy z uloženého tréningu a aktualizuj preset
-        const updatedExercises = (currentPreset.exercises || []).map(pEx => {
-            const match = savedExercises.find(sEx =>
-                sEx.name.toLowerCase() === pEx.name.toLowerCase()
-            );
-            if (!match || !match.sets?.length) return pEx;
-            // Aktualizuj váhy v presete podľa posledného tréningu
-            return { ...pEx, sets: match.sets.map(s => ({ ...s })) };
+        const updated = (currentPreset.exercises || []).map(pEx => {
+            const match = savedExercises.find(s => s.name.toLowerCase() === pEx.name.toLowerCase());
+            return (match && match.sets?.length) ? { ...pEx, sets: match.sets.map(s => ({ ...s })) } : pEx;
         });
-        try {
-            await af('/api/workout-presets/' + currentPreset.id + '/use', {
-                method: 'POST',
-                body: JSON.stringify({ exercises: updatedExercises })
-            });
-        } catch {} // tichý fail — nie kritické
+        try { await af('/api/workout-presets/' + currentPreset.id + '/use', { method: 'POST', body: JSON.stringify({ exercises: updated }) }); } catch {}
     }
+
 
     // Vytvorenie nového presetu
     function openCreatePreset() {
@@ -2387,7 +1776,8 @@
     async function initWorkoutPage() {
         await renderCalendar();
         loadWeeklyStats();
-        loadPresets(); // ← pridaj tento riadok
+        loadPresets();
+        loadProgressQuickTags();
     }
 
     async function renderCalendar() {
@@ -2588,13 +1978,49 @@
 
     function setFeeling(val) {
         editorFeeling = val;
-        updateFeelingBtns();
+        document.querySelectorAll('.wd-feel-btn').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.val) === val);
+        });
+    }
+    function updateFeelingBtns() {
+        document.querySelectorAll('.wd-feel-btn').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.val) === editorFeeling);
+        });
     }
 
-    function updateFeelingBtns() {
-        document.querySelectorAll('#feelingBtns button').forEach((btn, i) => {
-            btn.className = 'btn btn-sm ' + (i+1 === editorFeeling ? 'btn-acid' : 'btn-ghost');
-        });
+    async function loadProgressQuickTags() {
+        const container = document.getElementById('progressQuickTags');
+        if (!container) return;
+        const templates = await loadExerciseTemplates('');
+        if (!templates.length) return;
+        container.innerHTML = templates.slice(0, 7).map(ex =>
+            `<span class="progress-tag" onclick="selectProgressExercise('${ex.name.replace(/'/g,"\\'")}')">
+            ${ex.name}
+        </span>`
+        ).join('');
+    }
+    function selectProgressExercise(name) {
+        document.getElementById('progressExercise').value = name;
+        const dd = document.getElementById('progressAcDropdown');
+        if (dd) dd.style.display = 'none';
+        loadProgress();
+    }
+    async function showProgressSuggestions(inputEl) {
+        const dd = document.getElementById('progressAcDropdown');
+        if (!inputEl.value.trim()) { dd.style.display = 'none'; return; }
+        const results = await loadExerciseTemplates(inputEl.value);
+        if (!results.length) { dd.style.display = 'none'; return; }
+        dd.innerHTML = results.slice(0, 8).map(ex =>
+            `<div class="exercise-autocomplete-item"
+            onmousedown="selectProgressExercise('${ex.name.replace(/'/g,"\\'")}')">
+            <span>${ex.name}</span>
+            <span class="ex-ac-cat">${ex.category === 'kardio' ? '🏃' : '💪'}</span>
+        </div>`
+        ).join('');
+        dd.style.display = 'block';
+    }
+    function hideProgressSuggestions() {
+        setTimeout(() => { const d = document.getElementById('progressAcDropdown'); if (d) d.style.display = 'none'; }, 150);
     }
 
 
@@ -2632,6 +2058,7 @@
             filtered.unshift({ name: name.trim(), category, trackType, customLabels, usedAt: Date.now() });
             localStorage.setItem('ex_history_' + user.id, JSON.stringify(filtered.slice(0, 50)));
         }
+        loadProgressQuickTags();
     }
 
     async function showExerciseSuggestions(inputEl, exId) {
@@ -2930,7 +2357,6 @@
             const trackType = block.dataset.trackType || 'weight_reps';
             const customLabels = block.dataset.customLabels || null;
 
-            // Ulož do histórie
             saveExerciseTemplate(name, category, trackType, customLabels);
 
             const sets = [];
@@ -2989,9 +2415,7 @@
             saveWorkoutLocal(selectedDate, savedData);
             saveCalendarDatesLocal(calYear, calMonth, null);
             toast('Tréning uložený! 💪', 'ok');
-            if (currentPreset?.id) {
-                syncPresetAfterWorkout(collectedExercises); // collectedExercises = pole čo buduješ počas saveWorkout
-            }
+            if (currentPreset?.id) syncPresetAfterWorkout(exercises);
 
             closeEditor();
             await renderCalendar();
@@ -3017,38 +2441,33 @@
     // ── PROGRES GRAF ─────────────────────────────────────────────────────────────
     async function loadProgress() {
         const exercise = document.getElementById('progressExercise').value.trim();
-        if (!exercise) return toast('Zadaj názov cviku', 'err');
-
+        if (!exercise) return toast('Zadaj alebo vyber cvik', 'err');
+        const emptyEl = document.getElementById('progressEmpty');
+        if (emptyEl) emptyEl.style.display = 'none';
         try {
             const res = await af(`/api/workouts/progress?exercise=${encodeURIComponent(exercise)}`);
             const data = await res.json();
-
             if (!data || !data.length) {
-                toast('Žiadne dáta pre tento cvik', 'err');
+                if (emptyEl) emptyEl.style.display = 'block';
+                if (progressChart) { progressChart.destroy(); progressChart = null; }
                 return;
             }
-
             if (progressChart) progressChart.destroy();
-
             progressChart = new Chart(document.getElementById('chartProgress'), {
                 type: 'line',
                 data: {
-                    labels: data.map(d => new Date(d.date).toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'})),
+                    labels: data.map(d => new Date(d.date).toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit' })),
                     datasets: [{
                         label: `Max váha — ${exercise}`,
                         data: data.map(d => d.maxWeight),
                         borderColor: '#C8FF00',
-                        backgroundColor: 'rgba(200,255,0,0.08)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#C8FF00',
-                        borderWidth: 2
+                        backgroundColor: 'rgba(200,255,0,0.07)',
+                        fill: true, tension: 0.35, pointRadius: 5,
+                        pointBackgroundColor: '#C8FF00', pointHoverRadius: 7, borderWidth: 2
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     scales: {
                         x: { grid: { display: false } },
                         y: { beginAtZero: false, ticks: { callback: v => v + ' kg' } }
