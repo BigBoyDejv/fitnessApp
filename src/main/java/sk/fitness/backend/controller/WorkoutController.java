@@ -150,6 +150,7 @@ public class WorkoutController {
             Map<String, Object> m = new HashMap<>();
             m.put("date", r[0].toString());
             m.put("maxWeight", r[1]);
+            m.put("maxReps", r[2]);
             return m;
         }).toList();
         return ResponseEntity.ok(result);

@@ -26,17 +26,27 @@ public class WorkoutPresetController {
         this.userRepo = userRepo;
     }
 
-    // GET /api/workout-presets — zoznam presetov usera
+    // GET /api/workout-presets — zoznam presetov usera (+ zdieľané od trénera)
     @GetMapping
     public ResponseEntity<?> list(@AuthenticationPrincipal UserDetails ud) {
         User user = resolve(ud);
         if (user == null) return ResponseEntity.status(401).build();
 
-        List<Map<String, Object>> result = presetRepo
-                .findByUserIdOrderByLastUsedAtDescNameAsc(user.getId())
-                .stream()
-                .map(this::toDtoLight)
-                .toList();
+        // Moje presety
+        List<WorkoutPreset> myPresets = presetRepo.findByUserIdOrderByLastUsedAtDescNameAsc(user.getId());
+        
+        // Zdieľané presety od trénera
+        List<WorkoutPreset> sharedPresets = new ArrayList<>();
+        if (user.getTrainerId() != null) {
+            sharedPresets = presetRepo.findByUserIdInAndIsSharedTrueOrderByLastUsedAtDesc(List.of(user.getTrainerId()));
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        // Najprv tvoje
+        myPresets.forEach(p -> result.add(toDtoLight(p, false)));
+        // Potom trénerove (označené ako shared)
+        sharedPresets.forEach(p -> result.add(toDtoLight(p, true)));
+
         return ResponseEntity.ok(result);
     }
 
@@ -48,7 +58,8 @@ public class WorkoutPresetController {
         if (user == null) return ResponseEntity.status(401).build();
 
         return presetRepo.findById(id)
-                .filter(p -> p.getUser().getId().equals(user.getId()))
+                .filter(p -> p.getUser().getId().equals(user.getId()) || 
+                           (p.getIsShared() && user.getTrainerId() != null && p.getUser().getId().equals(user.getTrainerId())))
                 .map(this::toDtoFull)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -156,7 +167,7 @@ public class WorkoutPresetController {
         return userRepo.findByEmail(ud.getUsername()).orElse(null);
     }
 
-    private Map<String, Object> toDtoLight(WorkoutPreset p) {
+    private Map<String, Object> toDtoLight(WorkoutPreset p, boolean isSharedFromTrainer) {
         Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", p.getId().toString());
         dto.put("name", p.getName());
@@ -164,6 +175,7 @@ public class WorkoutPresetController {
         dto.put("lastUsedAt", p.getLastUsedAt());
         dto.put("createdAt", p.getCreatedAt());
         dto.put("exerciseCount", p.getExercises() != null ? p.getExercises().size() : 0);
+        dto.put("fromTrainer", isSharedFromTrainer);
         return dto;
     }
 

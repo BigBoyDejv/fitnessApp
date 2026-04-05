@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface WorkoutPresetRepository extends JpaRepository<WorkoutPreset, UUID> {
     List<WorkoutPreset> findByUserIdOrderByLastUsedAtDescNameAsc(UUID userId);
+    List<WorkoutPreset> findByUserIdInAndIsSharedTrueOrderByLastUsedAtDesc(List<UUID> userIds);
 }

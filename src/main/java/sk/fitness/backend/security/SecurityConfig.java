@@ -66,7 +66,8 @@ public class SecurityConfig {
                         // Statické súbory a frontend stránky
                         .requestMatchers(
                                 "/", "/index.html", "/member.html", "/admin.html", "/trainer.html",
-                                "/favicon.ico", "/static/**", "/css/**", "/js/**", "/reception.html", "/jsQR.js"
+                                "/favicon.ico", "/static/**", "/css/**", "/js/**", "/reception.html", "/jsQR.js",
+                                "/error"
                         ).permitAll()
 
                         // Všetko ostatné musí byť autentifikované

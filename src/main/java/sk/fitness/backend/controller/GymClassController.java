@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -90,6 +91,7 @@ public class GymClassController {
     }
 
     // ── POST /api/classes/{id}/book ───────────────────────────────────────────
+    @Transactional
     @PostMapping("/{id}/book")
     public ResponseEntity<?> book(
             @PathVariable Long id,
@@ -133,27 +135,45 @@ public class GymClassController {
     }
 
     // ── DELETE /api/classes/{id}/cancel ──────────────────────────────────────
+    @Transactional
     @DeleteMapping("/{id}/cancel")
     public ResponseEntity<?> cancel(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         User currentUser = resolveUser(userDetails);
-        if (currentUser == null) return ResponseEntity.status(401).body(Map.of("message", "Neprihlásený"));
+        if (currentUser == null) {
+            System.err.println("CANCEL ERROR: Unauthenticated user.");
+            return ResponseEntity.status(401).body(Map.of("message", "Neprihlásený"));
+        }
 
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
-        if (gymClass == null) return ResponseEntity.notFound().build();
+        if (gymClass == null) {
+            System.err.println("CANCEL ERROR: Class " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
 
-        if (!gymClass.getReservedUsers().contains(currentUser))
-            return ResponseEntity.badRequest().body(Map.of("message", "Nie si rezervovaný na túto lekciu"));
+        System.out.println("CANCELLING: User " + currentUser.getId() + " from Class " + id);
+        
+        // Use removeIf to be safe against proxy issues in the Set
+        boolean removed = gymClass.getReservedUsers().removeIf(u -> {
+            if (u == null || u.getId() == null) return false;
+            return u.getId().equals(currentUser.getId());
+        });
 
-        gymClass.getReservedUsers().remove(currentUser);
+        if (!removed) {
+            System.out.println("CANCEL WARNING: User was not in reserved set. Current size: " + gymClass.getReservedUsers().size());
+            return ResponseEntity.badRequest().body(Map.of("message", "Nie si prihlásený na túto lekciu"));
+        }
+
         gymClass.setBooked(Math.max(0, gymClass.getBooked() - 1));
         gymClassRepository.save(gymClass);
+        System.out.println("CANCEL SUCCESS: User " + currentUser.getId() + " removed from Class " + id);
 
         return ResponseEntity.ok(Map.of("message", "Rezervácia zrušená"));
     }
 
+    @Transactional
     @PostMapping("/{id}/cancel")
     public ResponseEntity<?> cancelPost(@PathVariable Long id,
                                         @AuthenticationPrincipal UserDetails ud) {

@@ -35,6 +35,9 @@ public class WorkoutPreset {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "is_shared")
+    private Boolean isShared = false;
+
     // Constructors
     public WorkoutPreset() {}
 
@@ -69,4 +72,7 @@ public class WorkoutPreset {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Boolean getIsShared() { return isShared != null ? isShared : false; }
+    public void setIsShared(Boolean shared) { isShared = shared != null ? shared : false; }
 }
