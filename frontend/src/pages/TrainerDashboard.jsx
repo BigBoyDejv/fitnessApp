@@ -35,7 +35,7 @@ export default function TrainerDashboard() {
       }
     }
   }, [navigate]);
-  
+
   useEffect(() => {
     const onResize = () => {
       const mobile = window.innerWidth <= 900;
@@ -70,7 +70,7 @@ export default function TrainerDashboard() {
         elements.push(<div key={`sec-${item.id}`} className="nav-section">{item.section}</div>);
       }
       elements.push(
-        <a 
+        <a
           key={item.id}
           href="#"
           onClick={(e) => { e.preventDefault(); setActiveTab(item.id); setSidebarOpen(false); }}
@@ -85,27 +85,27 @@ export default function TrainerDashboard() {
 
   const pageTitle = navItems.find(i => i.id === activeTab)?.label || 'Prehľad';
 
-  let avatarContent = <>{user?.fullName ? user.fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : 'T'}</>;
+  let avatarContent = <>{user?.fullName ? user.fullName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() : 'T'}</>;
   if (user?.avatarUrl) {
-    avatarContent = <img src={user.avatarUrl} alt="Avatar" style={{width:'38px', height:'38px', borderRadius:'50%', objectFit:'cover'}} />;
+    avatarContent = <img src={user.avatarUrl} alt="Avatar" style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }} />;
   }
 
   return (
-    <div 
-      className="trainer-dashboard" 
-      style={{display:'flex', flexDirection:'row', minHeight:'100vh', width:'100%'}}
+    <div
+      className="trainer-dashboard"
+      style={{ display: 'flex', flexDirection: 'row', minHeight: '100vh', width: '100%' }}
     >
       {/* ── Overlay (mobile) ───────────────────────────────────────────── */}
       {isMobile && sidebarOpen && (
-        <div 
-          className="sidebar-overlay open" 
+        <div
+          className="sidebar-overlay open"
           onClick={() => setSidebarOpen(false)}
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 99, backdropFilter: "blur(3px)" }}
         />
       )}
-      
+
       {/* ── Sidebar ────────────────────────────────────────────────────── */}
-      <aside 
+      <aside
         className={`sidebar ${sidebarOpen ? 'open' : ''}`}
         style={{
           position: 'fixed',
@@ -123,7 +123,7 @@ export default function TrainerDashboard() {
           <div className="logo">FITNESS<span>PRO</span></div>
           <div className="role-tag"><i className="fas fa-dumbbell"></i> Tréner</div>
         </div>
-        
+
         <div className="sb-user">
           <div className="avatar">{avatarContent}</div>
           <div>
@@ -131,11 +131,11 @@ export default function TrainerDashboard() {
             <div className="email">{user?.email || '—'}</div>
           </div>
         </div>
-        
+
         <nav className="sb-nav" style={{ flex: 1, overflowY: 'auto' }}>
           {renderNav()}
         </nav>
-        
+
         <div className="sb-footer">
           <button className="logout-btn" onClick={logout}>
             <i className="fas fa-sign-out-alt"></i> Odhlásiť sa
@@ -144,7 +144,7 @@ export default function TrainerDashboard() {
       </aside>
 
       {/* ── Hlavná oblasť ──────────────────────────────────────────────── */}
-      <main 
+      <main
         className="main"
         style={{
           marginLeft: isMobile ? 0 : '256px',
@@ -158,9 +158,9 @@ export default function TrainerDashboard() {
         }}
       >
         <header className="topbar">
-          <div style={{display: 'flex', alignItems: 'center', gap: '0.8rem'}}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
             {isMobile && (
-              <button 
+              <button
                 className={`hamburger ${sidebarOpen ? 'open' : ''}`}
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 aria-label="Menu"
@@ -171,11 +171,16 @@ export default function TrainerDashboard() {
             <div className="page-title">{pageTitle}</div>
           </div>
           <div className="topbar-right">
+            {isMobile && (
+              <button className="top-logout-btn" onClick={logout} style={{ marginRight: '0.8rem' }}>
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
+            )}
             <span className="trainer-badge"><i className="fas fa-dumbbell"></i> Tréner panel</span>
           </div>
         </header>
 
-        <div className="content">
+        <div className="content" style={{ paddingBottom: isMobile ? '100px' : '2rem' }}>
           {activeTab === 'overview' && <OverviewTab user={user} />}
           {activeTab === 'my-classes' && <MyClassesTab />}
           {activeTab === 'schedule' && <ScheduleTab />}
@@ -183,7 +188,7 @@ export default function TrainerDashboard() {
           {activeTab === 'messages' && <MessagesTab user={user} />}
           {activeTab === 'profile' && <ProfileTab user={user} updateUser={setUser} />}
           {/* TO DO: add others  */}
-          
+
           {!['overview', 'my-classes', 'schedule', 'clients', 'messages', 'profile'].includes(activeTab) && (
             <div className="empty-state">
               <i className="fas fa-tools"></i>
@@ -191,6 +196,38 @@ export default function TrainerDashboard() {
             </div>
           )}
         </div>
+
+        {isMobile && (
+          <nav className="mobile-bottom-dock">
+            <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-home" />
+              <span>DOMOV</span>
+            </button>
+            <button className={activeTab === 'my-classes' ? 'active' : ''} onClick={() => setActiveTab('my-classes')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-calendar-alt" />
+              <span>LEKCIE</span>
+            </button>
+            <button className="nav-action-btn" onClick={() => setActiveTab('schedule')}>
+              <i className="fas fa-clock" />
+            </button>
+            <button className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-comments" />
+              <span>SPRÁVY</span>
+            </button>
+            <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-user" />
+              <span>ÚČET</span>
+            </button>
+          </nav>
+        )}
       </main>
     </div>
   );

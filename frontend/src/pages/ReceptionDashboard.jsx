@@ -50,7 +50,7 @@ export default function ReceptionDashboard() {
 
     return () => clearInterval(timer);
   }, [navigate]);
-  
+
   useEffect(() => {
     const onResize = () => {
       const mobile = window.innerWidth <= 900;
@@ -230,6 +230,11 @@ export default function ReceptionDashboard() {
             <div className="page-title">{pageTitles[activeTab]}</div>
           </div>
           <div className="topbar-right">
+            {isMobile && (
+              <button className="top-logout-btn" onClick={handleLogout} style={{ marginRight: '0.8rem' }}>
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
+            )}
             <span style={{ fontFamily: "var(--font-d)", fontSize: "1.1rem", color: "var(--muted)" }}>
               {clock}
             </span>
@@ -239,11 +244,42 @@ export default function ReceptionDashboard() {
           </div>
         </header>
 
-        <div className="content">
+        <div className="content" style={{ paddingBottom: isMobile ? '100px' : '2rem' }}>
           <div className="fade-in">{renderTabContent()}</div>
         </div>
-      </main>
 
+        {isMobile && (
+          <nav className="mobile-bottom-dock">
+            <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-home" />
+              <span>DOMOV</span>
+            </button>
+            <button className={activeTab === 'checkin' ? 'active' : ''} onClick={() => setActiveTab('checkin')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-qrcode" />
+              <span>CHECKIN</span>
+            </button>
+            <button className="nav-action-btn" onClick={() => setActiveTab('kasa')}>
+              <i className="fas fa-cash-register" />
+            </button>
+            <button className={activeTab === 'members' ? 'active' : ''} onClick={() => setActiveTab('members')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-users" />
+              <span>ČLENOVIA</span>
+            </button>
+            <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-user" />
+              <span>ÚČET</span>
+            </button>
+          </nav>
+        )}
+      </main>
     </div>
   );
 }

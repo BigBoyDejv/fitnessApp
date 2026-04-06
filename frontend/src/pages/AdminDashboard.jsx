@@ -33,7 +33,7 @@ export default function AdminDashboard() {
       }
     }
   }, [navigate]);
-  
+
   useEffect(() => {
     const onResize = () => {
       const mobile = window.innerWidth <= 900;
@@ -52,16 +52,16 @@ export default function AdminDashboard() {
 
   const navItems = [
     { id: 'overview', icon: 'fa-chart-line', label: 'Dashboard', section: 'Prehľad' },
-    
+
     { id: 'users', icon: 'fa-users', label: 'Profily', section: 'Správa' },
     { id: 'messages', icon: 'fa-envelope', label: 'Správy členom', section: 'Správa' },
     { id: 'memberships', icon: 'fa-id-card', label: 'Predplatné', section: 'Správa' },
     { id: 'classes-admin', icon: 'fa-calendar-alt', label: 'Lekcie', section: 'Správa' },
     { id: 'create-class', icon: 'fa-plus-circle', label: 'Nová lekcia', section: 'Správa' },
-    
+
     { id: 'stats', icon: 'fa-chart-bar', label: 'Štatistiky', section: 'Analytika' },
     { id: 'inventory', icon: 'fa-boxes', label: 'Sklad', section: 'Analytika' },
-    
+
     { id: 'profile', icon: 'fa-user-cog', label: 'Môj profil', section: 'Nastavenia' }
   ];
 
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
         elements.push(<div key={`sec-${item.id}`} className="nav-section">{item.section}</div>);
       }
       elements.push(
-        <a 
+        <a
           key={item.id}
           href="#"
           onClick={(e) => { e.preventDefault(); setActiveTab(item.id); setSidebarOpen(false); }}
@@ -89,27 +89,27 @@ export default function AdminDashboard() {
 
   const pageTitle = navItems.find(i => i.id === activeTab)?.label || 'Dashboard';
 
-  let avatarContent = <>{user?.fullName ? user.fullName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : 'A'}</>;
+  let avatarContent = <>{user?.fullName ? user.fullName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() : 'A'}</>;
   if (user?.avatarUrl) {
-    avatarContent = <img src={user.avatarUrl} alt="Avatar" style={{width:'38px', height:'38px', borderRadius:'50%', objectFit:'cover'}} />;
+    avatarContent = <img src={user.avatarUrl} alt="Avatar" style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }} />;
   }
 
   return (
-    <div 
-      className="admin-dashboard" 
-      style={{display:'flex', flexDirection:'row', minHeight:'100vh', width:'100%'}}
+    <div
+      className="admin-dashboard"
+      style={{ display: 'flex', flexDirection: 'row', minHeight: '100vh', width: '100%' }}
     >
       {/* ── Overlay (mobile) ───────────────────────────────────────────── */}
       {isMobile && sidebarOpen && (
-        <div 
-          className="sidebar-overlay open" 
+        <div
+          className="sidebar-overlay open"
           onClick={() => setSidebarOpen(false)}
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 99, backdropFilter: "blur(3px)" }}
         />
       )}
-      
+
       {/* ── Sidebar ────────────────────────────────────────────────────── */}
-      <aside 
+      <aside
         className={`sidebar ${sidebarOpen ? 'open' : ''}`}
         style={{
           position: 'fixed',
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
           <div className="logo">FITNESS<span>PRO</span></div>
           <div className="role-tag"><i className="fas fa-shield-alt"></i> Admin panel</div>
         </div>
-        
+
         <div className="sb-user">
           <div className="avatar">{avatarContent}</div>
           <div>
@@ -135,11 +135,11 @@ export default function AdminDashboard() {
             <div className="email">{user?.email || '—'}</div>
           </div>
         </div>
-        
+
         <nav className="sb-nav" style={{ flex: 1, overflowY: "auto" }}>
           {renderNav()}
         </nav>
-        
+
         <div className="sb-footer">
           <button className="logout-btn" onClick={logout}>
             <i className="fas fa-sign-out-alt"></i> Odhlásiť sa
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* ── Hlavná oblasť ──────────────────────────────────────────────── */}
-      <main 
+      <main
         className="main"
         style={{
           marginLeft: isMobile ? 0 : '256px',
@@ -162,9 +162,9 @@ export default function AdminDashboard() {
         }}
       >
         <header className="topbar">
-          <div style={{display: 'flex', alignItems: 'center', gap: '0.8rem'}}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
             {isMobile && (
-              <button 
+              <button
                 className={`hamburger ${sidebarOpen ? 'open' : ''}`}
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 aria-label="Menu"
@@ -175,11 +175,16 @@ export default function AdminDashboard() {
             <div className="page-title">{pageTitle}</div>
           </div>
           <div className="topbar-right">
+            {isMobile && (
+              <button className="top-logout-btn" onClick={logout} style={{ marginRight: '0.8rem' }}>
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
+            )}
             <span className="admin-badge"><i className="fas fa-shield-alt"></i> Admin</span>
           </div>
         </header>
 
-        <div className="content">
+        <div className="content" style={{ paddingBottom: isMobile ? '100px' : '2rem' }}>
           {activeTab === 'overview' && <OverviewTab user={user} />}
           {activeTab === 'users' && <UsersTab />}
           {activeTab === 'memberships' && <MembershipsTab />}
@@ -189,7 +194,7 @@ export default function AdminDashboard() {
           {activeTab === 'messages' && <MessagesTab />}
           {activeTab === 'inventory' && <InventoryTab />}
           {activeTab === 'stats' && <StatsTab />}
-          
+
           {!['overview', 'users', 'memberships', 'classes-admin', 'create-class', 'profile', 'messages', 'inventory', 'stats'].includes(activeTab) && (
             <div className="empty-state">
               <i className="fas fa-tools"></i>
@@ -197,6 +202,38 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+
+        {isMobile && (
+          <nav className="mobile-bottom-dock">
+            <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-chart-line" />
+              <span>DOMOV</span>
+            </button>
+            <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-users" />
+              <span>PROFILY</span>
+            </button>
+            <button className="nav-action-btn" onClick={() => setActiveTab('create-class')}>
+              <i className="fas fa-plus" />
+            </button>
+            <button className={activeTab === 'stats' ? 'active' : ''} onClick={() => setActiveTab('stats')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-chart-bar" />
+              <span>STATS</span>
+            </button>
+            <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-user-cog" />
+              <span>ÚČET</span>
+            </button>
+          </nav>
+        )}
       </main>
     </div>
   );

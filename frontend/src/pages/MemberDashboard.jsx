@@ -348,6 +348,11 @@ export default function MemberDashboard() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+            {isMobile && (
+              <button className="top-logout-btn" onClick={logout}>
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
+            )}
             <button className="top-notif-btn" onClick={() => setActiveTab('notifications')}>
               <i className="fas fa-bell" />
               {notifCount > 0 && <span className="dot" />}
