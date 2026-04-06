@@ -27,7 +27,12 @@ export default function ClassesAdminTab() {
     loadClasses();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (e, id) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!window.confirm(`Zmazať lekciu #${id}?`)) return;
     
     setMsg({ text: '', type: '' });
@@ -103,7 +108,7 @@ export default function ClassesAdminTab() {
                       </div>
                     </td>
                     <td>
-                      <button className="btn btn-red btn-sm" onClick={() => handleDelete(c.id)}>
+                      <button className="btn btn-red btn-sm" onClick={(e) => handleDelete(e, c.id)}>
                         <i className="fas fa-trash"></i>
                       </button>
                     </td>

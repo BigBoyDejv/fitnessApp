@@ -5,6 +5,13 @@ export default function ClassesTab({ setActiveTab }) {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = 'ok') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   useEffect(() => { loadMyClasses(); }, []);
 
   const loadMyClasses = async () => {
@@ -20,26 +27,31 @@ export default function ClassesTab({ setActiveTab }) {
     finally { setLoading(false); }
   };
 
-  const cancelClass = async (id) => {
+  const cancelClass = async (e, id) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!id) return;
-    console.log('CLIENT: Cancelling class ID from timeline:', id);
-    if (!window.confirm('Naozaj zrušiť rezerváciu?')) return;
+    
+    const confirmed = window.confirm('Naozaj zrušiť rezerváciu?');
+    if (!confirmed) return;
     
     setLoading(true);
     try {
       const res = await authenticatedFetch(`/api/classes/${id}/cancel`, { method: 'DELETE' });
       const text = await res.text();
-      console.log('CLIENT: Server response:', res.status, text);
       
       if (res.ok) {
-        // V member.html volajú loadMyClasses()
+        showToast('Rezervácia zrušená', 'ok');
         await loadMyClasses();
       } else {
-        throw new Error('Nepodarilo sa zrušiť rezerváciu.');
+        let d = {}; try { d = JSON.parse(text); } catch { d = { message: text }; }
+        showToast(d.message || 'Nepodarilo sa zrušiť rezerváciu.', 'err');
       }
     } catch (e) {
-      console.error('CLIENT ERROR:', e);
-      alert('Chyba: ' + e.message);
+      showToast(e.message, 'err');
     } finally {
       setLoading(false);
     }
@@ -103,7 +115,7 @@ export default function ClassesTab({ setActiveTab }) {
                           </div>
                            {!isPast && (
                               <div className="t-actions">
-                                 <button className="btn btn-red btn-sm" onClick={() => cancelClass(c.id)} disabled={loading}>
+                                 <button className="btn btn-red btn-sm" onClick={(e) => cancelClass(e, c.id)} disabled={loading}>
                                     <i className="fas fa-times" /> ZRUŠIŤ
                                  </button>
                               </div>
@@ -116,6 +128,11 @@ export default function ClassesTab({ setActiveTab }) {
           </div>
         )}
       </div>
+      {toast && (
+        <div className={`toast-message toast-${toast.type}`}>
+          {toast.type === 'ok' ? '✓' : '⚠'} {toast.msg}
+        </div>
+      )}
     </div>
   );
 }

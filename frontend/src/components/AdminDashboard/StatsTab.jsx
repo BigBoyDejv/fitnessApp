@@ -246,120 +246,190 @@ export default function StatsTab() {
   const dash = data.dashboard || {};
 
   return (
-    <div className="stats-tab-content">
-      <div className="stats-hero">
-        <div className="sh-card" style={{ '--sh-accent': chartColors.acid }}>
-          <div className="sh-icon"><i className="fas fa-euro-sign"></i></div>
-          <div className="sh-val">{(dash.totalRevenueThisMonth || 0).toFixed(2)} €</div>
-          <div className="sh-lbl">Celkový obrat tento mesiac</div>
-          {renderDelta(dash.totalRevenueThisMonth, dash.totalRevenueLastMonth)}
+    <div className="animate-in">
+      <div className="dashboard-grid" style={{ marginBottom: "2.5rem", gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0s' }}>
+           <div className="kpi-icon-v2" style={{ background: 'rgba(200,255,0,0.1)', color: 'var(--acid)' }}><i className="fas fa-euro-sign"></i></div>
+           <div className="kpi-content-v2">
+              <div className="kpi-label-v2">CELKOVÝ OBRAT <span style={{fontSize: '0.65rem', color: 'var(--muted)', fontWeight: 400, marginLeft: '0.5rem'}}>MESIAC</span></div>
+              <div className="kpi-value-v2">{(dash.totalRevenueThisMonth || 0).toFixed(0)} <span style={{fontSize: '1.2rem'}}>€</span></div>
+              {renderDelta(dash.totalRevenueThisMonth, dash.totalRevenueLastMonth)}
+           </div>
         </div>
-        <div className="sh-card" style={{ '--sh-accent': chartColors.orange }}>
-          <div className="sh-icon"><i className="fas fa-cash-register"></i></div>
-          <div className="sh-val">{(dash.receptionRevenueThisMonth || 0).toFixed(2)} €</div>
-          <div className="sh-lbl">Tržby recepcia</div>
-          {renderDelta(dash.receptionRevenueThisMonth, dash.receptionRevenueLastMonth)}
+        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.05s' }}>
+           <div className="kpi-icon-v2" style={{ background: 'rgba(255,149,0,0.1)', color: 'var(--orange)' }}><i className="fas fa-cash-register"></i></div>
+           <div className="kpi-content-v2">
+              <div className="kpi-label-v2">TRŽBY RECEPCIA</div>
+              <div className="kpi-value-v2">{(dash.receptionRevenueThisMonth || 0).toFixed(0)} <span style={{fontSize: '1.2rem'}}>€</span></div>
+              {renderDelta(dash.receptionRevenueThisMonth, dash.receptionRevenueLastMonth)}
+           </div>
         </div>
-        <div className="sh-card" style={{ '--sh-accent': chartColors.acid2 }}>
-          <div className="sh-icon"><i className="fas fa-id-card"></i></div>
-          <div className="sh-val">{(dash.membershipRevenueThisMonth || 0).toFixed(2)} €</div>
-          <div className="sh-lbl">Tržby permanentky</div>
-          {renderDelta(dash.membershipRevenueThisMonth, dash.membershipRevenueLastMonth)}
+        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.1s' }}>
+           <div className="kpi-icon-v2" style={{ background: 'rgba(10,132,255,0.1)', color: 'var(--blue)' }}><i className="fas fa-id-card"></i></div>
+           <div className="kpi-content-v2">
+              <div className="kpi-label-v2">TRŽBY PERMANENTKY</div>
+              <div className="kpi-value-v2">{(dash.membershipRevenueThisMonth || 0).toFixed(0)} <span style={{fontSize: '1.2rem'}}>€</span></div>
+              {renderDelta(dash.membershipRevenueThisMonth, dash.membershipRevenueLastMonth)}
+           </div>
         </div>
-        <div className="sh-card" style={{ '--sh-accent': chartColors.red }}>
-          <div className="sh-icon"><i className="fas fa-walking"></i></div>
-          <div className="sh-val">{dash.checkinsThisMonth || 0}</div>
-          <div className="sh-lbl">Check-iny tento mesiac</div>
-          {renderDelta(dash.checkinsThisMonth, dash.checkinsLastMonth)}
+        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.15s' }}>
+           <div className="kpi-icon-v2" style={{ background: 'rgba(255,45,85,0.1)', color: 'var(--red)' }}><i className="fas fa-walking"></i></div>
+           <div className="kpi-content-v2">
+              <div className="kpi-label-v2">NÁVŠTEVNOSŤ</div>
+              <div className="kpi-value-v2">{dash.checkinsThisMonth || 0} <span style={{fontSize: '1.2rem', fontWeight: 600}}>VSTUPOV</span></div>
+              {renderDelta(dash.checkinsThisMonth, dash.checkinsLastMonth)}
+           </div>
         </div>
       </div>
 
-      <div className="grid-2">
-        <div className="panel">
+      <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="panel animate-in" style={{ animationDelay: '0.2s', border: '1px solid var(--border)' }}>
           <div className="ph">
-            <span className="pt">Mesačné tržby (Recepcia)</span>
-            <div className="stats-filter">
-              <button className={filters.monthlyMonths === 6 ? 'active' : ''} onClick={() => setFilters(f => ({...f, monthlyMonths: 6}))}>6M</button>
-              <button className={filters.monthlyMonths === 12 ? 'active' : ''} onClick={() => setFilters(f => ({...f, monthlyMonths: 12}))}>12M</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ width: 32, height: 32, background: 'rgba(255,149,0,0.1)', color: 'var(--orange)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-chart-bar"></i>
+              </div>
+              <span className="pt">Recepcia: Mesačný obrat</span>
+            </div>
+            <div className="stats-filter" style={{ background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '10px' }}>
+              <button 
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.monthlyMonths === 6 ? 'var(--orange)' : 'transparent', color: filters.monthlyMonths === 6 ? '#000' : 'var(--muted)' }} 
+                onClick={() => setFilters(f => ({...f, monthlyMonths: 6}))}
+              >6 MESIACOV</button>
+              <button 
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.monthlyMonths === 12 ? 'var(--orange)' : 'transparent', color: filters.monthlyMonths === 12 ? '#000' : 'var(--muted)' }} 
+                onClick={() => setFilters(f => ({...f, monthlyMonths: 12}))}
+              >ROK</button>
             </div>
           </div>
-          <div className="pb">
-            <div className="chart-wrap" style={{height: 250}}>
+          <div className="pb" style={{ padding: '2rem' }}>
+            <div style={{ height: 280 }}>
               <Bar data={monthlyChartData} options={chartOptions} />
             </div>
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel animate-in" style={{ animationDelay: '0.25s', border: '1px solid var(--border)' }}>
           <div className="ph">
-            <span className="pt">Trend denných tržieb</span>
-            <div className="stats-filter">
-              <button className={filters.dailyDays === 7 ? 'active' : ''} onClick={() => setFilters(f => ({...f, dailyDays: 7}))}>7D</button>
-              <button className={filters.dailyDays === 30 ? 'active' : ''} onClick={() => setFilters(f => ({...f, dailyDays: 30}))}>30D</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ width: 32, height: 32, background: 'rgba(200,255,0,0.1)', color: 'var(--acid)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-chart-line"></i>
+              </div>
+              <span className="pt">Denné tržby: Trend</span>
+            </div>
+            <div className="stats-filter" style={{ background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '10px' }}>
+              <button 
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.dailyDays === 7 ? 'var(--acid)' : 'transparent', color: filters.dailyDays === 7 ? '#000' : 'var(--muted)' }} 
+                onClick={() => setFilters(f => ({...f, dailyDays: 7}))}
+              >TÝŽDEŇ</button>
+              <button 
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.dailyDays === 30 ? 'var(--acid)' : 'transparent', color: filters.dailyDays === 30 ? '#000' : 'var(--muted)' }} 
+                onClick={() => setFilters(f => ({...f, dailyDays: 30}))}
+              >MESIAC</button>
             </div>
           </div>
-          <div className="pb">
-            <div className="chart-wrap" style={{height: 250}}>
+          <div className="pb" style={{ padding: '2rem' }}>
+            <div style={{ height: 280 }}>
               <Line data={dailyRevData} options={chartOptions} />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid-3">
-        <div className="panel">
-          <div className="ph"><span className="pt">Top Produkty</span></div>
-          <div className="pb" style={{maxHeight: 280, overflowY: 'auto'}}>
-            {data.topProducts.map((p, i) => {
-              const maxVal = Math.max(...data.topProducts.map(x => x.totalQuantity), 1);
-              const pct = (p.totalQuantity / maxVal) * 100;
-              return (
-                <div key={i} className="top-product-row">
-                  <div className="tp-rank" style={{ color: i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'' }}>{i+1}</div>
-                  <div className="tp-info">
-                    <div className="tp-name">{p.productName}</div>
-                    <div className="tp-qty">{p.totalQuantity}×</div>
+      <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="panel animate-in" style={{ animationDelay: '0.3s' }}>
+          <div className="ph">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.05)', color: 'var(--text)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-trophy"></i>
+              </div>
+              <span className="pt">TOP PRODUKTY</span>
+            </div>
+          </div>
+          <div className="pb" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              {data.topProducts.slice(0, 8).map((p, i) => {
+                const maxVal = Math.max(...data.topProducts.map(x => x.totalQuantity), 1);
+                const pct = (p.totalQuantity / maxVal) * 100;
+                return (
+                  <div key={i} style={{ 
+                    background: 'rgba(255,255,255,0.02)', 
+                    padding: '0.8rem 1.2rem', 
+                    borderRadius: '12px', 
+                    border: '1px solid var(--border)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{ position: 'absolute', left: 0, bottom: 0, height: '3px', background: paletteArray[i%paletteArray.length], width: `${pct}%`, opacity: 0.4 }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, color: i < 3 ? 'var(--acid)' : 'var(--muted)', fontSize: i < 3 ? '1.2rem' : '0.9rem' }}>{i + 1}</span>
+                          <div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{p.productName}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase' }}>{p.totalQuantity} PREDANÝCH</div>
+                          </div>
+                       </div>
+                       <div style={{ fontFamily: 'var(--font-d)', fontWeight: 950, color: 'var(--blue)' }}>{p.totalRevenueEuros.toFixed(2)} €</div>
+                    </div>
                   </div>
-                  <div className="tp-bar-wrap">
-                     <div className="tp-bar-bg"><div className="tp-bar-fill" style={{ width: `${pct}%`, background: paletteArray[i%paletteArray.length] }}></div></div>
-                  </div>
-                  <div className="tp-rev">{p.totalRevenueEuros.toFixed(2)}€</div>
+                );
+              })}
+              {data.topProducts.length === 0 && (
+                <div style={{ padding: '3rem', textAlign: 'center', opacity: 0.2 }}>
+                  <i className="fas fa-box-open" style={{fontSize: '3rem', marginBottom: '1rem'}}></i>
+                  <p>Žiadne predaje produktov</p>
                 </div>
-              );
-            })}
+              )}
+            </div>
           </div>
         </div>
-        <div className="panel">
-          <div className="ph"><span className="pt">Podľa kategórie</span></div>
-          <div className="pb">
-            <div className="chart-wrap" style={{height: 240}}>
+
+        <div className="panel animate-in" style={{ animationDelay: '0.35s' }}>
+          <div className="ph"><span className="pt">OBRAT PODĽA KATEGÓRIÍ</span></div>
+          <div className="pb" style={{ padding: '2rem' }}>
+            <div style={{ height: 320 }}>
               <Doughnut data={catChartData} options={donutOptions} />
             </div>
           </div>
         </div>
-        <div className="panel">
-          <div className="ph"><span className="pt">Spôsob platby</span></div>
-          <div className="pb">
-            <div className="chart-wrap" style={{height: 240}}>
+
+        <div className="panel animate-in" style={{ animationDelay: '0.4s' }}>
+          <div className="ph"><span className="pt">PLATOBNÉ METÓDY</span></div>
+          <div className="pb" style={{ padding: '2rem' }}>
+            <div style={{ height: 320 }}>
               <Doughnut data={paymentChartData} options={donutOptions} />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid-2">
-         <div className="panel">
-            <div className="ph"><span className="pt">Vstupy podľa hodiny</span></div>
-            <div className="pb">
-               <div className="chart-wrap" style={{height: 220}}>
+      <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.5rem' }}>
+         <div className="panel animate-in" style={{ animationDelay: '0.45s' }}>
+            <div className="ph">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <div style={{ width: 32, height: 32, background: 'rgba(10,132,255,0.1)', color: 'var(--blue)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <i className="fas fa-clock"></i>
+                </div>
+                <span className="pt">Vstupy podľa hodín dňa</span>
+              </div>
+            </div>
+            <div className="pb" style={{ padding: '2rem' }}>
+               <div style={{ height: 250 }}>
                   <Bar data={hourChartData} options={chartOptions} />
                </div>
             </div>
          </div>
-         <div className="panel">
-            <div className="ph"><span className="pt">Trend návštevnosti</span></div>
-            <div className="pb">
-               <div className="chart-wrap" style={{height: 220}}>
+         <div className="panel animate-in" style={{ animationDelay: '0.5s' }}>
+            <div className="ph">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <div style={{ width: 32, height: 32, background: 'rgba(255,45,85,0.1)', color: 'var(--red)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <i className="fas fa-users-cog"></i>
+                </div>
+                <span className="pt">Trend návštevnosti: 30 Dní</span>
+              </div>
+            </div>
+            <div className="pb" style={{ padding: '2rem' }}>
+               <div style={{ height: 250 }}>
                   <Line data={checkinTrendData} options={chartOptions} />
                </div>
             </div>

@@ -141,134 +141,164 @@ export default function ClientsTab() {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="animate-in" style={{ position: 'relative' }}>
       
       {msg.text && (
-        <div style={{ background: msg.type === 'err' ? 'rgba(255,45,85,0.1)' : 'rgba(200,255,0,0.1)', color: msg.type === 'err' ? 'var(--red)' : 'var(--acid)', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-          {msg.text}
-        </div>
+         <div className={`fm ${msg.type} animate-in`} style={{ marginBottom: '1.5rem', borderRadius: '10px' }}>{msg.text}</div>
       )}
 
-      <div className="grid-2">
-        <div className="panel">
+      <div className="dashboard-grid">
+        <div className="panel animate-in">
           <div className="ph">
-            <span className="pt">Moji klienti</span>
-            <div style={{ display: 'flex', gap: '0.7rem', alignItems: 'center' }}>
-              <button className="btn btn-ghost btn-sm" onClick={loadClients}>
-                <i className="fas fa-sync-alt"></i> Obnoviť
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ width: 32, height: 32, background: 'rgba(10,132,255,0.1)', color: 'var(--blue)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-users"></i>
+              </div>
+              <span className="pt">Moji aktívni klienti</span>
             </div>
+            <button className="btn btn-ghost btn-xs" onClick={loadClients}>
+              <i className="fas fa-sync-alt"></i> OBNOVIŤ
+            </button>
           </div>
           <div className="pb">
-            <div className="search-bar">
-              <input 
-                className="fi" 
-                type="text" 
-                placeholder="Hľadaj klienta..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+            <div className="search-bar" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <i className="fas fa-search" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
+                <input 
+                  className="fi" 
+                  type="text" 
+                  placeholder="Hľadajte klienta podľa mena..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{ paddingLeft: '2.8rem', borderRadius: '10px' }}
+                />
+              </div>
             </div>
             
-            <div id="clientsList">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
               {loading ? (
-                <div className="empty-state"><span className="spinner"></span></div>
+                <div className="empty-state" style={{ minHeight: '200px' }}><span className="spinner" style={{width: 32, height: 32}}></span></div>
               ) : filteredClients.length > 0 ? (
                 filteredClients.map(c => (
                   <div 
                     key={c.id} 
-                    className="client-card" 
+                    className="glass highlight blue" 
                     onClick={() => openDrawer(c)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', padding: '0.9rem 1rem', border: '1px solid var(--border)', borderRadius: 4, marginBottom: '0.6rem', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', padding: '1.2rem', borderRadius: '16px', cursor: 'pointer', border: '1px solid var(--border)', transition: 'all 0.2s', background: 'rgba(10,132,255,0.02)' }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.01)'; e.currentTarget.style.background = 'rgba(10,132,255,0.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.background = 'rgba(10,132,255,0.02)'; }}
                   >
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--border2),var(--surface3))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 'bold' }}>
+                    <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'linear-gradient(135deg, var(--blue), var(--cyan))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontFamily: 'var(--font-d)', fontSize: '1.2rem', color: '#fff', boxShadow: '0 8px 16px rgba(10,132,255,0.2)' }}>
                       {getInitials(c.fullName)}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>{c.fullName || '—'}</div>
-                      <div style={{ fontSize: '0.73rem', color: 'var(--muted)' }}>
+                      <div style={{ fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-d)', letterSpacing: '0.02em' }}>{c.fullName || '—'}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '0.2rem' }}>
                         {c.email || '—'}{c.phone ? ` · ${c.phone}` : ''}
                       </div>
                     </div>
-                    <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                      <span className={`badge ${c.active !== false ? 'b-acid' : 'b-grey'}`} style={{ fontSize: '0.6rem' }}>
-                        {c.active !== false ? 'Aktívny' : 'Neaktívny'}
+                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                      <span className={`badge ${c.active !== false ? 'b-acid' : 'b-frozen'}`} style={{ fontSize: '0.65rem' }}>
+                        {c.active !== false ? 'AKTÍVNY' : 'NEAKTÍVNY'}
                       </span>
                       <button 
-                        className="btn btn-red btn-sm" 
+                        className="btn btn-red btn-xs" 
                         onClick={(e) => removeClient(c.id, c.fullName, e)}
-                        style={{ background: 'transparent', padding: '0.2rem 0.5rem', minWidth: 0 }}
+                        style={{ borderRadius: '50%', width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >
-                        <i className="fas fa-user-minus"></i>
+                        <i className="fas fa-user-minus" style={{fontSize: '0.8rem'}}></i>
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="empty-state">
-                  <i className="fas fa-users"></i>
-                  <p>Žiadni klienti nenašli</p>
+                <div className="empty-state" style={{ padding: '3rem', background: 'rgba(255,255,255,0.01)', borderRadius: '16px', border: 'dashed 1px var(--border)' }}>
+                  <i className="fas fa-user-friends" style={{ fontSize: '3rem', opacity: 0.1, marginBottom: '1rem' }}></i>
+                  <p style={{ fontWeight: 600 }}>Nenašli sa žiadni klienti</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginTop: '0.4rem' }}>Pridajte nového klienta pomocou panela vpravo.</p>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel animate-in" style={{ height: 'fit-content', animationDelay: '0.1s' }}>
           <div className="ph">
-            <span className="pt">Pridať klienta</span>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.1)', color: 'var(--text)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-plus-circle"></i>
+              </div>
+              <span className="pt">Pridať nového klienta</span>
+            </div>
           </div>
           <div className="pb">
             <div className="fg" style={{ position: 'relative' }}>
-              <label className="fl">Vyber člena</label>
+              <label className="fl" style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Vyhľadať člena Gymu</label>
               
               {!selectedMember ? (
                 <div className="user-picker">
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input 
-                      className="fi" 
-                      type="text" 
-                      placeholder="Hľadaj meno alebo email..." 
-                      value={addSearch}
-                      onChange={(e) => setAddSearch(e.target.value)}
-                      onFocus={handleOpenPicker}
-                    />
-                    <button className="btn btn-ghost btn-sm" onClick={() => setPickerOpen(!pickerOpen)}>
-                      <i className="fas fa-chevron-down"></i>
+                  <div style={{ display: 'flex', gap: '0.8rem' }}>
+                    <div style={{ position: 'relative', flex: 1 }}>
+                       <i className="fas fa-search" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
+                        <input 
+                          className="fi" 
+                          type="text" 
+                          placeholder="Meno alebo email..." 
+                          value={addSearch}
+                          onChange={(e) => setAddSearch(e.target.value)}
+                          onFocus={handleOpenPicker}
+                          style={{ paddingLeft: '2.8rem', borderRadius: '10px' }}
+                        />
+                    </div>
+                    <button className="btn btn-ghost" onClick={() => setPickerOpen(!pickerOpen)} style={{ borderRadius: '10px', width: '52px', padding: 0 }}>
+                      <i className={`fas fa-chevron-${pickerOpen ? 'up' : 'down'}`}></i>
                     </button>
                   </div>
                   
                   {pickerOpen && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--surface2)', border: '1px solid var(--border2)', borderRadius: 3, zIndex: 200, maxHeight: 200, overflowY: 'auto', marginTop: 2 }}>
+                    <div className="animate-in" style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '12px', zIndex: 200, maxHeight: 250, overflowY: 'auto', marginTop: '0.5rem', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', padding: '0.5rem' }}>
                       {filteredMembers.length > 0 ? (
                         filteredMembers.map(u => (
                           <div 
                             key={u.id} 
-                            style={{ padding: '0.6rem 0.9rem', cursor: 'pointer', fontSize: '0.83rem', borderBottom: '1px solid rgba(255,255,255,0.03)', display: 'flex', justifyContent: 'space-between' }}
+                            style={{ padding: '0.8rem 1rem', cursor: 'pointer', borderRadius: '8px', borderBottom: '1px solid rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'all 0.2s' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             onClick={() => {
                               setSelectedMember(u);
                               setPickerOpen(false);
                             }}
                           >
-                            <span>{u.fullName || '—'} <span style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>&lt;{u.email}&gt;</span></span>
+                             <div style={{ width: 34, height: 34, borderRadius: '8px', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-d)' }}>
+                              {getInitials(u.fullName)}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 700, fontSize: '0.88rem' }}>{u.fullName || '—'}</div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{u.email}</div>
+                            </div>
                           </div>
                         ))
                       ) : (
-                        <div style={{ padding: '0.6rem 0.9rem', color: 'var(--muted)', fontSize: '0.83rem' }}>
-                          {availableMembers.length === 0 ? 'Načítavam členov...' : 'Žiadni dostupní členovia'}
+                        <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.85rem' }}>
+                          <i className="fas fa-info-circle" style={{display: 'block', marginBottom: '0.5rem', opacity: 0.2}}></i>
+                          {availableMembers.length === 0 ? 'Načítavam zoznam...' : 'Žiadni dostupní členovia'}
                         </div>
                       )}
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.8rem', background: 'rgba(10,132,255,0.07)', border: '1px solid rgba(10,132,255,0.2)', borderRadius: 3 }}>
+                <div className="glass highlight blue animate-in" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(10,132,255,0.3)', background: 'rgba(10,132,255,0.05)' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '10px', background: 'var(--blue)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontFamily: 'var(--font-d)', fontSize: '1rem' }}>
+                    {getInitials(selectedMember.fullName)}
+                  </div>
                   <div>
-                    <div style={{ fontWeight: 500, color: 'var(--blue)', fontSize: '0.85rem' }}>{selectedMember.fullName || '—'}</div>
+                    <div style={{ fontWeight: 800, color: 'var(--blue)', fontSize: '1rem', fontFamily: 'var(--font-d)' }}>{selectedMember.fullName || '—'}</div>
                     <div style={{ color: 'var(--muted)', fontSize: '0.72rem' }}>{selectedMember.email || '—'}</div>
                   </div>
                   <button 
-                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
+                    className="btn btn-ghost btn-xs"
+                    style={{ marginLeft: 'auto', borderRadius: '50%', width: '32px', height: '32px', padding: 0 }}
                     onClick={() => setSelectedMember(null)}
                   >
                     <i className="fas fa-times"></i>
@@ -277,15 +307,13 @@ export default function ClientsTab() {
               )}
             </div>
             
-            <button className="btn btn-blue" onClick={handleAddClient} disabled={adding || !selectedMember}>
-              {adding ? <span className="spinner" style={{width: 14, height: 14, marginRight: 6}}></span> : <i className="fas fa-user-plus" style={{marginRight: 6}}></i>}
-              Pridať klienta
+            <button className="btn btn-blue btn-block" onClick={handleAddClient} disabled={adding || !selectedMember} style={{ height: '52px', borderRadius: '10px', fontWeight: 800, marginTop: '2rem' }}>
+              {adding ? <span className="spinner" style={{width: 20, height: 20, marginRight: 10}}></span> : <i className="fas fa-plus-circle" style={{marginRight: 10}}></i>}
+              PRIDAŤ DO ZOZNAMU
             </button>
             
             {addMsg.text && (
-              <div style={{ marginTop: '0.65rem', padding: '0.55rem 0.8rem', borderRadius: 3, fontSize: '0.78rem', background: addMsg.type === 'err' ? 'rgba(255,45,85,0.08)' : 'rgba(200,255,0,0.07)', color: addMsg.type === 'err' ? 'var(--red)' : 'var(--acid)', border: `1px solid ${addMsg.type === 'err' ? 'rgba(255,45,85,0.2)' : 'rgba(200,255,0,0.18)'}` }}>
-                {addMsg.text}
-              </div>
+               <div className={`fm ${addMsg.type} animate-in`} style={{ marginTop: '1.5rem', borderRadius: '10px' }}>{addMsg.text}</div>
             )}
           </div>
         </div>
@@ -293,106 +321,105 @@ export default function ClientsTab() {
 
       {/* DRAWER COMPONENT */}
       <div 
-        style={{ display: drawerOpen ? 'block' : 'none', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300, backdropFilter: 'blur(4px)' }} 
+        style={{ display: drawerOpen ? 'block' : 'none', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 300, backdropFilter: 'blur(8px)' }} 
         onClick={() => setDrawerOpen(false)}
       ></div>
       <div 
-        style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: 400, maxWidth: '100%', background: 'var(--surface)', borderLeft: '1px solid var(--border)', zIndex: 301, display: 'flex', flexDirection: 'column', transform: drawerOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)' }}
+        style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: 450, maxWidth: '100%', background: 'var(--surface)', borderLeft: '1px solid var(--border)', zIndex: 301, display: 'flex', flexDirection: 'column', transform: drawerOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.4s cubic-bezier(0.4,0,0.2,1)', boxShadow: '-20px 0 50px rgba(0,0,0,0.5)' }}
       >
-        <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h3 style={{ fontSize: '1rem', fontFamily: 'var(--font-d)' }}>{drawerData?.fullName || 'Detail klienta'}</h3>
-          <button style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: '1rem', cursor: 'pointer' }} onClick={() => setDrawerOpen(false)}>
+        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface2)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-d)', letterSpacing: '0.05em', fontWeight: 900 }}>KARTA KLIENTA</h3>
+          <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                  onClick={() => setDrawerOpen(false)}>
             <i className="fas fa-times"></i>
           </button>
         </div>
         
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.4rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
           {drawerLoading ? (
-            <div className="empty-state"><span className="spinner"></span></div>
+            <div className="empty-state" style={{marginTop: '5rem'}}><span className="spinner" style={{width: 48, height: 48}}></span></div>
           ) : drawerData ? (
-            <>
-              <div style={{ fontFamily: 'var(--font-d)', fontSize: '0.68rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '0.6rem', paddingBottom: '0.35rem', borderBottom: '1px solid var(--border)' }}>
-                Základné info
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                <div style={{ fontSize: '0.83rem' }}>
-                  <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Meno</div>
-                  {drawerData.fullName || '—'}
+            <div className="animate-in">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                <div style={{ width: 80, height: 80, borderRadius: '20px', background: 'linear-gradient(135deg,var(--blue),var(--cyan))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', fontWeight: 950, color: '#fff', boxShadow: '0 10px 25px rgba(10,132,255,0.2)', border: '2px solid rgba(255,255,255,0.1)' }}>
+                  {getInitials(drawerData.fullName)}
                 </div>
-                <div style={{ fontSize: '0.83rem' }}>
-                  <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Email</div>
-                  <span style={{ fontSize: '0.78rem' }}>{drawerData.email || '—'}</span>
-                </div>
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                <div style={{ fontSize: '0.83rem' }}>
-                  <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Telefón</div>
-                  {drawerData.phone || '—'}
-                </div>
-                <div style={{ fontSize: '0.83rem' }}>
-                  <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Stav</div>
-                  {drawerData.active !== false ? <span className="badge b-acid">Aktívny</span> : <span className="badge b-grey">Neaktívny</span>}
+                <div>
+                  <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.8rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '0.4rem' }}>{drawerData.fullName || 'BEZ MENA'}</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.6rem' }}>{drawerData.email || 'Žiadny email'}</div>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <span className="badge b-blue" style={{fontSize: '0.6rem'}}>KLIENT</span>
+                    {drawerData.active !== false ? <span className="badge b-acid" style={{fontSize: '0.6rem'}}>AKTÍVNY</span> : <span className="badge b-frozen" style={{fontSize: '0.6rem'}}>ZMRAZENÝ</span>}
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                <div style={{ fontSize: '0.83rem' }}>
-                  <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Registrovaný</div>
-                  {drawerData.createdAt ? new Date(drawerData.createdAt).toLocaleDateString('sk-SK') : '—'}
+              <div style={{ marginBottom: '2rem' }}>
+                <div style={{ fontFamily: 'var(--font-d)', fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '1.2rem', paddingBottom: '0.6rem', borderBottom: '1px solid var(--border)', fontWeight: 800 }}>
+                  <i className="fas fa-id-badge" style={{marginRight: '0.6rem', color: 'var(--blue)'}}></i> Kontaktné údaje
                 </div>
-                <div style={{ fontSize: '0.83rem' }}>
-                  <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Rola</div>
-                  <span className="badge b-blue">{drawerData.role || 'member'}</span>
+                
+                <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
+                  <div className="glass" style={{ padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem', fontWeight: 700 }}>Telefón</div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 600 }}>{drawerData.phone || '—'}</div>
+                  </div>
+                  <div className="glass" style={{ padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem', fontWeight: 700 }}>Registrovaný</div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 600 }}>{drawerData.createdAt ? new Date(drawerData.createdAt).toLocaleDateString('sk-SK') : '—'}</div>
+                  </div>
                 </div>
               </div>
 
-              {drawerMembership && (
-                <>
-                  <div style={{ fontFamily: 'var(--font-d)', fontSize: '0.68rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '0.6rem', paddingBottom: '0.35rem', borderBottom: '1px solid var(--border)', marginTop: '1rem' }}>
-                    Predplatné
+              {drawerMembership ? (
+                <div style={{ marginBottom: '2rem' }}>
+                   <div style={{ fontFamily: 'var(--font-d)', fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '1.2rem', paddingBottom: '0.6rem', borderBottom: '1px solid var(--border)', fontWeight: 800 }}>
+                    <i className="fas fa-credit-card" style={{marginRight: '0.6rem', color: 'var(--blue)'}}></i> Členstvo v Gym-e
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                    <div style={{ fontSize: '0.83rem' }}>
-                      <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Typ</div>
-                      {drawerMembership.membershipTypeName || '—'}
+                  <div className="glass highlight blue" style={{ padding: '1.5rem', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(10,132,255,0.05) 0%, rgba(10,10,10,0.4) 100%)', border: '1px solid rgba(10,132,255,0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem' }}>
+                      <div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '0.2rem' }}>TYP PROGRAMU</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: 'var(--font-d)', color: 'var(--blue)' }}>{drawerMembership.membershipTypeName || '—'}</div>
+                      </div>
+                      <span className={`badge ${drawerMembership.status === 'active' ? 'b-acid' : 'b-red'}`} style={{padding: '0.3rem 0.8rem', borderRadius: '6px'}}>{drawerMembership.status?.toUpperCase()}</span>
                     </div>
-                    <div style={{ fontSize: '0.83rem' }}>
-                      <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status</div>
-                      <span className={`badge ${drawerMembership.status === 'active' ? 'b-acid' : 'b-red'}`}>{drawerMembership.status}</span>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.2rem' }}>Platnosť do</div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{drawerMembership.endDate || '—'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.2rem' }}>Zostáva</div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{drawerMembership.daysRemaining} dní</div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                    <div style={{ fontSize: '0.83rem' }}>
-                      <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Platí do</div>
-                      {drawerMembership.endDate || '—'}
-                    </div>
-                    <div style={{ fontSize: '0.83rem' }}>
-                      <div style={{ fontSize: '0.63rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Zostatok</div>
-                      {drawerMembership.daysRemaining != null ? drawerMembership.daysRemaining + ' dní' : '—'}
-                    </div>
-                  </div>
-                </>
+                </div>
+              ) : (
+                <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: 'dashed 1px var(--border)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Žiadne aktívne predplatné v systéme.</p>
+                </div>
               )}
-            </>
+            </div>
           ) : (
             <div className="empty-state">
-              <i className="fas fa-exclamation-triangle"></i>
-              <p>Klient sa nenašiel</p>
+              <i className="fas fa-user-times" style={{fontSize: '3rem', opacity: 0.1, marginBottom: '1rem'}}></i>
+              <p>Údaje nie sú dostupné</p>
             </div>
           )}
         </div>
         
-        <div style={{ padding: '1rem 1.4rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.6rem' }}>
+        <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid var(--border)', display: 'flex', background: 'var(--surface2)' }}>
           <button 
-            className="btn btn-red btn-sm" 
+            className="btn btn-red btn-block" 
             onClick={() => removeClient(drawerData?.id, drawerData?.fullName)}
             disabled={!drawerData}
+            style={{ borderRadius: '10px', height: '48px', fontWeight: 800 }}
           >
-            <i className="fas fa-user-minus"></i> Odstrániť klienta
+            <i className="fas fa-user-minus" style={{marginRight: '0.8rem'}}></i> UKONČIŤ SPOLUPRÁCU
           </button>
         </div>
       </div>

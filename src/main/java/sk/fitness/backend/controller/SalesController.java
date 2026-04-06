@@ -138,6 +138,8 @@ public class SalesController {
             tx.put("createdAt", s.getSoldAt().toString());
             tx.put("paymentMethod", s.getPaymentMethod());
             tx.put("totalEuros", s.getTotalPriceEuros());
+            tx.put("totalCents", s.getTotalPriceCents());
+            tx.put("userName", s.getCustomer() != null ? s.getCustomer().getFullName() : null);
             tx.put("items", List.of(Map.of(
                     "productName", s.getProduct() != null ? s.getProduct().getName() : "—",
                     "quantity", s.getQuantity()

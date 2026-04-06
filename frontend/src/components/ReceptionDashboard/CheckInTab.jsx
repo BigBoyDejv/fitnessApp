@@ -232,68 +232,80 @@ export default function CheckInTab() {
       .toUpperCase();
   };
 
+  const [historyOpen, setHistoryOpen] = useState(true);
+
   return (
-    <div className="grid-2">
-      <div className="panel">
+    <div className="dashboard-grid animate-in">
+      <div className="panel animate-in">
         <div className="ph">
-          <span className="pt">Check-in člena</span>
-          <span className="method m-purple">POST /api/checkin/scan</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div style={{ width: 32, height: 32, background: 'rgba(191,90,242,0.1)', color: 'var(--purple)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="fas fa-sign-in-alt"></i>
+            </div>
+            <span className="pt">Odbavenie vstupu</span>
+          </div>
+          <span className="method m-purple">API: CHECKIN_SCAN</span>
         </div>
         <div className="pb">
           {/* Tabs */}
-          <div className="checkin-tabs">
+          <div className="checkin-tabs" style={{ background: 'var(--surface2)', padding: '0.4rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', gap: '0.4rem' }}>
             <button 
               className={`ctab ${activeTab === "qr" ? "active" : ""}`} 
               onClick={() => setActiveTab("qr")}
+              style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', border: 'none', background: activeTab === 'qr' ? 'var(--purple)' : 'transparent', color: activeTab === 'qr' ? '#fff' : 'var(--muted)', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', transition: 'all 0.2s' }}
             >
-              <i className="fas fa-qrcode"></i> QR skener
+              <i className="fas fa-qrcode"></i> QR SKENER
             </button>
             <button 
               className={`ctab ${activeTab === "name" ? "active" : ""}`}
               onClick={() => setActiveTab("name")}
+              style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', border: 'none', background: activeTab === 'name' ? 'var(--purple)' : 'transparent', color: activeTab === 'name' ? '#fff' : 'var(--muted)', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', transition: 'all 0.2s' }}
             >
-              <i className="fas fa-search"></i> Podľa mena
+              <i className="fas fa-search"></i> MANUÁLNE
             </button>
           </div>
 
           {/* QR Tab */}
           {activeTab === "qr" && (
-            <div>
+            <div className="animate-in">
               <div className="fg">
-                <label className="fl">QR kód / ID člena</label>
-                <input 
-                  className="fi" 
-                  type="text" 
-                  placeholder="Naskenuj alebo zadaj ručne..." 
-                  value={qrInput}
-                  onChange={(e) => setQrInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && processCheckin(qrInput, null)}
-                  style={{ fontSize: "1rem", padding: "0.9rem" }}
-                />
+                <label className="fl">QR kód / Identifikátor</label>
+                <div style={{ position: 'relative' }}>
+                  <i className="fas fa-barcode" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
+                  <input 
+                    className="fi" 
+                    type="text" 
+                    placeholder="Zadajte kód alebo skenujte..." 
+                    value={qrInput}
+                    onChange={(e) => setQrInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && processCheckin(qrInput, null)}
+                    style={{ paddingLeft: '2.8rem', borderRadius: '10px', height: '52px', fontSize: '1rem' }}
+                  />
+                </div>
               </div>
-              <div style={{ display: "flex", gap: "0.6rem", marginBottom: "0.8rem" }}>
-                <button className="btn btn-purple" onClick={() => processCheckin(qrInput, null)} style={{ flex: 1 }}>
-                  <i className="fas fa-sign-in-alt"></i> Potvrdiť vstup
+              <div style={{ display: "flex", gap: "0.8rem", marginBottom: "1.5rem" }}>
+                <button className="btn btn-purple" onClick={() => processCheckin(qrInput, null)} style={{ flex: 1, height: '52px', borderRadius: '10px', fontWeight: 800 }}>
+                  <i className="fas fa-sign-in-alt" style={{marginRight: '0.6rem'}}></i> OVERIŤ VSTUP
                 </button>
-                <button className="btn btn-ghost" onClick={toggleCamera}>
-                  {!scanningActive ? <><i className="fas fa-camera"></i> Skener</> : <><i className="fas fa-camera" style={{ color: "var(--purple)" }}></i> Aktívny</>}
+                <button className={`btn ${cameraStream ? 'btn-red' : 'btn-ghost'}`} onClick={toggleCamera} style={{ borderRadius: '10px', width: '52px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <i className={`fas fa-${cameraStream ? 'times' : 'camera'}`}></i>
                 </button>
               </div>
               
               {/* Camera Wrap */}
               {cameraStream && (
-                <div style={{ marginTop: "0.8rem", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: "6px", overflow: "hidden", position: "relative" }}>
-                  <video ref={videoRef} style={{ width: "100%", display: "block", maxHeight: "320px", objectFit: "cover" }} autoPlay playsInline muted></video>
+                <div className="animate-in" style={{ marginTop: "0.8rem", background: "#000", border: "1px solid var(--purple)", borderRadius: "16px", overflow: "hidden", position: "relative", boxShadow: '0 0 30px rgba(191,90,242,0.2)' }}>
+                  <video ref={videoRef} style={{ width: "100%", display: "block", maxHeight: "350px", objectFit: "cover" }} autoPlay playsInline muted></video>
                   <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                    <div style={{ width: "260px", height: "260px", border: "3px solid var(--purple)", borderRadius: "8px", boxShadow: "0 0 0 9999px rgba(0,0,0,0.55)", position: "relative", overflow: "hidden" }}>
-                      <div className="camera-scanning" style={{ position: "absolute", left: '50%', transform: "translate(-50%,-50%)", width: "196px", height: "2px", background: "linear-gradient(90deg,transparent,var(--purple),transparent)", animation: "scan 2s linear infinite" }}></div>
+                    <div style={{ width: "240px", height: "240px", border: "2px solid var(--purple)", borderRadius: "20px", boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)", position: "relative", overflow: "hidden" }}>
+                      <div className="camera-scanning" style={{ position: "absolute", left: 0, width: "100%", height: "2px", background: "linear-gradient(90deg,transparent,var(--purple),transparent)", animation: "scan 2s linear infinite", boxShadow: '0 0 15px var(--purple)' }}></div>
                     </div>
                   </div>
-                  <div style={{ position: "absolute", top: "0.6rem", right: "0.6rem" }}>
-                    <button className="btn btn-red btn-sm" onClick={stopCamera}><i className="fas fa-times"></i> Zatvoriť</button>
+                  <div style={{ position: "absolute", top: "1rem", right: "1rem" }}>
+                    <button className="btn btn-red btn-xs" onClick={stopCamera} style={{borderRadius: '20px', padding: '0.4rem 0.8rem'}}><i className="fas fa-times"></i></button>
                   </div>
-                  <div style={{ position: "absolute", bottom: "0.6rem", left: 0, right: 0, textAlign: "center", fontSize: "0.72rem", color: "rgba(255,255,255,0.7)" }}>
-                    <i className="fas fa-info-circle"></i> Namier kameru na QR kód člena
+                  <div style={{ position: "absolute", bottom: "1rem", left: 0, right: 0, textAlign: "center", fontSize: "0.7rem", color: "#fff", textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    <i className="fas fa-sync fa-spin" style={{marginRight: '0.5rem'}}></i> Hľadám QR kód...
                   </div>
                 </div>
               )}
@@ -302,44 +314,49 @@ export default function CheckInTab() {
 
           {/* Name Tab */}
           {activeTab === "name" && (
-            <div>
+            <div className="animate-in">
               <div className="fg">
-                <label className="fl">Hľadaj podľa mena alebo emailu</label>
-                <input 
-                  className="fi" 
-                  type="text" 
-                  placeholder="Zadaj meno alebo email..." 
-                  value={nameSearch}
-                  onChange={(e) => handleNameSearch(e.target.value)}
-                />
+                <label className="fl">Search Client Database</label>
+                <div style={{ position: 'relative' }}>
+                  <i className="fas fa-user-search" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
+                  <input 
+                    className="fi" 
+                    type="text" 
+                    placeholder="Meno, priezvisko alebo email..." 
+                    value={nameSearch}
+                    onChange={(e) => handleNameSearch(e.target.value)}
+                    style={{ paddingLeft: '2.8rem', borderRadius: '10px' }}
+                  />
+                </div>
               </div>
-              <div className="name-results" style={{ border: "1px solid var(--border)", borderRadius: "4px", maxHeight: "220px", overflowY: "auto" }}>
+              <div className="name-results" style={{ background: 'rgba(255,255,255,0.02)', border: "1px solid var(--border)", borderRadius: "12px", maxHeight: "250px", overflowY: "auto", padding: '0.5rem' }}>
                 {nameSearch.length < 2 ? (
-                  <div style={{ padding: "1rem", textAlign: "center", color: "var(--muted)", fontSize: "0.82rem" }}>
-                    Začni písať meno... (min 2 znaky)
+                  <div style={{ padding: "1.5rem", textAlign: "center", color: "var(--muted)", fontSize: "0.85rem" }}>
+                    <i className="fas fa-keyboard" style={{display: 'block', marginBottom: '0.5rem', opacity: 0.2}}></i>
+                    Zadajte aspoň 2 znaky pre vyhľadávanie
                   </div>
                 ) : nameResults.length === 0 ? (
-                  <div style={{ padding: "1rem", textAlign: "center", color: "var(--muted)", fontSize: "0.82rem" }}>
-                    Žiadny člen nenájdený
+                  <div style={{ padding: "1.5rem", textAlign: "center", color: "var(--muted)", fontSize: "0.85rem" }}>
+                    Nenašli sa žiadne výsledky
                   </div>
                 ) : (
                   nameResults.map((m, idx) => (
                     <div 
                       key={idx} 
-                      style={{ display: "flex", alignItems: "center", gap: "0.8rem", padding: "0.7rem 0.9rem", borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer", transition: "background 0.15s" }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = "rgba(191,90,242,0.08)"}
-                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                      style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.8rem 1rem", borderRadius: '8px', cursor: "pointer", transition: "all 0.2s", marginBottom: '4px' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.transform = 'translateX(5px)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}
                       onClick={() => doCheckinById(m.id, m.fullName)}
                     >
-                      <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "linear-gradient(135deg, var(--purple), var(--blue))", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-d)", fontSize: "0.8rem", fontWeight: "700", color: "#fff", flexShrink: 0 }}>
-                        {m.avatarUrl ? <img src={m.avatarUrl} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} /> : getInitials(m.fullName)}
+                      <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "linear-gradient(135deg, var(--purple), var(--blue))", border: '1px solid rgba(255,255,255,0.1)', display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-d)", fontSize: "0.85rem", fontWeight: "900", color: "#fff", flexShrink: 0 }}>
+                        {m.avatarUrl ? <img src={m.avatarUrl} alt="" style={{ width: "100%", height: "100%", borderRadius: "10px", objectFit: "cover" }} /> : getInitials(m.fullName)}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "0.85rem", fontWeight: 500 }}>{m.fullName || "—"}</div>
+                        <div style={{ fontSize: "0.92rem", fontWeight: 800 }}>{m.fullName || "—"}</div>
                         <div style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{m.email || ""}</div>
                       </div>
                       <span className={`badge ${m.active ? "b-acid" : "b-frozen"}`} style={{ fontSize: "0.6rem" }}>
-                        {m.active ? "Aktívny" : "Zmrazený"}
+                        {m.active ? "AKTÍVNY" : "ZMRAZENÝ"}
                       </span>
                     </div>
                   ))
@@ -350,39 +367,43 @@ export default function CheckInTab() {
 
           {/* Results Display */}
           {checkinResult && (
-            <div className={`checkin-result ${checkinResult.type}`}>
+            <div className={`checkin-result ${checkinResult.type} animate-in`} style={{ marginTop: '1.5rem', padding: '1.5rem', borderRadius: '16px', border: '1px solid', borderColor: checkinResult.type === 'ok' ? 'rgba(200,255,0,0.2)' : 'rgba(255,45,85,0.2)', background: checkinResult.type === 'ok' ? 'rgba(200,255,0,0.05)' : 'rgba(255,45,85,0.05)' }}>
               {checkinResult.type === "ok" ? (
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                  <i className="fas fa-check-circle" style={{ fontSize: "2.5rem", color: "var(--acid)" }}></i>
+                <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+                   <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--acid)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>
+                    <i className="fas fa-check"></i>
+                   </div>
                   <div>
-                    <div style={{ fontFamily: "var(--font-d)", fontSize: "1.4rem", fontWeight: 900, color: "var(--acid)" }}>
+                    <div style={{ fontFamily: "var(--font-d)", fontSize: "1.6rem", fontWeight: 900, color: "var(--acid)", textTransform: 'uppercase', lineHeight: 1 }}>
+                      Vstup povolený
+                    </div>
+                    <div style={{ fontSize: "1rem", fontWeight: 700, marginTop: "0.3rem" }}>
                       {checkinResult.data.fullName || "Člen"}
                     </div>
-                    <div style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "0.2rem" }}>
-                      {checkinResult.data.email || ""}
-                    </div>
-                    <div style={{ marginTop: "0.5rem" }}>
-                      <span className="badge b-acid">
-                        <i className="fas fa-id-card"></i> {checkinResult.mem.membershipTypeName || "Permanentka"}
+                    <div style={{ display: "flex", gap: '0.8rem', marginTop: "0.8rem" }}>
+                      <span className="badge b-acid" style={{borderRadius: '4px'}}>
+                         {checkinResult.mem.membershipTypeName || "Paušál"}
                       </span>
-                      <span style={{ fontSize: "0.75rem", color: "var(--muted)", marginLeft: "0.5rem" }}>
-                        {checkinResult.mem.daysRemaining} dní zostatok
+                      <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
+                        Zostatok: <b>{checkinResult.mem.daysRemaining} dní</b>
                       </span>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                  <i className="fas fa-times-circle" style={{ fontSize: "2.5rem", color: "var(--red)" }}></i>
+                <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+                   <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>
+                    <i className="fas fa-times"></i>
+                   </div>
                   <div>
-                    <div style={{ fontFamily: "var(--font-d)", fontSize: "1.2rem", fontWeight: 900, color: "var(--red)" }}>
+                    <div style={{ fontFamily: "var(--font-d)", fontSize: "1.6rem", fontWeight: 900, color: "var(--red)", textTransform: 'uppercase', lineHeight: 1 }}>
                       Vstup zamietnutý
                     </div>
-                    <div style={{ fontSize: "0.82rem", color: "var(--muted)", marginTop: "0.2rem" }}>
-                      {checkinResult.name}
+                    <div style={{ fontSize: "0.95rem", fontWeight: 400, marginTop: "0.3rem", color: 'var(--muted)' }}>
+                      Pre: {checkinResult.name}
                     </div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--red)", marginTop: "0.3rem" }}>
-                      <i className="fas fa-exclamation-triangle"></i> {checkinResult.msg}
+                    <div style={{ fontSize: "0.88rem", color: "var(--red)", marginTop: "0.6rem", fontWeight: 600 }}>
+                      <i className="fas fa-ban"></i> {checkinResult.msg}
                     </div>
                   </div>
                 </div>
@@ -393,24 +414,40 @@ export default function CheckInTab() {
         </div>
       </div>
 
-      <div className="panel">
-        <div className="ph">
-          <span className="pt">Vstupy dnes</span>
-          <button className="btn btn-ghost btn-sm" onClick={loadTodayCheckins}>
-            <i className="fas fa-sync-alt"></i> Obnoviť
-          </button>
+      <div className="panel animate-in" style={{ animationDelay: '0.1s' }}>
+        <div className="ph" onClick={() => setHistoryOpen(!historyOpen)} style={{ cursor: 'pointer' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div style={{ width: 32, height: 32, background: 'rgba(0,255,209,0.1)', color: 'var(--acid2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="fas fa-history"></i>
+            </div>
+            <span className="pt">História dnes</span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+            {historyOpen && (
+              <button 
+                className="btn btn-ghost btn-xs" 
+                onClick={(e) => { e.stopPropagation(); loadTodayCheckins(); }}
+                style={{ borderRadius: '6px' }}
+              >
+                OBNOVIŤ <i className="fas fa-sync-alt"></i>
+              </button>
+            )}
+            <i className={`fas fa-chevron-${historyOpen ? 'up' : 'down'}`} style={{ color: 'var(--muted)', fontSize: '0.9rem' }}></i>
+          </div>
         </div>
-        <div className="pb" style={{ maxHeight: "600px", overflowY: "auto" }}>
-          {renderTodayCheckins()}
-        </div>
+        {historyOpen && (
+          <div className="pb animate-in" style={{ maxHeight: "650px", overflowY: "auto" }}>
+            {renderTodayCheckins()}
+          </div>
+        )}
       </div>
 
       {toastMsg && <Toast message={toastMsg.msg} type={toastMsg.type} onClose={() => setToastMsg(null)} />}
 
       <style>{`
         @keyframes scan {
-          0% { top: calc(50% - 98px); }
-          100% { top: calc(50% + 98px); }
+          0% { top: 0%; }
+          100% { top: 100%; }
         }
       `}</style>
     </div>

@@ -58,9 +58,14 @@ export function BookClassTab({ setActiveTab }) {
     }
   };
 
-  const cancelClass = async (id) => {
+  const cancelClass = async (e, id) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!id) return;
-    console.log('CLIENT: Cancelling class ID:', id);
+    
     if (!window.confirm('Naozaj zrušiť rezerváciu?')) return;
     
     setActionLoading(true);
@@ -124,7 +129,7 @@ export function BookClassTab({ setActiveTab }) {
 
         <div style={{ marginBottom: '0.75rem' }}>
           {c.isReserved ? (
-            <button className="btn btn-red btn-block" onClick={() => cancelClass(c.id)} disabled={actionLoading} style={{ justifyContent: 'center' }}>
+            <button className="btn btn-red btn-block" onClick={(e) => cancelClass(e, c.id)} disabled={actionLoading} style={{ justifyContent: 'center' }}>
               {actionLoading ? <span className="spin" /> : <><i className="fas fa-times" /> Zrušiť rezerváciu</>}
             </button>
           ) : full ? (

@@ -70,52 +70,52 @@ export default function ScheduleTab() {
   const weekLabel = `${formatDateStr(mon)} — ${formatDateStr(sun)} ${sun.getFullYear()}`;
 
   return (
-    <div className="panel">
+    <div className="panel animate-in">
       <div className="ph">
-        <span className="pt">Týždenný rozvrh</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+          <div style={{ width: 32, height: 32, background: 'rgba(10,132,255,0.1)', color: 'var(--blue)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <i className="fas fa-calendar-alt"></i>
+          </div>
+          <span className="pt">Týždenný rozvrh tréningov</span>
+        </div>
         <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => setOffset(o => o - 1)}>
+          <button className="btn btn-ghost btn-xs" onClick={() => setOffset(o => o - 1)} style={{ borderRadius: '6px' }}>
             <i className="fas fa-chevron-left"></i>
           </button>
-          <span style={{ fontFamily: 'var(--font-d)', fontSize: '0.92rem', letterSpacing: '0.05em', minWidth: 180, textAlign: 'center' }}>
+          <span style={{ fontFamily: 'var(--font-d)', fontSize: '1rem', fontWeight: 800, letterSpacing: '0.05em', minWidth: 180, textAlign: 'center', color: 'var(--text)' }}>
             {weekLabel}
           </span>
-          <button className="btn btn-ghost btn-sm" onClick={() => setOffset(o => o + 1)}>
+          <button className="btn btn-ghost btn-xs" onClick={() => setOffset(o => o + 1)} style={{ borderRadius: '6px' }}>
             <i className="fas fa-chevron-right"></i>
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={() => setOffset(0)}>
-            <i className="fas fa-dot-circle"></i> Dnes
+          <button className="btn btn-ghost btn-xs" onClick={() => setOffset(0)} style={{ borderLeft: '1px solid var(--border)', marginLeft: '0.5rem', paddingLeft: '0.8rem' }}>
+            DNES
           </button>
         </div>
       </div>
       
       <div className="pb">
-        <div style={{ display: 'flex', gap: '1.2rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
-            <span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(10,132,255,0.3)', borderLeft: '2px solid var(--blue)', marginRight: 4, borderRadius: 1 }}></span>
-            Lekcie
-          </span>
-          <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
-            Rozvrh je generovaný z tvojich lekcií v systéme
-          </span>
+        <div style={{ display: 'flex', gap: '1.2rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--muted)', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.8rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
+            <i className="fas fa-info-circle" style={{marginRight: '0.5rem', color: 'var(--blue)'}}></i>
+            Kliknite na lekciu pre zobrazenie zoznamu prihlásených
+          </div>
+          <span className="method m-get">API: GET_SCHEDULE</span>
         </div>
 
         {loading ? (
-          <div className="empty-state">
-            <span className="spinner"></span>
-            <p>Načítavam rozvrh...</p>
+          <div className="empty-state" style={{ minHeight: '300px' }}>
+            <span className="spinner" style={{width: 32, height: 32}}></span>
+            <p style={{marginTop: '1rem'}}>Generujem tvoj rozvrh...</p>
           </div>
         ) : (
-          <>
-            <div className="schedule-wrap" style={{ overflowX: 'auto' }}>
+          <div className="animate-in">
+            <div className="schedule-wrap" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
               <div 
                 style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: '60px repeat(7, 1fr)', 
-                  minWidth: 720, 
-                  border: '1px solid var(--border)', 
-                  borderRadius: 4, 
-                  overflow: 'hidden' 
+                  gridTemplateColumns: '70px repeat(7, 1fr)', 
+                  minWidth: 800, 
                 }}
               >
                 {/* Headers */}
@@ -126,23 +126,25 @@ export default function ScheduleTab() {
                     <div 
                       key={i} 
                       style={{ 
-                        background: isToday ? 'rgba(10,132,255,0.06)' : 'var(--surface2)',
-                        padding: '0.6rem 0.4rem',
+                        background: isToday ? 'rgba(10,132,255,0.08)' : 'var(--surface2)',
+                        padding: '1rem 0.5rem',
                         textAlign: 'center',
                         fontFamily: 'var(--font-d)',
-                        fontSize: '0.7rem',
-                        letterSpacing: '0.1em',
+                        fontSize: '0.75rem',
+                        letterSpacing: '0.12em',
                         textTransform: 'uppercase',
                         color: isToday ? 'var(--blue)' : 'var(--muted)',
                         borderRight: '1px solid var(--border)',
                         borderBottom: '1px solid var(--border)',
-                        lineHeight: 1.4
+                        lineHeight: 1.4,
+                        position: 'relative'
                       }}
                     >
                       {SK_DAYS[i]}<br />
-                      <span style={{ fontSize: '0.8rem', fontWeight: isToday ? 700 : 400 }}>
-                        {d.getDate()}.{d.getMonth() + 1}.
+                      <span style={{ fontSize: '1.2rem', fontWeight: 900, color: isToday ? 'var(--blue)' : 'var(--text)' }}>
+                        {d.getDate()}
                       </span>
+                      {isToday && <div style={{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '2px', background: 'var(--blue)', borderRadius: '2px 2px 0 0' }}></div>}
                     </div>
                   );
                 })}
@@ -152,14 +154,18 @@ export default function ScheduleTab() {
                   <React.Fragment key={`h-${h}`}>
                     <div 
                       style={{
-                        background: 'var(--surface)',
-                        padding: '0.5rem 0.35rem',
-                        textAlign: 'right',
+                        background: 'var(--surface2)',
+                        padding: '1rem 0.5rem',
+                        textAlign: 'center',
                         fontFamily: 'var(--font-d)',
-                        fontSize: '0.65rem',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
                         color: 'var(--muted2)',
                         borderRight: '1px solid var(--border)',
-                        borderBottom: '1px solid var(--border)'
+                        borderBottom: '1px solid var(--border)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}
                     >
                       {String(h).padStart(2, '0')}:00
@@ -175,44 +181,54 @@ export default function ScheduleTab() {
                         <div 
                           key={`c-${h}-${i}`}
                           style={{
-                            padding: '0.3rem',
+                            padding: '0.4rem',
                             borderRight: '1px solid var(--border)',
                             borderBottom: '1px solid var(--border)',
-                            minHeight: 52,
-                            background: isToday ? 'rgba(10,132,255,0.025)' : 'var(--surface)'
+                            minHeight: 70,
+                            background: isToday ? 'rgba(10,132,255,0.01)' : 'transparent',
+                            transition: 'background 0.2s'
                           }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                          onMouseLeave={e => e.currentTarget.style.background = isToday ? 'rgba(10,132,255,0.01)' : 'transparent'}
                         >
                           {cellClasses.map(c => {
                             const colorClass = colorMap[c.id];
                             
-                            // Emulate original CSS classes logic
+                            // Color mapping
                             let bg, border, color;
-                            if (colorClass === 'c-blue') { bg = 'rgba(10,132,255,0.18)'; border = 'var(--blue)'; color = '#a8cfff'; }
-                            if (colorClass === 'c-acid') { bg = 'rgba(200,255,0,0.1)'; border = 'var(--acid)'; color = '#d6ff5e'; }
-                            if (colorClass === 'c-red') { bg = 'rgba(255,45,85,0.12)'; border = 'var(--red)'; color = '#ff8099'; }
-                            if (colorClass === 'c-orange') { bg = 'rgba(255,149,0,0.12)'; border = 'var(--orange)'; color = '#ffc266'; }
-                            if (colorClass === 'c-cyan') { bg = 'rgba(0,255,209,0.1)'; border = 'var(--acid2)'; color = '#66ffe8'; }
+                            if (colorClass === 'c-blue') { bg = 'rgba(10,132,255,0.1)'; border = 'var(--blue)'; color = 'var(--blue)'; }
+                            if (colorClass === 'c-acid') { bg = 'rgba(200,255,0,0.08)'; border = 'var(--acid)'; color = 'var(--acid)'; }
+                            if (colorClass === 'c-red') { bg = 'rgba(255,45,85,0.1)'; border = 'var(--red)'; color = 'var(--red)'; }
+                            if (colorClass === 'c-orange') { bg = 'rgba(255,149,0,0.1)'; border = 'var(--orange)'; color = 'var(--orange)'; }
+                            if (colorClass === 'c-cyan') { bg = 'rgba(0,255,209,0.08)'; border = 'var(--acid2)'; color = 'var(--acid2)'; }
 
                             return (
                               <div 
                                 key={c.id}
                                 title={`${c.name} | ${new Date(c.startTime).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})} | ${c.booked||0}/${c.capacity||'?'} miest`}
                                 style={{
-                                  borderRadius: 3,
-                                  padding: '0.25rem 0.4rem',
-                                  fontSize: '0.68rem',
-                                  fontWeight: 500,
-                                  cursor: 'default',
-                                  marginBottom: 2,
-                                  lineHeight: 1.35,
+                                  borderRadius: '8px',
+                                  padding: '0.5rem',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  marginBottom: '0.3rem',
+                                  lineHeight: 1.3,
                                   background: bg,
-                                  borderLeft: `2px solid ${border}`,
-                                  color: color
+                                  borderLeft: `3px solid ${border}`,
+                                  color: color,
+                                  borderTop: '1px solid rgba(255,255,255,0.05)',
+                                  borderRight: '1px solid rgba(255,255,255,0.05)',
+                                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                  transition: 'transform 0.2s, box-shadow 0.2s'
                                 }}
+                                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = `0 4px 12px ${bg}`; }}
+                                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
                               >
-                                <div style={{ fontWeight: 600 }}>{c.name || '—'}</div>
-                                <div style={{ opacity: 0.75, fontSize: '0.62rem' }}>
-                                  {new Date(c.startTime).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })} · {c.booked || 0}/{c.capacity || '?'}
+                                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name || 'Lekcia'}</div>
+                                <div style={{ opacity: 0.8, fontSize: '0.62rem', marginTop: '0.2rem', display: 'flex', justifyContent: 'space-between' }}>
+                                  <span><i className="far fa-clock"></i> {new Date(c.startTime).getHours()}:00</span>
+                                  <span><i className="fas fa-user-friends"></i> {c.booked || 0}/{c.capacity || '?'}</span>
                                 </div>
                               </div>
                             );
@@ -226,12 +242,13 @@ export default function ScheduleTab() {
             </div>
 
             {weekClasses.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)', fontSize: '0.85rem' }}>
-                <i className="fas fa-calendar-times" style={{ display: 'block', fontSize: '1.8rem', marginBottom: '0.6rem', opacity: 0.3 }}></i>
-                Žiadne lekcie tento týždeň — použi navigáciu na iný týždeň.
+              <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--muted)', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: 'dashed 1px var(--border)', marginTop: '2rem' }}>
+                <i className="fas fa-calendar-alt" style={{ display: 'block', fontSize: '3rem', marginBottom: '1rem', opacity: 0.1 }}></i>
+                <p style={{fontSize: '0.95rem', fontWeight: 500}}>Na tento týždeň nemáte naplánované žiadne lekcie.</p>
+                <p style={{fontSize: '0.8rem', marginTop: '0.4rem'}}>Skúste prepnúť na iný týždeň pomocou šípok vyššie.</p>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

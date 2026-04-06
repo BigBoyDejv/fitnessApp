@@ -38,10 +38,10 @@ export default function OverviewTab({ user }) {
 
   // Hours this week
   const now = new Date();
-  const mon = new Date(now); 
-  mon.setDate(now.getDate() - ((now.getDay() + 6) % 7)); 
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
   mon.setHours(0, 0, 0, 0);
-  const sun = new Date(mon); 
+  const sun = new Date(mon);
   sun.setDate(mon.getDate() + 7);
 
   const thisWeekClasses = classes.filter(c => {
@@ -64,50 +64,68 @@ export default function OverviewTab({ user }) {
   if (loading) {
     return (
       <div className="empty-state">
-        <span className="spinner" style={{width: 32, height: 32}}></span>
+        <span className="spinner" style={{ width: 32, height: 32 }}></span>
         <p>Načítavam tvoj prehľad...</p>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="animate-in">
       {error && (
-        <div style={{ background: 'rgba(255,45,85,0.1)', color: 'var(--red)', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
+        <div className="fm err" style={{ marginBottom: '1.5rem' }}>
           <i className="fas fa-exclamation-circle"></i> {error}
         </div>
       )}
 
-      {/* KPIs */}
-      <div className="kpi-grid">
-        <div className="kpi-card" style={{ '--kpi-color': 'var(--blue)' }}>
+      {/* ── Trainer Hero Section ────────────────────────────────────────── */}
+      <div className="overview-hero trainer">
+        <div className="hero-content">
+          <h1>Ahoj, tréner {user?.fullName?.split(' ')[0] || 'Šampión'}! 👋</h1>
+          <p>Tvoji klienti sa na teba tešia. Dnes máš naplánovaných {totalClasses} lekcií.</p>
+          <div className="hero-actions">
+            <button className="btn btn-blue btn-sm" onClick={loadData}>
+              <i className="fas fa-calendar-alt"></i> MÔJ ROZVRH
+            </button>
+            <button className="btn btn-ghost btn-sm">
+              <i className="fas fa-plus-circle"></i> PRIDAŤ TRÉNING
+            </button>
+          </div>
+        </div>
+        <div className="hero-visual">
+          <i className="fas fa-dumbbell" />
+        </div>
+      </div>
+
+      <div className="stat-row" style={{ background: 'transparent', gap: '1.2rem', marginBottom: '2rem' }}>
+        <div className="kpi-card-v2 glass highlight blue" style={{ '--kpi-color': 'var(--blue)' }}>
           <div className="kpi-icon"><i className="fas fa-calendar-check"></i></div>
           <div className="kpi-val">{totalClasses}</div>
           <div className="kpi-lbl">Lekcie celkovo</div>
         </div>
-        <div className="kpi-card" style={{ '--kpi-color': 'var(--acid)' }}>
+        <div className="kpi-card-v2 glass highlight acid" style={{ '--kpi-color': 'var(--acid)' }}>
           <div className="kpi-icon"><i className="fas fa-users"></i></div>
           <div className="kpi-val">{totalClients}</div>
           <div className="kpi-lbl">Priradení klienti</div>
         </div>
-        <div className="kpi-card" style={{ '--kpi-color': 'var(--acid2)' }}>
+        <div className="kpi-card-v2 glass highlight cyan" style={{ '--kpi-color': 'var(--acid2)' }}>
           <div className="kpi-icon"><i className="fas fa-user-check"></i></div>
           <div className="kpi-val">{totalBooked}</div>
           <div className="kpi-lbl">Prihlásení na lekcie</div>
         </div>
-        <div className="kpi-card" style={{ '--kpi-color': 'var(--orange)' }}>
+        <div className="kpi-card-v2 glass highlight orange" style={{ '--kpi-color': 'var(--orange)' }}>
           <div className="kpi-icon"><i className="fas fa-fire"></i></div>
           <div className="kpi-val">{hoursThisWeek.toFixed(1)}h</div>
           <div className="kpi-lbl">Hodín tento týždeň</div>
         </div>
       </div>
 
-      <div className="grid-2">
-        <div className="panel">
+      <div className="dashboard-grid">
+        <div className="panel animate-in" style={{ animationDelay: '0.1s' }}>
           <div className="ph">
             <span className="pt">Najbližšie lekcie</span>
-            <button className="btn btn-ghost btn-sm" onClick={loadData}>
-              <i className="fas fa-sync-alt"></i> Obnoviť
+            <button className="btn btn-ghost btn-xs" onClick={loadData}>
+              OBNOVIŤ <i className="fas fa-sync-alt"></i>
             </button>
           </div>
           <div className="pb">
@@ -116,19 +134,20 @@ export default function OverviewTab({ user }) {
                 const pct = c.capacity ? Math.round(((c.booked || 0) / c.capacity) * 100) : 0;
                 const bc = pct >= 90 ? 'var(--red)' : pct >= 60 ? 'var(--orange)' : 'var(--acid)';
                 return (
-                  <div key={i} style={{ padding: '0.65rem 0', borderBottom: '1px solid var(--border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                      <b style={{ fontSize: '0.87rem' }}>{c.name || '—'}</b>
-                      <span className="badge b-grey" style={{ fontSize: '0.6rem' }}>{c.location || '—'}</span>
+                  <div key={i} style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', marginBottom: '0.8rem', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                      <b style={{ fontSize: '0.92rem' }}>{c.name || '—'}</b>
+                      <span className="badge b-grey" style={{ fontSize: '0.6rem' }}>{c.location || 'SÁLA 1'}</span>
                     </div>
-                    <div style={{ fontSize: '0.77rem', color: 'var(--muted)', marginBottom: '0.35rem' }}>
-                      {new Date(c.startTime).toLocaleString('sk-SK', { weekday:'short', day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit' })}
+                    <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: '0.6rem' }}>
+                      <i className="far fa-clock" style={{ marginRight: '0.4rem' }}></i>
+                      {new Date(c.startTime).toLocaleString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
-                    <div className="occ-bar">
-                      <div className="occ-track">
-                        <div className="occ-fill" style={{ width: `${pct}%`, background: bc }}></div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+                      <div className="occ-track" style={{ flex: 1, height: "6px", background: "var(--border2)", borderRadius: "3px", overflow: 'hidden' }}>
+                        <div className="occ-fill" style={{ width: `${pct}%`, background: bc, height: "100%", transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
                       </div>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--muted)', minWidth: 36, textAlign: 'right' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, minWidth: '35px', textAlign: 'right' }}>
                         {c.booked || 0}/{c.capacity || '—'}
                       </span>
                     </div>
@@ -137,33 +156,43 @@ export default function OverviewTab({ user }) {
               })
             ) : (
               <div className="empty-state" style={{ padding: '1.5rem' }}>
-                <i className="fas fa-calendar-times"></i>
+                <i className="fas fa-calendar-times" style={{ opacity: 0.1 }}></i>
                 <p>Žiadne nadchádzajúce lekcie</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="panel">
-          <div className="ph"><span className="pt">Moji klienti (Náhľad)</span></div>
+        <div className="panel animate-in" style={{ animationDelay: '0.2s' }}>
+          <div className="ph">
+            <span className="pt">Aktívni klienti</span>
+            <button className="btn btn-ghost btn-xs">DETAIL <i className="fas fa-chevron-right"></i></button>
+          </div>
           <div className="pb">
             {clients.length > 0 ? (
-              clients.slice(0, 6).map((c, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', padding: '0.9rem 1rem', border: '1px solid var(--border)', borderRadius: 4, marginBottom: '0.6rem' }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--border2),var(--surface3))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 'bold' }}>
-                     {getInitials(c.fullName)}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                {clients.slice(0, 6).map((c, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,var(--blue),var(--acid2))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '0.75rem', color: '#000' }}>
+                      {getInitials(c.fullName)}
+                    </div>
+                    <div style={{ overflow: 'hidden' }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.fullName || '—'}</div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.email || '—'}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>{c.fullName || '—'}</div>
-                    <div style={{ fontSize: '0.73rem', color: 'var(--muted)' }}>{c.email || '—'}</div>
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="empty-state" style={{ padding: '1.5rem' }}>
-                <i className="fas fa-users"></i>
+                <i className="fas fa-users" style={{ opacity: 0.1 }}></i>
                 <p>Zatiaľ žiadni klienti</p>
               </div>
+            )}
+            {clients.length > 6 && (
+              <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '1rem' }}>
+                Zobrazených 6 z {clients.length} klientov
+              </p>
             )}
           </div>
         </div>

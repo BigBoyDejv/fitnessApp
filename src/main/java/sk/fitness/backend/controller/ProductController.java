@@ -2,11 +2,15 @@ package sk.fitness.backend.controller;
 
 import sk.fitness.backend.model.Product;
 import sk.fitness.backend.repository.ProductRepository;
+import sk.fitness.backend.repository.ReceptionSaleRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,9 +19,12 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductRepository productRepository;
+    private final ReceptionSaleRepository receptionSaleRepository;
 
-    public ProductController(ProductRepository productRepository) {
+    public ProductController(ProductRepository productRepository, 
+                             ReceptionSaleRepository receptionSaleRepository) {
         this.productRepository = productRepository;
+        this.receptionSaleRepository = receptionSaleRepository;
     }
 
     // GET /api/products — aktívne produkty (pokladňa)
@@ -98,7 +105,6 @@ public class ProductController {
         return ResponseEntity.ok(productRepository.save(p));
     }
 
-    // DELETE /api/products/{id} — soft delete
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable Integer id,
                                            @AuthenticationPrincipal UserDetails ud) {
@@ -109,6 +115,29 @@ public class ProductController {
         p.setActive(false);
         productRepository.save(p);
         return ResponseEntity.ok(Map.of("message", "Produkt deaktivovaný"));
+    }
+
+    // GET /api/products/popular — štatistika predajnosti za posledných 30 dní
+    @GetMapping("/popular")
+    public ResponseEntity<?> getPopularityStats(@AuthenticationPrincipal UserDetails ud) {
+        if (!isAdminOrReception(ud)) return ResponseEntity.status(403).build();
+
+        LocalDateTime from = LocalDateTime.now().minusDays(30);
+        LocalDateTime to = LocalDateTime.now();
+
+        // Query vracia: [ProductName (String), TotalQty (Long), TotalRevenue (Long)]
+        // Alebo ak chceme ID, musíme zmeniť repo. Poďme radšej nateraz použiť ProductName ako kľúč,
+        // alebo vrátiť zoznam s menami a frontend si to spáruje.
+        List<Object[]> stats = receptionSaleRepository.topSellingProducts(from, to);
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Object[] row : stats) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("name", row[0]);
+            item.put("count", row[1]);
+            result.add(item);
+        }
+        return ResponseEntity.ok(result);
     }
 
     private boolean isAdminOrReception(UserDetails ud) {

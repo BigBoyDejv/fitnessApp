@@ -171,48 +171,77 @@ export default function MusicTab() {
 
   const currentTitle = playlist[currentTrack]?.name || "Lokálny MP3 prehrávač";
 
+  // Visualizer bars
+  const bars = [1,2,3,4,5,6,7,8,9,10,11,12];
+
   return (
-    <div className="grid-2">
-      <div>
-        <div className="music-player">
-          <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "linear-gradient(135deg, var(--purple), var(--blue))", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", fontSize: "2rem", color: "#fff", boxShadow: "0 10px 30px rgba(191,90,242,0.3)" }}>
-            <i className="fas fa-music"></i>
+    <div className="grid-2 animate-in">
+      <div className="panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(0,0,0,0.4)', borderRadius: '24px', border: '1px solid rgba(191,90,242,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+        {/* Cover Art Area */}
+        <div style={{ position: 'relative', width: '220px', height: '220px', marginBottom: '2rem' }}>
+          <div style={{ 
+            width: '100%', height: '100%', borderRadius: '30px', 
+            background: 'linear-gradient(135deg, #7b2ff7, #21d4fd)', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '4.5rem', color: '#fff',
+            boxShadow: isPlaying ? '0 0 50px rgba(123,47,247,0.4)' : '0 15px 30px rgba(0,0,0,0.3)',
+            transition: 'all 0.5s ease',
+            transform: isPlaying ? 'scale(1.02)' : 'scale(1)'
+          }}>
+            <i className={`fas ${isPlaying ? 'fa-compact-disc fa-spin' : 'fa-music'}`} style={{ animationDuration: '3s' }}></i>
           </div>
-          <div className="music-title">{currentTitle}</div>
-          <div className="music-artist">Fitness Gym</div>
           
-          <div className="music-progress" ref={progressRef} onClick={handleSeek}>
-            <div className="music-progress-fill" style={{ width: `${progressPercent}%` }}></div>
+          {/* Animated Visualizer Overlay */}
+          {isPlaying && (
+            <div style={{ position: 'absolute', bottom: '15px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '3px', alignItems: 'flex-end', height: '40px' }}>
+              {bars.map(i => (
+                <div key={i} style={{ 
+                  width: '4px', background: '#fff', borderRadius: '2px', 
+                  height: '20%', animation: `musicBar ${0.5 + Math.random()}s ease-in-out infinite alternate` 
+                }}></div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{ textAlign: 'center', marginBottom: '2rem', width: '100%' }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: 'var(--font-d)', letterSpacing: '0.02em', marginBottom: '0.3rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentTitle}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700 }}>{isPlaying ? 'HRAJE TERAZ' : 'POASTAVENÉ'}</div>
+        </div>
+
+        {/* Custom Progress Bar */}
+        <div style={{ width: '100%', marginBottom: '1.5rem' }}>
+          <div className="music-progress" ref={progressRef} onClick={handleSeek} style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', cursor: 'pointer', overflow: 'hidden' }}>
+            <div className="music-progress-fill" style={{ width: `${progressPercent}%`, height: '100%', background: 'linear-gradient(90deg, #7b2ff7, #21d4fd)', boxShadow: '0 0 10px rgba(33,212,253,0.5)' }}></div>
           </div>
-          
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem", color: "var(--muted)", marginBottom: "1.2rem" }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--muted)', marginTop: '0.6rem', fontWeight: 700, fontFamily: 'var(--font-d)' }}>
             <span>{currentTimeStr}</span>
             <span>{durationStr}</span>
           </div>
+        </div>
 
-          <div className="music-controls">
-            <button className="mc-btn" onClick={() => setIsShuffle(!isShuffle)} style={{ color: isShuffle ? "var(--purple)" : "var(--muted)" }}>
-              <i className="fas fa-random"></i>
-            </button>
-            <button className="mc-btn" onClick={prevTrack}>
-              <i className="fas fa-backward"></i>
-            </button>
-            <button className="mc-btn play" onClick={togglePlay}>
-              <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
-            </button>
-            <button className="mc-btn" onClick={nextTrack}>
-              <i className="fas fa-forward"></i>
-            </button>
-            <button className="mc-btn" onClick={() => setIsRepeat(!isRepeat)} style={{ color: isRepeat ? "var(--purple)" : "var(--muted)" }}>
-              <i className="fas fa-redo"></i>
-            </button>
-          </div>
+        <div className="music-controls" style={{ gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <button className="mc-btn" onClick={() => setIsShuffle(!isShuffle)} style={{ color: isShuffle ? "var(--acid2)" : "var(--muted)", fontSize: '1.1rem' }}>
+            <i className="fas fa-random"></i>
+          </button>
+          <button className="mc-btn" onClick={prevTrack} style={{ fontSize: '1.4rem' }}>
+            <i className="fas fa-backward"></i>
+          </button>
+          <button className="mc-btn play" onClick={togglePlay} style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'var(--text)', color: '#000', fontSize: '1.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`} style={{ marginLeft: isPlaying ? '0' : '4px' }}></i>
+          </button>
+          <button className="mc-btn" onClick={nextTrack} style={{ fontSize: '1.4rem' }}>
+            <i className="fas fa-forward"></i>
+          </button>
+          <button className="mc-btn" onClick={() => setIsRepeat(!isRepeat)} style={{ color: isRepeat ? "var(--acid2)" : "var(--muted)", fontSize: '1.1rem' }}>
+            <i className="fas fa-redo"></i>
+          </button>
+        </div>
 
-          <div className="music-vol">
-            <i className="fas fa-volume-down" style={{ color: "var(--muted)", fontSize: "0.85rem" }}></i>
-            <input type="range" className="vol-slider" min="0" max="100" value={volume} onChange={(e) => setVolume(e.target.value)} />
-            <i className="fas fa-volume-up" style={{ color: "var(--muted)", fontSize: "0.85rem" }}></i>
-          </div>
+        <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '0.8rem 1.2rem', borderRadius: '15px' }}>
+          <i className={`fas ${volume == 0 ? 'fa-volume-mute' : volume < 50 ? 'fa-volume-down' : 'fa-volume-up'}`} style={{ color: 'var(--muted)', width: '20px' }}></i>
+          <input type="range" className="vol-slider" min="0" max="100" value={volume} onChange={(e) => setVolume(e.target.value)} style={{ flex: 1, accentColor: 'var(--purple)' }} />
+          <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', minWidth: '35px', textAlign: 'right' }}>{volume}%</span>
         </div>
       </div>
 
@@ -238,7 +267,7 @@ export default function MusicTab() {
               <p>Playlist je prázdny — nahraj MP3 súbory</p>
             </div>
           ) : (
-            <div className="playlist">
+            <div className="playlist" style={{ maxHeight: '550px', overflowY: 'auto' }}>
               {playlist.map((t, idx) => {
                 const isActive = idx === currentTrack;
                 return (
@@ -246,13 +275,25 @@ export default function MusicTab() {
                     key={idx} 
                     className={`pl-item ${isActive ? 'active' : ''}`}
                     onClick={() => { setIsPlaying(true); loadTrack(playlist, idx); }}
+                    style={{ 
+                      padding: '1rem 1.5rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '1rem', 
+                      borderBottom: '1px solid rgba(255,255,255,0.05)',
+                      background: isActive ? 'rgba(123,47,247,0.1)' : 'transparent',
+                      transition: 'all 0.2s',
+                      cursor: 'pointer'
+                    }}
                   >
-                    <div className="pl-num">
-                      {isActive ? <i className="fas fa-volume-up"></i> : (idx + 1)}
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isActive ? 'var(--purple)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: isActive ? '#fff' : 'var(--muted)' }}>
+                      {isActive ? <i className="fas fa-play" style={{ fontSize: '0.6rem' }}></i> : (idx + 1)}
                     </div>
-                    <div className="pl-name">
-                      {t.name}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: isActive ? 800 : 600, color: isActive ? 'var(--purple)' : 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--muted)', marginTop: '0.1rem' }}>MPEG Audio Layer 3</div>
                     </div>
+                    {isActive && <div className="spinner-s" style={{ width: '12px', height: '12px', border: '2px solid var(--purple)', borderTopColor: 'transparent' }}></div>}
                   </div>
                 );
               })}
