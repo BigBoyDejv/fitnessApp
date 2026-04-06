@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  PointElement, 
-  LineElement, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend, 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
   ArcElement,
   Filler
 } from 'chart.js';
@@ -48,8 +48,8 @@ const chartColors = {
 };
 
 const paletteArray = [
-  chartColors.acid, chartColors.acid2, chartColors.orange, 
-  chartColors.red, chartColors.blue, chartColors.frozen, 
+  chartColors.acid, chartColors.acid2, chartColors.orange,
+  chartColors.red, chartColors.blue, chartColors.frozen,
   chartColors.purple, chartColors.pink, chartColors.teal, chartColors.amber
 ];
 
@@ -93,7 +93,7 @@ export default function StatsTab() {
       ];
 
       const results = await Promise.all(
-        fetchParams.map(([key, url]) => 
+        fetchParams.map(([key, url]) =>
           authenticatedFetch(url)
             .then(res => res.ok ? res.json() : (Array.isArray(data[key]) ? [] : {}))
             .catch(() => (Array.isArray(data[key]) ? [] : {}))
@@ -249,36 +249,36 @@ export default function StatsTab() {
     <div className="animate-in">
       <div className="dashboard-grid" style={{ marginBottom: "2.5rem", gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
         <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(200,255,0,0.1)', color: 'var(--acid)' }}><i className="fas fa-euro-sign"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">CELKOVÝ OBRAT <span style={{fontSize: '0.65rem', color: 'var(--muted)', fontWeight: 400, marginLeft: '0.5rem'}}>MESIAC</span></div>
-              <div className="kpi-value-v2">{(dash.totalRevenueThisMonth || 0).toFixed(0)} <span style={{fontSize: '1.2rem'}}>€</span></div>
-              {renderDelta(dash.totalRevenueThisMonth, dash.totalRevenueLastMonth)}
-           </div>
+          <div className="kpi-icon-v2" style={{ background: 'rgba(200,255,0,0.1)', color: 'var(--acid)' }}><i className="fas fa-euro-sign"></i></div>
+          <div className="kpi-content-v2">
+            <div className="kpi-label-v2">CELKOVÝ OBRAT <span style={{ fontSize: '0.65rem', color: 'var(--muted)', fontWeight: 400, marginLeft: '0.5rem' }}>MESIAC</span></div>
+            <div className="kpi-value-v2">{(dash.totalRevenueThisMonth || 0).toFixed(0)} <span style={{ fontSize: '1.2rem' }}>€</span></div>
+            {renderDelta(dash.totalRevenueThisMonth, dash.totalRevenueLastMonth)}
+          </div>
         </div>
         <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.05s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(255,149,0,0.1)', color: 'var(--orange)' }}><i className="fas fa-cash-register"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">TRŽBY RECEPCIA</div>
-              <div className="kpi-value-v2">{(dash.receptionRevenueThisMonth || 0).toFixed(0)} <span style={{fontSize: '1.2rem'}}>€</span></div>
-              {renderDelta(dash.receptionRevenueThisMonth, dash.receptionRevenueLastMonth)}
-           </div>
+          <div className="kpi-icon-v2" style={{ background: 'rgba(255,149,0,0.1)', color: 'var(--orange)' }}><i className="fas fa-cash-register"></i></div>
+          <div className="kpi-content-v2">
+            <div className="kpi-label-v2">TRŽBY RECEPCIA</div>
+            <div className="kpi-value-v2">{(dash.receptionRevenueThisMonth || 0).toFixed(0)} <span style={{ fontSize: '1.2rem' }}>€</span></div>
+            {renderDelta(dash.receptionRevenueThisMonth, dash.receptionRevenueLastMonth)}
+          </div>
         </div>
         <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.1s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(10,132,255,0.1)', color: 'var(--blue)' }}><i className="fas fa-id-card"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">TRŽBY PERMANENTKY</div>
-              <div className="kpi-value-v2">{(dash.membershipRevenueThisMonth || 0).toFixed(0)} <span style={{fontSize: '1.2rem'}}>€</span></div>
-              {renderDelta(dash.membershipRevenueThisMonth, dash.membershipRevenueLastMonth)}
-           </div>
+          <div className="kpi-icon-v2" style={{ background: 'rgba(10,132,255,0.1)', color: 'var(--blue)' }}><i className="fas fa-id-card"></i></div>
+          <div className="kpi-content-v2">
+            <div className="kpi-label-v2">TRŽBY PERMANENTKY</div>
+            <div className="kpi-value-v2">{(dash.membershipRevenueThisMonth || 0).toFixed(0)} <span style={{ fontSize: '1.2rem' }}>€</span></div>
+            {renderDelta(dash.membershipRevenueThisMonth, dash.membershipRevenueLastMonth)}
+          </div>
         </div>
         <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.15s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(255,45,85,0.1)', color: 'var(--red)' }}><i className="fas fa-walking"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">NÁVŠTEVNOSŤ</div>
-              <div className="kpi-value-v2">{dash.checkinsThisMonth || 0} <span style={{fontSize: '1.2rem', fontWeight: 600}}>VSTUPOV</span></div>
-              {renderDelta(dash.checkinsThisMonth, dash.checkinsLastMonth)}
-           </div>
+          <div className="kpi-icon-v2" style={{ background: 'rgba(255,45,85,0.1)', color: 'var(--red)' }}><i className="fas fa-walking"></i></div>
+          <div className="kpi-content-v2">
+            <div className="kpi-label-v2">NÁVŠTEVNOSŤ</div>
+            <div className="kpi-value-v2">{dash.checkinsThisMonth || 0} <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>VSTUPOV</span></div>
+            {renderDelta(dash.checkinsThisMonth, dash.checkinsLastMonth)}
+          </div>
         </div>
       </div>
 
@@ -292,13 +292,13 @@ export default function StatsTab() {
               <span className="pt">Recepcia: Mesačný obrat</span>
             </div>
             <div className="stats-filter" style={{ background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '10px' }}>
-              <button 
-                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.monthlyMonths === 6 ? 'var(--orange)' : 'transparent', color: filters.monthlyMonths === 6 ? '#000' : 'var(--muted)' }} 
-                onClick={() => setFilters(f => ({...f, monthlyMonths: 6}))}
+              <button
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.monthlyMonths === 6 ? 'var(--orange)' : 'transparent', color: filters.monthlyMonths === 6 ? '#000' : 'var(--muted)' }}
+                onClick={() => setFilters(f => ({ ...f, monthlyMonths: 6 }))}
               >6 MESIACOV</button>
-              <button 
-                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.monthlyMonths === 12 ? 'var(--orange)' : 'transparent', color: filters.monthlyMonths === 12 ? '#000' : 'var(--muted)' }} 
-                onClick={() => setFilters(f => ({...f, monthlyMonths: 12}))}
+              <button
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.monthlyMonths === 12 ? 'var(--orange)' : 'transparent', color: filters.monthlyMonths === 12 ? '#000' : 'var(--muted)' }}
+                onClick={() => setFilters(f => ({ ...f, monthlyMonths: 12 }))}
               >ROK</button>
             </div>
           </div>
@@ -318,13 +318,13 @@ export default function StatsTab() {
               <span className="pt">Denné tržby: Trend</span>
             </div>
             <div className="stats-filter" style={{ background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '10px' }}>
-              <button 
-                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.dailyDays === 7 ? 'var(--acid)' : 'transparent', color: filters.dailyDays === 7 ? '#000' : 'var(--muted)' }} 
-                onClick={() => setFilters(f => ({...f, dailyDays: 7}))}
+              <button
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.dailyDays === 7 ? 'var(--acid)' : 'transparent', color: filters.dailyDays === 7 ? '#000' : 'var(--muted)' }}
+                onClick={() => setFilters(f => ({ ...f, dailyDays: 7 }))}
               >TÝŽDEŇ</button>
-              <button 
-                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.dailyDays === 30 ? 'var(--acid)' : 'transparent', color: filters.dailyDays === 30 ? '#000' : 'var(--muted)' }} 
-                onClick={() => setFilters(f => ({...f, dailyDays: 30}))}
+              <button
+                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, border: 'none', cursor: 'pointer', background: filters.dailyDays === 30 ? 'var(--acid)' : 'transparent', color: filters.dailyDays === 30 ? '#000' : 'var(--muted)' }}
+                onClick={() => setFilters(f => ({ ...f, dailyDays: 30 }))}
               >MESIAC</button>
             </div>
           </div>
@@ -352,31 +352,31 @@ export default function StatsTab() {
                 const maxVal = Math.max(...data.topProducts.map(x => x.totalQuantity), 1);
                 const pct = (p.totalQuantity / maxVal) * 100;
                 return (
-                  <div key={i} style={{ 
-                    background: 'rgba(255,255,255,0.02)', 
-                    padding: '0.8rem 1.2rem', 
-                    borderRadius: '12px', 
+                  <div key={i} style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    padding: '0.8rem 1.2rem',
+                    borderRadius: '12px',
                     border: '1px solid var(--border)',
                     position: 'relative',
                     overflow: 'hidden'
                   }}>
-                    <div style={{ position: 'absolute', left: 0, bottom: 0, height: '3px', background: paletteArray[i%paletteArray.length], width: `${pct}%`, opacity: 0.4 }}></div>
+                    <div style={{ position: 'absolute', left: 0, bottom: 0, height: '3px', background: paletteArray[i % paletteArray.length], width: `${pct}%`, opacity: 0.4 }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, color: i < 3 ? 'var(--acid)' : 'var(--muted)', fontSize: i < 3 ? '1.2rem' : '0.9rem' }}>{i + 1}</span>
-                          <div>
-                            <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{p.productName}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase' }}>{p.totalQuantity} PREDANÝCH</div>
-                          </div>
-                       </div>
-                       <div style={{ fontFamily: 'var(--font-d)', fontWeight: 950, color: 'var(--blue)' }}>{p.totalRevenueEuros.toFixed(2)} €</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, color: i < 3 ? 'var(--acid)' : 'var(--muted)', fontSize: i < 3 ? '1.2rem' : '0.9rem' }}>{i + 1}</span>
+                        <div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{p.productName}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase' }}>{p.totalQuantity} PREDANÝCH</div>
+                        </div>
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-d)', fontWeight: 950, color: 'var(--blue)' }}>{p.totalRevenueEuros.toFixed(2)} €</div>
                     </div>
                   </div>
                 );
               })}
               {data.topProducts.length === 0 && (
                 <div style={{ padding: '3rem', textAlign: 'center', opacity: 0.2 }}>
-                  <i className="fas fa-box-open" style={{fontSize: '3rem', marginBottom: '1rem'}}></i>
+                  <i className="fas fa-box-open" style={{ fontSize: '3rem', marginBottom: '1rem' }}></i>
                   <p>Žiadne predaje produktov</p>
                 </div>
               )}
@@ -404,36 +404,36 @@ export default function StatsTab() {
       </div>
 
       <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.5rem' }}>
-         <div className="panel animate-in" style={{ animationDelay: '0.45s' }}>
-            <div className="ph">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                <div style={{ width: 32, height: 32, background: 'rgba(10,132,255,0.1)', color: 'var(--blue)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className="fas fa-clock"></i>
-                </div>
-                <span className="pt">Vstupy podľa hodín dňa</span>
+        <div className="panel animate-in" style={{ animationDelay: '0.45s' }}>
+          <div className="ph">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ width: 32, height: 32, background: 'rgba(10,132,255,0.1)', color: 'var(--blue)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-clock"></i>
               </div>
+              <span className="pt">Vstupy podľa hodín dňa</span>
             </div>
-            <div className="pb" style={{ padding: '2rem' }}>
-               <div style={{ height: 250 }}>
-                  <Bar data={hourChartData} options={chartOptions} />
-               </div>
+          </div>
+          <div className="pb" style={{ padding: '2rem' }}>
+            <div style={{ height: 250 }}>
+              <Bar data={hourChartData} options={chartOptions} />
             </div>
-         </div>
-         <div className="panel animate-in" style={{ animationDelay: '0.5s' }}>
-            <div className="ph">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                <div style={{ width: 32, height: 32, background: 'rgba(255,45,85,0.1)', color: 'var(--red)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className="fas fa-users-cog"></i>
-                </div>
-                <span className="pt">Trend návštevnosti: 30 Dní</span>
+          </div>
+        </div>
+        <div className="panel animate-in" style={{ animationDelay: '0.5s' }}>
+          <div className="ph">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ width: 32, height: 32, background: 'rgba(255,45,85,0.1)', color: 'var(--red)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-users-cog"></i>
               </div>
+              <span className="pt">Trend návštevnosti: 30 Dní</span>
             </div>
-            <div className="pb" style={{ padding: '2rem' }}>
-               <div style={{ height: 250 }}>
-                  <Line data={checkinTrendData} options={chartOptions} />
-               </div>
+          </div>
+          <div className="pb" style={{ padding: '2rem' }}>
+            <div style={{ height: 250 }}>
+              <Line data={checkinTrendData} options={chartOptions} />
             </div>
-         </div>
+          </div>
+        </div>
       </div>
     </div>
   );

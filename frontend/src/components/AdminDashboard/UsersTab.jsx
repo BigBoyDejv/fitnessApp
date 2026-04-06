@@ -9,6 +9,9 @@ export default function UsersTab() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [listOpen, setListOpen] = useState(true);
+  const [sortOption, setSortOption] = useState('fullName');
+  const [sortDir, setSortDir] = useState('asc');
 
   // Role Change State
   const [roleSearch, setRoleSearch] = useState('');
@@ -133,7 +136,24 @@ export default function UsersTab() {
       (statusFilter === 'active' && u.active !== false) || 
       ((statusFilter === 'frozen' || statusFilter === 'inactive') && u.active === false);
     return matchSearch && matchRole && matchStatus;
+  }).sort((a, b) => {
+    let res = 0;
+    if (sortOption === 'fullName') res = (a.fullName || '').localeCompare(b.fullName || '');
+    else if (sortOption === 'email') res = (a.email || '').localeCompare(b.email || '');
+    else if (sortOption === 'role') res = (a.role || '').localeCompare(b.role || '');
+    else if (sortOption === 'active') res = (a.active === false ? 0 : 1) - (b.active === false ? 0 : 1);
+    
+    return sortDir === 'asc' ? res : -res;
   });
+
+  const handleSort = (option) => {
+    if (sortOption === option) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortOption(option);
+      setSortDir('asc');
+    }
+  };
 
   const getFilteredPicker = (list, query, excludeId) => {
     return list.filter(u => 
@@ -151,42 +171,51 @@ export default function UsersTab() {
   };
 
   return (
-    <div className="animate-in">
+    <div className="animate-in" style={{ animationDelay: '0.05s' }}>
       <div className="panel animate-in">
-        <div className="ph">
-          <span className="pt">Manažment používateľských profilov</span>
-          <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span className="method m-get">GET /api/admin/profiles</span>
-            <button className="btn btn-ghost btn-sm" onClick={loadUsers}>
-              <i className="fas fa-sync-alt"></i> OBNOVIŤ
-            </button>
+        <div className="ph" style={{ flexWrap: "wrap", gap: "0.5rem", cursor: 'pointer' }} onClick={() => setListOpen(!listOpen)}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div style={{ width: 32, height: 32, background: 'rgba(0,123,255,0.1)', color: 'var(--blue)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="fas fa-users-cog"></i>
+            </div>
+            <span className="pt">Správa všetkých profilov</span>
+          </div>
+          <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
+             <button className="btn btn-ghost btn-xs" onClick={(e) => { e.stopPropagation(); loadUsers(); }}><i className="fas fa-sync-alt"></i> OBNOVIŤ</button>
+             <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', color: 'var(--muted)', transition: 'all 0.3s', transform: listOpen ? 'rotate(0deg)' : 'rotate(180deg)' }}>
+                <i className="fas fa-chevron-up"></i>
+             </div>
           </div>
         </div>
-        <div className="pb">
-          <div className="search-bar" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
+        
+        {listOpen && (
+        <div className="pb" style={{ padding: '1rem', animation: 'slideDown 0.3s ease' }}>
+          <div className="search-bar" style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
               <i className="fas fa-search" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
               <input 
                 className="fi" 
                 type="text" 
-                placeholder="Hľadať meno, email alebo ID..." 
+                placeholder="Hľadať meno, email alebo ID profilu..." 
                 value={search} 
                 onChange={e => setSearch(e.target.value)} 
-                style={{ paddingLeft: '2.8rem', borderRadius: '8px' }}
+                style={{ paddingLeft: '2.8rem', borderRadius: '10px' }}
               />
             </div>
-            <select className="fi" style={{ maxWidth: 160, borderRadius: '8px' }} value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
-              <option value="">Všetky role</option>
-              <option value="member">Člen</option>
-              <option value="trainer">Tréner</option>
-              <option value="admin">Administrátor</option>
-              <option value="reception">Recepcia</option>
-            </select>
-            <select className="fi" style={{ maxWidth: 160, borderRadius: '8px' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-              <option value="">Všetky stavy</option>
-              <option value="active">Aktívni</option>
-              <option value="frozen">Zmrazení</option>
-            </select>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <select className="fi" style={{ maxWidth: 160, borderRadius: '10px' }} value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+                <option value="">Všetky role</option>
+                <option value="member">Člen</option>
+                <option value="trainer">Tréner</option>
+                <option value="admin">Administrátor</option>
+                <option value="reception">Recepcia</option>
+              </select>
+              <select className="fi" style={{ maxWidth: 140, borderRadius: '10px' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value="">Všetky stavy</option>
+                <option value="active">Aktívni</option>
+                <option value="frozen">Zmrazení</option>
+              </select>
+            </div>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
@@ -196,11 +225,19 @@ export default function UsersTab() {
               <table className="dt">
                 <thead>
                   <tr>
-                    <th>Používateľ</th>
-                    <th>Email</th>
-                    <th>Rola</th>
-                    <th>Stav účtu</th>
-                    <th style={{ textAlign: 'right' }}>Akcie</th>
+                    <th onClick={() => handleSort('fullName')} style={{ cursor: 'pointer' }}>
+                       PROFIL {sortOption === 'fullName' && <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{fontSize: '0.7rem', marginLeft: '0.4rem', color: 'var(--acid)'}}></i>}
+                    </th>
+                    <th onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>
+                       EMAIL {sortOption === 'email' && <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{fontSize: '0.7rem', marginLeft: '0.4rem', color: 'var(--acid)'}}></i>}
+                    </th>
+                    <th onClick={() => handleSort('role')} style={{ cursor: 'pointer' }}>
+                       ROLA {sortOption === 'role' && <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{fontSize: '0.7rem', marginLeft: '0.4rem', color: 'var(--acid)'}}></i>}
+                    </th>
+                    <th onClick={() => handleSort('active')} style={{ cursor: 'pointer' }}>
+                       STAV {sortOption === 'active' && <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{fontSize: '0.7rem', marginLeft: '0.4rem', color: 'var(--acid)'}}></i>}
+                    </th>
+                    <th style={{ textAlign: 'right' }}>AKCIE</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -258,6 +295,7 @@ export default function UsersTab() {
             )}
           </div>
         </div>
+        )}
       </div>
 
       <div className="dashboard-grid">
@@ -305,14 +343,17 @@ export default function UsersTab() {
                 </div>
               )}
             </div>
-            <div className="fg">
-              <label className="fl">Nová úroveň prístupu</label>
-              <select className="fi" value={newRole} onChange={e => setNewRole(e.target.value)} style={{ borderRadius: '8px' }}>
-                <option value="member">Člen (Member)</option>
-                <option value="trainer">Tréner (Trainer)</option>
-                <option value="admin">Administrátor (Admin)</option>
-                <option value="reception">Recepcia (Reception)</option>
-              </select>
+            <div className="fg" style={{ marginBottom: "1.5rem" }}>
+              <label className="fl" style={{ fontSize: "0.62rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--muted)", marginBottom: "0.4rem" }}>Nová úroveň prístupu</label>
+              <div style={{ position: 'relative' }}>
+                <i className="fas fa-user-lock" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1 }}></i>
+                <select className="fi" value={newRole} onChange={e => setNewRole(e.target.value)} style={{ paddingLeft: '2.8rem', borderRadius: '10px', height: '48px' }}>
+                  <option value="member">Člen (Základný prístup)</option>
+                  <option value="trainer">Tréner</option>
+                  <option value="reception">Recepcia</option>
+                  <option value="admin">Administrátor (Úplný prístup)</option>
+                </select>
+              </div>
             </div>
             <button className="btn btn-acid btn-block" onClick={handleChangeRole} disabled={roleLoading || !roleSelectedUser} style={{ borderRadius: '8px', marginTop: '0.5rem' }}>
               {roleLoading ? <span className="spinner" style={{width: 16, height: 16, marginRight: 8}}></span> : <i className="fas fa-save" style={{marginRight: 8}}></i>} ULOŽIŤ ZMENY
