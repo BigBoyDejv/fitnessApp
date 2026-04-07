@@ -35,8 +35,10 @@ public class SecurityConfig {
             "http://127.0.0.1:*",
             "https://*.vercel.app",
             "https://fitnessapp-5ogv.onrender.com",
-            "https://fitpro-bakalarka.netlify.app"
-        ));
+            "https://fitpro-bakalarka.netlify.app",
+                "https://fit-kosice.vercel.app"
+
+                ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
