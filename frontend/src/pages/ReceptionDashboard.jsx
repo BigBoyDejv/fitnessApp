@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import SEO from "../components/common/SEO";
 import OverviewTab from "../components/ReceptionDashboard/OverviewTab";
 import CheckInTab from "../components/ReceptionDashboard/CheckInTab";
 import MembersTab from "../components/ReceptionDashboard/MembersTab";
@@ -117,6 +118,7 @@ export default function ReceptionDashboard() {
 
   return (
     <div className="reception-dashboard">
+      <SEO title={`${pageTitles[activeTab]} — Recepcia`} />
       {/* ── Overlay (mobile) ───────────────────────────────────────────── */}
       {isMobile && sidebarOpen && (
         <div className="sidebar-overlay open" onClick={() => setSidebarOpen(false)} />

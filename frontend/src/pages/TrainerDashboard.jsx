@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/common/SEO';
 import OverviewTab from '../components/TrainerDashboard/OverviewTab';
 import MyClassesTab from '../components/TrainerDashboard/MyClassesTab';
 import ScheduleTab from '../components/TrainerDashboard/ScheduleTab';
@@ -108,6 +109,7 @@ export default function TrainerDashboard() {
       className="trainer-dashboard"
       style={{ display: 'flex', flexDirection: 'row', minHeight: '100vh', width: '100%' }}
     >
+      <SEO title={`${pageTitle} — Trainer Portal`} />
       {/* ── Overlay (mobile) ───────────────────────────────────────────── */}
       {isMobile && sidebarOpen && (
         <div

@@ -74,7 +74,7 @@ public class SecurityConfig {
 
                         // Statické súbory a frontend stránky (Len nevyhnutné, HTML pôjde cez React)
                         .requestMatchers(
-                                "/favicon.ico", "/error"
+                                "/", "/api/health", "/api/stats/occupancy", "/favicon.ico", "/error"
                         ).permitAll()
 
                         // Všetko ostatné musí byť autentifikované

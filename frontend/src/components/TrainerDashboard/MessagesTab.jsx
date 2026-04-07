@@ -41,9 +41,11 @@ export default function MessagesTab({ user }) {
 
   const loadClients = async () => {
     try {
-      const res = await authenticatedFetch('/api/trainer/clients');
+      const res = await authenticatedFetch('/api/messages/conversations');
       const data = await res.json();
-      if (res.ok) setClients(Array.isArray(data) ? data : []);
+      if (res.ok) {
+        setClients(Array.isArray(data) ? data : []);
+      }
     } catch (e) {
       console.error('loadClients:', e);
     } finally {
@@ -168,7 +170,7 @@ export default function MessagesTab({ user }) {
                  </div>
                  <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 800, fontSize: '0.95rem', fontFamily: 'var(--font-d)' }}>{activeClient.fullName}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--acid2)', fontWeight: 800 }}>MÔJ KLIENT</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--acid2)', fontWeight: 800 }}>{activeClient.role === 'member' ? 'MÔJ KLIENT' : 'KONTAKT'}</div>
                  </div>
                  {!isMobile && (
                    <button className="btn btn-ghost btn-sm" onClick={() => loadMessages(activeClient.id)}>

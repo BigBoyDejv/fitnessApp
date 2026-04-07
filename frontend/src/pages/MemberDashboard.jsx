@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../utils/api';
+import SEO from '../components/common/SEO';
 
 /* Tab Components */
 import OverviewTab from '../components/MemberDashboard/OverviewTab';
@@ -222,7 +223,7 @@ export default function MemberDashboard() {
       case 'pricing': return <PricingTab setActiveTab={handleTabChange} />;
       case 'classes': return <ClassesTab setActiveTab={handleTabChange} />;
       case 'book-class': return <BookClassTab setActiveTab={handleTabChange} />;
-      case 'trainer-hub': return <TrainerHubTab />;
+      case 'trainer-hub': return <TrainerHubTab setActiveTab={handleTabChange} />;
       case 'trainers': return <TrainersTab onMessage={(id) => handleTabChange('messages', id)} />;
       case 'qr': return <QrTab />;
       case 'stats': return <StatsTab />;
@@ -252,6 +253,7 @@ export default function MemberDashboard() {
       className="member-dashboard"
       style={{ display: 'flex', flexDirection: 'row', minHeight: '100vh', width: '100%' }}
     >
+      <SEO title={`${pageTitle} — Dashboard`} />
       {/* ── Overlay (mobile) ───────────────────────────────────────────── */}
       {isMobile && sidebarOpen && (
         <div
@@ -285,7 +287,7 @@ export default function MemberDashboard() {
         <div className="sidebar-user">
           <div className="avatar">
             {user.avatarUrl
-              ? <img src={user.avatarUrl} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ? <img src={user.avatarUrl} alt={user.fullName || 'Avatar'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
               : avatarInitials
             }
           </div>
@@ -367,9 +369,14 @@ export default function MemberDashboard() {
               <i className="fas fa-bell" />
               {notifCount > 0 && <span className="dot" />}
             </button>
+            {isMobile && (
+              <button className="top-logout-btn" onClick={logout} style={{ marginRight: '0.4rem' }}>
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
+            )}
             {isMobile ? (
                <div className="header-user-mini" onClick={() => handleTabChange('profile')}>
-                 {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : avatarInitials}
+                 {user.avatarUrl ? <img src={user.avatarUrl} alt={user.fullName || 'Avatar'} /> : avatarInitials}
                </div>
             ) : (
               <button className="top-logout-btn" onClick={logout} title="Odhlásiť sa">

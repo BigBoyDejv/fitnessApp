@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/common/SEO';
 import './LandingPage.css';
 
 const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -133,6 +134,10 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page">
+      <SEO 
+        title="Najlepšie fitko v Košiciach" 
+        description="Vstúp do sveta profesionálneho coachingu a špičkového vybavenia v Košiciach. Ponúkame osobný tréning, skupinové lekcie, CrossFit a mnoho iného."
+      />
       <div className={`toast ${toast.type === 'ok' ? 't-ok' : 't-err'} ${toast.show ? 'show' : ''}`} id="toast">
         {toast.type === 'ok' ? <i className="fas fa-check-circle"></i> : <i className="fas fa-exclamation-circle"></i>} {toast.msg}
       </div>

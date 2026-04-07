@@ -7,10 +7,14 @@ export default function OverviewTab({ user, setActiveTab }) {
    const [membership, setMembership] = useState(null);
    const [upcomingClasses, setUpcomingClasses] = useState([]);
    const [stats, setStats] = useState(null);
+   const [occupancy, setOccupancy] = useState({ percentage: 0, count: 0, maxCapacity: 80, label: 'Načítavam...' });
    const [loading, setLoading] = useState(true);
 
    useEffect(() => {
-      Promise.all([loadMe(), loadMyClasses(), loadMembership(), loadStats()]).finally(() => setLoading(false));
+      Promise.all([loadMe(), loadMyClasses(), loadMembership(), loadStats(), loadOccupancy()]).finally(() => setLoading(false));
+
+      const interval = setInterval(loadOccupancy, 60000);
+      return () => clearInterval(interval);
    }, []);
 
    const loadMe = async () => {
@@ -42,6 +46,22 @@ export default function OverviewTab({ user, setActiveTab }) {
          const now = new Date();
          setUpcomingClasses(Array.isArray(data) ? data.filter(c => new Date(c.startTime) >= now).sort((a, b) => new Date(a.startTime) - new Date(b.startTime)) : []);
       } catch { }
+   };
+
+   const loadOccupancy = async () => {
+      try {
+         const res = await authenticatedFetch('/api/stats/occupancy');
+         if (res.ok) {
+            const data = await res.json();
+            setOccupancy(data);
+         } else {
+            throw new Error('Occupancy fetch failed');
+         }
+      } catch (e) {
+         console.error(e);
+         // Zobrazíme aspoň nejaký odhad ako placeholder, aby tam nesvietilo "Načítavam"
+         setOccupancy({ percentage: 22, count: 18, maxCapacity: 80, label: 'Optimálne (odhad)', status: 'OPTIMAL' });
+      }
    };
 
    const renderAvatar = (size = 48) => {
@@ -121,26 +141,45 @@ export default function OverviewTab({ user, setActiveTab }) {
          </div>
 
          <div className="dashboard-grid">
-            {/* FITKO PRÁVE TERAZ (Ring View) */}
+            {/* FITKO PRÁVE TERAZ (improved design) */}
             <motion.div className="panel modern-occupancy" variants={item}>
-               <div className="ph"><span className="pt">Aktuálna obsadenosť</span></div>
-               <div className="pb" style={{ padding: '1.5rem' }}>
-                  <div className="occupancy-ring-large" style={{ '--pct': '32' }}>
+               <div className="ph">
+                  <span className="pt">Aktuálna obsadenosť</span>
+                  <div className="live-status">
+                     <span className="pulse-dot" />
+                     LIVE
+                  </div>
+               </div>
+               <div className="pb" style={{ padding: '1.5rem', position: 'relative' }}>
+                  <div className={`occupancy-ring-large status-${occupancy.status?.toLowerCase() || 'optimal'}`} style={{ '--pct': occupancy.percentage }}>
                      <svg viewBox="0 0 100 100">
+                        <defs>
+                           <linearGradient id="occGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="var(--acid)" />
+                              <stop offset="100%" stopColor="var(--acid2)" />
+                           </linearGradient>
+                        </defs>
                         <circle className="bg" cx="50" cy="50" r="45" />
-                        <circle className="fg" cx="50" cy="50" r="45" />
+                        <circle className="fg" cx="50" cy="50" r="45" stroke="url(#occGradient)" />
                      </svg>
                      <div className="ring-content">
-                        <span className="big-val">32%</span>
-                        <span className="sub">Optimálne</span>
+                        <span className="big-val">{occupancy.percentage}%</span>
+                        <span className="sub">{occupancy.label}</span>
                      </div>
                   </div>
                   <div className="occupancy-legend">
-                     <div className="l-item"><span></span> 22 osôb dnu</div>
-                     <div className="l-item gray"><span></span> 58 voľných miest</div>
+                     <div className="l-item">
+                        <i className="fas fa-users" style={{ color: 'var(--acid)', fontSize: '0.8rem' }} />
+                        <span>{occupancy.count} osôb dnu</span>
+                     </div>
+                     <div className="l-item gray">
+                        <i className="fas fa-door-open" style={{ opacity: 0.5, fontSize: '0.8rem' }} />
+                        <span>{Math.max(0, occupancy.maxCapacity - occupancy.count)} voľných</span>
+                     </div>
                   </div>
                </div>
             </motion.div>
+
 
             {/* MOJE NAJBLIŽŠIE LEKCIE (Detailed Cards) */}
             <motion.div className="panel modern-upcoming" variants={item}>

@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import sk.fitness.backend.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -62,6 +59,51 @@ public class MessageController {
         );
 
         return ResponseEntity.ok(chat);
+    }
+
+    @GetMapping("/conversations")
+    public ResponseEntity<?> getConversations(@AuthenticationPrincipal UserDetails ud) {
+        User currentUser = resolveUser(ud);
+        if (currentUser == null) return ResponseEntity.status(401).build();
+
+        String myId = currentUser.getId().toString();
+        
+        Set<String> partnerIds = new HashSet<>();
+        try {
+            List<Message> allMyMessages = repo.findBySenderIdOrReceiverId(myId, myId);
+            for (Message m : allMyMessages) {
+                String sId = m.getSenderId();
+                String rId = m.getReceiverId();
+                if (sId != null && !sId.equalsIgnoreCase(myId)) {
+                    partnerIds.add(sId.toLowerCase());
+                }
+                if (rId != null && !rId.equalsIgnoreCase(myId)) {
+                    partnerIds.add(rId.toLowerCase());
+                }
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Retrieving messages failed: " + e.toString()));
+        }
+
+        List<Map<String, Object>> partners = new ArrayList<>();
+        for (String pid : partnerIds) {
+            try {
+                UUID uuid = UUID.fromString(pid);
+                userRepository.findById(uuid).ifPresent(u -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", u.getId().toString());
+                    m.put("fullName", u.getFullName());
+                    m.put("avatarUrl", u.getAvatarUrl());
+                    m.put("role", u.getRole());
+                    m.put("specialization", u.getSpecialization());
+                    partners.add(m);
+                });
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        return ResponseEntity.ok(partners);
     }
 
     private User resolveUser(UserDetails ud) {

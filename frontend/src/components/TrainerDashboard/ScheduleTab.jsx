@@ -21,11 +21,25 @@ export default function ScheduleTab() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await authenticatedFetch('/api/trainer/classes');
-      const data = await res.json();
-      if (res.ok) {
-        setClasses(Array.isArray(data) ? data : []);
+      const [resC, resP] = await Promise.all([
+        authenticatedFetch('/api/trainer/classes'),
+        authenticatedFetch('/api/personal-sessions/trainer')
+      ]);
+      
+      let cls = [];
+      let sess = [];
+
+      if (resC.ok) {
+        const dataC = await resC.json();
+        cls = Array.isArray(dataC) ? dataC.map(c => ({ ...c, itemType: 'class' })) : [];
       }
+      
+      if (resP.ok) {
+        const dataP = await resP.json();
+        sess = Array.isArray(dataP) ? dataP.map(p => ({ ...p, itemType: 'session' })) : [];
+      }
+      
+      setClasses([...cls, ...sess]);
     } catch (e) {
       console.error(e);
     } finally {
@@ -137,14 +151,14 @@ export default function ScheduleTab() {
                  const time = st.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
                  const isPassed = st < new Date();
                  return (
-                   <div key={c.id} className="trainer-class-card-mobile animate-in" style={{ 
+                   <div key={`${c.itemType}-${c.id}`} className={`trainer-class-card-mobile animate-in ${c.itemType === 'session' ? 'session-card' : ''}`} style={{ 
                       padding: '1.25rem', 
                       borderRadius: '24px', 
                       display: 'flex', 
                       gap: '1.2rem', 
                       alignItems: 'center', 
-                      background: 'var(--surface2)',
-                      border: '1px solid var(--border)',
+                      background: c.itemType === 'session' ? 'linear-gradient(135deg, rgba(200,255,0,0.05), rgba(0,0,0,0.2))' : 'var(--surface2)',
+                      border: c.itemType === 'session' ? '1px solid rgba(200,255,0,0.2)' : '1px solid var(--border)',
                       opacity: isPassed ? 0.5 : 1,
                       animationDelay: `${idx * 0.1}s`,
                       position: 'relative',
@@ -154,7 +168,7 @@ export default function ScheduleTab() {
                         fontSize: '1.2rem', 
                         fontWeight: 950, 
                         fontFamily: 'var(--font-d)', 
-                        color: isPassed ? 'var(--muted)' : 'var(--blue)', 
+                        color: isPassed ? 'var(--muted)' : (c.itemType === 'session' ? 'var(--acid)' : 'var(--blue)'), 
                         borderRight: '1px solid var(--border)', 
                         paddingRight: '1.2rem',
                         minWidth: '65px',
@@ -163,14 +177,22 @@ export default function ScheduleTab() {
                         {time}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{c.name}</div>
+                        <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{c.itemType === 'session' ? c.title : c.name}</div>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                           <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                              <i className="fas fa-users" style={{ color: 'var(--blue)' }} /> {c.booked||0}/{c.capacity}
-                           </span>
-                           <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                              <i className="fas fa-map-marker-alt" style={{ color: 'var(--blue)' }} /> Sála 1
-                           </span>
+                           {c.itemType === 'session' ? (
+                             <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <i className="fas fa-user" style={{ color: 'var(--acid)' }} /> {c.clientName}
+                             </span>
+                           ) : (
+                             <>
+                               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <i className="fas fa-users" style={{ color: 'var(--blue)' }} /> {c.booked||0}/{c.capacity}
+                               </span>
+                               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <i className="fas fa-map-marker-alt" style={{ color: 'var(--blue)' }} /> Sála 1
+                               </span>
+                             </>
+                           )}
                         </div>
                       </div>
                       <div style={{ padding: '0.5rem', opacity: 0.3 }}>
@@ -212,9 +234,15 @@ export default function ScheduleTab() {
                            return (
                              <td key={i} style={{ border: '1px solid var(--border)', padding: '0.5rem', height: '100px', verticalAlign: 'top', background: 'rgba(255,255,255,0.01)' }}>
                                 {cellClasses.map(c => (
-                                  <div key={c.id} className="trainer-class-tag glass highlight blue" style={{ padding: '0.6rem 0.8rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, marginBottom: '0.4rem', cursor: 'pointer', transition: 'all 0.2s' }}>
-                                     <div style={{ marginBottom: '2px' }}>{c.name}</div>
-                                     <div style={{ opacity: 0.7, fontSize: '0.65rem' }}>{c.booked}/{c.capacity} osôb</div>
+                                  <div key={`${c.itemType}-${c.id}`} className={`trainer-class-tag glass highlight ${c.itemType === 'session' ? 'acid' : 'blue'}`} style={{ padding: '0.6rem 0.8rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, marginBottom: '0.4rem', cursor: 'pointer', transition: 'all 0.2s', border: c.itemType === 'session' ? '1px solid rgba(200,255,0,0.3)' : '1px solid transparent' }}>
+                                     <div style={{ marginBottom: '2px' }}>{c.itemType === 'session' ? c.title : c.name}</div>
+                                     <div style={{ opacity: 0.7, fontSize: '0.65rem' }}>
+                                        {c.itemType === 'session' ? (
+                                           <><i className="fas fa-user"></i> {c.clientName}</>
+                                        ) : (
+                                           <>{c.booked}/{c.capacity} osôb</>
+                                        )}
+                                     </div>
                                   </div>
                                 ))}
                              </td>

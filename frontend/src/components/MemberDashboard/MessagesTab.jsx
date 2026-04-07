@@ -54,20 +54,27 @@ export default function MessagesTab({ user, preselectedId, clearPreselected }) {
 
   const loadAllTrainers = async () => {
     try {
-      const res = await authenticatedFetch('/api/trainer/list?active=true');
+      const res = await authenticatedFetch('/api/messages/conversations');
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
-        setTrainers(Array.isArray(data) ? data : []);
-
-        // Ak nemáme preselected, skúsme načítaj priradeného trénera ako default
-        if (!preselectedId) {
-          const meRes = await authenticatedFetch('/api/auth/me');
-          const me = await meRes.json();
-          if (me.trainerId) {
-            const t = data.find(x => x.id === me.trainerId);
-            if (t) setSelectedTrainer(t);
-          }
+        let contacts = Array.isArray(data) ? data : [];
+        if (preselectedId) {
+           const exists = contacts.find(x => x.id === preselectedId);
+           if (!exists) {
+              const resP = await authenticatedFetch(`/api/users/${preselectedId}`);
+              if (resP.ok) {
+                 const newP = await resP.json();
+                 contacts = [newP, ...contacts];
+              }
+           }
         }
+        setTrainers(contacts);
+        if (preselectedId) {
+           const t = contacts.find(x => x.id === preselectedId);
+           if (t) setSelectedTrainer(t);
+        }
+      } else {
+        console.error('Conversations error:', data);
       }
     } catch (e) {
       console.error(e);

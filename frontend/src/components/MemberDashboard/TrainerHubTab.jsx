@@ -2,24 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
-export default function TrainerHubTab() {
+export default function TrainerHubTab({ setActiveTab }) {
   const [sessions, setSessions] = useState([]);
+  const [myTrainer, setMyTrainer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  const [trainers, setTrainers] = useState([]); // User's trainers if any
-
   const loadData = async () => {
     setLoading(true);
+    setError('');
     try {
       // 1. Fetch personal sessions
       const resS = await authenticatedFetch('/api/personal-sessions/my');
-      const dataS = await resS.json();
-      setSessions(Array.isArray(dataS) ? dataS : []);
+      if (resS.ok) {
+        const dataS = await resS.json();
+        setSessions(Array.isArray(dataS) ? dataS : []);
+      }
 
-      // 2. Fetch my trainers (we might need a new endpoint /api/trainer/my-trainers)
-      // For now, let's just get the general list and filter if needed, 
-      // but ideally we show the trainers the user has sessions with.
+      // 2. Fetch my trainer details
+      const resT = await authenticatedFetch('/api/users/my-trainer');
+      if (resT.ok) {
+         const dataT = await resT.json();
+         if (dataT.id) {
+            setMyTrainer(dataT);
+         }
+      }
     } catch (e) {
       console.error(e);
       setError('Nepodarilo sa načítať dáta');
@@ -45,11 +52,39 @@ export default function TrainerHubTab() {
     show: { opacity: 1, y: 0 }
   };
 
+  if (loading) {
+    return <div style={{ padding: '4rem', textAlign: 'center' }}><span className="spinner" /></div>;
+  }
+
+  if (!myTrainer) {
+    return (
+      <div className="tab-container animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+         <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(10,132,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)', fontSize: '3rem', margin: '0 auto 1.5rem' }}>
+                <i className="fas fa-user-tie"></i>
+            </div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Môj Tréner</h2>
+            <p style={{ color: 'var(--muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2rem' }}>Zatiaľ nespolupracuješ so žiadnym trénerom. Vyber si svojho osobného kouča a začni cvičiť na vyššej úrovni.</p>
+            <button className="btn btn-blue" onClick={() => setActiveTab('trainers')} style={{ borderRadius: '12px', padding: '0.8rem 2rem', fontSize: '1rem', fontWeight: 800 }}>
+                NÁJSŤ TRÉNERA
+            </button>
+         </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="tab-container" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <header>
-        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Tvoj Trainer Hub</h2>
-        <p style={{ color: 'var(--muted)', fontSize: '1rem' }}>Sleduj svoje osobné tréningy a komunikuj so svojím koučom</p>
+    <div className="tab-container animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <header style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ width: 80, height: 80, borderRadius: '24px', background: 'linear-gradient(135deg, var(--acid), #00FFD1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '2rem', fontWeight: 900, boxShadow: '0 10px 20px rgba(200,255,0,0.2)', border: '2px solid rgba(255,255,255,0.1)' }}>
+            {myTrainer.avatarUrl ? <img src={myTrainer.avatarUrl} alt="" style={{width: '100%', height: '100%', borderRadius: '22px', objectFit:'cover'}} /> : (myTrainer.fullName?.substring(0,2).toUpperCase() || 'TR')}
+        </div>
+        <div>
+           <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.2rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{myTrainer.fullName}</h2>
+           <p style={{ color: 'var(--acid)', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <i className="fas fa-shield-alt"></i> OSOBNÝ TRÉNER
+           </p>
+        </div>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem' }}>
@@ -58,7 +93,7 @@ export default function TrainerHubTab() {
         <section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                <i className="fas fa-calendar-alt" style={{ color: 'var(--blue)' }} />
+                <i className="fas fa-calendar-alt" style={{ color: 'var(--acid)' }} />
                 Plán tvojich tréningov
             </h3>
           </div>
@@ -89,14 +124,14 @@ export default function TrainerHubTab() {
                         width: '55px', 
                         height: '55px', 
                         borderRadius: '12px', 
-                        background: 'rgba(10,132,255,0.1)', 
+                        background: 'rgba(200,255,0,0.1)', 
                         display: 'flex', 
                         flexDirection: 'column', 
                         alignItems: 'center', 
                         justifyContent: 'center',
-                        border: '1px solid rgba(10,132,255,0.2)'
+                        border: '1px solid rgba(200,255,0,0.2)'
                     }}>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--blue)' }}>{date.toLocaleDateString('sk', { month: 'short' })}</span>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--acid)' }}>{date.toLocaleDateString('sk', { month: 'short' })}</span>
                         <span style={{ fontSize: '1.4rem', fontWeight: 900, lineHeight: 1 }}>{date.getDate()}</span>
                     </div>
 
@@ -138,15 +173,21 @@ export default function TrainerHubTab() {
         {/* ── Sidebar / Interaction ────────────────────────────────── */}
         <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
-          <div className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', background: 'linear-gradient(135deg, rgba(10,132,255,0.05), rgba(0,0,0,0.2))' }}>
+          <div className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', background: 'linear-gradient(135deg, rgba(200,255,0,0.05), rgba(0,0,0,0.2))' }}>
             <h4 style={{ fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <i className="fas fa-comments" style={{ color: 'var(--blue)' }} />
+                <i className="fas fa-comments" style={{ color: 'var(--acid)' }} />
                 Rýchly Chat
             </h4>
             <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '1.5rem' }}>Máš otázku ohľadom tréningu? Napíš svojmu trénerovi hneď teraz.</p>
-            <button className="btn btn-blue btn-block" style={{ borderRadius: '12px', height: '48px', fontWeight: 800 }}>
+            <button className="btn btn-acid btn-block" onClick={() => setActiveTab('messages', myTrainer.id)} style={{ borderRadius: '12px', height: '48px', fontWeight: 800 }}>
                 OTVORIŤ SPRÁVY
             </button>
+          </div>
+
+          <div className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', marginTop: '1rem' }}>
+             <button className="btn btn-ghost btn-block" style={{ color: 'var(--red)', fontSize: '0.8rem', fontWeight: 700 }}>
+                UKONČIŤ SPOLUPRÁCU
+             </button>
           </div>
 
           <div className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>

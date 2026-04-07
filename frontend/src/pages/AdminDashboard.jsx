@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/common/SEO';
 import OverviewTab from '../components/AdminDashboard/OverviewTab';
 import UsersTab from '../components/AdminDashboard/UsersTab';
 import MembershipsTab from '../components/AdminDashboard/MembershipsTab';
@@ -109,6 +110,7 @@ export default function AdminDashboard() {
       className="admin-dashboard"
       style={{ display: 'flex', flexDirection: 'row', minHeight: '100vh', width: '100%' }}
     >
+      <SEO title={`${pageTitle} — Admin Panel`} />
       {/* ── Overlay (mobile) ───────────────────────────────────────────── */}
       {isMobile && sidebarOpen && (
         <div
