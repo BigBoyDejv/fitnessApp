@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { authenticatedFetch } from '../../utils/api';
 
-export default function TrainersTab() {
+export default function TrainersTab({ onMessage }) {
   const [trainers, setTrainers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [curSlide, setCurSlide] = useState(0);
@@ -86,8 +86,20 @@ export default function TrainersTab() {
                        <div className="trainer-slide-overlay" />
                        <div className="trainer-slide-content">
                           <div className="trainer-slide-name">{t.fullName || '—'}</div>
-                          <div className="trainer-slide-spec">{t.specialization || 'Tréner'}</div>
-                          <div className="trainer-slide-bio">{t.bio}</div>
+                           <div className="trainer-slide-spec">{t.specialization || 'Tréner'}</div>
+                           <div className="trainer-slide-bio">{t.bio}</div>
+                           <div style={{ marginTop: '1.2rem' }}>
+                              <button 
+                                className="btn btn-acid btn-sm" 
+                                style={{ borderRadius: '8px', padding: '0.6rem 1.2rem', textTransform: 'uppercase', fontWeight: 800, fontSize: '0.7rem' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onMessage) onMessage(t.id);
+                                }}
+                              >
+                                <i className="fas fa-paper-plane" style={{ marginRight: '0.6rem' }} /> Napísať správu
+                              </button>
+                           </div>
                        </div>
                     </div>
                   );

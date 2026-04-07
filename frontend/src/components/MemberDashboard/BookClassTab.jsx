@@ -12,6 +12,14 @@ export function BookClassTab({ setActiveTab }) {
   const [bookMsg, setBookMsg]         = useState({ text: '', type: '' });
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
 
   const showToast = (msg, type = 'ok') => {
     setToast({ msg, type });
@@ -108,87 +116,110 @@ export function BookClassTab({ setActiveTab }) {
     const dur      = c.durationMinutes ? `${c.durationMinutes} min` : '—';
 
     return (
-      <div style={{ padding: '1.5rem' }}>
-        <div style={{ marginBottom: '1.2rem' }}>
-          <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.4rem', fontWeight: 900, marginBottom: '0.25rem' }}>{c.name || '—'}</div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>{c.instructor || '—'}</div>
+      <div className="class-detail-inner animate-in">
+        {isMobile && (
+          <button className="detail-close-btn" onClick={() => setSelectedClass(null)}>
+            <i className="fas fa-chevron-down" />
+          </button>
+        )}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.8rem', fontWeight: 950, marginBottom: '0.25rem', color: 'var(--text)' }}>{c.name || '—'}</div>
+          <div style={{ fontSize: '0.9rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <i className="fas fa-user-tie" style={{color: 'var(--acid)'}} /> {c.instructor || 'Tím Fitness Pro'}
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', marginBottom: '1.2rem' }}>
-          <div><div className="fl">Začiatok</div><div style={{ fontSize: '0.85rem' }}>{dtStart}</div></div>
-          <div><div className="fl">Koniec</div><div style={{ fontSize: '0.85rem' }}>{dtEnd ? `${dtEnd} (${dur})` : dur}</div></div>
-          <div><div className="fl">Miesto</div><span className="badge b-grey">{c.location || '—'}</span></div>
-          <div>
-            <div className="fl">Obsadenosť</div>
-            <div style={{ fontSize: '0.85rem', marginBottom: '0.3rem' }}>{c.booked || 0} / {c.capacity || '?'}</div>
-            <div style={{ height: '4px', background: 'var(--border2)', borderRadius: '2px' }}>
-              <div style={{ width: `${pct}%`, height: '4px', background: barColor, borderRadius: '2px' }} />
+        <div className="detail-stats-grid">
+          <div className="detail-stat-item">
+            <div className="fl">DEŇ A ČAS</div>
+            <div className="val">{dtStart}</div>
+          </div>
+          <div className="detail-stat-item">
+            <div className="fl">DĹŽKA</div>
+            <div className="val">{dur}</div>
+          </div>
+          <div className="detail-stat-item">
+            <div className="fl">MIESTNOSŤ</div>
+            <div className="val"><span className="badge b-grey">{c.location || 'Hlavná sála'}</span></div>
+          </div>
+          <div className="detail-stat-item">
+            <div className="fl">KAPACITA</div>
+            <div className="val">
+               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.8rem' }}>
+                 <span>{c.booked || 0} / {c.capacity || '?'}</span>
+                 <span style={{ color: barColor }}>{100 - pct}% voľné</span>
+               </div>
+               <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                 <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: '10px' }} />
+               </div>
             </div>
           </div>
         </div>
 
-        <div style={{ marginBottom: '0.75rem' }}>
+        <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
           {c.isReserved ? (
-            <button className="btn btn-red btn-block" onClick={(e) => cancelClass(e, c.id)} disabled={actionLoading} style={{ justifyContent: 'center' }}>
-              {actionLoading ? <span className="spin" /> : <><i className="fas fa-times" /> Zrušiť rezerváciu</>}
+            <button className="btn btn-red btn-block btn-lg" onClick={(e) => cancelClass(e, c.id)} disabled={actionLoading}>
+              {actionLoading ? <span className="spinner" /> : <><i className="fas fa-times-circle" /> ZRUŠIŤ MOJU REZERVÁCIU</>}
             </button>
           ) : full ? (
-            <button className="btn btn-ghost btn-block" disabled style={{ justifyContent: 'center', opacity: 0.5 }}>
-              <i className="fas fa-ban" /> Lekcia je plná
+            <button className="btn btn-ghost btn-block btn-lg" disabled style={{ opacity: 0.5 }}>
+              <i className="fas fa-ban" /> LEKCIA JE OBSADENÁ
             </button>
           ) : (
-            <button className="btn btn-acid btn-block" onClick={() => bookClass(c.id)} disabled={actionLoading} style={{ justifyContent: 'center' }}>
-              {actionLoading ? <span className="spin" /> : <><i className="fas fa-plus" /> Rezervovať</>}
+            <button className="btn btn-acid btn-block btn-lg" onClick={() => bookClass(c.id)} disabled={actionLoading}>
+              {actionLoading ? <span className="spinner" /> : <><i className="fas fa-plus-circle" /> REZERVOVAŤ MIESTO</>}
             </button>
           )}
         </div>
 
-        {/* Oprava: použiť "fm ok" / "fm err" nie "fm show" */}
-        {bookMsg.text && <div className={`fm ${bookMsg.type}`}>{bookMsg.text}</div>}
+        {bookMsg.text && <div className={`fm ${bookMsg.type}`} style={{ padding: '1rem' }}>{bookMsg.text}</div>}
       </div>
     );
   };
-
   return (
-    <div className="g2 book-class-container" style={{ alignItems: 'start' }}>
+    <div className={`book-class-wrapper ${isMobile ? 'mobile-mode' : 'desktop-mode'}`}>
       {/* Zoznam lekcií */}
-      <div className="panel">
+      <div className="panel list-panel">
         <div className="ph">
           <span className="pt">Dostupné lekcie</span>
-          <button className="btn btn-ghost btn-sm" onClick={loadAllClasses}><i className="fas fa-sync-alt" /></button>
+          <button className="btn btn-ghost btn-xs" onClick={() => loadAllClasses()} style={{padding: '0.5rem'}}><i className="fas fa-sync-alt" /></button>
         </div>
-        <div style={{ padding: 0 }}>
+        <div className="cl-scroller">
           {loading ? (
-            <div className="empty" style={{ padding: '2rem' }}><span className="spin" /></div>
+            <div className="empty" style={{ padding: '4rem 2rem' }}><span className="spinner" /></div>
           ) : error ? (
-            <div className="empty" style={{ padding: '2rem' }}>❌ {error}</div>
+            <div className="empty" style={{ padding: '4rem 2rem' }}>❌ {error}</div>
           ) : classes.length === 0 ? (
-            <div className="empty" style={{ padding: '2rem' }}><i className="fas fa-dumbbell" /><p>Žiadne dostupné lekcie</p></div>
+            <div className="empty" style={{ padding: '4rem 2rem' }}><i className="fas fa-dumbbell" /><p>Žiadne dostupné lekcie</p></div>
           ) : classes.map(c => {
             const free     = (c.capacity || 0) - (c.booked || 0);
             const full     = c.isFull || free <= 0;
             const isSelected = selectedClass?.id === c.id;
-            const dt       = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
-            const dur      = c.durationMinutes ? ` · ${c.durationMinutes} min` : '';
+            const dtObj    = new Date(c.startTime);
+            const timeStr  = dtObj.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+            const dateStr  = dtObj.toLocaleDateString('sk-SK', { weekday: 'short', day: '2-digit', month: 'short' });
 
             return (
               <div
                 key={c.id}
                 className={`cl-row${isSelected ? ' cl-row-selected' : ''}`}
                 onClick={() => { setSelectedClass(c); setBookMsg({ text: '', type: '' }); }}
-                style={{ background: c.isReserved ? 'rgba(200,255,0,0.04)' : '' }}
               >
+                <div className="cl-row-time-box">
+                  <div className="time">{timeStr}</div>
+                  <div className="date">{dateStr}</div>
+                </div>
                 <div className="cl-row-main">
                   <div className="cl-row-name">{c.name || '—'}</div>
                   <div className="cl-row-meta">
-                    <span><i className="fas fa-clock" style={{ opacity: 0.5 }} /> {dt}{dur}</span>
-                    <span><i className="fas fa-user" style={{ opacity: 0.5 }} /> {c.instructor || '—'}</span>
+                    <span><i className="fas fa-user" /> {c.instructor || 'Tím'}</span>
+                    <span><i className="fas fa-map-marker-alt" /> {c.location || 'Sála 1'}</span>
                   </div>
                 </div>
                 <div className="cl-row-status">
-                  {c.isReserved ? <span className="badge b-acid" style={{ fontSize: '0.6rem' }}><i className="fas fa-check" /> Moja</span>
-                  : full        ? <span className="badge b-red"  style={{ fontSize: '0.6rem' }}>Plná</span>
-                  :               <span className="badge b-cyan" style={{ fontSize: '0.6rem' }}>{free} voľných</span>}
+                  {c.isReserved ? <span className="badge b-acid">MOJA</span>
+                  : full        ? <span className="badge b-red">PLNÁ</span>
+                  :               <span className="badge b-cyan">{free} voľných</span>}
                 </div>
               </div>
             );
@@ -196,17 +227,22 @@ export function BookClassTab({ setActiveTab }) {
         </div>
       </div>
 
-      {/* Detail */}
-      <div className="panel" style={{ position: 'sticky', top: '70px' }}>
-        <div className="ph"><span className="pt">Detail lekcie</span></div>
-        <div style={{ padding: 0 }}>{renderDetail()}</div>
+      {/* Detail - Panel / Mobile Drawer */}
+      <div className={`detail-panel-container ${selectedClass ? 'open' : ''}`}>
+        {isMobile && <div className="detail-overlay" onClick={() => setSelectedClass(null)} />}
+        <div className="panel detail-panel" style={{ position: isMobile ? 'fixed' : 'sticky', top: isMobile ? 'auto' : '70px' }}>
+          {!isMobile && <div className="ph"><span className="pt">Detail lekcie</span></div>}
+          <div style={{ padding: 0 }}>{renderDetail()}</div>
+        </div>
       </div>
+
       {toast && (
         <div className={`toast-message toast-${toast.type}`}>
           {toast.type === 'ok' ? '✓' : '⚠'} {toast.msg}
         </div>
       )}
     </div>
+
   );
 }
 

@@ -85,11 +85,11 @@ export default function MembershipTab({ setActiveTab }) {
             <div style={{ background: 'rgba(200,255,0,0.1)', color: 'var(--acid)', padding: '0.5rem 1rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.1em', border: '1px solid rgba(200,255,0,0.2)' }}>AKTÍVNE</div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+          <div className="grid-2" style={{ marginBottom: '2.5rem' }}>
             <div>
                <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.8rem', fontWeight: 700 }}>ZOSTÁVAJÚCI ČAS</div>
                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-                 <span style={{ fontSize: '4.5rem', fontWeight: 950, fontFamily: 'var(--font-d)', lineHeight: 0.8, color: 'var(--text)' }}>{daysLeft}</span>
+                 <span style={{ fontSize: 'clamp(3rem, 10vw, 4.5rem)', fontWeight: 950, fontFamily: 'var(--font-d)', lineHeight: 0.8, color: 'var(--text)' }}>{daysLeft}</span>
                  <span style={{ fontSize: '1rem', fontWeight: 900, fontFamily: 'var(--font-d)', color: 'var(--acid)' }}>DNÍ</span>
                </div>
             </div>
@@ -135,34 +135,36 @@ export default function MembershipTab({ setActiveTab }) {
     }
     
     return (
-      <div className="animate-in" style={{ padding: '1rem' }}>
-        <table className="dt">
-          <thead>
-            <tr>
-              <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>TYP PROGRAMU</th>
-              <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>OD</th>
-              <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>DO</th>
-              <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>SUMA</th>
-              <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem', textAlign: 'right' }}>STATUS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((m, i) => {
-               const c = m.status === 'active' ? 'b-acid' : m.status === 'expired' ? 'b-grey' : 'b-red';
-               return (
-                 <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                   <td style={{ padding: '1.2rem 1rem', fontWeight: 800, fontFamily: 'var(--font-d)' }}>{m.membershipTypeName?.toUpperCase() || '—'}</td>
-                   <td style={{ padding: '1.2rem 1rem', color: 'var(--muted)' }}>{m.startDate || '—'}</td>
-                   <td style={{ padding: '1.2rem 1rem', color: 'var(--muted)' }}>{m.endDate || '—'}</td>
-                   <td style={{ padding: '1.2rem 1rem', fontWeight: 700, color: 'var(--blue)' }}>{m.priceEuros || '0.00'} €</td>
-                   <td style={{ padding: '1.2rem 1rem', textAlign: 'right' }}>
-                     <span className={`badge ${c}`} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.65rem' }}>{m.status?.toUpperCase()}</span>
-                   </td>
-                 </tr>
-               );
-            })}
-          </tbody>
-        </table>
+      <div className="animate-in" style={{ padding: '0 1rem' }}>
+        <div className="table-responsive">
+          <table className="dt">
+            <thead>
+              <tr>
+                <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>TYP PROGRAMU</th>
+                <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>OD</th>
+                <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>DO</th>
+                <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem' }}>SUMA</th>
+                <th style={{ background: 'transparent', borderBottom: '1px solid var(--border)', padding: '1.2rem 1rem', textAlign: 'right' }}>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((m, i) => {
+                 const c = m.status === 'active' ? 'b-acid' : m.status === 'expired' ? 'b-grey' : 'b-red';
+                 return (
+                   <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                     <td style={{ padding: '1.2rem 1rem', fontWeight: 800, fontFamily: 'var(--font-d)' }}>{m.membershipTypeName?.toUpperCase() || '—'}</td>
+                     <td style={{ padding: '1.2rem 1rem', color: 'var(--muted)' }}>{m.startDate || '—'}</td>
+                     <td style={{ padding: '1.2rem 1rem', color: 'var(--muted)' }}>{m.endDate || '—'}</td>
+                     <td style={{ padding: '1.2rem 1rem', fontWeight: 700, color: 'var(--blue)' }}>{m.priceEuros || '0.00'} €</td>
+                     <td style={{ padding: '1.2rem 1rem', textAlign: 'right' }}>
+                       <span className={`badge ${c}`} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.65rem' }}>{m.status?.toUpperCase()}</span>
+                     </td>
+                   </tr>
+                 );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };

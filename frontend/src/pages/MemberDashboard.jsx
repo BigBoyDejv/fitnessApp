@@ -29,7 +29,6 @@ const NAV_ITEMS = [
   { id: 'profile', icon: 'fa-user', label: 'Môj profil' },
   { id: 'notifications', icon: 'fa-bell', label: 'Notifikácie' },
   { id: 'membership', icon: 'fa-id-card', label: 'Moje členstvo', section: 'Členstvo' },
-  { id: 'pricing', icon: 'fa-tag', label: 'Cenník' },
   { id: 'classes', icon: 'fa-calendar-alt', label: 'Moje lekcie', section: 'Tréning' },
   { id: 'book', icon: 'fa-plus-circle', label: 'Rezervovať lekciu' },
   { id: 'workout', icon: 'fa-dumbbell', label: 'Denník tréningov' },
@@ -53,6 +52,7 @@ export default function MemberDashboard() {
   const [expandedSecs, setExpandedSecs] = useState({ training: true, club: false, profile: false });
   const [fabOpen, setFabOpen] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
+  const [msgTarget, setMsgTarget] = useState(null); // ID trénera pre správy
 
   // Pull to refresh state
   const [pulling, setPulling] = useState(false);
@@ -104,8 +104,9 @@ export default function MemberDashboard() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const handleTabChange = (id) => {
+  const handleTabChange = (id, target = null) => {
     setActiveTab(id);
+    setMsgTarget(target);
     localStorage.setItem('member_dashboard_active_tab', id);
     setSidebarOpen(false);
   };
@@ -164,7 +165,6 @@ export default function MemberDashboard() {
       {
         id: 'club', label: 'Klub', section: 'group', icon: 'fa-house-user', items: [
           { id: 'membership', icon: 'fa-id-card', label: 'Moje členstvo' },
-          { id: 'pricing', icon: 'fa-tags', label: 'Cenník členstva' },
           { id: 'book-class', icon: 'fa-plus-circle', label: 'Rezervácia lekcie' },
           { id: 'trainers', icon: 'fa-users', label: 'Naši tréneri' },
         ]
@@ -223,11 +223,11 @@ export default function MemberDashboard() {
       case 'classes': return <ClassesTab setActiveTab={handleTabChange} />;
       case 'book-class': return <BookClassTab setActiveTab={handleTabChange} />;
       case 'trainer-hub': return <TrainerHubTab />;
-      case 'trainers': return <TrainersTab />;
+      case 'trainers': return <TrainersTab onMessage={(id) => handleTabChange('messages', id)} />;
       case 'qr': return <QrTab />;
       case 'stats': return <StatsTab />;
       case 'checkin': return <CheckinTab user={user} />;
-      case 'messages': return <MessagesTab user={user} />;
+      case 'messages': return <MessagesTab user={user} preselectedId={msgTarget} clearPreselected={() => setMsgTarget(null)} />;
       case 'workout': return <WorkoutTab user={user} />;
       case 'rules': return <RulesTab />;
       default: return (
@@ -347,29 +347,38 @@ export default function MemberDashboard() {
 
         <header className="topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            {isMobile && (
+              <button 
+                className={`hamburger-menu-btn ${sidebarOpen ? 'open' : ''}`} 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label="Menu"
+              >
+                <span></span><span></span><span></span>
+              </button>
+            )}
             <div className="page-header-info">
               <h1 className="page-title">{pageTitle}</h1>
-              <div className="page-subtitle">Personalizovaný prehľad vášho progresu</div>
+              <div className="page-subtitle">Osobný fitness asistent</div>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
-            {isMobile && (
-              <button className="top-logout-btn" onClick={logout}>
-                <i className="fas fa-sign-out-alt"></i>
-              </button>
-            )}
-            <button className="top-notif-btn" onClick={() => setActiveTab('notifications')}>
+            <button className="top-notif-btn" onClick={() => handleTabChange('notifications')}>
               <i className="fas fa-bell" />
               {notifCount > 0 && <span className="dot" />}
             </button>
-            {isMobile && (
-              <div className="header-user-mini" onClick={() => setActiveTab('profile')}>
-                {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : avatarInitials}
-              </div>
+            {isMobile ? (
+               <div className="header-user-mini" onClick={() => handleTabChange('profile')}>
+                 {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : avatarInitials}
+               </div>
+            ) : (
+              <button className="top-logout-btn" onClick={logout} title="Odhlásiť sa">
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
             )}
           </div>
         </header>
+
 
         <section className="cont" style={{ flex: 1, padding: isMobile ? '1rem' : '1.5rem', paddingBottom: isMobile ? '80px' : '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <AnimatePresence mode="wait">
@@ -387,39 +396,38 @@ export default function MemberDashboard() {
         </section>
 
         {isMobile && (
-          <>
-            <nav className="mobile-bottom-dock">
-              <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => handleTabChange('overview')}>
-                <div className="nav-indicator" />
-                <div className="nav-spotlight" />
-                <i className="fas fa-home" />
-                <span>DOMOV</span>
-              </button>
-              <button className={activeTab === 'workout' ? 'active' : ''} onClick={() => handleTabChange('workout')}>
-                <div className="nav-indicator" />
-                <div className="nav-spotlight" />
-                <i className="fas fa-dumbbell" />
-                <span>TRÉNING</span>
-              </button>
-              <button className="nav-action-btn" onClick={() => setFabOpen(!fabOpen)}>
-                <i className="fas fa-plus" />
-              </button>
-              <button className={activeTab === 'messages' ? 'active' : ''} onClick={() => handleTabChange('messages')}>
-                <div className="nav-indicator" />
-                <div className="nav-spotlight" />
-                <i className="fas fa-comments" />
-                {notifCount > 0 && <span className="notif-dot" />}
-                <span>SPRÁVY</span>
-              </button>
-              <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => handleTabChange('profile')}>
-                <div className="nav-indicator" />
-                <div className="nav-spotlight" />
-                <i className="fas fa-user" />
-                <span>PROFIL</span>
-              </button>
-            </nav>
-          </>
+          <nav className="mobile-bottom-dock">
+            <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => handleTabChange('overview')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-home" />
+              <span>DOMOV</span>
+            </button>
+            <button className={activeTab === 'workout' ? 'active' : ''} onClick={() => handleTabChange('workout')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-dumbbell" />
+              <span>TRÉNING</span>
+            </button>
+            <button className={`nav-action-btn ${activeTab === 'qr' ? 'active' : ''}`} onClick={() => handleTabChange('qr')}>
+               <i className="fas fa-qrcode" />
+            </button>
+            <button className={activeTab === 'messages' ? 'active' : ''} onClick={() => handleTabChange('messages')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-envelope" />
+              {notifCount > 0 && <span className="notif-dot" />}
+              <span>SPRÁVY</span>
+            </button>
+            <button className={activeTab === 'stats' ? 'active' : ''} onClick={() => handleTabChange('stats')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-chart-line" />
+              <span>ŠTATISTIKY</span>
+            </button>
+          </nav>
         )}
+
       </main>
     </div>
   );

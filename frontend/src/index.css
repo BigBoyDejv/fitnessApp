@@ -87,7 +87,7 @@ h4 {
 .g2,
 .grid-2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.6rem;
 }
 
@@ -98,16 +98,43 @@ h4 {
     gap: 1.2rem;
 }
 
-@media(max-width:900px) {
+.g4,
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
 
-    .g2,
-    .grid-2,
-    .g3,
-    .grid-3 {
+/* Responsive Grid Overrides */
+@media(max-width: 1100px) {
+    .g4, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media(max-width: 900px) {
+    .g3, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .g2, .grid-2 { gap: 1rem; }
+}
+
+@media(max-width: 600px) {
+    .g2, .grid-2, .g3, .grid-3, .g4, .grid-4 {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 0.85rem;
+    }
+
+    .container, .cont {
+        padding: 1rem !important;
     }
 }
+
+/* Scrollable Tables for Mobile */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+}
+
 
 /* Panels */
 .panel {
@@ -205,11 +232,27 @@ h4 {
     font-weight: 700;
 }
 
-@media(max-width:600px) {
+@media(max-width:768px) {
     .stat-row {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+
+    .sc-val {
+        font-size: 2.2rem;
+    }
+
+    .sc {
+        padding: 1.4rem 1.1rem;
     }
 }
+
+@media(max-width:480px) {
+    .stat-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 /* Data Tables */
 .dt {
@@ -286,24 +329,26 @@ h4 {
     color: var(--muted);
 }
 
-/* Buttons */
+/* Buttons with Touch Optimization (44px min-height) */
 .btn {
     font-family: var(--font-d);
     font-size: 0.86rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0.5rem 1.2rem;
+    padding: 0.8rem 1.5rem; /* Increased padding for mobile-friendly size */
+    min-height: 44px; /* Essential touch target size */
     border: 2px solid transparent;
-    border-radius: 3px;
+    border-radius: 8px; /* Modern rounded look */
     cursor: pointer;
-    transition: all 0.18s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.6rem;
     justify-content: center;
 }
+
 
 .btn-acid {
     background: var(--accent-gradient);

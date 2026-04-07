@@ -478,21 +478,65 @@
   .admin-dashboard .sidebar {
     transform: translateX(-100%);
     transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    background: rgba(8, 8, 8, 0.95);
   }
   .admin-dashboard .sidebar.open { transform: translateX(0); }
   .admin-dashboard .main { margin-left: 0; }
   .admin-dashboard .grid-2, .admin-dashboard .grid-3 { grid-template-columns: 1fr; }
   .admin-dashboard .hamburger { display: flex; }
-  .admin-dashboard .sidebar-overlay { display: block; }
+  .admin-dashboard .sidebar-overlay { 
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+  }
   .admin-dashboard .sidebar-overlay.open { opacity: 1; pointer-events: all; }
   .admin-dashboard .topbar { padding: 0 1rem; }
-  .admin-dashboard .content { padding: 1rem; }
+  .admin-dashboard .content { padding: 1.5rem 1rem; }
   .admin-dashboard .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-dashboard .fr { grid-template-columns: 1fr; }
 }
 @media(max-width: 600px) {
-  .admin-dashboard .kpi-grid { grid-template-columns: 1fr 1fr; }
-  .admin-dashboard .ph { flex-direction: column; align-items: flex-start; }
-  .admin-dashboard .search-bar { flex-direction: column; }
-  .admin-dashboard .search-bar .fi { max-width: 100% !important; }
+  .admin-dashboard .content {
+    padding: 1rem 0.75rem;
+    padding-bottom: 100px; /* Space for bottom dock if applicable */
+  }
+
+  .admin-dashboard .kpi-grid { 
+    grid-template-columns: 1fr 1fr; 
+    gap: 0.75rem;
+  }
+  
+  .admin-dashboard .kpi-card {
+    padding: 1.4rem 1rem;
+  }
+  
+  .admin-dashboard .kpi-val {
+    font-size: 2.1rem;
+  }
+  
+  .admin-dashboard .ph { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  
+  .admin-dashboard .search-bar { flex-direction: column; width: 100%; }
+  
+  .admin-dashboard .search-bar .fi { 
+    max-width: 100% !important; 
+    width: 100%;
+  }
+
+  .admin-dashboard .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Table styling for mobile */
+  .admin-dashboard .table-responsive {
+    overflow-x: auto;
+    border-radius: 8px;
+    background: var(--surface2);
+  }
 }
+
+@media(max-width: 400px) {
+  .admin-dashboard .kpi-grid { grid-template-columns: 1fr; }
+}
+
