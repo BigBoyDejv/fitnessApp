@@ -1,5 +1,6 @@
 package sk.fitness.backend.controller;
 
+import jakarta.transaction.Transactional;
 import sk.fitness.backend.model.User;
 import sk.fitness.backend.repository.CheckInRepository;
 import sk.fitness.backend.repository.GymClassRepository;
