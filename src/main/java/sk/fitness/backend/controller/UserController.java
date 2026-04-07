@@ -42,11 +42,11 @@ public class UserController {
         User target = userRepository.findByIdEquals(uid).orElse(null);
         if (target == null) return ResponseEntity.notFound().build();
 
-        // Povoliť ak: si to ty sám, si admin/recepcia, alebo cieľ je tréner
+        // Povoliť ak: si to ty sám, si admin/recepcia/trener, alebo cieľ je tréner
         boolean isSelf = caller.getId().equals(uid);
         boolean isTargetTrainer = target.getRole().equalsIgnoreCase("trainer");
 
-        if (!isSelf && !isAdmin && !isReception && !isTargetTrainer) {
+        if (!isSelf && !isAdmin && !isReception && !isTrainer && !isTargetTrainer) {
             return ResponseEntity.status(403).body(Map.of("message", "Nemáš oprávnenie vidieť tento profil"));
         }
 

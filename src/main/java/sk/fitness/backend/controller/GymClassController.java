@@ -107,6 +107,10 @@ public class GymClassController {
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
         if (gymClass == null) return ResponseEntity.notFound().build();
 
+        if (gymClass.getStartTime().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Nemožno si rezervovať lekciu, ktorá už začala."));
+        }
+
         // Skontroluj či má uźívateľ aktívne členstvo (robustnejšie cez List)
         boolean hasMembership = membershipRepository
                 .findByUserIdOrderByCreatedAtDesc(currentUser.getId())
@@ -147,6 +151,10 @@ public class GymClassController {
 
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
         if (gymClass == null) return ResponseEntity.notFound().build();
+
+        if (gymClass.getStartTime().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Nemožno zrušiť lekciu, ktorá už začala."));
+        }
 
         ClassReservation res = classReservationRepository.findByGymClassAndUser(gymClass, currentUser).orElse(null);
         if (res == null) return ResponseEntity.badRequest().body(Map.of("message", "Nie si prihlásený na túto lekciu"));

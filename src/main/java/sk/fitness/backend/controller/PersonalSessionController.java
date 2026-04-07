@@ -43,7 +43,13 @@ public class PersonalSessionController {
         String clientIdStr = (String) body.get("clientId");
         if (clientIdStr == null) return ResponseEntity.badRequest().body(Map.of("message", "Chýba clientId"));
         
-        UUID clientId = UUID.fromString(clientIdStr);
+        UUID clientId;
+        try {
+            clientId = UUID.fromString(clientIdStr);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Neplatné ID klienta"));
+        }
+
         User client = userRepository.findByIdEquals(clientId).orElse(null);
         if (client == null) return ResponseEntity.badRequest().body(Map.of("message", "Klient nenájdený"));
 
@@ -53,9 +59,14 @@ public class PersonalSessionController {
         
         LocalDateTime start;
         try {
-            start = LocalDateTime.parse((String) body.get("startTime"));
+            String startStr = (String) body.get("startTime");
+            if (startStr == null) throw new IllegalArgumentException("Chýba čas začiatku");
+            // Podpora pre rôzne dĺžky ISO formátu (napr. s/bez sekúnd)
+            if (startStr.length() == 16) startStr += ":00"; 
+            start = LocalDateTime.parse(startStr.replace(" ", "T"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Neplatný formát dátumu a času"));
+            System.err.println("Chyba pri parsovaní dátumu: " + body.get("startTime") + " - " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", "Neplatný formát dátumu a času. Použite formát YYYY-MM-DDTHH:mm"));
         }
 
         LocalDateTime end = start.plusMinutes(duration);
@@ -73,8 +84,10 @@ public class PersonalSessionController {
         User trainer = resolveUser(ud);
         if (trainer == null) return ResponseEntity.status(401).build();
         
+        // Zmena: Vraciame všetky tréningy (aj tie v ten istý deň skôr), 
+        // aby ich bolo vidieť v kalendári/rozvrhu
         List<Map<String, Object>> sessions = personalSessionRepository
-                .findByTrainerIdAndStartTimeAfterOrderByStartTimeAsc(trainer.getId(), LocalDateTime.now())
+                .findByTrainerId(trainer.getId())
                 .stream().map(this::mapToMap).toList();
         return ResponseEntity.ok(sessions);
     }

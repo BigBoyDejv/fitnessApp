@@ -134,7 +134,7 @@ public class AdminController {
                     m.put("stock",    p.getStock());
                     m.put("price",    p.getPriceCents() / 100.0);
                     m.put("value",    p.getStock() * p.getPriceCents() / 100.0);
-                    m.put("status",   p.getStock() == 0 ? "out" : p.getStock() <= 5 ? "low" : "ok");
+                    m.put("status",   p.getStock() == 0 ? "out" : p.getStock() < 10 ? "low" : "ok");
                     return m;
                 })
                 .toList();
