@@ -195,7 +195,12 @@ export default function TrainerDashboard() {
             )}
             <div className="page-title">{pageTitle}</div>
           </div>
-          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {isMobile && (
+              <button className="top-logout-btn" onClick={logout}>
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
+            )}
             {!isMobile && <span className="trainer-badge"><i className="fas fa-dumbbell"></i> Tréner panel</span>}
             <button 
               className={`topbar-avatar ${activeTab === 'profile' ? 'active' : ''}`}
