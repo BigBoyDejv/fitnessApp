@@ -2,9 +2,8 @@ package sk.fitness.backend.controller;
 
 import sk.fitness.backend.dto.CreateGymClassRequest;
 import sk.fitness.backend.dto.GymClassResponse;
-import sk.fitness.backend.model.GymClass;
-import sk.fitness.backend.model.User;
-import sk.fitness.backend.model.Membership;
+import sk.fitness.backend.model.*;
+import sk.fitness.backend.repository.ClassReservationRepository;
 import sk.fitness.backend.repository.GymClassRepository;
 import sk.fitness.backend.repository.MembershipRepository;
 import sk.fitness.backend.repository.UserRepository;
@@ -16,8 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/classes")
@@ -26,18 +28,20 @@ public class GymClassController {
     private final GymClassRepository gymClassRepository;
     private final UserRepository userRepository;
     private final MembershipRepository membershipRepository;
+    private final ClassReservationRepository classReservationRepository;
 
     public GymClassController(GymClassRepository gymClassRepository,
-                              UserRepository userRepository,
-                              MembershipRepository membershipRepository) {
+                               UserRepository userRepository,
+                               MembershipRepository membershipRepository,
+                               ClassReservationRepository classReservationRepository) {
         this.gymClassRepository = gymClassRepository;
         this.userRepository = userRepository;
         this.membershipRepository = membershipRepository;
+        this.classReservationRepository = classReservationRepository;
     }
 
     // ── GET /api/classes ─────────────────────────────────────────────────────
-    // ADMIN: vráti VŠETKY lekcie (vrátane minulých)
-    // Ostatní: len nadchádzajúce
+    @Transactional(readOnly = true)
     @GetMapping
     public List<GymClassResponse> getClasses(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -48,11 +52,9 @@ public class GymClassController {
 
         List<GymClass> classes;
         if (isAdminOrTrainer) {
-            // Admin / tréner vidí všetky lekcie
             classes = gymClassRepository.findAll();
             classes.sort((a, b) -> a.getStartTime().compareTo(b.getStartTime()));
         } else {
-            // Člen vidí len nadchádzajúce
             classes = gymClassRepository.findByStartTimeAfterOrderByStartTimeAsc(LocalDateTime.now());
         }
 
@@ -62,6 +64,7 @@ public class GymClassController {
     }
 
     // ── GET /api/classes/my ───────────────────────────────────────────────────
+    @Transactional(readOnly = true)
     @GetMapping("/my")
     public ResponseEntity<List<GymClassResponse>> getMyClasses(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -70,7 +73,7 @@ public class GymClassController {
         if (currentUser == null) return ResponseEntity.status(401).build();
 
         List<GymClassResponse> myClasses = gymClassRepository
-                .findByReservedUsersContains(currentUser)
+                .findByReservations_User(currentUser)
                 .stream()
                 .map(gc -> mapToResponse(gc, currentUser))
                 .toList();
@@ -79,6 +82,7 @@ public class GymClassController {
     }
 
     // ── GET /api/classes/{id} ─────────────────────────────────────────────────
+    @Transactional(readOnly = true)
     @GetMapping("/{id}")
     public ResponseEntity<GymClassResponse> getClassDetail(
             @PathVariable Long id,
@@ -101,36 +105,33 @@ public class GymClassController {
         if (currentUser == null) return ResponseEntity.status(401).body(Map.of("message", "Neprihlásený"));
 
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
-        if (gymClass == null)
-            return ResponseEntity.notFound().build();
+        if (gymClass == null) return ResponseEntity.notFound().build();
 
-        // Overenie aktívneho členstva
+        // Skontroluj či má uźívateľ aktívne členstvo (robustnejšie cez List)
         boolean hasMembership = membershipRepository
-                .findByUserIdAndStatus(currentUser.getId(), Membership.MembershipStatus.active)
-                .map(m -> m.isValid())
-                .orElse(false);
-        if (!hasMembership)
-            return ResponseEntity.status(403).body(Map.of(
-                    "message", "Na rezerváciu lekcie potrebuješ aktívne členstvo."
-            ));
+                .findByUserIdOrderByCreatedAtDesc(currentUser.getId())
+                .stream()
+                .anyMatch(m -> m.getStatus() == Membership.MembershipStatus.active && m.isValid());
 
-        if (gymClass.getReservedUsers().contains(currentUser))
-            return ResponseEntity.badRequest().body(Map.of("message", "Už si rezervovaný na túto lekciu"));
+        if (!hasMembership) return ResponseEntity.badRequest().body(Map.of("message", "Nemáš aktívne členstvo"));
 
         if (gymClass.getBooked() >= gymClass.getCapacity())
             return ResponseEntity.badRequest().body(Map.of("message", "Lekcia je plná"));
 
-        gymClass.getReservedUsers().add(currentUser);
+        if (classReservationRepository.existsByGymClassAndUser(gymClass, currentUser))
+            return ResponseEntity.badRequest().body(Map.of("message", "Už si rezervovaný na túto lekciu"));
+
+        ClassReservation res = new ClassReservation(gymClass, currentUser);
+        classReservationRepository.save(res);
+
         gymClass.setBooked(gymClass.getBooked() + 1);
-        gymClassRepository.save(gymClass);
+        // gymClassRepository.save(gymClass); // Hibernate uloží automaticky v @Transactional
 
         return ResponseEntity.ok(mapToResponse(gymClass, currentUser));
     }
 
-    // ── Starý endpoint — spätná kompatibilita ─────────────────────────────────
     @PostMapping("/{id}/reserve")
-    public ResponseEntity<?> reserve(@PathVariable Long id,
-                                     @AuthenticationPrincipal UserDetails ud) {
+    public ResponseEntity<?> reserve(@PathVariable Long id, @AuthenticationPrincipal UserDetails ud) {
         return book(id, ud);
     }
 
@@ -142,97 +143,122 @@ public class GymClassController {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         User currentUser = resolveUser(userDetails);
-        if (currentUser == null) {
-            System.err.println("CANCEL ERROR: Unauthenticated user.");
-            return ResponseEntity.status(401).body(Map.of("message", "Neprihlásený"));
-        }
+        if (currentUser == null) return ResponseEntity.status(401).body(Map.of("message", "Neprihlásený"));
 
         GymClass gymClass = gymClassRepository.findById(id).orElse(null);
-        if (gymClass == null) {
-            System.err.println("CANCEL ERROR: Class " + id + " not found.");
-            return ResponseEntity.notFound().build();
-        }
+        if (gymClass == null) return ResponseEntity.notFound().build();
 
-        System.out.println("CANCELLING: User " + currentUser.getId() + " from Class " + id);
-        
-        // Use removeIf to be safe against proxy issues in the Set
-        boolean removed = gymClass.getReservedUsers().removeIf(u -> {
-            if (u == null || u.getId() == null) return false;
-            return u.getId().equals(currentUser.getId());
-        });
+        ClassReservation res = classReservationRepository.findByGymClassAndUser(gymClass, currentUser).orElse(null);
+        if (res == null) return ResponseEntity.badRequest().body(Map.of("message", "Nie si prihlásený na túto lekciu"));
 
-        if (!removed) {
-            System.out.println("CANCEL WARNING: User was not in reserved set. Current size: " + gymClass.getReservedUsers().size());
-            return ResponseEntity.badRequest().body(Map.of("message", "Nie si prihlásený na túto lekciu"));
-        }
-
+        classReservationRepository.delete(res);
+        gymClass.getReservations().remove(res);
         gymClass.setBooked(Math.max(0, gymClass.getBooked() - 1));
         gymClassRepository.save(gymClass);
-        System.out.println("CANCEL SUCCESS: User " + currentUser.getId() + " removed from Class " + id);
 
         return ResponseEntity.ok(Map.of("message", "Rezervácia zrušená"));
     }
 
     @Transactional
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<?> cancelPost(@PathVariable Long id,
-                                        @AuthenticationPrincipal UserDetails ud) {
+    public ResponseEntity<?> cancelPost(@PathVariable Long id, @AuthenticationPrincipal UserDetails ud) {
         return cancel(id, ud);
     }
 
+    // ── TRAINER/ADMIN: Get participants ─────────────────────────────────────
+    @Transactional(readOnly = true)
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<?> getParticipants(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        User currentUser = resolveUser(userDetails);
+        if (currentUser == null || (!isAdmin(currentUser) && !"trainer".equalsIgnoreCase(currentUser.getRole())))
+            return ResponseEntity.status(403).body(Map.of("message", "Prístup zamietnutý"));
+
+        GymClass gymClass = gymClassRepository.findById(id).orElse(null);
+        if (gymClass == null) return ResponseEntity.notFound().build();
+
+        List<Map<String, Object>> participants = gymClass.getReservations().stream()
+                .map(r -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", r.getId());
+                    m.put("userId", r.getUser().getId().toString());
+                    m.put("fullName", r.getUser().getFullName());
+                    m.put("email", r.getUser().getEmail());
+                    m.put("status", r.getStatus());
+                    m.put("reservedAt", r.getReservedAt());
+                    return m;
+                }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(participants);
+    }
+
+    // ── TRAINER: Update participant attendance ─────────────────────────────
+    @Transactional
+    @PatchMapping("/{classId}/attendance/{userId}")
+    public ResponseEntity<?> updateAttendance(
+            @PathVariable Long classId,
+            @PathVariable UUID userId,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        User currentUser = resolveUser(userDetails);
+        if (currentUser == null || (!isAdmin(currentUser) && !"trainer".equalsIgnoreCase(currentUser.getRole())))
+            return ResponseEntity.status(403).build();
+
+        GymClass gymClass = gymClassRepository.findById(classId).orElse(null);
+        User targetUser = userRepository.findById(userId).orElse(null);
+        if (gymClass == null || targetUser == null) return ResponseEntity.notFound().build();
+
+        ClassReservation res = classReservationRepository.findByGymClassAndUser(gymClass, targetUser).orElse(null);
+        if (res == null) return ResponseEntity.badRequest().body(Map.of("message", "Rezervácia nenájdená"));
+
+        String statusStr = body.get("status");
+        try {
+            res.setStatus(AttendanceStatus.valueOf(statusStr));
+            classReservationRepository.save(res);
+            return ResponseEntity.ok(Map.of("message", "Status upravený", "status", res.getStatus()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Neplatný status"));
+        }
+    }
+
     // ── DELETE /api/classes/{id} ──────────────────────────────────────────────
-    // Zmaž lekciu — len admin
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteClass(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         User currentUser = resolveUser(userDetails);
-        if (!isAdmin(currentUser))
-            return ResponseEntity.status(403).body(Map.of("message", "Len admin môže mazať lekcie"));
-
-        if (!gymClassRepository.existsById(id))
-            return ResponseEntity.notFound().build();
-
+        if (!isAdmin(currentUser)) return ResponseEntity.status(403).body(Map.of("message", "Len admin môže mazať lekcie"));
+        if (!gymClassRepository.existsById(id)) return ResponseEntity.notFound().build();
         gymClassRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Lekcia zmazaná"));
     }
 
     // ── POST /api/classes ─────────────────────────────────────────────────────
-    // Vytvor lekciu — len admin alebo trainer
-    // Frontend posiela: { name, type, startTime, durationMinutes, capacity, location, description, instructor, trainerId }
     @PostMapping
     public ResponseEntity<?> createClass(
             @Valid @RequestBody CreateGymClassRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         User currentUser = resolveUser(userDetails);
-
-        // FIX 3: manuálna kontrola roly (bez ROLE_ prefixu)
-        if (currentUser == null ||
-                (!isAdmin(currentUser) && !"trainer".equalsIgnoreCase(currentUser.getRole()))) {
+        if (currentUser == null || (!isAdmin(currentUser) && !"trainer".equalsIgnoreCase(currentUser.getRole())))
             return ResponseEntity.status(403).body(Map.of("message", "Nemáš oprávnenie vytvárať lekcie"));
-        }
 
-        // FIX 2: parsovanie startTime + výpočet endTime
         LocalDateTime startTime;
         try {
             startTime = LocalDateTime.parse(request.startTime());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Neplatný formát dátumu: " + request.startTime()));
+            return ResponseEntity.badRequest().body(Map.of("message", "Neplatný formát dátumu"));
         }
 
-        int duration = (request.durationMinutes() != null && request.durationMinutes() > 0)
-                ? request.durationMinutes()
-                : 60;
+        int duration = (request.durationMinutes() != null && request.durationMinutes() > 0) ? request.durationMinutes() : 60;
         LocalDateTime endTime = startTime.plusMinutes(duration);
 
-        // FIX 4: nastavenie instructor mena
         String instructorName = request.instructor();
-        if (instructorName == null || instructorName.isBlank()) {
-            // Fallback — použi meno aktuálne prihláseného trénera
-            instructorName = currentUser.getFullName() != null ? currentUser.getFullName() : "—";
-        }
+        if (instructorName == null || instructorName.isBlank()) instructorName = currentUser.getFullName();
 
         GymClass gymClass = new GymClass();
         gymClass.setName(request.name());
@@ -247,8 +273,6 @@ public class GymClassController {
         return ResponseEntity.ok(mapToResponse(gymClass, currentUser));
     }
 
-    // ── Pomocné metódy ────────────────────────────────────────────────────────
-
     private User resolveUser(UserDetails userDetails) {
         if (userDetails == null) return null;
         return userRepository.findByEmail(userDetails.getUsername()).orElse(null);
@@ -259,22 +283,26 @@ public class GymClassController {
     }
 
     private GymClassResponse mapToResponse(GymClass gc, User currentUser) {
-        boolean isReserved = currentUser != null && gc.getReservedUsers().contains(currentUser);
+        boolean isReserved = false;
+        if (currentUser != null) {
+            isReserved = classReservationRepository.existsByGymClassAndUser(gc, currentUser);
+        }
+
         int duration = (gc.getStartTime() != null && gc.getEndTime() != null)
                 ? (int) java.time.Duration.between(gc.getStartTime(), gc.getEndTime()).toMinutes()
                 : 60;
+
+        boolean isFull = false;
+        if (gc.getBooked() != null && gc.getCapacity() != null) {
+            isFull = gc.getBooked() >= gc.getCapacity();
+        }
+
         return new GymClassResponse(
-                gc.getId(),
-                gc.getName(),
-                gc.getInstructor(),
-                gc.getStartTime(),
-                gc.getEndTime(),
-                gc.getCapacity(),
-                gc.getBooked(),
-                gc.getBooked() >= gc.getCapacity(),
-                isReserved,
-                gc.getLocation(),
-                duration
+                gc.getId(), gc.getName(), gc.getInstructor(), gc.getStartTime(), gc.getEndTime(),
+                gc.getCapacity() != null ? gc.getCapacity() : 0, 
+                gc.getBooked() != null ? gc.getBooked() : 0, 
+                isFull, isReserved,
+                gc.getLocation() != null ? gc.getLocation() : "", duration
         );
     }
 }

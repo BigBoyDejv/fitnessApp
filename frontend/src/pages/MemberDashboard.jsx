@@ -18,6 +18,7 @@ import CheckinTab from '../components/MemberDashboard/CheckinTab';
 import MessagesTab from '../components/MemberDashboard/MessagesTab';
 import WorkoutTab from '../components/MemberDashboard/WorkoutTab';
 import RulesTab from '../components/MemberDashboard/RulesTab';
+import TrainerHubTab from '../components/MemberDashboard/TrainerHubTab';
 
 import './MemberDashboard.css';
 
@@ -32,7 +33,9 @@ const NAV_ITEMS = [
   { id: 'classes', icon: 'fa-calendar-alt', label: 'Moje lekcie', section: 'Tréning' },
   { id: 'book', icon: 'fa-plus-circle', label: 'Rezervovať lekciu' },
   { id: 'workout', icon: 'fa-dumbbell', label: 'Denník tréningov' },
-  { id: 'trainers', icon: 'fa-dumbbell', label: 'Naši tréneri' },
+  { id: 'trainer-hub', icon: 'fa-user-tie', label: 'Môj Tréner', section: 'Tréning' },
+  { id: 'classes', icon: 'fa-calendar-alt', label: 'Moje lekcie' },
+  { id: 'trainers', icon: 'fa-users', label: 'Naši tréneri', section: 'Klub' },
   { id: 'messages', icon: 'fa-comments', label: 'Správy' },
   { id: 'qr', icon: 'fa-qrcode', label: 'QR Vstupný kód', section: 'Vstup & Štatistiky' },
   { id: 'checkin', icon: 'fa-history', label: 'História vstupov' },
@@ -153,6 +156,7 @@ export default function MemberDashboard() {
       {
         id: 'training', label: 'Tréning', section: 'group', icon: 'fa-dumbbell', items: [
           { id: 'workout', icon: 'fa-book', label: 'Denník tréningov' },
+          { id: 'trainer-hub', icon: 'fa-user-tie', label: 'Môj Tréner' },
           { id: 'classes', icon: 'fa-calendar-alt', label: 'Moje lekcie' },
           { id: 'stats', icon: 'fa-chart-line', label: 'Štatistiky' },
         ]
@@ -162,7 +166,7 @@ export default function MemberDashboard() {
           { id: 'membership', icon: 'fa-id-card', label: 'Moje členstvo' },
           { id: 'pricing', icon: 'fa-tags', label: 'Cenník členstva' },
           { id: 'book-class', icon: 'fa-plus-circle', label: 'Rezervácia lekcie' },
-          { id: 'trainers', icon: 'fa-user-tie', label: 'Naši tréneri' },
+          { id: 'trainers', icon: 'fa-users', label: 'Naši tréneri' },
         ]
       },
       {
@@ -218,6 +222,7 @@ export default function MemberDashboard() {
       case 'pricing': return <PricingTab setActiveTab={handleTabChange} />;
       case 'classes': return <ClassesTab setActiveTab={handleTabChange} />;
       case 'book-class': return <BookClassTab setActiveTab={handleTabChange} />;
+      case 'trainer-hub': return <TrainerHubTab />;
       case 'trainers': return <TrainersTab />;
       case 'qr': return <QrTab />;
       case 'stats': return <StatsTab />;

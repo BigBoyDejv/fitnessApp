@@ -69,6 +69,7 @@ public class WorkoutController {
 
     // POST /api/workouts
     @PostMapping
+    @Transactional
     public ResponseEntity<?> createWorkout(
             @RequestBody Map<String, Object> body,
             @AuthenticationPrincipal UserDetails ud) {
@@ -94,13 +95,13 @@ public class WorkoutController {
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> updateWorkout(
-            @PathVariable String id,
+            @PathVariable UUID id,
             @RequestBody Map<String, Object> body,
             @AuthenticationPrincipal UserDetails ud) {
         User user = resolve(ud);
         if (user == null) return ResponseEntity.status(401).build();
 
-        WorkoutLog log = logRepo.findById(UUID.fromString(id)).orElse(null);
+        WorkoutLog log = logRepo.findById(id).orElse(null);
         if (log == null) return ResponseEntity.notFound().build();
         if (!log.getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
 
@@ -124,11 +125,11 @@ public class WorkoutController {
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<?> deleteWorkout(
-            @PathVariable String id,
+            @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails ud) {
         User user = resolve(ud);
         if (user == null) return ResponseEntity.status(401).build();
-        WorkoutLog log = logRepo.findById(UUID.fromString(id)).orElse(null);
+        WorkoutLog log = logRepo.findById(id).orElse(null);
         if (log == null) return ResponseEntity.notFound().build();
         if (!log.getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
         List<WorkoutExercise> exs = exRepo.findByWorkoutLogIdOrderBySortOrder(log.getId());

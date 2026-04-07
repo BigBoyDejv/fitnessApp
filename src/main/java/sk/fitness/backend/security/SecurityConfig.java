@@ -63,11 +63,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/trainer/list").authenticated()
 
 
-                        // Statické súbory a frontend stránky
+                        // Statické súbory a frontend stránky (Len nevyhnutné, HTML pôjde cez React)
                         .requestMatchers(
-                                "/", "/index.html", "/member.html", "/admin.html", "/trainer.html",
-                                "/favicon.ico", "/static/**", "/css/**", "/js/**", "/reception.html", "/jsQR.js",
-                                "/error"
+                                "/favicon.ico", "/error"
                         ).permitAll()
 
                         // Všetko ostatné musí byť autentifikované

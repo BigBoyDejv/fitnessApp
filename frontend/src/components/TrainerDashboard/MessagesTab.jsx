@@ -53,7 +53,7 @@ export default function MessagesTab({ user }) {
     if (!clientId) return;
     if (!isPoll) setLoading(prev => ({ ...prev, chat: true }));
     try {
-      const res = await authenticatedFetch(`/api/messages/chat?user1=${user.id}&user2=${clientId}`);
+      const res = await authenticatedFetch(`/api/messages/chat?otherUser=${clientId}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(Array.isArray(data) ? data : []);

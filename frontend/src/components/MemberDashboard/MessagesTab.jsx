@@ -50,9 +50,9 @@ export default function MessagesTab({ user }) {
   };
 
   const loadMessages = async (tId) => {
-    if (!user?.id || !tId) return;
+    if (!tId) return;
     try {
-      const res = await authenticatedFetch(`/api/messages/chat?user1=${user.id}&user2=${tId}`);
+      const res = await authenticatedFetch(`/api/messages/chat?otherUser=${tId}`);
       if (res.ok) setMessages(await res.json());
     } catch (e) { console.error(e); }
   };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
 export default function ClientsTab() {
@@ -6,6 +7,7 @@ export default function ClientsTab() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [msg, setMsg] = useState({ text: '', type: '' });
+  const [schedulingClient, setSchedulingClient] = useState(null);
 
   // Add Client state
   const [availableMembers, setAvailableMembers] = useState([]);
@@ -412,17 +414,105 @@ export default function ClientsTab() {
           )}
         </div>
         
-        <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid var(--border)', display: 'flex', background: 'var(--surface2)' }}>
+        <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.8rem', background: 'var(--surface2)' }}>
           <button 
-            className="btn btn-red btn-block" 
-            onClick={() => removeClient(drawerData?.id, drawerData?.fullName)}
+            className="btn btn-blue btn-block" 
+            onClick={() => { setSchedulingClient(drawerData); setDrawerOpen(false); }}
             disabled={!drawerData}
             style={{ borderRadius: '10px', height: '48px', fontWeight: 800 }}
           >
-            <i className="fas fa-user-minus" style={{marginRight: '0.8rem'}}></i> UKONČIŤ SPOLUPRÁCU
+            <i className="fas fa-calendar-plus" style={{marginRight: '0.8rem'}}></i> NAPLÁNOVAŤ TRÉNING
+          </button>
+          <button 
+            className="btn btn-red btn-block btn-ghost" 
+            onClick={() => removeClient(drawerData?.id, drawerData?.fullName)}
+            disabled={!drawerData}
+            style={{ borderRadius: '10px', height: '44px', fontWeight: 600, fontSize: '0.75rem' }}
+          >
+            UKONČIŤ SPOLUPRÁCU
           </button>
         </div>
       </div>
+
+      {/* ── Scheduling Modal ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {schedulingClient && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <motion.div 
+               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+               onClick={() => setSchedulingClient(null)}
+               style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }} 
+            />
+            <motion.div
+               initial={{ opacity: 0, scale: 0.9, y: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+               style={{ 
+                 width: '100%', maxWidth: '450px', background: 'rgba(30, 30, 35, 0.95)', backdropFilter: 'blur(20px)',
+                 border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem', position: 'relative'
+               }}
+            >
+               <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Plánovanie tréningu</h3>
+               <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Pre klienta: <b>{schedulingClient.fullName}</b></p>
+               
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  <div className="fg">
+                    <label className="fl">Názov tréningu</label>
+                    <input className="fi" placeholder="napr. Silový tréning - Nohy" id="ps-title" />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
+                    <div className="fg">
+                        <label className="fl">Dátum a čas</label>
+                        <input className="fi" type="datetime-local" id="ps-time" defaultValue={new Date().toISOString().slice(0, 16)} />
+                    </div>
+                    <div className="fg">
+                        <label className="fl">Trvanie</label>
+                        <select className="fi" id="ps-duration">
+                            <option value="30">30 min</option>
+                            <option value="45">45 min</option>
+                            <option value="60" selected>60 min</option>
+                            <option value="90">90 min</option>
+                            <option value="120">120 min</option>
+                        </select>
+                    </div>
+                  </div>
+                  <div className="fg">
+                    <label className="fl">Súkromné poznámky</label>
+                    <textarea className="fi" style={{ height: '80px', resize: 'none' }} id="ps-notes" placeholder="Ciele tréningu, zranenia..." />
+                  </div>
+               </div>
+
+               <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                  <button className="btn btn-ghost btn-block" onClick={() => setSchedulingClient(null)}>ZRUŠIŤ</button>
+                  <button className="btn btn-blue btn-block" onClick={async () => {
+                    const title = document.getElementById('ps-title').value;
+                    const startTime = document.getElementById('ps-time').value;
+                    const duration = parseInt(document.getElementById('ps-duration').value);
+                    const notes = document.getElementById('ps-notes').value;
+
+                    try {
+                        const res = await authenticatedFetch('/api/personal-sessions', {
+                            method: 'POST',
+                            body: JSON.stringify({ clientId: schedulingClient.id, title, startTime, durationMinutes: duration, notes })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            setMsg({ text: `Tréning pre ${schedulingClient.fullName} bol úspešne naplánovaný!`, type: 'ok' });
+                            setSchedulingClient(null);
+                            // Možno obnoviť zoznam ak treba
+                        } else {
+                            alert(data.message || 'Chyba pri plánovaní');
+                        }
+                    } catch(e) { 
+                      console.error(e);
+                      alert('Nepodarilo sa spojiť so serverom');
+                    }
+                  }}>POTVRDIŤ</button>
+               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

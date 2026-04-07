@@ -10,6 +10,10 @@ export default function MyClassesTab() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming', 'past'
 
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [participants, setParticipants] = useState([]);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
+
   const loadData = async () => {
     setLoading(true);
     setError('');
@@ -29,6 +33,34 @@ export default function MyClassesTab() {
     loadData();
   }, []);
 
+  const openParticipants = async (c) => {
+    setSelectedClass(c);
+    setLoadingParticipants(true);
+    try {
+      const res = await authenticatedFetch(`/api/classes/${c.id}/participants`);
+      const data = await res.json();
+      setParticipants(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingParticipants(false);
+    }
+  };
+
+  const updateAttendance = async (userId, status) => {
+    try {
+        const res = await authenticatedFetch(`/api/classes/${selectedClass.id}/attendance/${userId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+            setParticipants(prev => prev.map(p => p.userId === userId ? { ...p, status } : p));
+        }
+    } catch (e) {
+        console.error(e);
+    }
+  };
+
   const now = new Date();
 
   const filteredClasses = classes.filter(c => {
@@ -43,7 +75,6 @@ export default function MyClassesTab() {
     return matchSearch && matchTab;
   });
 
-  // Sort upcoming ascending, past descending
   const sortedClasses = [...filteredClasses].sort((a, b) => {
     const da = new Date(a.startTime);
     const db = new Date(b.startTime);
@@ -55,6 +86,14 @@ export default function MyClassesTab() {
     return isPast 
       ? { label: 'Prebehla', color: 'var(--muted)', bg: 'rgba(255,255,255,0.05)', icon: 'fa-check-circle' }
       : { label: 'Nadchádzajúca', color: 'var(--blue)', bg: 'rgba(10,132,255,0.1)', icon: 'fa-clock' };
+  };
+
+  const getAttendanceIcon = (status) => {
+    switch(status) {
+        case 'PRESENT': return { icon: 'fa-check-circle', color: 'var(--acid)', label: 'Prítomný' };
+        case 'ABSENT': return { icon: 'fa-times-circle', color: 'var(--red)', label: 'Neprišiel' };
+        default: return { icon: 'fa-clock', color: 'var(--muted)', label: 'Čaká' };
+    }
   };
 
   const container = {
@@ -239,8 +278,12 @@ export default function MyClassesTab() {
                     </div>
                   </div>
 
-                  <button className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center', borderRadius: '8px', fontSize: '0.75rem', marginTop: '0.5rem' }}>
-                    {activeTab === 'upcoming' ? 'Spravovať tréning' : 'Detail tréningu'} <i className="fas fa-arrow-right" style={{ fontSize: '0.6rem' }} />
+                  <button 
+                    className="btn btn-ghost btn-sm" 
+                    onClick={() => openParticipants(c)}
+                    style={{ width: '100%', justifyContent: 'center', borderRadius: '8px', fontSize: '0.75rem', marginTop: '0.5rem' }}
+                  >
+                    Spravovať účastníkov <i className="fas fa-users" style={{ fontSize: '0.6rem', marginLeft: '0.5rem' }} />
                   </button>
                 </motion.div>
               );
@@ -257,14 +300,110 @@ export default function MyClassesTab() {
             <p style={{ fontSize: '0.85rem', marginTop: '0.4rem' }}>
                 {search ? 'Zmeňte kritériá vyhľadávania' : activeTab === 'upcoming' ? 'Váš rozvrh je momentálne voľný' : 'Po ukončení lekcie sa tu zobrazí jej záznam'}
             </p>
-            {activeTab === 'upcoming' && !search && (
-                <button className="btn btn-blue btn-sm" style={{ marginTop: '1.5rem', borderRadius: '10px' }}>
-                    <i className="fas fa-plus" /> Naplánovať lekciu
-                </button>
-            )}
           </div>
         )}
       </section>
+
+      {/* ── Attendance Modal ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedClass && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSelectedClass(null)}
+              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              style={{ 
+                width: '100%', 
+                maxWidth: '500px', 
+                background: 'rgba(30, 30, 35, 0.95)', 
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '24px',
+                padding: '2rem',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
+              }}
+            >
+              <header style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Účastníci lekcie</h3>
+                  <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{selectedClass.name} • {new Date(selectedClass.startTime).toLocaleTimeString('sk', { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+                <button className="btn btn-ghost btn-sm" onClick={() => setSelectedClass(null)} style={{ borderRadius: '50%', width: '32px', height: '32px', padding: 0 }}>
+                  <i className="fas fa-times" />
+                </button>
+              </header>
+
+              <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingRight: '0.5rem' }}>
+                {loadingParticipants ? (
+                  <div style={{ padding: '3rem', textAlign: 'center' }}><span className="spinner" /></div>
+                ) : participants.length > 0 ? (
+                  participants.map(p => {
+                    const info = getAttendanceIcon(p.status);
+                    return (
+                        <div key={p.userId} style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            padding: '1rem', 
+                            background: 'rgba(255,255,255,0.03)', 
+                            borderRadius: '12px',
+                            border: '1px solid rgba(255,255,255,0.05)'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                            <div style={{ 
+                                width: '38px', height: '38px', borderRadius: '10px', 
+                                background: p.status === 'PRESENT' ? 'rgba(76,217,100,0.1)' : p.status === 'ABSENT' ? 'rgba(255,45,85,0.1)' : 'var(--surface)', 
+                                color: p.status === 'PRESENT' ? 'var(--acid)' : p.status === 'ABSENT' ? 'var(--red)' : 'var(--muted)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid currentColor', opacity: 0.8
+                            }}>
+                                <i className={`fas ${info.icon}`} style={{ fontSize: '1rem' }} />
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 800, fontSize: '0.95rem', fontFamily: 'var(--font-d)' }}>{p.fullName}</div>
+                                <div style={{ fontSize: '0.65rem', color: info.color, display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                    {info.label}
+                                </div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.4rem' }}>
+                            <button 
+                                onClick={() => updateAttendance(p.userId, 'PRESENT')}
+                                className={`btn btn-sm ${p.status === 'PRESENT' ? 'btn-blue' : 'btn-ghost'}`} 
+                                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px' }}
+                                title="Prítomný"
+                            >
+                                <i className="fas fa-check" />
+                            </button>
+                            <button 
+                                onClick={() => updateAttendance(p.userId, 'ABSENT')}
+                                className={`btn btn-sm ${p.status === 'ABSENT' ? 'btn-red' : 'btn-ghost'}`} 
+                                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px' }}
+                                title="Neprišiel"
+                            >
+                                <i className="fas fa-times" />
+                            </button>
+                          </div>
+                        </div>
+                    );
+                  })
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)', fontSize: '0.85rem' }}>Zatiaľ žiadne rezervácie</div>
+                )}
+              </div>
+
+              <footer style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+                <button className="btn btn-blue" onClick={() => setSelectedClass(null)} style={{ width: '100%', borderRadius: '12px' }}>Hotovo</button>
+              </footer>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

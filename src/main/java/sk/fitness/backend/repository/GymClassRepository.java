@@ -13,7 +13,7 @@ public interface GymClassRepository extends JpaRepository<GymClass, Long> {
     List<GymClass> findByStartTimeAfterOrderByStartTimeAsc(LocalDateTime now);
 
     // Lekcie na ktoré je prihlásený konkrétny user (GET /api/classes/my)
-    List<GymClass> findByReservedUsersContains(User user);
+    List<GymClass> findByReservations_User(User user);
 
     // Lekcie podľa mena trénera (GET /api/trainer/classes)
     List<GymClass> findByInstructor(String instructor);

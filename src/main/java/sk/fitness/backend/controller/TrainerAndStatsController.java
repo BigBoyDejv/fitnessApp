@@ -87,7 +87,7 @@ public class TrainerAndStatsController {
         if (user == null) return ResponseEntity.status(401).build();
 
         UUID uid = user.getId();
-        long totalBookings = gymClassRepository.findByReservedUsersContains(user).size();
+        long totalBookings = gymClassRepository.findByReservations_User(user).size();
         long totalCheckins = checkInRepository.countByUserId(uid);
 
         Map<String, Object> stats = new HashMap<>();
@@ -130,6 +130,7 @@ public class TrainerAndStatsController {
     // ── POST /api/trainer/clients ─────────────────────────────────────────────
     // Priraď člena k trénera
     // Body: { memberId: "uuid" }
+    @Transactional
     @PostMapping("/api/trainer/clients")
     public ResponseEntity<?> addClient(
             @RequestBody Map<String, String> body,
@@ -150,6 +151,7 @@ public class TrainerAndStatsController {
 
     // ── DELETE /api/trainer/clients/{memberId} ────────────────────────────────
     // Odober člena od trénera
+    @Transactional
     @DeleteMapping("/api/trainer/clients/{memberId}")
     public ResponseEntity<?> removeClient(
             @PathVariable String memberId,
@@ -160,12 +162,28 @@ public class TrainerAndStatsController {
         User member = userRepository.findByIdEquals(UUID.fromString(memberId)).orElse(null);
         if (member == null) return ResponseEntity.notFound().build();
 
-        if (!trainer.getId().equals(member.getTrainerId()))
+        if (member.getTrainerId() == null || !trainer.getId().equals(member.getTrainerId()))
             return ResponseEntity.status(403).body(Map.of("message", "Tento člen nie je tvoj cvičenec"));
 
         member.setTrainerId(null);
         userRepository.save(member);
-        return ResponseEntity.ok(Map.of("message", "Cvičenec odstránený"));
+        return ResponseEntity.ok(Map.of("message", "Spolupráca ukončená"));
+    }
+
+    // ── POST /api/trainer/terminate ───────────────────────────────────────────
+    // Koniec spolupráce Z POHĽADU ČLENA
+    @Transactional
+    @PostMapping("/api/trainer/terminate")
+    public ResponseEntity<?> terminateCooperation(@AuthenticationPrincipal UserDetails userDetails) {
+        User member = resolveUser(userDetails);
+        if (member == null) return ResponseEntity.status(401).build();
+        
+        if (member.getTrainerId() == null) 
+            return ResponseEntity.badRequest().body(Map.of("message", "Nemáš priradeného žiadneho trénera"));
+
+        member.setTrainerId(null);
+        userRepository.save(member);
+        return ResponseEntity.ok(Map.of("message", "Spolupráca s trénerom bola ukončená"));
     }
 
     // ── GET /api/trainer/available-members ───────────────────────────────────
