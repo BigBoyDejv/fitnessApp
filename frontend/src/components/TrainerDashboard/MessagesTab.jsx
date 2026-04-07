@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
 export default function MessagesTab({ user }) {
@@ -10,24 +9,27 @@ export default function MessagesTab({ user }) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState({ clients: true, chat: false });
   const [sending, setSending] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 850);
 
   const chatContainerRef = useRef(null);
   const pollRef = useRef(null);
 
-  // Initial load
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 850);
+    window.addEventListener('resize', handleResize);
     loadClients();
-    return () => clearInterval(pollRef.current);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearInterval(pollRef.current);
+    };
   }, []);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages, loading.chat]);
 
-  // Polling logic when client changes
   useEffect(() => {
     if (activeClient) {
       loadMessages(activeClient.id);
@@ -85,7 +87,6 @@ export default function MessagesTab({ user }) {
       await loadMessages(activeClient.id, true);
     } catch (e) {
       setNewMessage(text);
-      alert('Chyba pri odosielaní.');
     } finally {
       setSending(false);
     }
@@ -103,230 +104,144 @@ export default function MessagesTab({ user }) {
     (c.fullName || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const showList = !activeClient || !isMobile;
+  const showChat = !!activeClient;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="panel chat-modern-layout"
-      style={{
-        height: 'calc(100vh - 145px)',
-        display: 'flex',
-        background: 'rgba(10, 10, 12, 0.4)',
-        backdropFilter: 'blur(30px)',
-        border: '1px solid var(--border)',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        margin: 0
-      }}
-    >
-      {/* ── Client Sidebar ─────────────────────────────────────────── */}
-      <aside className="chat-sidebar" style={{
-        width: '320px',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'rgba(255, 255, 255, 0.02)'
-      }}>
-        <div className="sidebar-header" style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)' }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Konverzácie</h3>
-          <div className="search-box" style={{ position: 'relative' }}>
-            <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: '0.8rem' }} />
-            <input
-              type="text"
-              placeholder="Hľadať klienta..."
-              className="fi"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{
-                paddingLeft: '2.5rem',
-                borderRadius: '10px',
-                background: 'rgba(0,0,0,0.2)',
-                border: '1px solid var(--border)',
-                fontSize: '0.85rem'
-              }}
-            />
+    <div className="messages-layout animate-in" style={{ display: 'flex', height: 'calc(100vh - 160px)', gap: '1rem', overflow: 'hidden' }}>
+      
+      {/* Client List */}
+      {showList && (
+        <aside className="panel msg-sidebar" style={{ width: isMobile ? '100%' : '320px', display: 'flex', flexDirection: 'column', background: 'var(--surface2)', borderRadius: '24px' }}>
+          <div className="ph" style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
+             <h3 style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: 'var(--font-d)' }}>Konverzácie</h3>
+             <div style={{ position: 'relative', marginTop: '1rem', width: '100%' }}>
+                <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3, fontSize: '0.8rem' }} />
+                <input 
+                  className="fi" 
+                  placeholder="Hľadať klienta..." 
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  style={{ paddingLeft: '2.4rem', borderRadius: '12px', height: '40px', fontSize: '0.85rem' }} 
+                />
+             </div>
           </div>
-        </div>
-
-        <div className="client-list" style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
-          {loading.clients ? (
-            <div style={{ padding: '2rem', textAlign: 'center' }}><span className="spinner"></span></div>
-          ) : filteredClients.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {filteredClients.map((c, idx) => (
-                <motion.div
-                  key={c.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => setActiveClient(c)}
-                  className={`client-item ${activeClient?.id === c.id ? 'active' : ''}`}
-                  style={{
-                    padding: '0.9rem 1rem',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    background: activeClient?.id === c.id ? 'rgba(10, 132, 255, 0.12)' : 'transparent',
-                    border: activeClient?.id === c.id ? '1px solid rgba(10, 132, 255, 0.2)' : '1px solid transparent'
-                  }}
-                >
-                  <div className="avatar" style={{
-                    width: 44, height: 44, borderRadius: '12px',
-                    background: activeClient?.id === c.id ? 'var(--blue)' : 'var(--surface3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, fontSize: '0.9rem', color: '#fff',
-                    boxShadow: activeClient?.id === c.id ? '0 4px 12px rgba(10, 132, 255, 0.3)' : 'none'
-                  }}>
-                    {getInitials(c.fullName)}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.92rem', color: activeClient?.id === c.id ? '#fff' : 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {c.fullName}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
+             {loading.clients ? (
+               <div style={{ padding: '3rem', textAlign: 'center' }}><span className="spinner"></span></div>
+             ) : filteredClients.length === 0 ? (
+               <div style={{ padding: '3rem', textAlign: 'center', opacity: 0.3 }}>Žiadni klienti.</div>
+             ) : (
+               filteredClients.map(c => (
+                 <div 
+                   key={c.id} 
+                   className={`trainer-msg-item ${activeClient?.id === c.id ? 'active' : ''}`}
+                   onClick={() => setActiveClient(c)}
+                 >
+                    <div className="avatar-mini">
+                       {getInitials(c.fullName)}
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '2px' }}>Klient</div>
-                  </div>
-                  {activeClient?.id === c.id && (
-                    <motion.div layoutId="active-indicator" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--blue)', boxShadow: '0 0 8px var(--blue)' }} />
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.85rem' }}>
-              Žiadni klienti nenájdení.
-            </div>
-          )}
-        </div>
-      </aside>
-
-      {/* ── Chat Window ────────────────────────────────────────────── */}
-      <main className="chat-window" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-        {!activeClient ? (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.5rem', textAlign: 'center', opacity: 0.5 }}>
-            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="fas fa-comment-alt" style={{ fontSize: '2rem' }} />
-            </div>
-            <div>
-              <h4 style={{ color: 'var(--text)', marginBottom: '0.5rem' }}>Vyberte konverzáciu</h4>
-              <p style={{ fontSize: '0.85rem', maxWidth: '240px' }}>Začnite četovať s vašimi klientmi výberom zo zoznamu vľavo.</p>
-            </div>
+                    <div className="info">
+                       <div className="name">{c.fullName}</div>
+                       <div className="spec">Klient</div>
+                    </div>
+                    <i className="fas fa-chevron-right" style={{ opacity: 0.2, fontSize: '0.7rem' }} />
+                 </div>
+               ))
+             )}
           </div>
-        ) : (
-          <>
-            {/* Header */}
-            <header style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.01)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
-                  {getInitials(activeClient.fullName)}
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '1rem', letterSpacing: '0.02em' }}>{activeClient.fullName}</h4>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--acid2)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--acid2)' }} /> Online
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button className="btn btn-ghost btn-sm" onClick={() => loadMessages(activeClient.id)}>
-                  <i className="fas fa-sync-alt" />
-                </button>
-                <button className="btn btn-ghost btn-sm">
-                  <i className="fas fa-ellipsis-v" />
-                </button>
-              </div>
-            </header>
+        </aside>
+      )}
 
-            {/* Messages Area */}
-            <div
-              ref={chatContainerRef}
-              style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
+      {/* Chat Window */}
+      {showChat && (
+        <main className="panel msg-chat-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--surface)', borderRadius: '24px', position: 'relative' }}>
+           <div className="ph" style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', width: '100%' }}>
+                 {isMobile && (
+                   <button className="btn btn-ghost btn-sm" onClick={() => setActiveClient(null)} style={{ width: '40px', padding: 0 }}>
+                      <i className="fas fa-arrow-left" />
+                   </button>
+                 )}
+                 <div className="avatar-mini" style={{ width: 36, height: 36 }}>
+                    {getInitials(activeClient.fullName)}
+                 </div>
+                 <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', fontFamily: 'var(--font-d)' }}>{activeClient.fullName}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--acid2)', fontWeight: 800 }}>MÔJ KLIENT</div>
+                 </div>
+                 {!isMobile && (
+                   <button className="btn btn-ghost btn-sm" onClick={() => loadMessages(activeClient.id)}>
+                      <i className="fas fa-sync-alt" />
+                   </button>
+                 )}
+              </div>
+           </div>
+
+           <div ref={chatContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(0,0,0,0.1)' }}>
               {loading.chat ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                  <span className="spinner" style={{ width: 32, height: 32 }}></span>
-                </div>
+                <div style={{ textAlign: 'center', padding: '4rem' }}><span className="spinner"></span></div>
               ) : messages.length === 0 ? (
                 <div style={{ margin: 'auto', textAlign: 'center', opacity: 0.3 }}>
-                  <i className="fas fa-history" style={{ fontSize: '2rem', marginBottom: '1rem' }} />
-                  <p style={{ fontSize: '0.9rem' }}>Pripravený na vašu prvú správu</p>
+                   <i className="fas fa-history" style={{ fontSize: '2rem', marginBottom: '1rem' }} />
+                   <p>Začnite konverzáciu s klientom...</p>
                 </div>
               ) : (
                 messages.map((m, idx) => {
                   const isMe = m.senderId === user.id;
                   return (
-                    <motion.div
-                      key={m.id || idx}
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      style={{ alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth: '75%' }}
-                    >
-                      <div style={{
-                        background: isMe ? 'linear-gradient(135deg, var(--blue), #0056b3)' : 'var(--surface2)',
-                        color: '#fff',
-                        padding: '0.75rem 1.1rem',
-                        borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                        fontSize: '0.92rem',
-                        lineHeight: 1.5,
-                        boxShadow: isMe ? '0 4px 15px rgba(10, 132, 255, 0.2)' : '0 4px 15px rgba(0,0,0,0.1)',
-                        border: isMe ? 'none' : '1px solid var(--border)'
-                      }}>
-                        {m.text}
-                      </div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--muted)', marginTop: '4px', textAlign: isMe ? 'right' : 'left' }}>
-                        {formatTime(m.createdAt || m.timestamp)}
-                      </div>
-                    </motion.div>
+                    <div key={m.id || idx} style={{ alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                       <div style={{ 
+                           background: isMe ? 'rgba(10,132,255,0.85)' : 'var(--surface2)', 
+                           color: '#fff',
+                           padding: '0.8rem 1.1rem',
+                           borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                           fontSize: '0.9rem',
+                           boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                           border: isMe ? 'none' : '1px solid var(--border)',
+                           lineHeight: 1.5
+                       }}>
+                          {m.text || m.content}
+                          <div style={{ fontSize: '0.6rem', opacity: 0.5, marginTop: '0.4rem', textAlign: 'right', fontWeight: 700 }}>{formatTime(m.createdAt)}</div>
+                       </div>
+                    </div>
                   );
                 })
               )}
-            </div>
+           </div>
 
-            {/* Input Area */}
-            <footer style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                <button className="btn btn-ghost" style={{ padding: '0.6rem', minWidth: 0, border: 'none' }}>
-                  <i className="fas fa-paperclip" style={{ color: 'var(--muted)' }} />
-                </button>
-                <div style={{ flex: 1, position: 'relative' }}>
-                  <input
-                    type="text"
-                    placeholder="Napíšte správu..."
-                    className="fi"
-                    value={newMessage}
-                    onChange={e => setNewMessage(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                    disabled={sending}
-                    style={{
-                      padding: '0.8rem 1.25rem',
-                      borderRadius: '14px',
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid var(--border)',
-                      fontSize: '0.92rem',
-                      transition: 'all 0.3s'
-                    }}
-                  />
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleSendMessage}
-                  disabled={sending || !newMessage.trim()}
-                  className="btn btn-blue"
-                  style={{
-                    width: 48, height: 48, borderRadius: '14px', padding: 0, justifyContent: 'center',
-                    background: 'var(--blue)', border: 'none', boxShadow: '0 4px 15px rgba(10, 132, 255, 0.3)'
-                  }}
-                >
-                  {sending ? <span className="spinner" style={{ borderColor: 'transparent', borderTopColor: '#fff' }} /> : <i className="fas fa-paper-plane" />}
-                </motion.button>
-              </div>
-            </footer>
-          </>
-        )}
-      </main>
-    </motion.div>
+           <div className="chat-input-row" style={{ padding: '1.2rem', borderTop: '1px solid var(--border)', background: 'var(--surface2)', display: 'flex', gap: '0.8rem' }}>
+              <input 
+                type="text" 
+                className="fi" 
+                placeholder="Vaša správa..." 
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                style={{ flex: 1, height: '48px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)' }}
+              />
+              <button 
+                className="btn btn-blue" 
+                onClick={handleSendMessage} 
+                disabled={!newMessage.trim() || sending}
+                style={{ height: '48px', width: '48px', borderRadius: '14px', padding: 0 }}
+              >
+                 {sending ? <span className="spinner" style={{width: 20, height: 20}} /> : <i className="fas fa-paper-plane" />}
+              </button>
+           </div>
+        </main>
+      )}
+
+      {/* Welcome Desktop State */}
+      {!activeClient && !isMobile && (
+        <div className="panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.05)', borderRadius: '24px' }}>
+           <div style={{ textAlign: 'center', opacity: 0.3 }}>
+              <i className="fas fa-comments" style={{ fontSize: '4rem', marginBottom: '1.5rem' }} />
+              <div style={{ fontSize: '1.5rem', fontWeight: 900, fontFamily: 'var(--font-d)' }}>KLIENTSKÉ CENTRUM</div>
+              <p>Vyberte klienta zo zoznamu pre začatie konverzácie.</p>
+           </div>
+        </div>
+      )}
+    </div>
   );
 }

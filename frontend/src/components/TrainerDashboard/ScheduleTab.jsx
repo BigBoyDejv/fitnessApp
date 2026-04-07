@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { authenticatedFetch } from '../../utils/api';
 
-const SK_DAYS = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
-const HOURS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-const COLORS = ['c-blue', 'c-acid', 'c-red', 'c-orange', 'c-cyan'];
+const SK_DAYS = ['Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota', 'Nedeľa'];
+const SK_DAYS_SHORT = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
 
 export default function ScheduleTab() {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [offset, setOffset] = useState(0);
+  const [selectedDayIdx, setSelectedDayIdx] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 850);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 850);
+    window.addEventListener('resize', handleResize);
+    loadData();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -25,14 +33,10 @@ export default function ScheduleTab() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const getWeekBounds = (weekOffset) => {
     const now = new Date();
     const mon = new Date(now);
-    const dow = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0=Mon, 6=Sun
+    const dow = now.getDay() === 0 ? 6 : now.getDay() - 1; 
     mon.setDate(now.getDate() - dow + weekOffset * 7);
     mon.setHours(0, 0, 0, 0);
     const sun = new Date(mon);
@@ -42,9 +46,6 @@ export default function ScheduleTab() {
   };
 
   const { mon, sun } = getWeekBounds(offset);
-  const todayDate = new Date();
-  todayDate.setHours(0, 0, 0, 0);
-
   const dayDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(mon);
     d.setDate(mon.getDate() + i);
@@ -56,200 +57,220 @@ export default function ScheduleTab() {
     return d >= mon && d <= sun;
   });
 
-  // Assign colors to unique classes
-  const colorMap = {};
-  let ci = 0;
-  weekClasses.forEach(c => {
-    if (!colorMap[c.id]) {
-      colorMap[c.id] = COLORS[ci % COLORS.length];
-      ci++;
-    }
-  });
-
   const formatDateStr = (d) => d.toLocaleDateString('sk-SK', { day: 'numeric', month: 'numeric' });
   const weekLabel = `${formatDateStr(mon)} — ${formatDateStr(sun)} ${sun.getFullYear()}`;
 
-  return (
-    <div className="panel animate-in">
-      <div className="ph">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <div style={{ width: 32, height: 32, background: 'rgba(10,132,255,0.1)', color: 'var(--blue)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <i className="fas fa-calendar-alt"></i>
-          </div>
-          <span className="pt">Týždenný rozvrh tréningov</span>
+  // Pomocná funkcia na získanie lekcií pre konkrétny dátum
+  const getClassesForDate = (date) => {
+    return weekClasses.filter(c => new Date(c.startTime).toDateString() === date.toDateString());
+  };
+
+  const renderMobileSchedule = () => {
+    const selectedDate = dayDates[selectedDayIdx];
+    const dayClasses = getClassesForDate(selectedDate).sort((a,b) => new Date(a.startTime) - new Date(b.startTime));
+
+    return (
+      <div className="mobile-schedule animate-in">
+        {/* Vylepšený prepínač dní s vizuálnymi bodkami */}
+        <div className="day-selector-scroll" style={{ display: 'flex', gap: '0.8rem', overflowX: 'auto', padding: '0.5rem 0.2rem', marginBottom: '2rem', scrollbarWidth: 'none' }}>
+           {dayDates.map((d, i) => {
+             const active = i === selectedDayIdx;
+             const dailyClasses = getClassesForDate(d);
+             const dots = Math.min(dailyClasses.length, 3); // Max 3 bodky
+
+             return (
+               <button 
+                 key={i} 
+                 onClick={() => setSelectedDayIdx(i)}
+                 style={{
+                   flex: '0 0 72px',
+                   height: '84px',
+                   borderRadius: '20px',
+                   border: active ? '2px solid var(--blue)' : '1px solid var(--border)',
+                   background: active ? 'rgba(10,132,255,0.12)' : 'rgba(255,255,255,0.02)',
+                   display: 'flex',
+                   flexDirection: 'column',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   gap: '0.2rem',
+                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                   cursor: 'pointer',
+                   position: 'relative',
+                   boxShadow: active ? '0 8px 20px rgba(10, 132, 255, 0.2)' : 'none'
+                 }}
+               >
+                 <span style={{ fontSize: '0.65rem', fontWeight: 850, color: active ? 'var(--blue)' : 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{SK_DAYS_SHORT[i]}</span>
+                 <span style={{ fontSize: '1.25rem', fontWeight: 950, color: active ? 'var(--blue)' : 'var(--text)', fontFamily: 'var(--font-d)' }}>{d.getDate()}</span>
+                 
+                 {/* Bodky znázorňujúce plánované lekcie */}
+                 <div style={{ display: 'flex', gap: '3px', marginTop: '2px' }}>
+                    {Array.from({ length: dots }).map((_, di) => (
+                      <div key={di} style={{ width: '4px', height: '4px', borderRadius: '50%', background: active ? 'var(--blue)' : 'rgba(10,132,255,0.4)', boxShadow: active ? '0 0 5px var(--blue)' : 'none' }} />
+                    ))}
+                    {dailyClasses.length > 3 && <div style={{ fontSize: '8px', color: 'var(--blue)', marginLeft: '1px' }}>+</div>}
+                 </div>
+               </button>
+             );
+           })}
         </div>
-        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-ghost btn-xs" onClick={() => setOffset(o => o - 1)} style={{ borderRadius: '6px' }}>
-            <i className="fas fa-chevron-left"></i>
-          </button>
-          <span style={{ fontFamily: 'var(--font-d)', fontSize: '1rem', fontWeight: 800, letterSpacing: '0.05em', minWidth: 180, textAlign: 'center', color: 'var(--text)' }}>
-            {weekLabel}
-          </span>
-          <button className="btn btn-ghost btn-xs" onClick={() => setOffset(o => o + 1)} style={{ borderRadius: '6px' }}>
-            <i className="fas fa-chevron-right"></i>
-          </button>
-          <button className="btn btn-ghost btn-xs" onClick={() => setOffset(0)} style={{ borderLeft: '1px solid var(--border)', marginLeft: '0.5rem', paddingLeft: '0.8rem' }}>
-            DNES
-          </button>
+
+        <div className="daily-timeline">
+           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: 'var(--font-d)', letterSpacing: '0.03em' }}>
+                {SK_DAYS[selectedDayIdx]} <span style={{ color: 'var(--blue)', opacity: 0.6 }}>/</span> <span style={{ color: 'var(--muted)' }}>{formatDateStr(selectedDate)}</span>
+              </h3>
+              <div className="badge b-blue" style={{ fontSize: '0.65rem' }}>{dayClasses.length} {dayClasses.length === 1 ? 'LEKCIA' : 'LEKCIE'}</div>
+           </div>
+
+           {dayClasses.length === 0 ? (
+             <div style={{ padding: '4rem 1rem', textAlign: 'center', background: 'var(--surface2)', borderRadius: '24px', border: '1px dashed var(--border)' }}>
+               <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--surface3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                  <i className="fas fa-bed" style={{ opacity: 0.1, fontSize: '1.8rem' }} />
+               </div>
+               <p style={{ color: 'var(--muted)', fontSize: '0.95rem', fontWeight: 600 }}>Tento deň máte voľno.</p>
+               <p style={{ color: 'var(--muted2)', fontSize: '0.8rem', marginTop: '0.3rem' }}>Užite si regeneráciu!</p>
+             </div>
+           ) : (
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+               {dayClasses.map((c, idx) => {
+                 const st = new Date(c.startTime);
+                 const time = st.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+                 const isPassed = st < new Date();
+                 return (
+                   <div key={c.id} className="trainer-class-card-mobile animate-in" style={{ 
+                      padding: '1.25rem', 
+                      borderRadius: '24px', 
+                      display: 'flex', 
+                      gap: '1.2rem', 
+                      alignItems: 'center', 
+                      background: 'var(--surface2)',
+                      border: '1px solid var(--border)',
+                      opacity: isPassed ? 0.5 : 1,
+                      animationDelay: `${idx * 0.1}s`,
+                      position: 'relative',
+                      overflow: 'hidden'
+                   }}>
+                      <div style={{ 
+                        fontSize: '1.2rem', 
+                        fontWeight: 950, 
+                        fontFamily: 'var(--font-d)', 
+                        color: isPassed ? 'var(--muted)' : 'var(--blue)', 
+                        borderRight: '1px solid var(--border)', 
+                        paddingRight: '1.2rem',
+                        minWidth: '65px',
+                        textAlign: 'center'
+                      }}>
+                        {time}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{c.name}</div>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                           <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <i className="fas fa-users" style={{ color: 'var(--blue)' }} /> {c.booked||0}/{c.capacity}
+                           </span>
+                           <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <i className="fas fa-map-marker-alt" style={{ color: 'var(--blue)' }} /> Sála 1
+                           </span>
+                        </div>
+                      </div>
+                      <div style={{ padding: '0.5rem', opacity: 0.3 }}>
+                         <i className="fas fa-chevron-right" />
+                      </div>
+                      {isPassed && <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '0.6rem', fontWeight: 900, color: 'var(--muted2)', textTransform: 'uppercase' }}>UKONČENÉ</div>}
+                   </div>
+                 );
+               })}
+             </div>
+           )}
         </div>
       </div>
-      
-      <div className="pb">
-        <div style={{ display: 'flex', gap: '1.2rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--muted)', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.8rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
-            <i className="fas fa-info-circle" style={{marginRight: '0.5rem', color: 'var(--blue)'}}></i>
-            Kliknite na lekciu pre zobrazenie zoznamu prihlásených
+    );
+  };
+
+  const renderDesktopGrid = () => {
+    return (
+       <div className="schedule-desktop-view animate-in">
+          <div className="schedule-table-card" style={{ overflowX: 'auto', borderRadius: '24px', border: '1px solid var(--border)', background: 'rgba(10, 10, 15, 0.4)', backdropFilter: 'blur(20px)' }}>
+             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '950px' }}>
+                <thead>
+                   <tr>
+                      <th style={{ width: '80px', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}></th>
+                      {dayDates.map((d, i) => (
+                        <th key={i} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
+                           <div style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 850, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>{SK_DAYS_SHORT[i]}</div>
+                           <div style={{ fontSize: '1.6rem', fontWeight: 950, fontFamily: 'var(--font-d)', color: 'var(--text)' }}>{d.getDate()}</div>
+                        </th>
+                      ))}
+                   </tr>
+                </thead>
+                <tbody>
+                   {[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(h => (
+                     <tr key={h}>
+                        <td style={{ padding: '1.2rem', textAlign: 'center', background: 'rgba(0,0,0,0.15)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 900, fontFamily: 'var(--font-d)', color: 'var(--muted2)' }}>{h}:00</td>
+                        {dayDates.map((d, i) => {
+                           const cellClasses = getClassesForDate(d).filter(c => new Date(c.startTime).getHours() === h);
+                           return (
+                             <td key={i} style={{ border: '1px solid var(--border)', padding: '0.5rem', height: '100px', verticalAlign: 'top', background: 'rgba(255,255,255,0.01)' }}>
+                                {cellClasses.map(c => (
+                                  <div key={c.id} className="trainer-class-tag glass highlight blue" style={{ padding: '0.6rem 0.8rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, marginBottom: '0.4rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+                                     <div style={{ marginBottom: '2px' }}>{c.name}</div>
+                                     <div style={{ opacity: 0.7, fontSize: '0.65rem' }}>{c.booked}/{c.capacity} osôb</div>
+                                  </div>
+                                ))}
+                             </td>
+                           );
+                        })}
+                     </tr>
+                   ))}
+                </tbody>
+             </table>
           </div>
-          <span className="method m-get">API: GET_SCHEDULE</span>
+       </div>
+    );
+  };
+
+  return (
+    <div className="schedule-tab-root animate-in">
+      {/* Vylepšený Responsive Hero Header */}
+      <div className="overview-hero trainer" style={{ 
+        position: 'relative', 
+        padding: isMobile ? '1.8rem 1.5rem' : '2.5rem 2rem', 
+        borderRadius: isMobile ? '24px' : '28px',
+        marginBottom: '2rem',
+        overflow: 'hidden'
+      }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontSize: isMobile ? '2rem' : '2.8rem', marginBottom: '0.5rem', fontWeight: 950, letterSpacing: '0.02em' }}>VÁŠ ROZVRH</h1>
+          <p style={{ opacity: 0.7, fontSize: isMobile ? '0.85rem' : '1rem', maxWidth: isMobile ? '220px' : '100%' }}>Efektívny prehľad vašich tréningov a voľného času.</p>
         </div>
+        <div className="hero-visual" style={{ fontSize: isMobile ? '4rem' : '6rem', right: '10px', top: '10px' }}>
+          <i className="fas fa-calendar-alt" style={{ opacity: 0.15 }} />
+        </div>
+      </div>
 
-        {loading ? (
-          <div className="empty-state" style={{ minHeight: '300px' }}>
-            <span className="spinner" style={{width: 32, height: 32}}></span>
-            <p style={{marginTop: '1rem'}}>Generujem tvoj rozvrh...</p>
-          </div>
-        ) : (
-          <div className="animate-in">
-            <div className="schedule-wrap" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
-              <div 
-                style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '70px repeat(7, 1fr)', 
-                  minWidth: 800, 
-                }}
-              >
-                {/* Headers */}
-                <div style={{ background: 'var(--surface2)', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}></div>
-                {dayDates.map((d, i) => {
-                  const isToday = d.getTime() === todayDate.getTime();
-                  return (
-                    <div 
-                      key={i} 
-                      style={{ 
-                        background: isToday ? 'rgba(10,132,255,0.08)' : 'var(--surface2)',
-                        padding: '1rem 0.5rem',
-                        textAlign: 'center',
-                        fontFamily: 'var(--font-d)',
-                        fontSize: '0.75rem',
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                        color: isToday ? 'var(--blue)' : 'var(--muted)',
-                        borderRight: '1px solid var(--border)',
-                        borderBottom: '1px solid var(--border)',
-                        lineHeight: 1.4,
-                        position: 'relative'
-                      }}
-                    >
-                      {SK_DAYS[i]}<br />
-                      <span style={{ fontSize: '1.2rem', fontWeight: 900, color: isToday ? 'var(--blue)' : 'var(--text)' }}>
-                        {d.getDate()}
-                      </span>
-                      {isToday && <div style={{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '2px', background: 'var(--blue)', borderRadius: '2px 2px 0 0' }}></div>}
-                    </div>
-                  );
-                })}
-
-                {/* Grid */}
-                {HOURS.map(h => (
-                  <React.Fragment key={`h-${h}`}>
-                    <div 
-                      style={{
-                        background: 'var(--surface2)',
-                        padding: '1rem 0.5rem',
-                        textAlign: 'center',
-                        fontFamily: 'var(--font-d)',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        color: 'var(--muted2)',
-                        borderRight: '1px solid var(--border)',
-                        borderBottom: '1px solid var(--border)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      {String(h).padStart(2, '0')}:00
-                    </div>
-                    {dayDates.map((d, i) => {
-                      const isToday = d.getTime() === todayDate.getTime();
-                      const cellClasses = weekClasses.filter(c => {
-                        const cd = new Date(c.startTime);
-                        return cd.toDateString() === d.toDateString() && cd.getHours() === h;
-                      });
-
-                      return (
-                        <div 
-                          key={`c-${h}-${i}`}
-                          style={{
-                            padding: '0.4rem',
-                            borderRight: '1px solid var(--border)',
-                            borderBottom: '1px solid var(--border)',
-                            minHeight: 70,
-                            background: isToday ? 'rgba(10,132,255,0.01)' : 'transparent',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                          onMouseLeave={e => e.currentTarget.style.background = isToday ? 'rgba(10,132,255,0.01)' : 'transparent'}
-                        >
-                          {cellClasses.map(c => {
-                            const colorClass = colorMap[c.id];
-                            
-                            // Color mapping
-                            let bg, border, color;
-                            if (colorClass === 'c-blue') { bg = 'rgba(10,132,255,0.1)'; border = 'var(--blue)'; color = 'var(--blue)'; }
-                            if (colorClass === 'c-acid') { bg = 'rgba(200,255,0,0.08)'; border = 'var(--acid)'; color = 'var(--acid)'; }
-                            if (colorClass === 'c-red') { bg = 'rgba(255,45,85,0.1)'; border = 'var(--red)'; color = 'var(--red)'; }
-                            if (colorClass === 'c-orange') { bg = 'rgba(255,149,0,0.1)'; border = 'var(--orange)'; color = 'var(--orange)'; }
-                            if (colorClass === 'c-cyan') { bg = 'rgba(0,255,209,0.08)'; border = 'var(--acid2)'; color = 'var(--acid2)'; }
-
-                            return (
-                              <div 
-                                key={c.id}
-                                title={`${c.name} | ${new Date(c.startTime).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})} | ${c.booked||0}/${c.capacity||'?'} miest`}
-                                style={{
-                                  borderRadius: '8px',
-                                  padding: '0.5rem',
-                                  fontSize: '0.72rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  marginBottom: '0.3rem',
-                                  lineHeight: 1.3,
-                                  background: bg,
-                                  borderLeft: `3px solid ${border}`,
-                                  color: color,
-                                  borderTop: '1px solid rgba(255,255,255,0.05)',
-                                  borderRight: '1px solid rgba(255,255,255,0.05)',
-                                  borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                  transition: 'transform 0.2s, box-shadow 0.2s'
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = `0 4px 12px ${bg}`; }}
-                                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
-                              >
-                                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name || 'Lekcia'}</div>
-                                <div style={{ opacity: 0.8, fontSize: '0.62rem', marginTop: '0.2rem', display: 'flex', justifyContent: 'space-between' }}>
-                                  <span><i className="far fa-clock"></i> {new Date(c.startTime).getHours()}:00</span>
-                                  <span><i className="fas fa-user-friends"></i> {c.booked || 0}/{c.capacity || '?'}</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-
-            {weekClasses.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--muted)', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: 'dashed 1px var(--border)', marginTop: '2rem' }}>
-                <i className="fas fa-calendar-alt" style={{ display: 'block', fontSize: '3rem', marginBottom: '1rem', opacity: 0.1 }}></i>
-                <p style={{fontSize: '0.95rem', fontWeight: 500}}>Na tento týždeň nemáte naplánované žiadne lekcie.</p>
-                <p style={{fontSize: '0.8rem', marginTop: '0.4rem'}}>Skúste prepnúť na iný týždeň pomocou šípok vyššie.</p>
-              </div>
-            )}
-          </div>
-        )}
+      <div className="panel" style={{ borderRadius: isMobile ? '28px' : '32px', border: 'none', background: 'transparent' }}>
+        <div className="ph" style={{ borderBottom: 'none', padding: isMobile ? '0 0 1.5rem' : '0 1rem 2rem', justifyContent: 'space-between', background: 'transparent' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => setOffset(o => o - 1)} style={{ width: '42px', height: '42px', borderRadius: '12px' }}>
+                 <i className="fas fa-chevron-left" />
+              </button>
+              <span style={{ fontFamily: 'var(--font-d)', fontSize: isMobile ? '1.1rem' : '1.4rem', fontWeight: 900, textTransform: 'uppercase' }}>{weekLabel}</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setOffset(o => o + 1)} style={{ width: '42px', height: '42px', borderRadius: '12px' }}>
+                 <i className="fas fa-chevron-right" />
+              </button>
+           </div>
+           {!isMobile && (
+             <button className="btn btn-acid btn-sm" onClick={() => setOffset(0)} style={{ minWidth: '100px' }}>Dnes</button>
+           )}
+        </div>
+        
+        <div style={{ padding: 0 }}>
+           {loading ? (
+             <div style={{ textAlign: 'center', padding: '6rem 0' }}><span className="spinner" style={{width: 44, height: 44}}></span></div>
+           ) : (
+             isMobile ? renderMobileSchedule() : renderDesktopGrid()
+           )}
+        </div>
       </div>
     </div>
   );

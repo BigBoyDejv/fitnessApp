@@ -195,13 +195,29 @@ export default function TrainerDashboard() {
             )}
             <div className="page-title">{pageTitle}</div>
           </div>
-          <div className="topbar-right">
-            {isMobile && (
-              <button className="top-logout-btn" onClick={logout} style={{ marginRight: '0.8rem' }}>
-                <i className="fas fa-sign-out-alt"></i>
-              </button>
-            )}
-            <span className="trainer-badge"><i className="fas fa-dumbbell"></i> Tréner panel</span>
+          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+            {!isMobile && <span className="trainer-badge"><i className="fas fa-dumbbell"></i> Tréner panel</span>}
+            <button 
+              className={`topbar-avatar ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: activeTab === 'profile' ? 'var(--blue)' : 'var(--surface3)',
+                border: activeTab === 'profile' ? '2px solid var(--blue)' : '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                overflow: 'hidden',
+                padding: 0,
+                boxShadow: activeTab === 'profile' ? '0 0 15px rgba(10, 132, 255, 0.4)' : 'none'
+              }}
+            >
+              {avatarContent}
+            </button>
           </div>
         </header>
 
@@ -248,17 +264,17 @@ export default function TrainerDashboard() {
             <button className="nav-action-btn" onClick={() => setActiveTab('schedule')}>
               <i className="fas fa-clock" />
             </button>
+            <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}>
+              <div className="nav-indicator" />
+              <div className="nav-spotlight" />
+              <i className="fas fa-users" />
+              <span>KLIENTI</span>
+            </button>
             <button className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>
               <div className="nav-indicator" />
               <div className="nav-spotlight" />
               <i className="fas fa-comments" />
               <span>SPRÁVY</span>
-            </button>
-            <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
-              <div className="nav-indicator" />
-              <div className="nav-spotlight" />
-              <i className="fas fa-user" />
-              <span>ÚČET</span>
             </button>
           </nav>
         )}
