@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import OverviewTab from "../components/ReceptionDashboard/OverviewTab";
 import CheckInTab from "../components/ReceptionDashboard/CheckInTab";
 import MembersTab from "../components/ReceptionDashboard/MembersTab";
@@ -18,6 +19,7 @@ export default function ReceptionDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clock, setClock] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+  const [expandedSections, setExpandedSections] = useState({ hlavne: true, operacie: true, ucet: true });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -122,16 +124,16 @@ export default function ReceptionDashboard() {
 
       {/* ── Sidebar ────────────────────────────────────────────────────── */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <div className="sb-logo">
+        <div className="sidebar-logo">
           <div className="logo">
-            FITNESS<span>PRO</span>
+            FITNESS <span>PRO</span>
           </div>
           <div className="role-tag">
             <i className="fas fa-concierge-bell"></i> Recepcia
           </div>
         </div>
 
-        <div className="sb-user">
+        <div className="sidebar-user">
           <div className="avatar">
             {user.avatarUrl ? (
               <img src={user.avatarUrl} alt="Avatar" />
@@ -145,69 +147,68 @@ export default function ReceptionDashboard() {
           </div>
         </div>
 
-        <nav className="sb-nav">
-          <div className="nav-section">Hlavné</div>
-          <button
-            className={`nav-item ${activeTab === "overview" ? "active" : ""}`}
-            onClick={() => { setActiveTab("overview"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-home"></i> Prehľad
-          </button>
+        <nav className="sidebar-nav" style={{ flex: 1, overflowY: "auto" }}>
+          <div className="sidebar-nav-v2">
+            {/* HLAVNE */}
+            <div className={`nav-group ${expandedSections.hlavne ? 'open' : ''}`}>
+              <button className="nav-group-header" onClick={() => setExpandedSections(p => ({...p, hlavne: !p.hlavne}))}>
+                <i className="fas fa-home" /> <span>Hlavné</span>
+                <i className="fas fa-chevron-right arrow" />
+              </button>
+              <div className="nav-group-content">
+                <button className={`nav-item sub ${activeTab === "overview" ? "active" : ""}`} onClick={() => { setActiveTab("overview"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-home"></i> <span>Prehľad</span>
+                </button>
+              </div>
+            </div>
 
-          <div className="nav-section">Operácie</div>
-          <button
-            className={`nav-item ${activeTab === "checkin" ? "active" : ""}`}
-            onClick={() => { setActiveTab("checkin"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-qrcode"></i> Check-in
-          </button>
-          <button
-            className={`nav-item ${activeTab === "members" ? "active" : ""}`}
-            onClick={() => { setActiveTab("members"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-users"></i> Členovia
-          </button>
-          <button
-            className={`nav-item ${activeTab === "messages" ? "active" : ""}`}
-            onClick={() => { setActiveTab("messages"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-envelope"></i> Správy členom
-          </button>
-          <button
-            className={`nav-item ${activeTab === "classes" ? "active" : ""}`}
-            onClick={() => { setActiveTab("classes"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-calendar-alt"></i> Lekcie
-          </button>
-          <button
-            className={`nav-item ${activeTab === "kasa" ? "active" : ""}`}
-            onClick={() => { setActiveTab("kasa"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-cash-register"></i> Pokladňa
-          </button>
-          <button
-            className={`nav-item ${activeTab === "music" ? "active" : ""}`}
-            onClick={() => { setActiveTab("music"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-music"></i> Hudba
-          </button>
-          <button
-            className={`nav-item ${activeTab === "sklad" ? "active" : ""}`}
-            onClick={() => { setActiveTab("sklad"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-boxes"></i> Sklad
-          </button>
+            {/* OPERACIE */}
+            <div className={`nav-group ${expandedSections.operacie ? 'open' : ''}`}>
+              <button className="nav-group-header" onClick={() => setExpandedSections(p => ({...p, operacie: !p.operacie}))}>
+                <i className="fas fa-concierge-bell" /> <span>Operácie</span>
+                <i className="fas fa-chevron-right arrow" />
+              </button>
+              <div className="nav-group-content">
+                <button className={`nav-item sub ${activeTab === "checkin" ? "active" : ""}`} onClick={() => { setActiveTab("checkin"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-qrcode"></i> <span>Check-in</span>
+                </button>
+                <button className={`nav-item sub ${activeTab === "members" ? "active" : ""}`} onClick={() => { setActiveTab("members"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-users"></i> <span>Členovia</span>
+                </button>
+                <button className={`nav-item sub ${activeTab === "messages" ? "active" : ""}`} onClick={() => { setActiveTab("messages"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-envelope"></i> <span>Správy členom</span>
+                </button>
+                <button className={`nav-item sub ${activeTab === "classes" ? "active" : ""}`} onClick={() => { setActiveTab("classes"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-calendar-alt"></i> <span>Lekcie</span>
+                </button>
+                <button className={`nav-item sub ${activeTab === "kasa" ? "active" : ""}`} onClick={() => { setActiveTab("kasa"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-cash-register"></i> <span>Pokladňa</span>
+                </button>
+                <button className={`nav-item sub ${activeTab === "music" ? "active" : ""}`} onClick={() => { setActiveTab("music"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-music"></i> <span>Hudba</span>
+                </button>
+                <button className={`nav-item sub ${activeTab === "sklad" ? "active" : ""}`} onClick={() => { setActiveTab("sklad"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-boxes"></i> <span>Sklad</span>
+                </button>
+              </div>
+            </div>
 
-          <div className="nav-section">Účet</div>
-          <button
-            className={`nav-item ${activeTab === "profile" ? "active" : ""}`}
-            onClick={() => { setActiveTab("profile"); setSidebarOpen(false); }}
-          >
-            <i className="fas fa-user"></i> Môj profil
-          </button>
+            {/* UCET */}
+            <div className={`nav-group ${expandedSections.ucet ? 'open' : ''}`}>
+              <button className="nav-group-header" onClick={() => setExpandedSections(p => ({...p, ucet: !p.ucet}))}>
+                <i className="fas fa-user-circle" /> <span>Účet</span>
+                <i className="fas fa-chevron-right arrow" />
+              </button>
+              <div className="nav-group-content">
+                <button className={`nav-item sub ${activeTab === "profile" ? "active" : ""}`} onClick={() => { setActiveTab("profile"); if (isMobile) setSidebarOpen(false); }}>
+                  <i className="fas fa-user"></i> <span>Môj profil</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </nav>
 
-        <div className="sb-footer">
+        <div className="sidebar-footer">
           <button className="logout-btn" onClick={handleLogout}>
             <i className="fas fa-sign-out-alt"></i> Odhlásiť sa
           </button>
@@ -244,8 +245,18 @@ export default function ReceptionDashboard() {
           </div>
         </header>
 
-        <div className="content" style={{ paddingBottom: isMobile ? '100px' : '2rem' }}>
-          <div className="fade-in">{renderTabContent()}</div>
+        <div className="content" style={{ paddingBottom: isMobile ? '100px' : '2rem', position: 'relative', overflow: 'hidden' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1.02, y: -10 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              {renderTabContent()}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {isMobile && (

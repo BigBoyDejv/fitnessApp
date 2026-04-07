@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { authenticatedFetch } from "../../utils/api";
 import Toast from "../Toast";
 
 export default function KasaTab() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
-  const [members, setMembers] = useState([]); // for member assignment to sale
+  const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState("");
   
   const [customName, setCustomName] = useState("");
   const [customPrice, setCustomPrice] = useState("");
 
   const [todaySales, setTodaySales] = useState({ items: [], totalEuros: 0 });
-  
-  const [toastMsg, setToastMsg] = useState(null);
   const [activeCat, setActiveCat] = useState("Všetky");
   const [sortOption, setSortOption] = useState("pop");
-  const [popStats, setPopStats] = useState({}); // { name: count }
+  const [popStats, setPopStats] = useState({});
+
+  const [toastMsg, setToastMsg] = useState(null);
 
   useEffect(() => {
     loadProducts();
@@ -30,11 +31,8 @@ export default function KasaTab() {
       const res = await authenticatedFetch("/api/products/popular");
       if (res.ok) {
         const data = await res.json();
-        console.log("Popularita data loaded:", data);
         const map = {};
-        data.forEach(item => {
-          map[item.name] = item.count;
-        });
+        data.forEach(item => { map[item.name] = item.count; });
         setPopStats(map);
       }
     } catch (e) {
@@ -74,8 +72,6 @@ export default function KasaTab() {
       const res = await authenticatedFetch("/api/sales/today");
       if (res.ok) {
         const data = await res.json();
-        console.log("Today sales data:", data);
-        // Backend returns { transactions: [...], totalEuros: ... }
         setTodaySales({
           items: data.transactions || [],
           totalEuros: data.totalEuros || 0
@@ -130,7 +126,7 @@ export default function KasaTab() {
     const payload = {
       items: cart.map(c => ({
         productId: c.id || null,
-        productName: c.id ? null : c.name, // custom product
+        productName: c.id ? null : c.name,
         priceCents: c.priceCents,
         quantity: c.qty
       })),
@@ -152,7 +148,8 @@ export default function KasaTab() {
       setCart([]);
       setSelectedMember("");
       loadTodaySales();
-      loadProducts(); // refresh stock
+      loadProducts();
+      loadPopularity();
     } catch (e) {
       showToast(e.message, "err");
     }
@@ -161,64 +158,59 @@ export default function KasaTab() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.priceCents * item.qty), 0);
   const cartEuros = (cartTotal / 100).toFixed(2);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } }
+  };
+
   return (
-    <div className="dashboard-grid animate-in">
+    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="dashboard-grid">
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        {/* Rýchly výber */}
-        <div className="panel animate-in">
+        <motion.div variants={itemVariants} className="panel glass-panel">
           <div className="ph">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <div style={{ width: 32, height: 32, background: 'rgba(255,149,0,0.1)', color: 'var(--orange)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="neon-icon yellow" style={{ width: 32, height: 32, background: 'rgba(255,149,0,0.1)', color: 'var(--orange)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <i className="fas fa-th-large"></i>
               </div>
               <span className="pt">Katalóg položiek</span>
             </div>
-            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-              <div style={{ position: 'relative' }}>
-                <i className="fas fa-sort-amount-down" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1, fontSize: '0.8rem' }}></i>
-                <select className="fi" value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={{ paddingLeft: '2.2rem', borderRadius: '8px', height: '36px', fontSize: '0.75rem', width: '160px', background: 'var(--surface2)' }}>
-                   <option value="pop">Zoradiť: Populárne</option>
-                   <option value="name">Zoradiť: Názov</option>
-                   <option value="price">Zoradiť: Cena</option>
-                </select>
-              </div>
+            <div style={{ position: 'relative' }}>
+              <select className="fi" value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={{ paddingLeft: '2.5rem', borderRadius: '10px', height: '36px', fontSize: '0.75rem', width: '170px', background: 'rgba(255,255,255,0.02)' }}>
+                <option value="pop">🔥 Populárne</option>
+                <option value="name">🔤 Podľa názvu</option>
+                <option value="price">💰 Podľa ceny</option>
+              </select>
+              <i className="fas fa-sort" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--orange)', fontSize: '0.8rem' }}></i>
             </div>
           </div>
-          <div className="pb" style={{ padding: '1rem' }}>
-            {/* Category Tabs */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
+          <div className="pb" style={{ padding: '1.2rem' }}>
+            <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.8rem', overflowX: 'auto', paddingBottom: '0.6rem', scrollbarWidth: 'none' }}>
               {["Všetky", ...new Set(products.map(p => p.category).filter(Boolean))].map(cat => (
-                <button 
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   key={cat}
                   onClick={() => setActiveCat(cat)}
                   style={{ 
-                    padding: '0.45rem 1.1rem', 
-                    borderRadius: '20px', 
-                    border: '1px solid', 
-                    borderColor: activeCat === cat ? 'var(--acid)' : 'var(--border)', 
-                    background: activeCat === cat ? 'var(--acid)' : 'rgba(255,255,255,0.02)', 
+                    padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid', 
+                    borderColor: activeCat === cat ? 'var(--orange)' : 'var(--border)', 
+                    background: activeCat === cat ? 'var(--orange)' : 'rgba(255,149,0,0.05)', 
                     color: activeCat === cat ? '#000' : 'var(--muted)',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    whiteSpace: 'nowrap'
+                    fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap'
                   }}
                 >
                   {cat}
-                </button>
+                </motion.button>
               ))}
             </div>
 
-            {products.length === 0 ? (
-              <div className="empty-state" style={{ padding: '3rem' }}>
-                <i className="fas fa-box-open" style={{fontSize: '3rem', opacity: 0.1, marginBottom: '1rem'}}></i>
-                Žiadne aktívne produkty v systéme
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '1rem' }}>
+            <motion.div layout className="products-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1.2rem' }}>
+              <AnimatePresence>
                 {products
                   .filter(p => activeCat === "Všetky" || p.category === activeCat)
                   .sort((a, b) => {
@@ -227,8 +219,7 @@ export default function KasaTab() {
                     if (sortOption === "pop") {
                       const countA = popStats[a.name] || 0;
                       const countB = popStats[b.name] || 0;
-                      if (countA !== countB) return countB - countA;
-                      return b.stock - a.stock; // secondary tie-break
+                      return countB !== countA ? countB - countA : b.stock - a.stock;
                     }
                     return 0;
                   })
@@ -236,221 +227,191 @@ export default function KasaTab() {
                     const outOfStock = p.stock <= 0;
                     const salesCount = popStats[p.name] || 0;
                     return (
-                      <div 
+                      <motion.div 
                         key={p.id} 
-                        className={`glass highlight ${outOfStock ? 'muted' : 'acid'}`}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        whileHover={!outOfStock ? { y: -5, boxShadow: '0 10px 25px rgba(255,149,0,0.15)' } : {}}
                         onClick={() => !outOfStock && addToCart(p)}
+                        className="glass"
                         style={{ 
-                          padding: '1.2rem 1rem', 
-                          borderRadius: '16px', 
-                          cursor: outOfStock ? 'not-allowed' : 'pointer', 
-                          textAlign: 'center', 
-                          display: 'flex', 
-                          flexDirection: 'column', 
-                          gap: '0.4rem',
-                          transition: 'all 0.2s',
-                          border: '1px solid var(--border)',
-                          background: outOfStock ? 'rgba(255,255,255,0.02)' : 'rgba(200,255,0,0.02)',
-                          opacity: outOfStock ? 0.5 : 1,
-                          position: 'relative'
+                          padding: '1.5rem 1rem', borderRadius: '20px', cursor: outOfStock ? 'not-allowed' : 'pointer', 
+                          textAlign: 'center', border: '1px solid var(--border)',
+                          background: outOfStock ? 'rgba(0,0,0,0.4)' : 'rgba(255,149,0,0.01)',
+                          position: 'relative', overflow: 'hidden'
                         }}
-                        onMouseEnter={e => { if(!outOfStock) { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.background = 'rgba(200,255,0,0.06)'; } }}
-                        onMouseLeave={e => { if(!outOfStock) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'rgba(200,255,0,0.02)'; } }}
                       >
-                        {salesCount > 0 && (
-                          <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--orange)', color: '#000', fontSize: '0.6rem', fontWeight: 900, padding: '2px 6px', borderRadius: '4px', boxShadow: '0 2px 8px rgba(255,149,0,0.3)', zIndex: 1 }}>
-                            TOP: {salesCount}
+                        {salesCount > 0 && !outOfStock && (
+                          <div style={{ position: 'absolute', top: 0, right: 0, background: 'var(--orange)', color: '#000', fontSize: '0.6rem', fontWeight: 950, padding: '2px 8px', borderBottomLeftRadius: '10px' }}>
+                            TOP {salesCount}
                           </div>
                         )}
-                        <div style={{ fontSize: '0.9rem', fontWeight: 800, fontFamily: 'var(--font-d)', letterSpacing: '0.02em', minHeight: '2.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{p.name}</div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: outOfStock ? 'var(--muted)' : 'var(--acid)', fontFamily: 'var(--font-d)' }}>{(p.priceCents / 100).toFixed(2)} €</div>
-                      <div style={{ fontSize: '0.62rem', fontWeight: 700, color: outOfStock ? 'var(--red)' : 'var(--muted)', background: 'rgba(0,0,0,0.2)', padding: '0.2rem 0.6rem', borderRadius: '4px', alignSelf: 'center' }}>
-                        {outOfStock ? 'VYPREDANÉ' : `SKLADOM: ${p.stock}`}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                        <div style={{ fontSize: '0.9rem', fontWeight: 800, fontFamily: 'var(--font-d)', letterSpacing: '0.02em', minHeight: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: outOfStock ? 'var(--muted)' : '#fff' }}>
+                          {p.name}
+                        </div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 950, color: outOfStock ? 'var(--muted)' : 'var(--orange)', fontFamily: 'var(--font-d)', marginTop: '0.5rem' }}>
+                          {(p.priceCents / 100).toFixed(2)} €
+                        </div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: outOfStock ? 'var(--red)' : 'var(--muted)', background: 'rgba(0,0,0,0.3)', padding: '0.3rem 0.6rem', borderRadius: '8px', marginTop: '0.8rem', display: 'inline-block' }}>
+                          {outOfStock ? 'VYPREDANÉ' : `SKLADOM: ${p.stock}`}
+                        </div>
+                        {!outOfStock && (
+                          <div className="add-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(255,149,0,0.1)', opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}>
+                             <i className="fas fa-plus-circle" style={{ fontSize: '2rem', color: 'var(--orange)' }} />
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })
+                }
+              </AnimatePresence>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Vlastná položka */}
-        <div className="panel animate-in" style={{ animationDelay: '0.1s' }}>
-          <div className="ph">
-             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.1)', color: 'var(--text)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="fas fa-keyboard"></i>
-              </div>
-              <span className="pt">Manuálny dopyt</span>
-            </div>
-          </div>
-          <div className="pb">
+        <motion.div variants={itemVariants} className="panel glass-panel">
+          <div className="ph"><span className="pt"><i className="fas fa-pen-nib" style={{marginRight: '0.8rem'}} />Manuálna položka</span></div>
+          <div className="pb" style={{ padding: '1.2rem' }}>
             <div style={{ display: "flex", gap: "1rem" }}>
               <div style={{ flex: 1, position: 'relative' }}>
-                <i className="fas fa-tag" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
-                <input 
-                  className="fi" 
-                  type="text" 
-                  placeholder="Názov služby / tovaru..." 
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  style={{ paddingLeft: '2.8rem', borderRadius: '10px', height: '52px' }}
-                />
+                <i className="fas fa-edit" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
+                <input className="fi" type="text" placeholder="Názov služby / tovaru..." value={customName} onChange={(e) => setCustomName(e.target.value)} style={{ paddingLeft: '2.8rem', borderRadius: '12px', height: '52px' }} />
               </div>
-              <div style={{ width: "120px", position: 'relative' }}>
+              <div style={{ width: "130px", position: 'relative' }}>
                 <i className="fas fa-euro-sign" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
-                <input 
-                  className="fi" 
-                  type="number" 
-                  placeholder="0.00" 
-                  value={customPrice}
-                  onChange={(e) => setCustomPrice(e.target.value)}
-                  style={{ paddingLeft: '2.5rem', borderRadius: '10px', height: '52px', textAlign: 'right' }}
-                  step="0.5"
-                  min="0"
-                />
+                <input className="fi" type="number" placeholder="0.00" value={customPrice} onChange={(e) => setCustomPrice(e.target.value)} style={{ paddingLeft: '2.5rem', borderRadius: '12px', height: '52px', textAlign: 'right' }} />
               </div>
-              <button className="btn btn-acid" onClick={addCustomToCart} style={{ borderRadius: '10px', width: '52px', height: '52px', padding: 0 }} title="Pridať do košíka">
-                <i className="fas fa-plus"></i>
-              </button>
+              <button className="btn btn-acid" onClick={addCustomToCart} style={{ borderRadius: '12px', width: '52px', height: '52px', padding: 0 }}><i className="fas fa-plus"></i></button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        {/* Účet / Košík */}
-        <div className="panel animate-in" style={{ display: "flex", flexDirection: "column", minHeight: "500px", animationDelay: '0.05s', border: '1px solid rgba(200,255,0,0.1)' }}>
+        <motion.div variants={itemVariants} className="panel glass-panel" style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: "600px", border: '1px solid rgba(200,255,0,0.15)' }}>
           <div className="ph" style={{ justifyContent: "space-between", background: 'rgba(200,255,0,0.03)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <div style={{ width: 32, height: 32, background: 'rgba(200,255,0,0.1)', color: 'var(--acid)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="fas fa-shopping-cart"></i>
+              <div className="neon-icon yellow" style={{ width: 32, height: 32, background: 'rgba(200,255,0,0.1)', color: 'var(--acid)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-shopping-basket"></i>
               </div>
-              <span className="pt">Aktuálna objednávka</span>
+              <span className="pt">Aktuálny košík</span>
             </div>
-            <button className="btn btn-ghost btn-xs" onClick={() => setCart([])} disabled={cart.length === 0} style={{ borderRadius: '6px' }}>
-              <i className="fas fa-trash-alt"></i> VYMAZAŤ
-            </button>
+            <button className="btn btn-ghost btn-xs" onClick={() => setCart([])} disabled={cart.length === 0} style={{ borderRadius: '8px' }}>VYMAZAŤ</button>
           </div>
           
           <div className="pb" style={{ flex: 1, padding: "1.5rem", overflowY: 'auto' }}>
-            {cart.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.2 }}>
-                <i className="fas fa-cart-plus" style={{fontSize: '4rem', marginBottom: '1.5rem'}}></i>
-                <p style={{ fontWeight: 700, letterSpacing: '0.05em' }}>KOŠÍK JE PRÁZDNY</p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {cart.map((c, i) => (
-                  <div key={i} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.92rem', fontWeight: 800 }}>{c.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.2rem' }}>{(c.priceCents / 100).toFixed(2)} € / ks</div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", background: 'rgba(255,255,255,0.05)', padding: '0.3rem 0.6rem', borderRadius: '8px' }}>
-                      <button style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: '0.2rem' }} onClick={() => updateQty(i, -1)}><i className="fas fa-minus" style={{fontSize: '0.7rem'}}></i></button>
-                      <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: '1.1rem', minWidth: '20px', textAlign: 'center' }}>{c.qty}</span>
-                      <button style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: '0.2rem' }} onClick={() => updateQty(i, 1)}><i className="fas fa-plus" style={{fontSize: '0.7rem'}}></i></button>
-                    </div>
-                    <div style={{ minWidth: '70px', textAlign: 'right', fontFamily: 'var(--font-d)', fontWeight: 900, color: 'var(--acid)', fontSize: '1.1rem' }}>
-                      {((c.priceCents * c.qty) / 100).toFixed(2)} €
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <AnimatePresence mode="popLayout">
+              {cart.length === 0 ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.1 }}>
+                  <i className="fas fa-cart-arrow-down" style={{fontSize: '5rem', marginBottom: '1.5rem'}} />
+                  <p style={{ fontWeight: 900, letterSpacing: '0.2em' }}>KOŠÍK JE PRÁZDNY</p>
+                </motion.div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                  {cart.map((c, i) => (
+                    <motion.div 
+                      key={i} 
+                      layout
+                      initial={{ x: 20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -20, opacity: 0 }}
+                      className="glass" 
+                      style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.4rem', borderRadius: '16px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '1rem', fontWeight: 800 }}>{c.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.2rem' }}>{(c.priceCents / 100).toFixed(2)} € / ks</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", background: 'rgba(255,255,255,0.05)', padding: '0.4rem 0.8rem', borderRadius: '10px' }}>
+                        <button className="btn-qty" onClick={() => updateQty(i, -1)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><i className="fas fa-minus"></i></button>
+                        <span style={{ fontFamily: 'var(--font-d)', fontWeight: 950, fontSize: '1.2rem', minWidth: '24px', textAlign: 'center' }}>{c.qty}</span>
+                        <button className="btn-qty" onClick={() => updateQty(i, 1)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><i className="fas fa-plus"></i></button>
+                      </div>
+                      <div style={{ minWidth: '80px', textAlign: 'right', fontFamily: 'var(--font-d)', fontWeight: 950, color: 'var(--acid)', fontSize: '1.2rem' }}>
+                        {((c.priceCents * c.qty) / 100).toFixed(2)} €
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </AnimatePresence>
           </div>
           
-          <div style={{ borderTop: "1px solid var(--border)", padding: "1.5rem", background: "rgba(0,0,0,0.2)" }}>
-            <div className="fg" style={{ marginBottom: "1.5rem" }}>
-              <label className="fl" style={{ fontSize: "0.65rem", color: "var(--muted)", textTransform: "uppercase", letterSpacing: '0.1em', fontWeight: 800 }}>Zákazník (Pripísať na účet)</label>
+          <div className="cart-footer" style={{ borderTop: "1px solid var(--border)", padding: "1.8rem", background: "rgba(0,0,0,0.3)" }}>
+            <div className="fg" style={{ marginBottom: "1.8rem" }}>
+              <label className="fl" style={{ fontSize: "0.65rem", color: "var(--muted)", textTransform: "uppercase", letterSpacing: '0.15em', fontWeight: 900, marginBottom: '0.6rem' }}>Pripísať členovi (voliteľné)</label>
               <div style={{ position: 'relative' }}>
-                <i className="fas fa-user-circle" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1 }}></i>
-                <select className="fi" value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)} style={{ paddingLeft: '2.8rem', borderRadius: '10px' }}>
-                  <option value="">Anonymný predaj</option>
-                  {members.map(m => (
-                    <option key={m.id} value={m.id}>{m.fullName} ({m.email})</option>
-                  ))}
+                <i className="fas fa-user-tag" style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1 }}></i>
+                <select className="fi" value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)} style={{ paddingLeft: '3.2rem', borderRadius: '12px', height: '52px', border: '1px solid var(--border)' }}>
+                  <option value="">🛒 Anonymný nákup (Hotovosť / Karta)</option>
+                  {members.map(m => <option key={m.id} value={m.id}>{m.fullName} ({m.email})</option>)}
                 </select>
               </div>
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800 }}>Dnešná tržba</div>
-                  <div style={{ fontFamily: "var(--font-d)", fontSize: "1.2rem", fontWeight: 900, color: "var(--orange)" }}>
-                     {(todaySales.totalEuros || 0).toFixed(2)} €
-                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 900, marginBottom: '0.3rem' }}>Tržba dnes</div>
+                  <div style={{ fontFamily: "var(--font-d)", fontSize: "1.4rem", fontWeight: 950, color: "var(--orange)" }}>{(todaySales.totalEuros || 0).toFixed(2)} €</div>
                </div>
                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 800 }}>Spolu</div>
-                  <div style={{ fontFamily: 'var(--font-d)', fontSize: '2.4rem', fontWeight: 950, color: 'var(--acid)', lineHeight: 1 }}>{cartEuros} €</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 900, marginBottom: '0.3rem' }}>Celkom k úhrade</div>
+                  <div style={{ fontFamily: 'var(--font-d)', fontSize: '3rem', fontWeight: 950, color: 'var(--acid)', lineHeight: 0.9 }}>{cartEuros} €</div>
                </div>
             </div>
             
             <div style={{ display: "flex", gap: "1rem" }}>
-              <button 
-                className="btn btn-acid btn-block" 
-                style={{ flex: 1, height: '52px', borderRadius: '12px', fontWeight: 900, gap: '0.8rem' }}
-                onClick={() => checkout("cash")}
-                disabled={cart.length === 0}
-              >
-                <i className="fas fa-coins" style={{fontSize: '1.2rem'}}></i> HOTOVOSŤ
-              </button>
-              <button 
-                className={`btn ${cart.length > 0 ? 'btn-purple' : 'btn-ghost'} btn-block`}
-                style={{ flex: 1, height: '52px', borderRadius: '12px', fontWeight: 900, gap: '0.8rem' }}
-                onClick={() => checkout("card")}
-                disabled={cart.length === 0}
-              >
-                <i className="fas fa-credit-card" style={{fontSize: '1.2rem'}}></i> KARTOU
-              </button>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="btn btn-acid btn-block" style={{ flex: 1, height: '60px', borderRadius: '16px', fontWeight: 950, fontSize: '1rem', letterSpacing: '0.05em' }} onClick={() => checkout("cash")} disabled={cart.length === 0}>
+                <i className="fas fa-coins" style={{marginRight: '0.8rem'}} /> HOTOVOSŤ
+              </motion.button>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="btn btn-purple btn-block" style={{ flex: 1, height: '60px', borderRadius: '16px', fontWeight: 950, fontSize: '1rem', letterSpacing: '0.05em' }} onClick={() => checkout("card")} disabled={cart.length === 0}>
+                <i className="fas fa-credit-card" style={{marginRight: '0.8rem'}} /> KARTOU
+              </motion.button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Prezretie dnešných predajov */}
-        <div className="panel animate-in" style={{ animationDelay: '0.15s' }}>
-          <div className="ph">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.05)', color: 'var(--text)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="fas fa-history"></i>
-              </div>
-              <span className="pt">História predajov dnes</span>
+        <motion.div variants={itemVariants} className="panel glass-panel">
+          <div className="ph" style={{ borderBottom: '1px solid var(--border)' }}>
+            <span className="pt"><i className="fas fa-history" style={{marginRight: '0.8rem', color: 'var(--muted)'}} />Nedávne predaje</span>
+          </div>
+          <div className="pb" style={{ padding: '0.8rem' }}>
+            <div style={{ maxHeight: "300px", overflowY: 'auto' }}>
+              <AnimatePresence>
+                {(!todaySales.items || todaySales.items.length === 0) ? (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.85rem' }}>Dnes zatiaľ žiadne operácie</div>
+                ) : (
+                  todaySales.items.slice().reverse().map((t, idx) => (
+                    <motion.div 
+                      key={idx} 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      className="glass" 
+                      style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.8rem 1.2rem', borderRadius: '12px', marginBottom: '0.6rem', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}
+                    >
+                      <div style={{ fontSize: "0.8rem", fontWeight: 950, fontFamily: 'var(--font-d)', color: 'var(--muted)', width: '50px' }}>
+                        {new Date(t.createdAt).toLocaleTimeString("sk-SK", { hour: "2-digit", minute:"2-digit"})}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>{t.items.map(i => `${i.quantity}x ${i.productName || 'Položka'}`).join(", ")}</div>
+                        {t.userName && <div style={{ fontSize: "0.68rem", color: "var(--acid)", fontWeight: 700, marginTop: '0.2rem' }}><i className="fas fa-user-tag" /> {t.userName}</div>}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        <i className={`fas ${t.paymentMethod === 'card' ? 'fa-credit-card' : 'fa-coins'}`} style={{ color: "var(--muted)", fontSize: "0.85rem" }}></i>
+                        <div style={{ fontFamily: 'var(--font-d)', fontWeight: 950, color: '#fff', fontSize: '1.1rem', textAlign: 'right' }}>{(t.totalEuros || 0).toFixed(2)} €</div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
             </div>
           </div>
-          <div className="pb" style={{ padding: '0.5rem' }}>
-            <div style={{ maxHeight: "280px", overflowY: 'auto', padding: '0.5rem' }}>
-              {(!todaySales.items || todaySales.items.length === 0) ? (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)', opacity: 0.5 }}>Zatiaľ neboli realizované žiadne predaje</div>
-              ) : (
-                todaySales.items.slice().reverse().map((t, idx) => (
-                  <div key={idx} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.8rem 1rem', borderRadius: '10px', marginBottom: '0.4rem', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 900, fontFamily: 'var(--font-d)', color: 'var(--muted)', width: '45px' }}>
-                      {new Date(t.createdAt).toLocaleTimeString("sk-SK", { hour: "2-digit", minute:"2-digit"})}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 700 }}>
-                        {t.items.map(i => `${i.quantity}x ${i.productName || 'Položka'}`).join(", ")}
-                      </div>
-                      {t.userName && <div style={{ fontSize: "0.68rem", color: "var(--acid)", display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}><i className="fas fa-user-check"></i> {t.userName}</div>}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                      <i className={`fas ${t.paymentMethod === 'card' ? 'fa-credit-card' : 'fa-coins'}`} style={{ color: "var(--muted)", fontSize: "0.8rem" }}></i>
-                      <div style={{ fontFamily: 'var(--font-d)', fontWeight: 900, color: 'var(--text)', fontSize: '1rem', minWidth: '60px', textAlign: 'right' }}>
-                        {(t.totalEuros || 0).toFixed(2)} €
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
+        </motion.div>
       </div>
 
-    </div>
+      {toastMsg && <Toast message={toastMsg.msg} type={toastMsg.type} onClose={() => setToastMsg(null)} />}
+    </motion.div>
   );
 }

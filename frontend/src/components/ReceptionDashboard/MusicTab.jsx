@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Toast from "../Toast";
 
 export default function MusicTab() {
@@ -7,7 +8,7 @@ export default function MusicTab() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
-  const [volume, setVolume] = useState(100);
+  const [volume, setVolume] = useState(80);
   
   const [progressPercent, setProgressPercent] = useState(0);
   const [currentTimeStr, setCurrentTimeStr] = useState("0:00");
@@ -40,14 +41,13 @@ export default function MusicTab() {
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', onEnded);
     
-    // Cleanup event listeners
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', onEnded);
-      audio.pause(); // stop music on unmount
+      audio.pause();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRepeat]); // Re-attach ended logic when repeat changes setting
+  }, [isRepeat, isShuffle, currentTrack]); 
 
   useEffect(() => {
     if (audioRef.current) {
@@ -71,7 +71,6 @@ export default function MusicTab() {
     setPlaylist(prev => {
       const updated = [...prev, ...newTracks];
       if (currentTrack === -1 && updated.length > 0) {
-        // Load first track but don't play immediately unless user pressed play
         setTimeout(() => loadTrack(updated, 0), 10); 
       }
       return updated;
@@ -92,8 +91,6 @@ export default function MusicTab() {
     setProgressPercent(0);
     setCurrentTimeStr("0:00");
     
-    // When track is loaded manually or next automatically
-    // It'll play if it was playing already, except on the very first load
     if (isPlaying || audio.played.length > 0) {
       audio.play().catch(() => setIsPlaying(false));
       setIsPlaying(true);
@@ -102,7 +99,6 @@ export default function MusicTab() {
 
   const togglePlay = () => {
     if (playlist.length === 0) return showToast("Najprv nahraj hudbu", "err");
-    
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -123,7 +119,7 @@ export default function MusicTab() {
   const nextTrack = () => {
     if (playlist.length === 0) return;
     let n = isShuffle ? Math.floor(Math.random() * playlist.length) : (currentTrack + 1) % playlist.length;
-    setIsPlaying(true); // force play next
+    setIsPlaying(true);
     setTimeout(() => {
       loadTrack(playlist, n);
       audioRef.current.play().catch(e => console.error(e));
@@ -169,140 +165,169 @@ export default function MusicTab() {
     }
   };
 
-  const currentTitle = playlist[currentTrack]?.name || "Lokálny MP3 prehrávač";
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
 
-  // Visualizer bars
-  const bars = [1,2,3,4,5,6,7,8,9,10,11,12];
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+  };
+
+  const currentTitle = playlist[currentTrack]?.name || "Gym Music Player";
+  const bars = Array.from({ length: 15 }, (_, i) => i);
 
   return (
-    <div className="grid-2 animate-in">
-      <div className="panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(0,0,0,0.4)', borderRadius: '24px', border: '1px solid rgba(191,90,242,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
-        {/* Cover Art Area */}
-        <div style={{ position: 'relative', width: '220px', height: '220px', marginBottom: '2rem' }}>
-          <div style={{ 
-            width: '100%', height: '100%', borderRadius: '30px', 
-            background: 'linear-gradient(135deg, #7b2ff7, #21d4fd)', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '4.5rem', color: '#fff',
-            boxShadow: isPlaying ? '0 0 50px rgba(123,47,247,0.4)' : '0 15px 30px rgba(0,0,0,0.3)',
-            transition: 'all 0.5s ease',
-            transform: isPlaying ? 'scale(1.02)' : 'scale(1)'
-          }}>
-            <i className={`fas ${isPlaying ? 'fa-compact-disc fa-spin' : 'fa-music'}`} style={{ animationDuration: '3s' }}></i>
-          </div>
-          
-          {/* Animated Visualizer Overlay */}
-          {isPlaying && (
-            <div style={{ position: 'absolute', bottom: '15px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '3px', alignItems: 'flex-end', height: '40px' }}>
-              {bars.map(i => (
-                <div key={i} style={{ 
-                  width: '4px', background: '#fff', borderRadius: '2px', 
-                  height: '20%', animation: `musicBar ${0.5 + Math.random()}s ease-in-out infinite alternate` 
-                }}></div>
-              ))}
-            </div>
-          )}
+    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="grid-2 music-reception">
+      <motion.div variants={itemVariants} className="panel glass-panel player-card" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(191,90,242,0.2)' }}>
+        <div className="disc-wrap" style={{ position: 'relative', width: '240px', height: '240px', marginBottom: '2.5rem' }}>
+          <motion.div 
+            animate={{ rotate: isPlaying ? 360 : 0 }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+            style={{ 
+              width: '100%', height: '100%', borderRadius: '50%', 
+              background: 'linear-gradient(135deg, #121212 10%, #2a2a2a 40%, #121212 50%, #2a2a2a 60%, #121212 90%)', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '6px solid rgba(255,255,255,0.05)',
+              boxShadow: isPlaying ? '0 0 40px rgba(191,90,242,0.3)' : '0 10px 30px rgba(0,0,0,0.5)',
+              position: 'relative', overflow: 'hidden'
+            }}
+          >
+             <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #7b2ff7, #21d4fd)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', border: '4px solid #121212' }}>
+                <i className="fas fa-drum" style={{ fontSize: '2rem' }}></i>
+             </div>
+             {/* Dynamic Visualizer around the center */}
+             {isPlaying && (
+               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {bars.map(i => (
+                    <motion.div 
+                      key={i}
+                      animate={{ height: ['40px', '120px', '40px'] }}
+                      transition={{ duration: Math.random() + 0.5, repeat: Infinity }}
+                      style={{ 
+                        position: 'absolute', 
+                        width: '2px', 
+                        background: 'rgba(191,90,242,0.2)', 
+                        transform: `rotate(${i * (360/bars.length)}deg) translateY(-85px)` 
+                      }} 
+                    />
+                  ))}
+               </div>
+             )}
+          </motion.div>
+          {/* Needle / Stylus */}
+          <motion.div 
+            animate={{ rotate: isPlaying ? 25 : 0 }}
+            style={{ position: 'absolute', top: -10, right: 10, width: '80px', height: '10px', background: '#ccc', borderRadius: '5px', originX: '100%', originY: '50%', transform: 'rotate(0deg)', zIndex: 1, boxShadow: '0 5px 10px rgba(0,0,0,0.3)' }}
+          />
         </div>
 
         <div style={{ textAlign: 'center', marginBottom: '2rem', width: '100%' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: 'var(--font-d)', letterSpacing: '0.02em', marginBottom: '0.3rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentTitle}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700 }}>{isPlaying ? 'HRAJE TERAZ' : 'POASTAVENÉ'}</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 950, fontFamily: 'var(--font-d)', color: '#fff', marginBottom: '0.4rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '0.05em' }}>
+             {currentTitle.toUpperCase()}
+          </div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 900, color: isPlaying ? 'var(--purple)' : 'var(--muted)', letterSpacing: '0.2em' }}>
+             {isPlaying ? 'ACTIVE STREAM' : 'SYSTEM PAUSED'}
+          </div>
         </div>
 
-        {/* Custom Progress Bar */}
-        <div style={{ width: '100%', marginBottom: '1.5rem' }}>
-          <div className="music-progress" ref={progressRef} onClick={handleSeek} style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', cursor: 'pointer', overflow: 'hidden' }}>
-            <div className="music-progress-fill" style={{ width: `${progressPercent}%`, height: '100%', background: 'linear-gradient(90deg, #7b2ff7, #21d4fd)', boxShadow: '0 0 10px rgba(33,212,253,0.5)' }}></div>
+        <div style={{ width: '100%', marginBottom: '2rem' }}>
+          <div ref={progressRef} onClick={handleSeek} style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', cursor: 'pointer', position: 'relative' }}>
+            <motion.div layout className="progress-fill" style={{ width: `${progressPercent}%`, height: '100%', background: 'linear-gradient(90deg, #7b2ff7, #21d4fd)', borderRadius: '3px', boxShadow: '0 0 15px rgba(123,47,247,0.5)' }} />
+            <motion.div style={{ position: 'absolute', left: `${progressPercent}%`, top: '50%', transform: 'translate(-50%, -50%)', width: '14px', height: '14px', borderRadius: '50%', background: '#fff', border: '3px solid var(--purple)' }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--muted)', marginTop: '0.6rem', fontWeight: 700, fontFamily: 'var(--font-d)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 900, color: 'var(--muted)', marginTop: '0.8rem', fontFamily: 'monospace' }}>
             <span>{currentTimeStr}</span>
             <span>{durationStr}</span>
           </div>
         </div>
 
-        <div className="music-controls" style={{ gap: '1.5rem', marginBottom: '2.5rem' }}>
-          <button className="mc-btn" onClick={() => setIsShuffle(!isShuffle)} style={{ color: isShuffle ? "var(--acid2)" : "var(--muted)", fontSize: '1.1rem' }}>
-            <i className="fas fa-random"></i>
-          </button>
-          <button className="mc-btn" onClick={prevTrack} style={{ fontSize: '1.4rem' }}>
-            <i className="fas fa-backward"></i>
-          </button>
-          <button className="mc-btn play" onClick={togglePlay} style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'var(--text)', color: '#000', fontSize: '1.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`} style={{ marginLeft: isPlaying ? '0' : '4px' }}></i>
-          </button>
-          <button className="mc-btn" onClick={nextTrack} style={{ fontSize: '1.4rem' }}>
-            <i className="fas fa-forward"></i>
-          </button>
-          <button className="mc-btn" onClick={() => setIsRepeat(!isRepeat)} style={{ color: isRepeat ? "var(--acid2)" : "var(--muted)", fontSize: '1.1rem' }}>
-            <i className="fas fa-redo"></i>
-          </button>
+        <div className="music-controls" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setIsShuffle(!isShuffle)} style={{ border: 'none', background: 'none', color: isShuffle ? 'var(--acid2)' : 'var(--muted)', fontSize: '1rem', cursor: 'pointer' }}><i className="fas fa-random" /></motion.button>
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={prevTrack} style={{ border: 'none', background: 'none', color: '#fff', fontSize: '1.4rem', cursor: 'pointer' }}><i className="fas fa-backward" /></motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} 
+            onClick={togglePlay} 
+            style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#fff', color: '#000', border: 'none', fontSize: '1.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}
+          >
+            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`} style={{ marginLeft: isPlaying ? 0 : 5 }}></i>
+          </motion.button>
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={nextTrack} style={{ border: 'none', background: 'none', color: '#fff', fontSize: '1.4rem', cursor: 'pointer' }}><i className="fas fa-forward" /></motion.button>
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setIsRepeat(!isRepeat)} style={{ border: 'none', background: 'none', color: isRepeat ? 'var(--acid2)' : 'var(--muted)', fontSize: '1rem', cursor: 'pointer' }}><i className="fas fa-redo" /></motion.button>
         </div>
 
-        <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '0.8rem 1.2rem', borderRadius: '15px' }}>
-          <i className={`fas ${volume == 0 ? 'fa-volume-mute' : volume < 50 ? 'fa-volume-down' : 'fa-volume-up'}`} style={{ color: 'var(--muted)', width: '20px' }}></i>
-          <input type="range" className="vol-slider" min="0" max="100" value={volume} onChange={(e) => setVolume(e.target.value)} style={{ flex: 1, accentColor: 'var(--purple)' }} />
-          <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', minWidth: '35px', textAlign: 'right' }}>{volume}%</span>
+        <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '1.2rem', background: 'rgba(255,255,255,0.03)', padding: '1rem 1.5rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
+          <i className={`fas ${volume === 0 ? 'fa-volume-mute' : volume < 50 ? 'fa-volume-down' : 'fa-volume-up'}`} style={{ color: 'var(--muted)', fontSize: '1rem' }} />
+          <input type="range" min="0" max="100" value={volume} onChange={(e) => setVolume(e.target.value)} style={{ flex: 1, height: '4px', accentColor: 'var(--purple)', cursor: 'pointer' }} />
+          <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--muted)', minWidth: '40px', textAlign: 'right', fontFamily: 'monospace' }}>{volume}%</span>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="panel">
-        <div className="ph" style={{ justifyContent: "space-between" }}>
-          <span className="pt">Playlist</span>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <label className="btn btn-acid btn-sm" style={{ cursor: "pointer", margin: 0 }}>
-              <i className="fas fa-upload"></i> Nahrať hudbu
-              <input type="file" multiple accept="audio/mpeg,audio/wav,audio/ogg" style={{ display: "none" }} onChange={handleFiles} />
+      <motion.div variants={itemVariants} className="panel glass-panel playlist-card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div className="ph" style={{ borderBottom: '1px solid var(--border)' }}>
+          <span className="pt"><i className="fas fa-list-ul" style={{marginRight: '0.8rem', color: 'var(--purple)'}} />Knižnica skladieb</span>
+          <div style={{ display: 'flex', gap: '0.8rem' }}>
+            <label className="btn btn-acid btn-xs" style={{ cursor: 'pointer', borderRadius: '8px' }}>
+              <i className="fas fa-plus"></i> PRIDAŤ
+              <input type="file" multiple accept="audio/*" style={{ display: 'none' }} onChange={handleFiles} />
             </label>
-            {playlist.length > 0 && (
-              <button className="btn btn-ghost btn-sm" onClick={clearPlaylist} title="Vyčistiť playlist">
-                <i className="fas fa-trash"></i>
-              </button>
-            )}
+            {playlist.length > 0 && <button className="btn btn-ghost btn-xs" onClick={clearPlaylist} style={{ borderRadius: '8px' }}><i className="fas fa-trash"></i></button>}
           </div>
         </div>
-        <div className="pb" style={{ padding: 0 }}>
-          {playlist.length === 0 ? (
-            <div className="empty-state" style={{ padding: "3rem" }}>
-              <i className="fas fa-music"></i>
-              <p>Playlist je prázdny — nahraj MP3 súbory</p>
-            </div>
-          ) : (
-            <div className="playlist" style={{ maxHeight: '550px', overflowY: 'auto' }}>
-              {playlist.map((t, idx) => {
-                const isActive = idx === currentTrack;
-                return (
-                  <div 
-                    key={idx} 
-                    className={`pl-item ${isActive ? 'active' : ''}`}
-                    onClick={() => { setIsPlaying(true); loadTrack(playlist, idx); }}
-                    style={{ 
-                      padding: '1rem 1.5rem', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '1rem', 
-                      borderBottom: '1px solid rgba(255,255,255,0.05)',
-                      background: isActive ? 'rgba(123,47,247,0.1)' : 'transparent',
-                      transition: 'all 0.2s',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isActive ? 'var(--purple)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: isActive ? '#fff' : 'var(--muted)' }}>
-                      {isActive ? <i className="fas fa-play" style={{ fontSize: '0.6rem' }}></i> : (idx + 1)}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.9rem', fontWeight: isActive ? 800 : 600, color: isActive ? 'var(--purple)' : 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--muted)', marginTop: '0.1rem' }}>MPEG Audio Layer 3</div>
-                    </div>
-                    {isActive && <div className="spinner-s" style={{ width: '12px', height: '12px', border: '2px solid var(--purple)', borderTopColor: 'transparent' }}></div>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        <div className="pb" style={{ padding: 0, flex: 1, overflowY: 'auto' }}>
+          <AnimatePresence>
+            {playlist.length === 0 ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="empty-state" style={{ height: '400px' }}>
+                <i className="fas fa-compact-disc" style={{ fontSize: '4rem', opacity: 0.1, marginBottom: '1.5rem' }} />
+                <p style={{ fontWeight: 800, color: 'var(--muted)', letterSpacing: '0.1em' }}>NAHRAJTE SVOJU HUDBU (MP3)</p>
+              </motion.div>
+            ) : (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="playlist-list">
+                {playlist.map((t, idx) => {
+                  const isActive = idx === currentTrack;
+                  return (
+                    <motion.div 
+                      key={idx} 
+                      whileHover={{ x: 10, background: 'rgba(191,90,242,0.05)' }} 
+                      onClick={() => { setIsPlaying(true); loadTrack(playlist, idx); }}
+                      style={{ 
+                        padding: '1.2rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1.2rem', 
+                        borderBottom: '1px solid var(--border)', cursor: 'pointer',
+                        background: isActive ? 'rgba(191,90,242,0.08)' : 'transparent',
+                        position: 'relative'
+                      }}
+                    >
+                      {isActive && <motion.div layoutId="track-active" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: 'var(--purple)' }} />}
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: isActive ? 'var(--purple)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: isActive ? '#fff' : 'var(--muted)', fontSize: '0.8rem' }}>
+                        {isActive ? <i className="fas fa-play" style={{ fontSize: '0.6rem' }} /> : (idx + 1)}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '1rem', fontWeight: isActive ? 900 : 700, color: isActive ? '#fff' : 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.2rem', textTransform: 'uppercase' }}>AUDIO STREAM</div>
+                      </div>
+                      {isActive && (
+                        <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '14px' }}>
+                          {[1,2,3].map(b => (
+                            <motion.div key={b} animate={{ height: ['4px', '14px', '4px'] }} transition={{ duration: 0.5 + b/5, repeat: Infinity }} style={{ width: '3px', background: 'var(--purple)', borderRadius: '1px' }} />
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
+
+      <style>{`
+        .music-reception .mc-btn { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .music-reception .pl-item:hover { transform: translateX(10px); }
+      `}</style>
 
       {toastMsg && <Toast message={toastMsg.msg} type={toastMsg.type} onClose={() => setToastMsg(null)} />}
-    </div>
+    </motion.div>
   );
 }

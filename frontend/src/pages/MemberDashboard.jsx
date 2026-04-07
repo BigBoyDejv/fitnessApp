@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../utils/api';
 
 /* Tab Components */
@@ -365,8 +366,19 @@ export default function MemberDashboard() {
           </div>
         </header>
 
-        <section className="cont" style={{ flex: 1, padding: isMobile ? '1rem' : '1.5rem', paddingBottom: isMobile ? '80px' : '1.5rem' }}>
-          {renderContent()}
+        <section className="cont" style={{ flex: 1, padding: isMobile ? '1rem' : '1.5rem', paddingBottom: isMobile ? '80px' : '1.5rem', position: 'relative', overflow: 'hidden' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              style={{ height: '100%' }}
+            >
+              {renderContent()}
+            </motion.div>
+          </AnimatePresence>
         </section>
 
         {isMobile && (

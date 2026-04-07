@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
 export default function OverviewTab({ user, setActiveTab }) {
@@ -55,12 +56,33 @@ export default function OverviewTab({ user, setActiveTab }) {
       );
    };
 
-   if (loading) return <div className="empty"><span className="spin" /></div>;
+   if (loading) return <div className="empty"><span className="spinner" /></div>;
+
+   const container = {
+      hidden: { opacity: 0 },
+      show: {
+         opacity: 1,
+         transition: {
+            staggerChildren: 0.1
+         }
+      }
+   };
+
+   const item = {
+      hidden: { opacity: 0, y: 20 },
+      show: { opacity: 1, y: 0 }
+   };
 
    return (
-      <div className="ps active animate-in" id="pg-overview">
+      <motion.div
+         className="ps active"
+         id="pg-overview"
+         variants={container}
+         initial="hidden"
+         animate="show"
+      >
          {/* ── Welcome Hero ───────────────────────────────────────────── */}
-         <div className="overview-hero">
+         <motion.div className="overview-hero" variants={item}>
             <div className="hero-content">
                <h1>Ahoj, {user?.fullName?.split(' ')[0] || 'Šampión'}! 👋</h1>
                <p>Tvoj progres je na dobrej ceste. Dnes je skvelý deň na tréning.</p>
@@ -72,35 +94,35 @@ export default function OverviewTab({ user, setActiveTab }) {
             <div className="hero-visual">
                <i className="fas fa-dumbbell" />
             </div>
-         </div>
+         </motion.div>
 
          {/* ── Stats Modern ──────────────────────────────────────────── */}
          <div className="stat-row">
-            <div className="sc glass highlight">
+            <motion.div className="sc glass highlight" variants={item}>
                <div className="sc-icon"><i className="fas fa-calendar-check"></i></div>
                <div className="sc-val">{stats?.totalBookings || 0}</div>
                <div className="sc-lbl">Lekcií</div>
-            </div>
-            <div className="sc glass highlight cyan">
+            </motion.div>
+            <motion.div className="sc glass highlight cyan" variants={item}>
                <div className="sc-icon"><i className="fas fa-fire"></i></div>
                <div className="sc-val">{stats?.streakDays || 0}</div>
                <div className="sc-lbl">Streak</div>
-            </div>
-            <div className="sc glass highlight gold">
+            </motion.div>
+            <motion.div className="sc glass highlight gold" variants={item}>
                <div className="sc-icon"><i className="fas fa-medal"></i></div>
                <div className="sc-val">PRO</div>
                <div className="sc-lbl">Úroveň</div>
-            </div>
-            <div className="sc glass highlight pink">
+            </motion.div>
+            <motion.div className="sc glass highlight pink" variants={item}>
                <div className="sc-icon"><i className="fas fa-bolt"></i></div>
                <div className="sc-val">{stats?.totalHours ? Math.round(stats.totalHours) : '0'}h</div>
                <div className="sc-lbl">Celkom h</div>
-            </div>
+            </motion.div>
          </div>
 
          <div className="dashboard-grid">
             {/* FITKO PRÁVE TERAZ (Ring View) */}
-            <div className="panel modern-occupancy">
+            <motion.div className="panel modern-occupancy" variants={item}>
                <div className="ph"><span className="pt">Aktuálna obsadenosť</span></div>
                <div className="pb" style={{ padding: '1.5rem' }}>
                   <div className="occupancy-ring-large" style={{ '--pct': '32' }}>
@@ -118,16 +140,22 @@ export default function OverviewTab({ user, setActiveTab }) {
                      <div className="l-item gray"><span></span> 58 voľných miest</div>
                   </div>
                </div>
-            </div>
+            </motion.div>
 
             {/* MOJE NAJBLIŽŠIE LEKCIE (Detailed Cards) */}
-            <div className="panel modern-upcoming">
+            <motion.div className="panel modern-upcoming" variants={item}>
                <div className="ph"><span className="pt">Moje najbližšie lekcie</span></div>
                <div className="pb">
                   {upcomingClasses.length > 0 ? (
                      <div className="modern-class-cards">
-                        {upcomingClasses.slice(0, 3).map(c => (
-                           <div key={c.id} className="o-class-card">
+                        {upcomingClasses.slice(0, 3).map((c, idx) => (
+                           <motion.div
+                              key={c.id}
+                              className="o-class-card"
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.1 * idx }}
+                           >
                               <div className="card-top">
                                  <div className="c-main-info">
                                     <div className="c-name">{c.name}</div>
@@ -143,7 +171,7 @@ export default function OverviewTab({ user, setActiveTab }) {
                                  <span className="dot-sep">&bull;</span>
                                  <span><i className="fas fa-map-marker-alt" /> SÁLA 1</span>
                               </div>
-                           </div>
+                           </motion.div>
                         ))}
                         <button className="btn btn-ghost btn-block btn-sm" style={{ marginTop: '1rem', borderColor: 'rgba(255,255,255,0.1)' }} onClick={() => setActiveTab('classes')}>ZOBRAZIŤ CELÝ ROZVRH</button>
                      </div>
@@ -155,10 +183,10 @@ export default function OverviewTab({ user, setActiveTab }) {
                      </div>
                   )}
                </div>
-            </div>
+            </motion.div>
 
             {/* PROFIL / ČLENSTVO */}
-            <div className="panel card-membership">
+            <motion.div className="panel card-membership" variants={item}>
                <div className="ph"><span className="pt">Aktívne členstvo</span></div>
                <div className="pb" style={{ padding: '1.2rem' }}>
                   <div className="m-card-visual">
@@ -170,19 +198,19 @@ export default function OverviewTab({ user, setActiveTab }) {
                         <i className="fas fa-bolt m-icon" />
                      </div>
                   </div>
-                  <div className="m-status-row">
-                     <div className="s-pill active">
+                  <div className="m-status-row" style={{ marginTop: '1.2rem', display: 'flex', gap: '0.8rem' }}>
+                     <div className="s-pill active" style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'rgba(200,255,0,0.1)', color: 'var(--acid)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}>
                         <i className="fas fa-check-circle" />
-                        <div className="s-content">STAV: <span>AKTÍVNY</span></div>
+                        <span>AKTÍVNY</span>
                      </div>
-                     <div className="s-pill">
+                     <div className="s-pill" style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}>
                         <i className="fas fa-infinity" />
-                        <div className="s-content">VSTUPY: <span>UNLIMITED</span></div>
+                        <span>UNLIMITED</span>
                      </div>
                   </div>
                </div>
-            </div>
+            </motion.div>
          </div>
-      </div>
+      </motion.div>
    );
 }

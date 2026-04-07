@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import './LandingPage.css';
 
 const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -169,7 +170,13 @@ export default function LandingPage() {
       {/* HERO */}
       <section className="hero" id="home">
         <div className="hero-content">
-          <div className="hero-left">
+          <motion.div
+            className="hero-left"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
             <div className="hero-tag">
               <i className="fas fa-crown"></i> Najlepšie fitko v Košiciach
             </div>
@@ -182,44 +189,71 @@ export default function LandingPage() {
               <button className="btn btn-acid btn-lg" onClick={focusRegister}>Vytvoriť účet</button>
               <a href="#programy" className="btn btn-ghost btn-lg">Naša ponuka</a>
             </div>
-          </div>
+          </motion.div>
 
           {/* AUTH PANEL */}
-          <div className="auth-panel" ref={authPanelRef}>
+          <motion.div
+            className="auth-panel"
+            ref={authPanelRef}
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
             <div className="auth-panel-header">
               <div className="auth-panel-title">{authMode === 'login' ? 'Vitaj späť' : 'Vytvor účet'}</div>
               <div className="auth-panel-sub">{authMode === 'login' ? 'Prihlás sa do svojho profilu' : 'Registrácia zaberie len minútu'}</div>
             </div>
             <div className="tabs">
-              <button className={`tab-btn ${authMode === 'login' ? 'active' : ''}`} onClick={() => setAuthMode('login')}>Prihlásiť sa</button>
-              <button className={`tab-btn ${authMode === 'register' ? 'active' : ''}`} onClick={() => setAuthMode('register')}>Registrovať sa</button>
+              <button className={`tab-btn ${authMode === 'login' ? 'active' : ''}`} onClick={() => setAuthMode('login')}>
+                {authMode === 'login' && <motion.div layoutId="auth-tab" className="tab-pill" />}
+                <span className="tab-text">Prihlásiť sa</span>
+              </button>
+              <button className={`tab-btn ${authMode === 'register' ? 'active' : ''}`} onClick={() => setAuthMode('register')}>
+                {authMode === 'register' && <motion.div layoutId="auth-tab" className="tab-pill" />}
+                <span className="tab-text">Registrovať sa</span>
+              </button>
             </div>
 
-            {/* LOGIN */}
-            {authMode === 'login' && (
-              <div className="animate-in">
-                <input className="form-input" type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="Tvoj email" autoComplete="email" />
-                <input className="form-input" type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Tvoje heslo" onKeyDown={(e) => { if (e.key === 'Enter') doLogin(); }} />
-                <button className="btn btn-acid btn-block btn-lg" style={{ marginTop: '1rem' }} disabled={loading} onClick={doLogin}>
-                  {loading ? 'Spracovávam...' : 'Prihlásiť sa'}
-                </button>
-                {loginMsg.text && <div className="form-msg show-err" style={{ marginTop: '1rem' }}>{loginMsg.text}</div>}
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {/* LOGIN */}
+              {authMode === 'login' && (
+                <motion.div
+                  key="login"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <input className="form-input" type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="Tvoj email" autoComplete="email" />
+                  <input className="form-input" type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Tvoje heslo" onKeyDown={(e) => { if (e.key === 'Enter') doLogin(); }} />
+                  <button className="btn btn-acid btn-block btn-lg" style={{ marginTop: '1rem' }} disabled={loading} onClick={doLogin}>
+                    {loading ? 'Spracovávam...' : 'Prihlásiť sa'}
+                  </button>
+                  {loginMsg.text && <div className="form-msg show-err" style={{ marginTop: '1rem' }}>{loginMsg.text}</div>}
+                </motion.div>
+              )}
 
-            {/* REGISTER */}
-            {authMode === 'register' && (
-              <div className="animate-in">
-                <input className="form-input" type="text" value={rName} onChange={e => setRName(e.target.value)} placeholder="Meno a priezvisko" />
-                <input className="form-input" type="email" value={rEmail} onChange={e => setREmail(e.target.value)} placeholder="Tvoj email" />
-                <input className="form-input" type="password" value={rPass} onChange={e => setRPass(e.target.value)} placeholder="Tvoje heslo" />
-                <button className="btn btn-acid btn-block btn-lg" style={{ marginTop: '1rem' }} disabled={loading} onClick={doRegister}>
-                  {loading ? 'Registrujem...' : 'Začať trénovať'}
-                </button>
-                {regMsg.text && <div className="form-msg show-err" style={{ marginTop: '1rem' }}>{regMsg.text}</div>}
-              </div>
-            )}
-          </div>
+              {/* REGISTER */}
+              {authMode === 'register' && (
+                <motion.div
+                  key="register"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <input className="form-input" type="text" value={rName} onChange={e => setRName(e.target.value)} placeholder="Meno a priezvisko" />
+                  <input className="form-input" type="email" value={rEmail} onChange={e => setREmail(e.target.value)} placeholder="Tvoj email" />
+                  <input className="form-input" type="password" value={rPass} onChange={e => setRPass(e.target.value)} placeholder="Tvoje heslo" />
+                  <button className="btn btn-acid btn-block btn-lg" style={{ marginTop: '1rem' }} disabled={loading} onClick={doRegister}>
+                    {loading ? 'Registrujem...' : 'Začať trénovať'}
+                  </button>
+                  {regMsg.text && <div className="form-msg show-err" style={{ marginTop: '1rem' }}>{regMsg.text}</div>}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </section>
 
@@ -359,19 +393,19 @@ export default function LandingPage() {
           <div className="contact-grid">
             <div className="contact-items">
               <div className="contact-item">
-                <div className="c-icon"><i className="fas fa-location-dot"></i></div>
+                <div className="c-icon"><i className="fa-solid fa-house"></i></div>
                 <div className="c-text"><h4>Adresa</h4><p>Jedlíkova 9, 040 01 Košice</p></div>
               </div>
               <div className="contact-item">
-                <div className="c-icon"><i className="fas fa-clock"></i></div>
+                <div className="c-icon"><i className="fa-solid fa-clock"></i></div>
                 <div className="c-text"><h4>Otváracie hodiny</h4><p>Po — Pi: 6:00 – 22:00<br />So — Ne: 8:00 – 20:00</p></div>
               </div>
               <div className="contact-item">
-                <div className="c-icon"><i className="fas fa-phone-flip"></i></div>
+                <div className="c-icon"><i className="fa-solid fa-phone"></i></div>
                 <div className="c-text"><h4>Telefón</h4><p>+421 905 123 456</p></div>
               </div>
               <div className="contact-item">
-                <div className="c-icon"><i className="fas fa-envelope"></i></div>
+                <div className="c-icon"><i className="fa-solid fa-envelope"></i></div>
                 <div className="c-text"><h4>Email</h4><p>info@fitnesspro.sk</p></div>
               </div>
             </div>
@@ -431,10 +465,12 @@ export default function LandingPage() {
         <div className="footer-bottom">
           <p>© 2026 Fitness Pro. Všetky práva vyhradené.</p>
           <div className="socials">
-            <a href="#"><i className="fab fa-instagram"></i></a>
-            <a href="#"><i className="fab fa-facebook-f"></i></a>
-            <a href="#"><i className="fab fa-tiktok"></i></a>
-            <a href="#"><i className="fab fa-youtube"></i></a>
+            <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
+            <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f"></i></a>
+            <a href="#" aria-label="TikTok"><i className="fa-brands fa-tiktok"></i></a>
+            <a href="#" aria-label="YouTube"><i className="fa-brands fa-youtube"></i></a>
+            <a href="#" aria-label="X (Twitter)"><i className="fa-brands fa-x-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
           </div>
         </div>
       </footer>

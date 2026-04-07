@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { authenticatedFetch } from "../../utils/api";
 import Toast from "../Toast";
 
@@ -8,7 +9,7 @@ export default function SkladTab() {
   const [filterCat, setFilterCat] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortOption, setSortOption] = useState("name");
-  const [sortDir, setSortDir] = useState("asc"); // "asc" or "desc"
+  const [sortDir, setSortDir] = useState("asc");
 
   const [toastMsg, setToastMsg] = useState(null);
 
@@ -75,9 +76,8 @@ export default function SkladTab() {
   const active = products.filter(p => p.active);
   const low = active.filter(p => p.stock > 0 && p.stock <= 5);
   const out = active.filter(p => p.stock === 0);
-  const val = active.reduce((s, p) => s + (p.priceCents / 100) * p.stock, 0);
+  const totalVal = active.reduce((s, p) => s + (p.priceCents / 100) * p.stock, 0);
 
-  // Modals Actions
   const openProductModal = (p = null) => {
     if (p) {
       setPForm({
@@ -92,7 +92,7 @@ export default function SkladTab() {
       setProductModal({ open: true, isEdit: true });
     } else {
       setPForm({
-        id: null, name: "", price: "", stock: 0, category: "Snacky", description: "", active: true
+        id: null, name: "", price: "", stock: 0, category: "Suplementy", description: "", active: true
       });
       setProductModal({ open: true, isEdit: false });
     }
@@ -115,17 +115,11 @@ export default function SkladTab() {
     try {
       const url = pForm.id ? `/api/products/${pForm.id}` : `/api/products`;
       const method = pForm.id ? "PUT" : "POST";
-      
-      const res = await authenticatedFetch(url, {
-        method,
-        body: JSON.stringify(payload)
-      });
-      
+      const res = await authenticatedFetch(url, { method, body: JSON.stringify(payload) });
       if (!res.ok) {
         const d = await res.json();
         throw new Error(d.message || "Chyba");
       }
-      
       showToast(`Produkt ${pForm.id ? 'upravený' : 'vytvorený'}`, "ok");
       setProductModal({ open: false, isEdit: false });
       loadProducts();
@@ -142,14 +136,12 @@ export default function SkladTab() {
   const saveStock = async () => {
     const delta = parseInt(stockDelta);
     if (isNaN(delta) || delta <= 0) return showToast("Zadaj kladné číslo", "err");
-
     try {
       const res = await authenticatedFetch(`/api/products/${stockModal.id}/stock`, {
         method: "PATCH",
         body: JSON.stringify({ delta })
       });
       if (!res.ok) throw new Error("Chyba dopĺňania zásob");
-      
       showToast(`Zásoby doplnené (+${delta})`, "ok");
       setStockModal({ open: false, id: null, name: "", current: 0 });
       loadProducts();
@@ -166,7 +158,6 @@ export default function SkladTab() {
         body: JSON.stringify({ active: !currentVal })
       });
       if (!res.ok) throw new Error("Chyba");
-      
       showToast(currentVal ? "Produkt deaktivovaný" : "Produkt aktívny", "ok");
       loadProducts();
     } catch (e) {
@@ -174,315 +165,194 @@ export default function SkladTab() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } }
+  };
+
   return (
-    <div className="animate-in">
-      <div className="dashboard-grid" style={{ marginBottom: "2.5rem", gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(200,255,0,0.1)', color: 'var(--acid)' }}><i className="fas fa-boxes"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">AKTÍVNE DOPLNKY</div>
-              <div className="kpi-value-v2">{active.length}</div>
-           </div>
-        </div>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.05s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(255,149,0,0.1)', color: 'var(--orange)' }}><i className="fas fa-exclamation-triangle"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">NÍZKY STAV</div>
-              <div className="kpi-value-v2">{low.length}</div>
-           </div>
-        </div>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.1s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(255,45,85,0.1)', color: 'var(--red)' }}><i className="fas fa-times-circle"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">VYPREDANÉ</div>
-              <div className="kpi-value-v2">{out.length}</div>
-           </div>
-        </div>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.15s' }}>
-           <div className="kpi-icon-v2" style={{ background: 'rgba(10,132,255,0.1)', color: 'var(--blue)' }}><i className="fas fa-euro-sign"></i></div>
-           <div className="kpi-content-v2">
-              <div className="kpi-label-v2">HODNOTA SKLADU</div>
-              <div className="kpi-value-v2">{val.toFixed(0)} <span style={{fontSize: '1rem'}}>€</span></div>
-           </div>
-        </div>
+    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="sklad-tab-reception">
+      <div className="dashboard-grid" style={{ marginBottom: "2.5rem", gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
+          <div className="kpi-icon-v2" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text)' }}><i className="fas fa-boxes" /></div>
+          <div className="kpi-content-v2">
+             <div className="kpi-label-v2">AKTÍVNE DOPLNKY</div>
+             <div className="kpi-value-v2">{active.length}</div>
+          </div>
+        </motion.div>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
+          <div className="kpi-icon-v2" style={{ background: 'rgba(255,149,0,0.1)', color: 'var(--orange)' }}><i className="fas fa-exclamation-triangle" /></div>
+          <div className="kpi-content-v2">
+             <div className="kpi-label-v2">NÍZKY STAV</div>
+             <div className="kpi-value-v2">{low.length}</div>
+          </div>
+        </motion.div>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
+          <div className="kpi-icon-v2" style={{ background: 'rgba(255,45,85,0.1)', color: 'var(--red)' }}><i className="fas fa-times-circle" /></div>
+          <div className="kpi-content-v2">
+             <div className="kpi-label-v2">VYPREDANÉ</div>
+             <div className="kpi-value-v2">{out.length}</div>
+          </div>
+        </motion.div>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
+          <div className="kpi-icon-v2" style={{ background: 'rgba(0,123,255,0.1)', color: 'var(--blue)' }}><i className="fas fa-wallet" /></div>
+          <div className="kpi-content-v2">
+             <div className="kpi-label-v2">HODNOTA SKLADU</div>
+             <div className="kpi-value-v2">{totalVal.toFixed(0)} €</div>
+          </div>
+        </motion.div>
       </div>
 
-      <div className="panel animate-in" style={{ animationDelay: '0.2s' }}>
+      <motion.div variants={itemVariants} className="panel glass-panel">
         <div className="ph">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.05)', color: 'var(--text)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="neon-icon yellow" style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(255,149,0,0.1)', color: 'var(--orange)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <i className="fas fa-warehouse"></i>
             </div>
             <span className="pt">Centrálny sklad</span>
           </div>
-          <div style={{ display: "flex", gap: "0.8rem" }}>
-             <button className="btn btn-ghost btn-xs" onClick={loadProducts}><i className="fas fa-sync-alt"></i> OBNOVIŤ</button>
-             <button className="btn btn-blue btn-xs" onClick={() => openProductModal(null)} style={{ borderRadius: '6px', fontWeight: 800 }}>
+          <div style={{ display: "flex", gap: "1rem" }}>
+             <button className="btn btn-ghost btn-xs" onClick={loadProducts}><i className="fas fa-sync-alt"></i></button>
+             <button className="btn btn-acid btn-xs" onClick={() => openProductModal(null)} style={{ borderRadius: '8px', padding: '0.5rem 1rem', fontWeight: 900 }}>
                <i className="fas fa-plus-circle" style={{marginRight: '0.4rem'}}></i> NOVÝ PRODUKT
              </button>
           </div>
         </div>
-        <div className="pb">
-          {/* Enhanced Premium Filter Bar */}
-          <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '14px', border: '1px solid var(--border)', marginBottom: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="pb" style={{ padding: '1.5rem' }}>
+          <div className="search-bar glass-panel" style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
             <div style={{ position: 'relative', flex: 2, minWidth: '240px' }}>
-              <i className="fas fa-search" style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: '0.9rem' }}></i>
-              <input 
-                className="fi" 
-                type="text" 
-                placeholder="Rýchle hľadanie produktu..." 
-                value={filterSearch}
-                onChange={(e) => setFilterSearch(e.target.value)}
-                style={{ paddingLeft: '3rem', borderRadius: '10px', height: '48px', border: '1px solid var(--border)' }}
-              />
+              <i className="fas fa-search" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
+              <input className="fi" type="text" placeholder="Hľadať produkt..." value={filterSearch} onChange={(e) => setFilterSearch(e.target.value)} style={{ paddingLeft: '2.8rem', borderRadius: '12px', height: '48px' }} />
             </div>
-            
-            <div style={{ display: 'flex', gap: '0.6rem', flex: 3, flexWrap: 'wrap' }}>
-              <div style={{ position: 'relative', flex: 1, minWidth: '150px' }}>
-                <i className="fas fa-tag" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1 }}></i>
-                <select className="fi" value={filterCat} onChange={(e) => setFilterCat(e.target.value)} style={{ paddingLeft: '2.5rem', borderRadius: '10px', height: '48px' }}>
-                  <option value="">Všetky kategórie</option>
-                  {cats.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              
-              <div style={{ position: 'relative', flex: 1, minWidth: '150px' }}>
-                <i className="fas fa-toggle-on" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1 }}></i>
-                <select className="fi" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ paddingLeft: '2.5rem', borderRadius: '10px', height: '48px' }}>
-                  <option value="all">Všetky stavy</option>
-                  <option value="active">Len aktívne</option>
-                  <option value="low">Nízka zásoba</option>
-                  <option value="out">Vypredané</option>
-                </select>
-              </div>
-
-              <div style={{ position: 'relative', flex: 1, minWidth: '150px' }}>
-                <i className="fas fa-sort-amount-down" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1 }}></i>
-                <div className="fi" style={{ paddingLeft: '2.5rem', borderRadius: '10px', height: '48px', display: 'flex', alignItems: 'center', fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 700 }}>
-                   KLIKNI NA HLAVIČKU TABUĽKY PRE SORT
-                </div>
-              </div>
-            </div>
+            <select className="fi" value={filterCat} onChange={(e) => setFilterCat(e.target.value)} style={{ flex: 1, minWidth: '150px', borderRadius: '12px', height: '48px' }}>
+              <option value="">Všetky kategórie</option>
+              {cats.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select className="fi" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ flex: 1, minWidth: '150px', borderRadius: '12px', height: '48px' }}>
+              <option value="all">Všetky stavy</option>
+              <option value="active">Aktívne</option>
+              <option value="low">Nízky stav</option>
+              <option value="out">Vypredané</option>
+            </select>
           </div>
 
-          {filteredProducts.length === 0 ? (
-            <div className="empty-state" style={{ padding: '5rem' }}>
-              <i className="fas fa-boxes" style={{ fontSize: '3.5rem', opacity: 0.1, marginBottom: '1rem' }}></i>
-              <p style={{ fontWeight: 700 }}>Neboli nájdené žiadne položky</p>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Skúste upraviť filtre alebo pridať nový produkt.</p>
-            </div>
-          ) : (
-            <div className="table-responsive" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}>
-              <table className="dt dt-compact">
+          <div style={{ overflowX: 'auto', borderRadius: '20px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+            {filteredProducts.length === 0 ? (
+              <div className="empty-state" style={{ padding: '5rem' }}>
+                <i className="fas fa-boxes" style={{ fontSize: '4rem', opacity: 0.1, marginBottom: '1.5rem' }}></i>
+                <p style={{ fontWeight: 900, color: 'var(--muted)' }}>SKLAD JE PRÁZDNY</p>
+              </div>
+            ) : (
+              <table className="dt">
                 <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    <th onClick={() => handleSort('name')} style={{ cursor: 'pointer', padding: '1.2rem', transition: 'all 0.2s' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        PRODUKT {sortOption === 'name' && (
-                          <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{ color: 'var(--acid)', fontSize: '0.7rem' }}></i>
-                        )}
-                      </div>
-                    </th>
-                    <th onClick={() => handleSort('category')} style={{ cursor: 'pointer', padding: '1.2rem' }}>
-                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        KATEGÓRIA {sortOption === 'category' && (
-                          <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{ color: 'var(--acid)', fontSize: '0.7rem' }}></i>
-                        )}
-                      </div>
-                    </th>
-                    <th onClick={() => handleSort('stock')} style={{ cursor: 'pointer', textAlign: 'center', padding: '1.2rem' }}>
-                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
-                        STAV ZÁSOB {sortOption === 'stock' && (
-                          <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{ color: 'var(--acid)', fontSize: '0.7rem' }}></i>
-                        )}
-                      </div>
-                    </th>
-                    <th onClick={() => handleSort('price')} style={{ cursor: 'pointer', textAlign: 'right', padding: '1.2rem' }}>
-                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.6rem' }}>
-                        CENA {sortOption === 'price' && (
-                          <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} style={{ color: 'var(--acid)', fontSize: '0.7rem' }}></i>
-                        )}
-                      </div>
-                    </th>
-                    <th style={{ textAlign: 'right', padding: '1.2rem', color: 'var(--muted)', fontWeight: 400 }}>AKCIE</th>
+                  <tr>
+                    <th onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>PRODUKT {sortOption === 'name' && <i className={`fas fa-chevron-${sortDir === 'asc' ? 'up' : 'down'}`} />}</th>
+                    <th onClick={() => handleSort('category')} style={{ cursor: 'pointer' }}>KATEGÓRIA</th>
+                    <th onClick={() => handleSort('stock')} style={{ cursor: 'pointer', textAlign: 'center' }}>STAV</th>
+                    <th onClick={() => handleSort('price')} style={{ cursor: 'pointer', textAlign: 'right' }}>CENA</th>
+                    <th style={{ textAlign: 'right' }}>AKCIE</th>
                   </tr>
                 </thead>
-                <tbody>
+                <motion.tbody variants={containerVariants} initial="hidden" animate="visible">
                   {filteredProducts.map(p => {
-                    const isLow = p.stock > 0 && p.stock <= 5;
                     const isOut = p.stock === 0;
+                    const isLow = p.stock > 0 && p.stock <= 5;
                     const stockColor = isOut ? 'var(--red)' : isLow ? 'var(--orange)' : 'var(--acid)';
-                    
                     return (
-                      <tr key={p.id} className="animate-in" style={{ opacity: p.active ? 1 : 0.4, transition: 'all 0.3s' }}>
-                        <td style={{ padding: '1rem 1.2rem' }}>
+                      <motion.tr key={p.id} variants={itemVariants} style={{ opacity: p.active ? 1 : 0.4 }}>
+                        <td style={{ paddingLeft: '1.5rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <div style={{ 
-                              width: 36, height: 36, borderRadius: '10px', 
-                              background: isOut ? 'rgba(255,45,85,0.1)' : 'rgba(255,255,255,0.02)', 
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: '0.9rem', fontWeight: 900, color: isOut ? 'var(--red)' : 'var(--muted)',
-                              border: `1px solid ${isOut ? 'rgba(255,45,85,0.2)' : 'var(--border)'}`
-                            }}>
-                              {p.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: isOut ? 'var(--red)' : 'inherit' }}>{p.name}</div>
-                                {isOut && <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--red)', letterSpacing: '0.05em' }}>VYPREDANÉ</div>}
-                            </div>
+                            <div style={{ width: 36, height: 36, borderRadius: '10px', background: isOut ? 'rgba(255,45,85,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: isOut ? 'var(--red)' : 'var(--muted)', border: '1px solid var(--border)' }}>{p.name.charAt(0)}</div>
+                            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{p.name}</div>
                           </div>
                         </td>
-                        <td style={{ padding: '1rem 1.2rem' }}>
-                          <span style={{ 
-                            padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,255,255,0.03)', 
-                            fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--muted)', border: '1px solid var(--border)' 
-                          }}>
-                            {p.category || "Ostatné"}
-                          </span>
+                        <td><span className="badge" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', fontSize: '0.65rem' }}>{p.category}</span></td>
+                        <td style={{ textAlign: 'center' }}>
+                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 1rem', borderRadius: '10px', background: 'rgba(0,0,0,0.3)', border: `1px solid ${stockColor}33` }}>
+                              <div style={{ width: 8, height: 8, borderRadius: '50%', background: stockColor, boxShadow: `0 0 10px ${stockColor}` }} />
+                              <span style={{ fontWeight: 950, color: stockColor, fontFamily: 'monospace', fontSize: '1rem' }}>{p.stock}ks</span>
+                           </div>
                         </td>
-                        <td style={{ textAlign: 'center', padding: '1rem 1.2rem' }}>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.8rem', borderRadius: '8px', background: `${stockColor}11` }}>
-                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: stockColor, boxShadow: `0 0 8px ${stockColor}` }}></div>
-                            <span style={{ fontWeight: 900, color: stockColor, fontFamily: 'var(--font-d)' }}>{p.stock} ks</span>
+                        <td style={{ textAlign: 'right', fontWeight: 950, color: 'var(--blue)', fontFamily: 'var(--font-d)', fontSize: '1.1rem' }}>{(p.priceCents / 100).toFixed(2)}€</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+                             <button className="btn btn-ghost btn-sm" onClick={() => openStockModal(p)} style={{ width: 36, padding: 0 }}><i className="fas fa-plus-square" /></button>
+                             <button className="btn btn-ghost btn-sm" onClick={() => openProductModal(p)} style={{ width: 36, padding: 0 }}><i className="fas fa-edit" /></button>
+                             <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(p.id, p.active)} style={{ width: 36, padding: 0, color: p.active ? 'var(--red)' : 'var(--acid2)' }}><i className={p.active ? "fas fa-eye-slash" : "fas fa-eye"} /></button>
                           </div>
                         </td>
-                        <td style={{ textAlign: 'right', padding: '1rem 1.2rem' }}>
-                          <div style={{ fontWeight: 950, color: 'var(--blue)', fontSize: '1.1rem', fontFamily: 'var(--font-d)' }}>
-                            {(p.priceCents / 100).toFixed(2)}<span style={{ fontSize: '0.8rem', marginLeft: '0.2rem', fontWeight: 700 }}>€</span>
-                          </div>
-                        </td>
-                        <td style={{ textAlign: 'right', padding: '1rem 1.2rem' }}>
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                             <button 
-                                className="btn-icon-v2" 
-                                onClick={() => openStockModal(p)} 
-                                style={{ color: 'var(--acid)', background: 'rgba(200,255,0,0.05)' }} 
-                                title="Doplniť zásoby"
-                             >
-                                <i className="fas fa-plus-square"></i>
-                             </button>
-                             <button className="btn-icon-v2" onClick={() => openProductModal(p)} title="Upraviť detaily">
-                                <i className="fas fa-edit"></i>
-                             </button>
-                             <button 
-                                className="btn-icon-v2" 
-                                onClick={() => toggleActive(p.id, p.active)} 
-                                style={{ color: p.active ? 'var(--red)' : 'var(--frozen)', background: p.active ? 'rgba(255,45,85,0.05)' : 'rgba(79,195,247,0.05)' }}
-                                title={p.active ? "Deaktivovať" : "Aktivovať"}
-                             >
-                                <i className={p.active ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-                             </button>
-                          </div>
-                        </td>
-                      </tr>
+                      </motion.tr>
                     );
                   })}
-                </tbody>
+                </motion.tbody>
               </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Product Modal */}
-      {productModal.open && (
-        <div style={{ position: 'fixed', inset: 0, zEnvironment: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 1000 }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }} onClick={() => setProductModal({ open: false })}></div>
-          <div className="panel animate-in" style={{ position: 'relative', width: '100%', maxWidth: '500px', zIndex: 1001, boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
-            <div className="ph" style={{ background: 'var(--surface2)' }}>
-              <span className="pt">{productModal.isEdit ? "UPRAVIŤ POLOŽKU" : "NOVÁ POLOŽKA"}</span>
-              <button className="btn btn-ghost btn-xs" onClick={() => setProductModal({ open: false })} style={{ borderRadius: '50%', width: '32px', height: '32px', padding: 0 }}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="pb" style={{ padding: '2rem' }}>
-              <div className="fg">
-                <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Názov produktu</label>
-                <input className="fi" type="text" value={pForm.name} onChange={e => setPForm({...pForm, name: e.target.value})} autoFocus style={{ borderRadius: '10px' }} />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-                <div className="fg">
-                  <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Cena (€)</label>
-                  <input className="fi" type="number" step="0.5" min="0" value={pForm.price} onChange={e => setPForm({...pForm, price: e.target.value})} style={{ borderRadius: '10px' }} />
-                </div>
-                <div className="fg">
-                  <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Počiatočný stav</label>
-                  <input className="fi" type="number" min="0" value={pForm.stock} onChange={e => setPForm({...pForm, stock: e.target.value})} disabled={productModal.isEdit} style={{ opacity: productModal.isEdit ? 0.5 : 1, borderRadius: '10px' }} />
-                </div>
-              </div>
-              <div className="fg">
-                <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Kategória</label>
-                <input className="fi" type="text" value={pForm.category} onChange={e => setPForm({...pForm, category: e.target.value})} list="cats-list" style={{ borderRadius: '10px' }} />
-                <datalist id="cats-list">
-                  {cats.map(c => <option key={c} value={c} />)}
-                </datalist>
-              </div>
-              <div className="fg">
-                <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Popis / Detaily</label>
-                <textarea className="fi" rows="3" value={pForm.description} onChange={e => setPForm({...pForm, description: e.target.value})} style={{ borderRadius: '10px', resize: 'none' }}></textarea>
-              </div>
-              {productModal.isEdit && (
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '10px' }}>
-                  <input type="checkbox" id="chkActive" checked={pForm.active} onChange={e => setPForm({...pForm, active: e.target.checked})} style={{ width: '20px', height: '20px' }} />
-                  <label htmlFor="chkActive" style={{ fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>PRODUKT JE AKTÍVNY A DOSTUPNÝ</label>
-                </div>
-              )}
-              
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
-                <button className="btn btn-ghost btn-block" onClick={() => setProductModal({ open: false })} style={{ height: '48px', borderRadius: '10px' }}>ZRUŠIŤ</button>
-                <button className="btn btn-blue btn-block" onClick={saveProduct} style={{ height: '48px', borderRadius: '10px', fontWeight: 900 }}>
-                  <i className="fas fa-save" style={{marginRight: '0.6rem'}}></i> ULOŽIŤ ZMENY
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
-      )}
+      </motion.div>
 
-      {/* Stock Modal */}
-      {stockModal.open && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }} onClick={() => setStockModal({ open: false })}></div>
-          <div className="panel animate-in" style={{ position: 'relative', width: '100%', maxWidth: '380px', zIndex: 1001, boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
-            <div className="ph" style={{ background: 'var(--surface2)' }}>
-              <span className="pt">DOPLNIŤ ZÁSOBY</span>
-              <button className="btn btn-ghost btn-xs" onClick={() => setStockModal({ open: false })} style={{ borderRadius: '50%', width: '32px', height: '32px', padding: 0 }}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="pb" style={{ padding: '2rem' }}>
-              <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                <div style={{ fontSize: "1.2rem", fontWeight: 950, fontFamily: 'var(--font-d)', marginBottom: '0.4rem' }}>{stockModal.name}</div>
-                <div style={{ display: "inline-flex", background: "rgba(255,255,255,0.05)", padding: "0.6rem 1.2rem", borderRadius: "10px", fontSize: '0.9rem', color: 'var(--muted)', fontWeight: 600 }}>
-                  Aktuálny stav: <span style={{ marginLeft: '0.5rem', color: 'var(--text)', fontWeight: 900 }}>{stockModal.current} KS</span>
+      {/* Modals with AnimatePresence */}
+      <AnimatePresence>
+        {productModal.open && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" onClick={() => setProductModal({ open: false })} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 1000 }} />
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="panel glass-panel" style={{ position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '540px', zIndex: 1001, border: '1px solid var(--border)' }}>
+              <div className="ph" style={{ borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <span className="pt" style={{ fontFamily: 'var(--font-d)', fontWeight: 950, letterSpacing: '0.1em' }}>{productModal.isEdit ? "UPRAVIŤ" : "NOVÝ PRODUKT"}</span>
+                <button className="btn btn-ghost" onClick={() => setProductModal({ open: false })}><i className="fas fa-times" /></button>
+              </div>
+              <div className="pb" style={{ padding: '2rem' }}>
+                <div className="fg" style={{ marginBottom: '1.5rem' }}>
+                  <label className="fl">NÁZOV PRODUKTU</label>
+                  <input className="fi" type="text" value={pForm.name} onChange={e => setPForm({...pForm, name: e.target.value})} style={{ borderRadius: '12px', height: '52px' }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                  <div className="fg">
+                    <label className="fl">CENA (€)</label>
+                    <input className="fi" type="number" step="0.5" value={pForm.price} onChange={e => setPForm({...pForm, price: e.target.value})} style={{ borderRadius: '12px', height: '52px' }} />
+                  </div>
+                  <div className="fg">
+                    <label className="fl">KATEGÓRIA</label>
+                    <input className="fi" type="text" value={pForm.category} onChange={e => setPForm({...pForm, category: e.target.value})} style={{ borderRadius: '12px', height: '52px' }} />
+                  </div>
+                </div>
+                <div className="fg" style={{ marginBottom: '2rem' }}>
+                   <label className="fl">POPIS</label>
+                   <textarea className="fi" rows="3" value={pForm.description} onChange={e => setPForm({...pForm, description: e.target.value})} style={{ borderRadius: '12px', resize: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                   <button className="btn btn-ghost btn-block" onClick={() => setProductModal({ open: false })} style={{ height: '56px', borderRadius: '14px' }}>Zrušiť</button>
+                   <button className="btn btn-blue btn-block" onClick={saveProduct} style={{ flex: 2, height: '56px', borderRadius: '14px', fontWeight: 950, letterSpacing: '0.1em' }}><i className="fas fa-save" style={{marginRight: '0.8rem'}} />ULOŽIŤ ZMENY</button>
                 </div>
               </div>
-              
-              <div className="fg">
-                <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', display: 'block' }}>Množstvo na pridanie</label>
-                <input 
-                  className="fi" 
-                  type="number" 
-                  min="1" 
-                  autoFocus 
-                  value={stockDelta} 
-                  onChange={e => setStockDelta(e.target.value)} 
-                  style={{ fontSize: "1.8rem", textAlign: "center", height: '70px', borderRadius: '15px', fontWeight: 900, fontFamily: 'var(--font-d)', border: '2px solid var(--purple)' }} 
-                />
-              </div>
+            </motion.div>
+          </>
+        )}
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button className="btn btn-ghost btn-block" onClick={() => setStockModal({ open: false })} style={{ height: '48px', borderRadius: '10px' }}>ZRUŠIŤ</button>
-                <button className="btn btn-purple btn-block" onClick={saveStock} style={{ height: '48px', borderRadius: '10px', fontWeight: 900 }}>
-                  <i className="fas fa-plus-circle" style={{marginRight: '0.6rem'}}></i> PRIDAŤ DO STAVU
-                </button>
+        {stockModal.open && (
+           <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" onClick={() => setStockModal({ open: false })} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 1000 }} />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="panel glass-panel" style={{ position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: '360px', zIndex: 1001, textAlign: 'center' }}>
+              <div className="pb" style={{ padding: '3rem 2rem' }}>
+                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(191,90,242,0.1)', color: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1.5rem' }}><i className="fas fa-plus-square" /></div>
+                 <div style={{ fontSize: '1.4rem', fontWeight: 950, fontFamily: 'var(--font-d)', color: '#fff', marginBottom: '0.5rem' }}>{stockModal.name}</div>
+                 <div style={{ fontSize: '0.8rem', color: 'var(--muted)', marginBottom: '2rem' }}>AKTUÁLNE: {stockModal.current} KS</div>
+                 <div className="fg" style={{ marginBottom: '2rem' }}>
+                    <input className="fi" type="number" value={stockDelta} onChange={e => setStockDelta(e.target.value)} style={{ textAlign: 'center', fontSize: '2.5rem', height: '80px', borderRadius: '16px', fontWeight: 950, fontFamily: 'var(--font-d)', border: '2px solid var(--purple)' }} />
+                 </div>
+                 <button className="btn btn-purple btn-block" onClick={saveStock} style={{ height: '60px', borderRadius: '16px', fontWeight: 950, letterSpacing: '0.1em' }}>DOPLNIŤ ZÁSOBY</button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+           </>
+        )}
+      </AnimatePresence>
 
       {toastMsg && <Toast message={toastMsg.msg} type={toastMsg.type} onClose={() => setToastMsg(null)} />}
-    </div>
+    </motion.div>
   );
 }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { authenticatedFetch } from "../../utils/api";
-// Importing jsQR requires it to be available. Assuming it is correctly linked from public/Jsqr.js.
-// We will access it via window.jsQR
 import Toast from "../Toast";
 
 export default function CheckInTab() {
@@ -17,6 +16,7 @@ export default function CheckInTab() {
   
   const [checkinResult, setCheckinResult] = useState(null);
   const [todayCheckins, setTodayCheckins] = useState(null);
+  const [historyOpen, setHistoryOpen] = useState(true);
 
   const [toastMsg, setToastMsg] = useState(null);
 
@@ -26,7 +26,7 @@ export default function CheckInTab() {
 
   useEffect(() => {
     loadTodayCheckins();
-    return () => stopCamera(); // Cleanup camera on unmount
+    return () => stopCamera();
   }, []);
 
   const loadTodayCheckins = async () => {
@@ -43,7 +43,6 @@ export default function CheckInTab() {
     }
   };
 
-  // QR Camera logic
   const toggleCamera = async () => {
     if (cameraStream) {
       stopCamera();
@@ -125,7 +124,6 @@ export default function CheckInTab() {
       return;
     }
     try {
-      // Re-use admin profiles endpoint since reception can see it
       const res = await authenticatedFetch("/api/admin/profiles");
       if (res.ok) {
         const members = await res.json();
@@ -156,9 +154,9 @@ export default function CheckInTab() {
         setCheckinResult({
           type: "err",
           name: displayName || userId,
-          msg: "Člen nemá aktívnu permanentku",
+          msg: "Člen nemá aktívnu permanentka",
         });
-        showToast("Zamietnutý: Člen nemá aktívnu permanentku", "err");
+        showToast("Zamietnutý: Člen nemá aktívnu permanentka", "err");
         return;
       }
       const mem = await resM.json();
@@ -200,256 +198,285 @@ export default function CheckInTab() {
     }
   };
 
-  const renderTodayCheckins = () => {
-    if (!todayCheckins) return <div className="empty-state"><span className="spinner"></span></div>;
-    if (todayCheckins.length === 0) return <div className="empty-state" style={{ padding: "1.5rem" }}><i className="fas fa-sign-in-alt"></i><p>Zatiaľ žiadne vstupy dnes</p></div>;
-
-    return todayCheckins.slice(0, 20).map((c, i) => {
-      const ini = (c.fullName || "?").split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
-      const t = c.checkedAt ? new Date(c.checkedAt).toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit" }) : "—";
-      return (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.8rem", padding: "0.6rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-          <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "linear-gradient(135deg, var(--purple), var(--blue))", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-d)", fontSize: "0.9rem", fontWeight: "700", flexShrink: 0 }}>
-            {ini}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: "0.84rem", fontWeight: 500 }}>{c.fullName || "—"}</div>
-            <div style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{c.email || ""}</div>
-          </div>
-          <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{t}</div>
-        </div>
-      );
-    });
-  };
-
   const getInitials = (name) => {
     if (!name) return "?";
-    return name
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
+    return name.split(" ").map((w) => w[0]).join("").substring(0, 2).toUpperCase();
   };
 
-  const [historyOpen, setHistoryOpen] = useState(true);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } }
+  };
+
+  const renderTodayCheckins = () => {
+    if (!todayCheckins) return <div className="empty-state"><span className="spinner"></span></div>;
+    if (todayCheckins.length === 0) return (
+      <div className="empty-state" style={{ padding: "3rem" }}>
+        <i className="fas fa-sign-in-alt neon-text-purple" style={{ fontSize: '3rem', opacity: 0.1, marginBottom: '1rem' }} />
+        <p style={{ fontWeight: 800 }}>Zatiaľ žiadne vstupy dnes</p>
+      </div>
+    );
+
+    return (
+      <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ padding: '0 1rem' }}>
+        {todayCheckins.slice(0, 20).map((c, i) => {
+          const ini = getInitials(c.fullName);
+          const t = c.checkedAt ? new Date(c.checkedAt).toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit" }) : "—";
+          return (
+            <motion.div 
+              key={i} 
+              variants={itemVariants}
+              className="glass"
+              style={{ display: "flex", alignItems: "center", gap: "0.8rem", padding: "0.8rem 1rem", border: "1px solid var(--border)", borderRadius: '12px', marginBottom: '0.6rem', background: 'rgba(255,255,255,0.01)' }}
+            >
+              <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "linear-gradient(135deg, var(--purple), var(--blue))", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-d)", fontSize: "0.9rem", fontWeight: "950", color: "#fff", flexShrink: 0 }}>
+                {ini}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: "0.9rem", fontWeight: 800 }}>{c.fullName || "—"}</div>
+                <div style={{ fontSize: "0.74rem", color: "var(--muted)" }}>{c.email || ""}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: "0.85rem", color: "var(--acid2)", fontWeight: 900 }}>{t}</div>
+                <div style={{ fontSize: "0.6rem", color: "var(--muted)", textTransform: 'uppercase' }}>Čas</div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </motion.div>
+    );
+  };
 
   return (
-    <div className="dashboard-grid animate-in">
-      <div className="panel animate-in">
+    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="dashboard-grid">
+      <motion.div variants={itemVariants} className="panel glass-panel">
         <div className="ph">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <div style={{ width: 32, height: 32, background: 'rgba(191,90,242,0.1)', color: 'var(--purple)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="fas fa-sign-in-alt"></i>
+            <div className="neon-icon purple" style={{ width: 32, height: 32, background: 'rgba(191,90,242,0.1)', color: 'var(--purple)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="fas fa-id-card-alt"></i>
             </div>
             <span className="pt">Odbavenie vstupu</span>
           </div>
-          <span className="method m-purple">API: CHECKIN_SCAN</span>
+          <span className="method m-purple" style={{ fontSize: '0.65rem' }}>SCANNER_ACTIVE</span>
         </div>
-        <div className="pb">
-          {/* Tabs */}
-          <div className="checkin-tabs" style={{ background: 'var(--surface2)', padding: '0.4rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', gap: '0.4rem' }}>
+        <div className="pb" style={{ padding: '1.2rem' }}>
+          <div className="checkin-tabs" style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem', borderRadius: '14px', marginBottom: '1.5rem', display: 'flex', gap: '0.4rem', border: '1px solid var(--border)' }}>
             <button 
               className={`ctab ${activeTab === "qr" ? "active" : ""}`} 
               onClick={() => setActiveTab("qr")}
-              style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', border: 'none', background: activeTab === 'qr' ? 'var(--purple)' : 'transparent', color: activeTab === 'qr' ? '#fff' : 'var(--muted)', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', transition: 'all 0.2s' }}
+              style={{ flex: 1, padding: '0.9rem', borderRadius: '10px', border: 'none', background: activeTab === 'qr' ? 'var(--purple)' : 'transparent', color: activeTab === 'qr' ? '#fff' : 'var(--muted)', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', transition: 'all 0.3s' }}
             >
               <i className="fas fa-qrcode"></i> QR SKENER
             </button>
             <button 
               className={`ctab ${activeTab === "name" ? "active" : ""}`}
               onClick={() => setActiveTab("name")}
-              style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', border: 'none', background: activeTab === 'name' ? 'var(--purple)' : 'transparent', color: activeTab === 'name' ? '#fff' : 'var(--muted)', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', transition: 'all 0.2s' }}
+              style={{ flex: 1, padding: '0.9rem', borderRadius: '10px', border: 'none', background: activeTab === 'name' ? 'var(--purple)' : 'transparent', color: activeTab === 'name' ? '#fff' : 'var(--muted)', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', transition: 'all 0.3s' }}
             >
               <i className="fas fa-search"></i> MANUÁLNE
             </button>
           </div>
 
-          {/* QR Tab */}
-          {activeTab === "qr" && (
-            <div className="animate-in">
-              <div className="fg">
-                <label className="fl">QR kód / Identifikátor</label>
-                <div style={{ position: 'relative' }}>
-                  <i className="fas fa-barcode" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
-                  <input 
-                    className="fi" 
-                    type="text" 
-                    placeholder="Zadajte kód alebo skenujte..." 
-                    value={qrInput}
-                    onChange={(e) => setQrInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && processCheckin(qrInput, null)}
-                    style={{ paddingLeft: '2.8rem', borderRadius: '10px', height: '52px', fontSize: '1rem' }}
-                  />
+          <AnimatePresence mode="wait">
+            {activeTab === "qr" ? (
+              <motion.div key="qr" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                <div className="fg">
+                  <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '0.6rem' }}>QR kód alebo Identifikátor</label>
+                  <div style={{ position: 'relative' }}>
+                    <i className="fas fa-barcode" style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--purple)' }}></i>
+                    <input 
+                      className="fi" 
+                      type="text" 
+                      placeholder="Zadaj kód manuálne..." 
+                      value={qrInput}
+                      onChange={(e) => setQrInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && processCheckin(qrInput, null)}
+                      style={{ paddingLeft: '3.2rem', borderRadius: '12px', height: '56px', fontSize: '1.1rem', background: 'rgba(255,255,255,0.02)' }}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: "flex", gap: "0.8rem", marginBottom: "1.5rem" }}>
-                <button className="btn btn-purple" onClick={() => processCheckin(qrInput, null)} style={{ flex: 1, height: '52px', borderRadius: '10px', fontWeight: 800 }}>
-                  <i className="fas fa-sign-in-alt" style={{marginRight: '0.6rem'}}></i> OVERIŤ VSTUP
-                </button>
-                <button className={`btn ${cameraStream ? 'btn-red' : 'btn-ghost'}`} onClick={toggleCamera} style={{ borderRadius: '10px', width: '52px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className={`fas fa-${cameraStream ? 'times' : 'camera'}`}></i>
-                </button>
-              </div>
-              
-              {/* Camera Wrap */}
-              {cameraStream && (
-                <div className="animate-in" style={{ marginTop: "0.8rem", background: "#000", border: "1px solid var(--purple)", borderRadius: "16px", overflow: "hidden", position: "relative", boxShadow: '0 0 30px rgba(191,90,242,0.2)' }}>
-                  <video ref={videoRef} style={{ width: "100%", display: "block", maxHeight: "350px", objectFit: "cover" }} autoPlay playsInline muted></video>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                    <div style={{ width: "240px", height: "240px", border: "2px solid var(--purple)", borderRadius: "20px", boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)", position: "relative", overflow: "hidden" }}>
-                      <div className="camera-scanning" style={{ position: "absolute", left: 0, width: "100%", height: "2px", background: "linear-gradient(90deg,transparent,var(--purple),transparent)", animation: "scan 2s linear infinite", boxShadow: '0 0 15px var(--purple)' }}></div>
+                <div style={{ display: "flex", gap: "0.8rem", marginBottom: "1.5rem" }}>
+                  <button className="btn btn-purple" onClick={() => processCheckin(qrInput, null)} style={{ flex: 1, height: '56px', borderRadius: '12px', fontWeight: 900, fontSize: '1rem', boxShadow: '0 10px 20px rgba(191,90,242,0.15)' }}>
+                    <i className="fas fa-sign-in-alt" style={{marginRight: '0.8rem'}}></i> OVERIŤ VSTUP
+                  </button>
+                  <button className={`btn ${cameraStream ? 'btn-red' : 'btn-ghost'}`} onClick={toggleCamera} style={{ borderRadius: '12px', width: '56px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                    <i className={`fas fa-${cameraStream ? 'times' : 'camera'}`}></i>
+                  </button>
+                </div>
+                
+                {cameraStream && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ marginTop: "1rem" }}>
+                    <div className="camera-wrap" style={{ background: "#000", border: "2px solid var(--purple)", borderRadius: "20px", overflow: "hidden", position: "relative", boxShadow: '0 0 40px rgba(191,90,242,0.3)' }}>
+                      <video ref={videoRef} style={{ width: "100%", display: "block", maxHeight: "350px", objectFit: "cover" }} autoPlay playsInline muted></video>
+                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                        <div style={{ width: "240px", height: "240px", border: "2px solid var(--purple)", borderRadius: "24px", boxShadow: "0 0 0 9999px rgba(0,0,0,0.75)", position: "relative" }}>
+                          <motion.div 
+                            animate={{ top: ['0%', '100%', '0%'] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                            style={{ position: "absolute", left: '5%', width: "90%", height: "2px", background: "var(--purple)", boxShadow: '0 0 15px var(--purple), 0 0 30px var(--purple)' }}
+                          />
+                        </div>
+                      </div>
+                      <div style={{ position: "absolute", top: "1.2rem", right: "1.2rem" }}>
+                        <button className="btn btn-red btn-xs" onClick={stopCamera} style={{borderRadius: '12px', width: 32, height: 32, padding: 0}}><i className="fas fa-times"></i></button>
+                      </div>
+                      <div style={{ position: "absolute", bottom: "1.2rem", left: 0, right: 0, textAlign: "center", fontSize: "0.75rem", color: "#fff", textTransform: 'uppercase', letterSpacing: '0.15em', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', padding: '0.4rem', margin: '0 2rem', borderRadius: '10px' }}>
+                        <i className="fas fa-spinner fa-spin" style={{marginRight: '0.6rem', color: 'var(--purple)'}}></i> Živý skener aktívny...
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ position: "absolute", top: "1rem", right: "1rem" }}>
-                    <button className="btn btn-red btn-xs" onClick={stopCamera} style={{borderRadius: '20px', padding: '0.4rem 0.8rem'}}><i className="fas fa-times"></i></button>
-                  </div>
-                  <div style={{ position: "absolute", bottom: "1rem", left: 0, right: 0, textAlign: "center", fontSize: "0.7rem", color: "#fff", textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    <i className="fas fa-sync fa-spin" style={{marginRight: '0.5rem'}}></i> Hľadám QR kód...
+                  </motion.div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div key="name" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
+                <div className="fg">
+                  <label className="fl" style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '0.6rem' }}>Search Client Database</label>
+                  <div style={{ position: 'relative' }}>
+                    <i className="fas fa-user-search" style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--purple)' }}></i>
+                    <input 
+                      className="fi" 
+                      type="text" 
+                      placeholder="Meno, priezvisko alebo email..." 
+                      value={nameSearch}
+                      onChange={(e) => handleNameSearch(e.target.value)}
+                      style={{ paddingLeft: '3.2rem', borderRadius: '12px', height: '56px', background: 'rgba(255,255,255,0.02)' }}
+                    />
                   </div>
                 </div>
-              )}
-            </div>
-          )}
+                <div className="name-results glass" style={{ background: 'rgba(0,0,0,0.2)', border: "1px solid var(--border)", borderRadius: "16px", maxHeight: "350px", overflowY: "auto", padding: '0.6rem' }}>
+                  {nameSearch.length < 2 ? (
+                    <div style={{ padding: "2.5rem 1.5rem", textAlign: "center", color: "var(--muted)", fontSize: "0.88rem" }}>
+                      <i className="fas fa-keyboard" style={{display: 'block', fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.1}}></i>
+                      Zadajte aspoň 2 znaky pre vyhľadávanie
+                    </div>
+                  ) : nameResults.length === 0 ? (
+                    <div style={{ padding: "2.5rem 1.5rem", textAlign: "center", color: "var(--muted)", fontSize: "0.88rem" }}>
+                      <i className="fas fa-search-minus" style={{display: 'block', fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.1}}></i>
+                      Nenašli sa žiadne výsledky
+                    </div>
+                  ) : (
+                    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+                      {nameResults.map((m, idx) => (
+                        <motion.div 
+                          key={idx} 
+                          variants={itemVariants}
+                          style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.8rem 1rem", borderRadius: '12px', cursor: "pointer", transition: "all 0.2s", marginBottom: '6px', background: 'rgba(255,255,255,0.01)', border: '1px solid transparent' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(191,90,242,0.2)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.01)'; e.currentTarget.style.borderColor = 'transparent'; }}
+                          onClick={() => doCheckinById(m.id, m.fullName)}
+                        >
+                          <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: "linear-gradient(135deg, var(--purple), var(--blue))", border: '1px solid rgba(255,255,255,0.1)', display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-d)", fontSize: "0.95rem", fontWeight: "950", color: "#fff", flexShrink: 0 }}>
+                            {getInitials(m.fullName)}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: "0.95rem", fontWeight: 800 }}>{m.fullName || "—"}</div>
+                            <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{m.email || ""}</div>
+                          </div>
+                          <span className={`badge ${m.active ? "b-acid" : "b-frozen"}`} style={{ fontSize: "0.62rem", padding: '0.3rem 0.6rem' }}>
+                            {m.active ? "AKTÍVNY" : "ZMRAZENÝ"}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Name Tab */}
-          {activeTab === "name" && (
-            <div className="animate-in">
-              <div className="fg">
-                <label className="fl">Search Client Database</label>
-                <div style={{ position: 'relative' }}>
-                  <i className="fas fa-user-search" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}></i>
-                  <input 
-                    className="fi" 
-                    type="text" 
-                    placeholder="Meno, priezvisko alebo email..." 
-                    value={nameSearch}
-                    onChange={(e) => handleNameSearch(e.target.value)}
-                    style={{ paddingLeft: '2.8rem', borderRadius: '10px' }}
-                  />
-                </div>
-              </div>
-              <div className="name-results" style={{ background: 'rgba(255,255,255,0.02)', border: "1px solid var(--border)", borderRadius: "12px", maxHeight: "250px", overflowY: "auto", padding: '0.5rem' }}>
-                {nameSearch.length < 2 ? (
-                  <div style={{ padding: "1.5rem", textAlign: "center", color: "var(--muted)", fontSize: "0.85rem" }}>
-                    <i className="fas fa-keyboard" style={{display: 'block', marginBottom: '0.5rem', opacity: 0.2}}></i>
-                    Zadajte aspoň 2 znaky pre vyhľadávanie
-                  </div>
-                ) : nameResults.length === 0 ? (
-                  <div style={{ padding: "1.5rem", textAlign: "center", color: "var(--muted)", fontSize: "0.85rem" }}>
-                    Nenašli sa žiadne výsledky
+          <AnimatePresence>
+            {checkinResult && (
+              <motion.div 
+                key="result"
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className={`checkin-result ${checkinResult.type}`} 
+                style={{ marginTop: '2rem', padding: '1.8rem', borderRadius: '20px', border: '2px solid', borderColor: checkinResult.type === 'ok' ? 'rgba(200,255,0,0.3)' : 'rgba(255,45,85,0.3)', background: checkinResult.type === 'ok' ? 'rgba(200,255,0,0.08)' : 'rgba(255,45,85,0.08)', boxShadow: checkinResult.type === 'ok' ? '0 15px 35px rgba(200,255,0,0.1)' : '0 15px 35px rgba(255,45,85,0.1)' }}
+              >
+                {checkinResult.type === "ok" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "1.8rem" }}>
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 12 }} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--acid)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', boxShadow: '0 0 20px var(--acid)' }}>
+                      <i className="fas fa-check"></i>
+                    </motion.div>
+                    <div>
+                      <div style={{ fontFamily: "var(--font-d)", fontSize: "1.8rem", fontWeight: 950, color: "var(--acid)", textTransform: 'uppercase', lineHeight: 1, letterSpacing: '0.05em' }}>
+                        Vstup povolený
+                      </div>
+                      <div style={{ fontSize: "1.1rem", fontWeight: 800, marginTop: "0.5rem", color: '#fff' }}>
+                        {checkinResult.data.fullName || "Člen"}
+                      </div>
+                      <div style={{ display: "flex", gap: '0.8rem', marginTop: "1rem", alignItems: 'center' }}>
+                        <span className="badge b-acid" style={{ border: 'none', background: 'rgba(200,255,0,0.2)', color: 'var(--acid)', fontWeight: 800 }}>
+                           {checkinResult.mem.membershipTypeName || "Paušál"}
+                        </span>
+                        <div style={{ fontSize: "0.82rem", color: "var(--muted)", fontWeight: 600 }}>
+                          Zostatok: <span style={{ color: 'var(--text)' }}>{checkinResult.mem.daysRemaining} dní</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  nameResults.map((m, idx) => (
-                    <div 
-                      key={idx} 
-                      style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.8rem 1rem", borderRadius: '8px', cursor: "pointer", transition: "all 0.2s", marginBottom: '4px' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.transform = 'translateX(5px)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateX(0)'; }}
-                      onClick={() => doCheckinById(m.id, m.fullName)}
-                    >
-                      <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "linear-gradient(135deg, var(--purple), var(--blue))", border: '1px solid rgba(255,255,255,0.1)', display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-d)", fontSize: "0.85rem", fontWeight: "900", color: "#fff", flexShrink: 0 }}>
-                        {m.avatarUrl ? <img src={m.avatarUrl} alt="" style={{ width: "100%", height: "100%", borderRadius: "10px", objectFit: "cover" }} /> : getInitials(m.fullName)}
+                  <div style={{ display: "flex", alignItems: "center", gap: "1.8rem" }}>
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 12 }} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', boxShadow: '0 0 20px rgba(255,45,85,0.4)' }}>
+                      <i className="fas fa-times"></i>
+                    </motion.div>
+                    <div>
+                      <div style={{ fontFamily: "var(--font-d)", fontSize: "1.8rem", fontWeight: 950, color: "var(--red)", textTransform: 'uppercase', lineHeight: 1, letterSpacing: '0.05em' }}>
+                        Vstup zamietnutý
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "0.92rem", fontWeight: 800 }}>{m.fullName || "—"}</div>
-                        <div style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{m.email || ""}</div>
+                      <div style={{ fontSize: "1rem", fontWeight: 600, marginTop: "0.4rem", color: 'rgba(255,255,255,0.6)' }}>
+                        ID/Meno: {checkinResult.name}
                       </div>
-                      <span className={`badge ${m.active ? "b-acid" : "b-frozen"}`} style={{ fontSize: "0.6rem" }}>
-                        {m.active ? "AKTÍVNY" : "ZMRAZENÝ"}
-                      </span>
+                      <div style={{ fontSize: "0.92rem", color: "var(--red)", marginTop: "0.8rem", fontWeight: 700, padding: '0.4rem 0.8rem', background: 'rgba(255,45,85,0.1)', borderRadius: '8px', display: 'inline-block' }}>
+                        <i className="fas fa-exclamation-circle" style={{marginRight: '0.5rem'}}></i> {checkinResult.msg}
+                      </div>
                     </div>
-                  ))
+                  </div>
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* Results Display */}
-          {checkinResult && (
-            <div className={`checkin-result ${checkinResult.type} animate-in`} style={{ marginTop: '1.5rem', padding: '1.5rem', borderRadius: '16px', border: '1px solid', borderColor: checkinResult.type === 'ok' ? 'rgba(200,255,0,0.2)' : 'rgba(255,45,85,0.2)', background: checkinResult.type === 'ok' ? 'rgba(200,255,0,0.05)' : 'rgba(255,45,85,0.05)' }}>
-              {checkinResult.type === "ok" ? (
-                <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-                   <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--acid)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>
-                    <i className="fas fa-check"></i>
-                   </div>
-                  <div>
-                    <div style={{ fontFamily: "var(--font-d)", fontSize: "1.6rem", fontWeight: 900, color: "var(--acid)", textTransform: 'uppercase', lineHeight: 1 }}>
-                      Vstup povolený
-                    </div>
-                    <div style={{ fontSize: "1rem", fontWeight: 700, marginTop: "0.3rem" }}>
-                      {checkinResult.data.fullName || "Člen"}
-                    </div>
-                    <div style={{ display: "flex", gap: '0.8rem', marginTop: "0.8rem" }}>
-                      <span className="badge b-acid" style={{borderRadius: '4px'}}>
-                         {checkinResult.mem.membershipTypeName || "Paušál"}
-                      </span>
-                      <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
-                        Zostatok: <b>{checkinResult.mem.daysRemaining} dní</b>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-                   <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>
-                    <i className="fas fa-times"></i>
-                   </div>
-                  <div>
-                    <div style={{ fontFamily: "var(--font-d)", fontSize: "1.6rem", fontWeight: 900, color: "var(--red)", textTransform: 'uppercase', lineHeight: 1 }}>
-                      Vstup zamietnutý
-                    </div>
-                    <div style={{ fontSize: "0.95rem", fontWeight: 400, marginTop: "0.3rem", color: 'var(--muted)' }}>
-                      Pre: {checkinResult.name}
-                    </div>
-                    <div style={{ fontSize: "0.88rem", color: "var(--red)", marginTop: "0.6rem", fontWeight: 600 }}>
-                      <i className="fas fa-ban"></i> {checkinResult.msg}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="panel animate-in" style={{ animationDelay: '0.1s' }}>
+      <motion.div variants={itemVariants} className="panel glass-panel">
         <div className="ph" onClick={() => setHistoryOpen(!historyOpen)} style={{ cursor: 'pointer' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <div style={{ width: 32, height: 32, background: 'rgba(0,255,209,0.1)', color: 'var(--acid2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="neon-icon cyan" style={{ width: 32, height: 32, background: 'rgba(0,255,209,0.1)', color: 'var(--acid2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <i className="fas fa-history"></i>
             </div>
             <span className="pt">História dnes</span>
           </div>
-          <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-            {historyOpen && (
-              <button 
-                className="btn btn-ghost btn-xs" 
-                onClick={(e) => { e.stopPropagation(); loadTodayCheckins(); }}
-                style={{ borderRadius: '6px' }}
-              >
-                OBNOVIŤ <i className="fas fa-sync-alt"></i>
-              </button>
-            )}
-            <i className={`fas fa-chevron-${historyOpen ? 'up' : 'down'}`} style={{ color: 'var(--muted)', fontSize: '0.9rem' }}></i>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <button className="btn btn-ghost btn-xs" onClick={(e) => { e.stopPropagation(); loadTodayCheckins(); }} style={{ borderRadius: '6px' }}>
+              <i className="fas fa-sync-alt"></i>
+            </button>
+            <motion.i animate={{ rotate: historyOpen ? 0 : 180 }} className="fas fa-chevron-up" style={{ color: 'var(--muted)', fontSize: '0.8rem' }} />
           </div>
         </div>
-        {historyOpen && (
-          <div className="pb animate-in" style={{ maxHeight: "650px", overflowY: "auto" }}>
-            {renderTodayCheckins()}
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {historyOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div className="pb" style={{ maxHeight: "650px", overflowY: "auto", paddingBottom: '1.5rem' }}>
+                {renderTodayCheckins()}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {toastMsg && <Toast message={toastMsg.msg} type={toastMsg.type} onClose={() => setToastMsg(null)} />}
-
-      <style>{`
-        @keyframes scan {
-          0% { top: 0%; }
-          100% { top: 100%; }
-        }
-      `}</style>
-    </div>
+    </motion.div>
   );
 }

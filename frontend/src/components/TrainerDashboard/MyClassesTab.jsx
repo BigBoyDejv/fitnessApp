@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
 export default function MyClassesTab() {
@@ -7,7 +8,7 @@ export default function MyClassesTab() {
   const [error, setError] = useState('');
   
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState(''); // '', 'upcoming', 'past'
+  const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming', 'past'
 
   const loadData = async () => {
     setLoading(true);
@@ -31,121 +32,239 @@ export default function MyClassesTab() {
   const now = new Date();
 
   const filteredClasses = classes.filter(c => {
-    const matchQ = !search || 
+    const matchSearch = !search || 
       (c.name || '').toLowerCase().includes(search.toLowerCase()) || 
       (c.location || '').toLowerCase().includes(search.toLowerCase());
     
     const isPast = new Date(c.startTime) < now;
-    const matchF = !filter || 
-      (filter === 'upcoming' && !isPast) || 
-      (filter === 'past' && isPast);
+    const matchTab = (activeTab === 'upcoming' && !isPast) || 
+                     (activeTab === 'past' && isPast);
       
-    return matchQ && matchF;
+    return matchSearch && matchTab;
   });
 
-  const sortedClasses = [...filteredClasses].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  // Sort upcoming ascending, past descending
+  const sortedClasses = [...filteredClasses].sort((a, b) => {
+    const da = new Date(a.startTime);
+    const db = new Date(b.startTime);
+    return activeTab === 'upcoming' ? da - db : db - da;
+  });
+
+  const getStatusInfo = (startTime) => {
+    const isPast = new Date(startTime) < now;
+    return isPast 
+      ? { label: 'Prebehla', color: 'var(--muted)', bg: 'rgba(255,255,255,0.05)', icon: 'fa-check-circle' }
+      : { label: 'Nadchádzajúca', color: 'var(--blue)', bg: 'rgba(10,132,255,0.1)', icon: 'fa-clock' };
+  };
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   return (
-    <div className="panel">
-      <div className="ph">
-        <span className="pt">Moje lekcie</span>
-        <div style={{ display: 'flex', gap: '0.7rem', alignItems: 'center' }}>
-          <span className="badge b-blue" style={{ textTransform: 'none', letterSpacing: '0', padding: '0.18rem 0.55rem' }}>GET /api/trainer/classes</span>
-          <button className="btn btn-ghost btn-sm" onClick={loadData}>
-            <i className="fas fa-sync-alt"></i> Obnoviť
-          </button>
+    <div className="tab-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.2rem' }}>Moje lekcie</h2>
+          <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Správa tréningových hodín a účastníkov</p>
         </div>
-      </div>
-      
-      <div className="pb">
-        {error && (
-          <div style={{ background: 'rgba(255,45,85,0.1)', color: 'var(--red)', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-            <i className="fas fa-exclamation-circle"></i> {error}
-          </div>
-        )}
+        <button className="btn btn-ghost" onClick={loadData} style={{ borderRadius: '10px' }}>
+          <i className="fas fa-sync-alt" /> Refresh
+        </button>
+      </header>
 
-        <div className="search-bar">
+      {/* ── Sub-Tabs Navigation ────────────────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '2rem' }}>
+          {[
+            { id: 'upcoming', label: 'Nadchádzajúce', icon: 'fa-bolt' },
+            { id: 'past', label: 'Minulé / Ukončené', icon: 'fa-history' }
+          ].map(t => (
+            <div 
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                style={{ 
+                    padding: '0.75rem 0.2rem', 
+                    cursor: 'pointer', 
+                    position: 'relative',
+                    color: activeTab === t.id ? 'var(--blue)' : 'var(--muted)',
+                    fontWeight: activeTab === t.id ? 800 : 600,
+                    fontSize: '0.95rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    transition: 'all 0.2s'
+                }}
+            >
+                <i className={`fas ${t.icon}`} style={{ fontSize: '0.85rem' }} />
+                {t.label}
+                {activeTab === t.id && (
+                    <motion.div 
+                        layoutId="activeTabUnderline"
+                        style={{ position: 'absolute', bottom: -1, left: 0, right: 0, height: 2, background: 'var(--blue)', borderRadius: 1 }}
+                    />
+                )}
+            </div>
+          ))}
+        </div>
+
+        {/* Search inside tab row for efficiency */}
+        <div style={{ position: 'relative', minWidth: '280px' }}>
+          <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: '0.85rem' }} />
           <input 
             className="fi" 
             type="text" 
-            placeholder="Hľadaj podľa názvu alebo miesta..." 
+            placeholder="Rýchle hľadanie..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            style={{ paddingLeft: '2.5rem', height: '36px', borderRadius: '8px', background: 'rgba(0,0,0,0.15)', fontSize: '0.85rem' }}
           />
-          <select 
-            className="fi" 
-            style={{ maxWidth: '160px' }} 
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="">Všetky</option>
-            <option value="upcoming">Nadchádzajúce</option>
-            <option value="past">Prebehnuté</option>
-          </select>
         </div>
+      </div>
 
+      {/* ── Classes Grid ────────────────────────────────────────────── */}
+      <section style={{ marginTop: '0.5rem' }}>
         {loading ? (
-          <div className="empty-state">
-            <span className="spinner"></span>
-            <p>Načítavam tvoje lekcie...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '5rem 0', gap: '1rem', color: 'var(--muted)' }}>
+            <span className="spinner" style={{ width: 40, height: 40 }} />
+            <p style={{ fontFamily: 'var(--font-d)', letterSpacing: '0.1em', fontSize: '0.8rem' }}>NAČÍTAVAM LEKCIE...</p>
           </div>
+        ) : error ? (
+            <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255,45,85,0.05)', border: '1px solid rgba(255,45,85,0.1)', borderRadius: '12px', color: 'var(--red)' }}>
+                <i className="fas fa-exclamation-triangle" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }} />
+                <p>{error}</p>
+            </div>
         ) : sortedClasses.length > 0 ? (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="dt">
-              <thead>
-                <tr>
-                  <th>Lekcia</th>
-                  <th>Čas</th>
-                  <th>Miesto</th>
-                  <th>Obsadenosť</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedClasses.map(c => {
-                  const booked = c.booked || 0;
-                  const cap = c.capacity || 0;
-                  const pct = cap ? Math.round((booked / cap) * 100) : 0;
-                  const bc = pct >= 90 ? 'var(--red)' : pct >= 60 ? 'var(--orange)' : 'var(--acid)';
-                  const isPast = new Date(c.startTime) < now;
+          <motion.div 
+            variants={container}
+            initial="hidden"
+            animate="show"
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
+              gap: '1.5rem' 
+            }}
+          >
+            {sortedClasses.map(c => {
+              const booked = c.booked || 0;
+              const cap = c.capacity || 0;
+              const pct = cap ? Math.round((booked / cap) * 100) : 0;
+              const status = getStatusInfo(c.startTime);
+              const date = new Date(c.startTime);
 
-                  return (
-                    <tr key={c.id}>
-                      <td><b>{c.name || '—'}</b></td>
-                      <td style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>
-                        {new Date(c.startTime).toLocaleString('sk-SK', { weekday:'short', day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit' })}
-                      </td>
-                      <td><span className="badge b-grey">{c.location || '—'}</span></td>
-                      <td>
-                        <div className="occ-bar">
-                          <div className="occ-track" style={{ width: '80px' }}>
-                            <div className="occ-fill" style={{ width: `${pct}%`, background: bc }}></div>
-                          </div>
-                          <span style={{ fontSize: '0.73rem', color: 'var(--muted)', minWidth: 32 }}>
-                            {booked}/{cap || '—'}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        {isPast ? (
-                          <span className="badge b-grey">Prebehla</span>
-                        ) : (
-                          <span className="badge b-acid">Nadchádzajúca</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              return (
+                <motion.div 
+                  key={c.id} 
+                  variants={item}
+                  whileHover={{ y: -4, borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.01)' }}
+                  style={{ 
+                    background: 'rgba(20, 20, 22, 0.4)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '16px',
+                    padding: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                       <div style={{ 
+                        fontSize: '0.62rem', 
+                        textTransform: 'uppercase', 
+                        fontWeight: 900, 
+                        color: status.color, 
+                        background: status.bg, 
+                        padding: '0.2rem 0.6rem', 
+                        borderRadius: '4px', 
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        marginBottom: '0.5rem',
+                        letterSpacing: '0.1em'
+                       }}>
+                         <i className={`fas ${status.icon}`} style={{ fontSize: '0.6rem' }} />
+                         {status.label}
+                       </div>
+                       <h3 style={{ fontSize: '1.4rem', fontWeight: 900, lineHeight: 1.1, color: '#fff' }}>{c.name || 'Pomenovaná lekcia'}</h3>
+                    </div>
+                    <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
+                        <span style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', opacity: 0.5 }}>{date.toLocaleDateString('sk', { month: 'short' })}</span>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 900, lineHeight: 1 }}>{date.getDate()}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                        <i className="far fa-clock" style={{ width: 14 }} />
+                        <span>{date.toLocaleTimeString('sk', { hour: '2-digit', minute: '2-digit' })} • {c.durationMinutes || 60} min</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                        <i className="fas fa-map-marker-alt" style={{ width: 14 }} />
+                        <span style={{ color: 'var(--text)' }}>{c.location || 'Sála 1'}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 800, marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <span style={{ color: 'var(--muted)' }}>Účastníci</span>
+                        <span style={{ color: pct > 80 ? 'var(--red)' : '#fff' }}>{booked} / {cap}</span>
+                    </div>
+                    <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{ duration: 1, ease: 'easeOut', delay: 0.5 }}
+                            style={{ 
+                                height: '100%', 
+                                background: pct > 80 ? 'linear-gradient(to right, var(--red), #ff7e5f)' : 'linear-gradient(to right, var(--blue), var(--acid2))',
+                                boxShadow: `0 0 10px ${pct > 80 ? 'var(--red)' : 'var(--blue)'}44`
+                            }} 
+                        />
+                    </div>
+                  </div>
+
+                  <button className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center', borderRadius: '8px', fontSize: '0.75rem', marginTop: '0.5rem' }}>
+                    {activeTab === 'upcoming' ? 'Spravovať tréning' : 'Detail tréningu'} <i className="fas fa-arrow-right" style={{ fontSize: '0.6rem' }} />
+                  </button>
+                </motion.div>
+              );
+            })}
+          </motion.div>
         ) : (
-          <div className="empty-state">
-            <i className="fas fa-calendar-times"></i>
-            <p>Žiadne lekcie nezodpovedajú filtru</p>
+          <div style={{ padding: '6rem 2rem', textAlign: 'center', color: 'var(--muted)', background: 'rgba(255,255,255,0.01)', borderRadius: '20px', border: 'dashed 1px var(--border)' }}>
+            <div style={{ fontSize: '3rem', opacity: 0.1, marginBottom: '1rem' }}>
+                <i className={`fas ${activeTab === 'upcoming' ? 'fa-calendar-plus' : 'fa-history'}`} />
+            </div>
+            <p style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text)' }}>
+                {activeTab === 'upcoming' ? 'Žiadne nadchádzajúce tréningy' : 'Zatiaľ žiadna história tréningov'}
+            </p>
+            <p style={{ fontSize: '0.85rem', marginTop: '0.4rem' }}>
+                {search ? 'Zmeňte kritériá vyhľadávania' : activeTab === 'upcoming' ? 'Váš rozvrh je momentálne voľný' : 'Po ukončení lekcie sa tu zobrazí jej záznam'}
+            </p>
+            {activeTab === 'upcoming' && !search && (
+                <button className="btn btn-blue btn-sm" style={{ marginTop: '1.5rem', borderRadius: '10px' }}>
+                    <i className="fas fa-plus" /> Naplánovať lekciu
+                </button>
+            )}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

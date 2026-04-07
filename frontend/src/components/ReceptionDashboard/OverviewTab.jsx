@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { authenticatedFetch } from "../../utils/api";
 
 export default function OverviewTab({ onNavigate }) {
@@ -70,7 +71,6 @@ export default function OverviewTab({ onNavigate }) {
     if (!val) return;
 
     try {
-      // Very basic implementation, real details logic is in CheckInTab
       const resM = await authenticatedFetch(`/api/admin/memberships/user/${val}`);
       if (!resM.ok) {
         setQuickCheckinResult({
@@ -102,7 +102,6 @@ export default function OverviewTab({ onNavigate }) {
           message: `<b>${d.fullName || "Člen"}</b> — vstup potvrdený`,
         });
         setQuickCheckinQr("");
-        // Refresh checkins KPI
         loadOverviewData();
       } else {
         setQuickCheckinResult({
@@ -120,15 +119,24 @@ export default function OverviewTab({ onNavigate }) {
     setTimeout(() => setQuickCheckinResult(null), 4000);
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } }
+  };
+
   return (
-    <div className="animate-in">
-      {/* ── Reception Hero Section ─────────────────────────────────────── */}
-      <div className="overview-hero reception">
+    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="overview-tab-reception">
+      <motion.div variants={itemVariants} className="overview-hero reception glass-panel" style={{ marginBottom: '2.5rem' }}>
         <div className="hero-content">
           <h1>Dobré ráno, Recepcia! 👋</h1>
           <p>Dnes je rušný deň. Nezabudnite skontrolovať členstvá pri vstupe.</p>
           <div className="hero-actions">
-            <button className="btn btn-purple btn-sm" onClick={() => onNavigate("checkin")}>
+            <button className="btn btn-acid btn-sm" onClick={() => onNavigate("checkin")}>
               <i className="fas fa-qrcode"></i> Skenovať QR kód
             </button>
             <button className="btn btn-ghost btn-sm" onClick={() => onNavigate("kasa")}>
@@ -137,47 +145,52 @@ export default function OverviewTab({ onNavigate }) {
           </div>
         </div>
         <div className="hero-visual">
-          <i className="fas fa-id-card" />
+          <i className="fas fa-id-card neon-text-purple" style={{ fontSize: '4rem', opacity: 0.2 }} />
         </div>
-      </div>
+      </motion.div>
 
-      <div className="dashboard-grid" style={{ marginBottom: "2.5rem", gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0s' }}>
+      <motion.div variants={containerVariants} className="dashboard-grid" style={{ marginBottom: "2.5rem", gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
           <div className="kpi-icon-v2" style={{ background: 'rgba(191,90,242,0.1)', color: 'var(--purple)' }}><i className="fas fa-sign-in-alt"></i></div>
           <div className="kpi-content-v2">
              <div className="kpi-label-v2">CHECK-IN DNES</div>
              <div className="kpi-value-v2">{stats.checkins}</div>
           </div>
-        </div>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.05s' }}>
+        </motion.div>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
           <div className="kpi-icon-v2" style={{ background: 'rgba(200,255,0,0.1)', color: 'var(--acid)' }}><i className="fas fa-users"></i></div>
           <div className="kpi-content-v2">
              <div className="kpi-label-v2">AKTÍVNI ČLENOVIA</div>
              <div className="kpi-value-v2">{stats.members}</div>
           </div>
-        </div>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.1s' }}>
+        </motion.div>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
           <div className="kpi-icon-v2" style={{ background: 'rgba(0,255,209,0.1)', color: 'var(--acid2)' }}><i className="fas fa-calendar-check"></i></div>
           <div className="kpi-content-v2">
              <div className="kpi-label-v2">LEKCIE DNES</div>
              <div className="kpi-value-v2">{stats.classes}</div>
           </div>
-        </div>
-        <div className="kpi-card-v2 animate-in" style={{ animationDelay: '0.15s' }}>
+        </motion.div>
+        <motion.div variants={itemVariants} className="kpi-card-v2">
           <div className="kpi-icon-v2" style={{ background: 'rgba(255,149,0,0.1)', color: 'var(--orange)' }}><i className="fas fa-euro-sign"></i></div>
           <div className="kpi-content-v2">
              <div className="kpi-label-v2">TRŽBA DNES</div>
              <div className="kpi-value-v2">{stats.revenue}</div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="dashboard-grid">
-        <div className="panel animate-in" style={{ animationDelay: '0.1s' }}>
+      <motion.div variants={containerVariants} className="dashboard-grid">
+        <motion.div variants={itemVariants} className="panel glass-panel">
           <div className="ph">
-            <span className="pt">Rýchly check-in</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div className="neon-icon blue" style={{ width: 28, height: 28, borderRadius: '6px', background: 'rgba(0,123,255,0.1)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-bolt" />
+              </div>
+              <span className="pt">Rýchly check-in</span>
+            </div>
             <button className="btn btn-ghost btn-xs" onClick={() => onNavigate("checkin")}>
-              SKENER <i className="fas fa-chevron-right"></i>
+              DETAIL <i className="fas fa-chevron-right"></i>
             </button>
           </div>
           <div className="pb">
@@ -187,78 +200,103 @@ export default function OverviewTab({ onNavigate }) {
                 <input
                   className="fi"
                   type="text"
-                  placeholder="Zadaj QR kód..."
+                  placeholder="Zadaj kód..."
                   value={quickCheckinQr}
                   onChange={(e) => setQuickCheckinQr(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleQuickCheckin()}
-                  style={{ borderRadius: '8px' }}
+                  style={{ borderRadius: '10px' }}
                 />
-                <button className="btn btn-purple" onClick={handleQuickCheckin} style={{ borderRadius: '8px' }}>
+                <button className="btn btn-purple" onClick={handleQuickCheckin} style={{ borderRadius: '10px' }}>
                   <i className="fas fa-arrow-right"></i>
                 </button>
               </div>
             </div>
+            <AnimatePresence>
             {quickCheckinResult && (
-              <div className={`fm ${quickCheckinResult.type === 'ok' ? 'ok' : 'err'}`} style={{ borderRadius: '8px', padding: '0.8rem' }}>
-                <i className={`fas ${quickCheckinResult.type === "ok" ? "fa-check-circle" : "fa-exclamation-triangle"}`}></i>{" "}
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className={`fm ${quickCheckinResult.type === 'ok' ? 'ok' : 'err'}`} 
+                style={{ borderRadius: '8px', padding: '0.8rem', marginTop: '0.5rem', overflow: 'hidden' }}
+              >
+                <i className={`fas ${quickCheckinResult.type === "ok" ? "fa-check-circle" : "fa-exclamation-triangle"}`} style={{ marginRight: '0.5rem' }}></i>
                 <span dangerouslySetInnerHTML={{ __html: quickCheckinResult.message }}></span>
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
             <p style={{ fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.8rem' }}>
-              <i className="fas fa-info-circle"></i> Zadajte ID užívateľa alebo naskenujte kód.
+              <i className="fas fa-info-circle"></i> Zadajte ID alebo skenujte.
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="panel animate-in" style={{ animationDelay: '0.2s' }}>
+        <motion.div variants={itemVariants} className="panel glass-panel">
           <div className="ph">
-            <span className="pt">Dnešné lekcie</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div className="neon-icon yellow" style={{ width: 28, height: 28, borderRadius: '6px', background: 'rgba(255,200,0,0.1)', color: 'var(--orange)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-calendar-day" />
+              </div>
+              <span className="pt">Dnešné lekcie</span>
+            </div>
             <button className="btn btn-ghost btn-xs" onClick={loadOverviewData}>
-              OBNOVIŤ <i className="fas fa-sync-alt"></i>
+              <i className="fas fa-sync-alt"></i>
             </button>
           </div>
-          <div className="pb" style={{ maxHeight: '350px', overflowY: 'auto' }}>
+          <div className="pb" style={{ maxHeight: '350px', overflowY: 'auto', padding: '1rem' }}>
             {loadingClasses ? (
               <div className="empty-state"><span className="spinner"></span></div>
             ) : todayClasses.length === 0 ? (
               <div className="empty-state" style={{ padding: "1.5rem" }}>
-                <i className="fas fa-calendar-times" style={{ opacity: 0.1 }}></i>
+                <i className="fas fa-calendar-times" style={{ opacity: 0.1, fontSize: '3rem' }}></i>
                 <p>Žiadne lekcie dnes</p>
               </div>
             ) : (
-              todayClasses.map((c, i) => {
-                const b = c.booked || 0;
-                const cap = c.capacity || 0;
-                const pct = cap ? Math.round((b / cap) * 100) : 0;
-                const bc = pct >= 90 ? "var(--red)" : pct >= 60 ? "var(--orange)" : "var(--acid)";
+              <motion.div variants={containerVariants} initial="hidden" animate="visible">
+                {todayClasses.map((c, i) => {
+                  const b = c.booked || 0;
+                  const cap = c.capacity || 0;
+                  const pct = cap ? Math.round((b / cap) * 100) : 0;
+                  const bc = pct >= 90 ? "var(--red)" : pct >= 60 ? "var(--orange)" : "var(--acid)";
 
-                return (
-                  <div key={i} style={{ padding: "0.8rem", background: 'rgba(255,255,255,0.02)', borderRadius: '10px', marginBottom: '0.6rem', border: '1px solid var(--border)' }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.4rem" }}>
-                      <div>
-                        <div style={{ fontSize: "0.88rem", fontWeight: 800 }}>{c.name || "—"}</div>
-                        <div style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{c.instructor || 'Tím fitness'}</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: "0.85rem", color: "var(--text)", fontWeight: 700 }}>
-                          {new Date(c.startTime).toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit" })}
+                  return (
+                    <motion.div 
+                      key={i} 
+                      variants={itemVariants}
+                      className="glass"
+                      style={{ padding: "0.8rem 1rem", borderRadius: '12px', marginBottom: '0.8rem', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.6rem" }}>
+                        <div>
+                          <div style={{ fontSize: "0.92rem", fontWeight: 800 }}>{c.name || "—"}</div>
+                          <div style={{ fontSize: "0.74rem", color: "var(--muted)" }}>{c.instructor || 'Tím fitness'}</div>
                         </div>
-                        <div style={{ fontSize: "0.65rem", color: "var(--muted)", textTransform: 'uppercase' }}>Štart</div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: "0.85rem", color: "var(--acid)", fontWeight: 900 }}>
+                            {new Date(c.startTime).toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                          <div style={{ fontSize: "0.6rem", color: "var(--muted)", textTransform: 'uppercase', letterSpacing: '0.1em' }}>Štartuje o</div>
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-                      <div className="occ-track" style={{ flex: 1, height: "6px", background: "var(--border2)", borderRadius: "3px", overflow: 'hidden' }}>
-                        <div className="occ-fill" style={{ width: `${pct}%`, background: bc, height: "100%", transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+                        <div className="occ-track" style={{ flex: 1, height: "6px", background: "rgba(255,255,255,0.05)", borderRadius: "3px", overflow: 'hidden' }}>
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{ duration: 1, ease: 'easeOut' }}
+                            style={{ background: bc, height: "100%" }}
+                          />
+                        </div>
+                        <span style={{ fontSize: "0.7rem", color: "var(--muted)", fontWeight: 800, minWidth: '35px' }}>{b}/{cap}</span>
                       </div>
-                      <span style={{ fontSize: "0.75rem", color: "var(--muted)", fontWeight: 700, minWidth: '35px' }}>{b}/{cap}</span>
-                    </div>
-                  </div>
-                );
-              })
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
             )}
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

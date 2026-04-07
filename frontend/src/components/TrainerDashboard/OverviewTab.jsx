@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
 export default function OverviewTab({ user }) {
@@ -32,12 +33,14 @@ export default function OverviewTab({ user }) {
     loadData();
   }, []);
 
+  const now = new Date();
+  
+  // Stats
   const totalClasses = classes.length;
   const totalClients = clients.length;
   const totalBooked = classes.reduce((sum, c) => sum + (c.booked || 0), 0);
 
   // Hours this week
-  const now = new Date();
   const mon = new Date(now);
   mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
   mon.setHours(0, 0, 0, 0);
@@ -54,149 +57,231 @@ export default function OverviewTab({ user }) {
   const upcoming = [...classes]
     .filter(c => new Date(c.startTime) >= now)
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-    .slice(0, 5);
+    .slice(0, 4);
 
-  const getInitials = (name) => {
-    if (!name) return '?';
-    return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  const getInitials = (name) => (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
   };
 
   if (loading) {
     return (
-      <div className="empty-state">
-        <span className="spinner" style={{ width: 32, height: 32 }}></span>
-        <p>Načítavam tvoj prehľad...</p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1.5rem' }}>
+        <span className="spinner" style={{ width: 48, height: 48, borderTopColor: 'var(--blue)' }} />
+        <p style={{ fontFamily: 'var(--font-d)', letterSpacing: '0.2em', color: 'var(--muted)', fontSize: '0.8rem' }}>PRIPRAVUJEM PREHĽAD...</p>
       </div>
     );
   }
 
   return (
-    <div className="animate-in">
-      {error && (
-        <div className="fm err" style={{ marginBottom: '1.5rem' }}>
-          <i className="fas fa-exclamation-circle"></i> {error}
-        </div>
-      )}
+    <motion.div 
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="overview-container"
+    >
+      <AnimatePresence>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="fm err" 
+            style={{ marginBottom: '1.5rem' }}
+          >
+            <i className="fas fa-exclamation-circle" /> {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── Trainer Hero Section ────────────────────────────────────────── */}
-      <div className="overview-hero trainer">
-        <div className="hero-content">
-          <h1>Ahoj, tréner {user?.fullName?.split(' ')[0] || 'Šampión'}! 👋</h1>
-          <p>Tvoji klienti sa na teba tešia. Dnes máš naplánovaných {totalClasses} lekcií.</p>
-          <div className="hero-actions">
-            <button className="btn btn-blue btn-sm" onClick={loadData}>
-              <i className="fas fa-calendar-alt"></i> MÔJ ROZVRH
+      {/* ── Hero Section ────────────────────────────────────────────── */}
+      <motion.section variants={item} className="overview-hero trainer-modern" style={{
+        background: 'linear-gradient(135deg, rgba(8, 8, 10, 0.8) 0%, rgba(10, 132, 255, 0.05) 100%)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid var(--border)',
+        borderRadius: '24px',
+        padding: '2.5rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem', lineHeight: 1 }}>
+            Dobrý deň, <span style={{ color: 'var(--blue)' }}>{user?.fullName?.split(' ')[0]}</span>! 👋
+          </h1>
+          <p style={{ color: 'var(--muted)', fontSize: '1.1rem', maxWidth: '500px', lineHeight: 1.5 }}>
+            Dnes máte v rozvrhu <b style={{ color: 'var(--text)' }}>{totalClasses} tréningov</b>. {totalClients} klientov čaká na vaše vedenie.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+            <button className="btn btn-blue" style={{ borderRadius: '12px', padding: '0.8rem 1.5rem' }}>
+              <i className="fas fa-calendar-alt" /> MÔJ ROZVRH
             </button>
-            <button className="btn btn-ghost btn-sm">
-              <i className="fas fa-plus-circle"></i> PRIDAŤ TRÉNING
-            </button>
-          </div>
-        </div>
-        <div className="hero-visual">
-          <i className="fas fa-dumbbell" />
-        </div>
-      </div>
-
-      <div className="stat-row" style={{ background: 'transparent', gap: '1.2rem', marginBottom: '2rem' }}>
-        <div className="kpi-card-v2 glass highlight blue" style={{ '--kpi-color': 'var(--blue)' }}>
-          <div className="kpi-icon"><i className="fas fa-calendar-check"></i></div>
-          <div className="kpi-val">{totalClasses}</div>
-          <div className="kpi-lbl">Lekcie celkovo</div>
-        </div>
-        <div className="kpi-card-v2 glass highlight acid" style={{ '--kpi-color': 'var(--acid)' }}>
-          <div className="kpi-icon"><i className="fas fa-users"></i></div>
-          <div className="kpi-val">{totalClients}</div>
-          <div className="kpi-lbl">Priradení klienti</div>
-        </div>
-        <div className="kpi-card-v2 glass highlight cyan" style={{ '--kpi-color': 'var(--acid2)' }}>
-          <div className="kpi-icon"><i className="fas fa-user-check"></i></div>
-          <div className="kpi-val">{totalBooked}</div>
-          <div className="kpi-lbl">Prihlásení na lekcie</div>
-        </div>
-        <div className="kpi-card-v2 glass highlight orange" style={{ '--kpi-color': 'var(--orange)' }}>
-          <div className="kpi-icon"><i className="fas fa-fire"></i></div>
-          <div className="kpi-val">{hoursThisWeek.toFixed(1)}h</div>
-          <div className="kpi-lbl">Hodín tento týždeň</div>
-        </div>
-      </div>
-
-      <div className="dashboard-grid">
-        <div className="panel animate-in" style={{ animationDelay: '0.1s' }}>
-          <div className="ph">
-            <span className="pt">Najbližšie lekcie</span>
-            <button className="btn btn-ghost btn-xs" onClick={loadData}>
-              OBNOVIŤ <i className="fas fa-sync-alt"></i>
+            <button className="btn btn-ghost" style={{ borderRadius: '12px', padding: '0.8rem 1.5rem' }}>
+              <i className="fas fa-plus" /> PRIDAŤ TRÉNING
             </button>
           </div>
-          <div className="pb">
+        </div>
+        <div style={{ position: 'absolute', right: '-20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.03, fontSize: '20rem', pointerEvents: 'none' }}>
+            <i className="fas fa-dumbbell" />
+        </div>
+      </motion.section>
+
+      {/* ── KPI Cards ───────────────────────────────────────────────── */}
+      <motion.div variants={item} className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+        {[
+          { label: 'Lekcie celkovo', val: totalClasses, icon: 'fa-calendar-check', col: 'var(--blue)' },
+          { label: 'Priradení klienti', val: totalClients, icon: 'fa-users', col: 'var(--acid2)' },
+          { label: 'Prihlásení spolu', val: totalBooked, icon: 'fa-user-check', col: 'var(--acid)' },
+          { label: 'Hodín / Týždeň', val: `${hoursThisWeek.toFixed(1)}h`, icon: 'fa-fire', col: 'var(--orange)' }
+        ].map((k, i) => (
+          <div key={i} className="glass kpi-card-modern" style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid var(--border)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+            transition: 'all 0.3s ease',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{ fontSize: '1.5rem', color: k.col, opacity: 0.8 }}><i className={`fas ${k.icon}`} /></div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, fontFamily: 'var(--font-d)' }}>{k.val}</div>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 800, letterSpacing: '0.1em' }}>{k.label}</div>
+            <div style={{ position: 'absolute', right: 0, bottom: 0, width: '40px', height: '40px', background: k.col, filter: 'blur(40px)', opacity: 0.15 }}></div>
+          </div>
+        ))}
+      </motion.div>
+
+      {/* ── Content Grid ────────────────────────────────────────────── */}
+      <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+        
+        {/* Upcoming Classes */}
+        <motion.section variants={item} className="panel-modern" style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.5rem' }}>
+          <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Najbližšie lekcie</h3>
+            <button className="btn btn-ghost btn-sm" style={{ border: 'none', background: 'rgba(255,255,255,0.03)' }}>Zobraziť všetky</button>
+          </header>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {upcoming.length > 0 ? (
               upcoming.map((c, i) => {
                 const pct = c.capacity ? Math.round(((c.booked || 0) / c.capacity) * 100) : 0;
-                const bc = pct >= 90 ? 'var(--red)' : pct >= 60 ? 'var(--orange)' : 'var(--acid)';
+                const d = new Date(c.startTime);
                 return (
-                  <div key={i} style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', marginBottom: '0.8rem', border: '1px solid var(--border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                      <b style={{ fontSize: '0.92rem' }}>{c.name || '—'}</b>
-                      <span className="badge b-grey" style={{ fontSize: '0.6rem' }}>{c.location || 'SÁLA 1'}</span>
+                  <motion.div 
+                    key={i} 
+                    whileHover={{ x: 6, background: 'rgba(255,255,255,0.03)' }}
+                    style={{ 
+                      padding: '1rem', 
+                      background: 'rgba(255,255,255,0.015)', 
+                      borderRadius: '12px', 
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1.25rem',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ width: 44, height: 44, borderRadius: '10px', background: 'var(--surface2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 900, opacity: 0.5 }}>{d.toLocaleDateString('sk', { month: 'short' })}</span>
+                        <span style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1 }}>{d.getDate()}</span>
                     </div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: '0.6rem' }}>
-                      <i className="far fa-clock" style={{ marginRight: '0.4rem' }}></i>
-                      {new Date(c.startTime).toLocaleString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '2px' }}>
+                            <i className="far fa-clock" /> {d.toLocaleTimeString('sk', { hour: '2-digit', minute: '2-digit' })} • {c.location || 'Sála 1'}
+                        </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-                      <div className="occ-track" style={{ flex: 1, height: "6px", background: "var(--border2)", borderRadius: "3px", overflow: 'hidden' }}>
-                        <div className="occ-fill" style={{ width: `${pct}%`, background: bc, height: "100%", transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
-                      </div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, minWidth: '35px', textAlign: 'right' }}>
-                        {c.booked || 0}/{c.capacity || '—'}
-                      </span>
+                    <div style={{ textAlign: 'right', minWidth: '60px' }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 900 }}>{c.booked || 0}/{c.capacity}</div>
+                        <div style={{ height: 4, width: 40, background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden', marginTop: '4px', marginLeft: 'auto' }}>
+                            <div style={{ height: '100%', width: `${pct}%`, background: pct > 80 ? 'var(--red)' : 'var(--blue)' }} />
+                        </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })
             ) : (
-              <div className="empty-state" style={{ padding: '1.5rem' }}>
-                <i className="fas fa-calendar-times" style={{ opacity: 0.1 }}></i>
-                <p>Žiadne nadchádzajúce lekcie</p>
-              </div>
+                <div style={{ padding: '3rem', textAlign: 'center', opacity: 0.2 }}>
+                    <i className="fas fa-calendar-times" style={{ fontSize: '2rem', marginBottom: '1rem' }} />
+                    <p>Žiadne plánované lekcie</p>
+                </div>
             )}
           </div>
-        </div>
+        </motion.section>
 
-        <div className="panel animate-in" style={{ animationDelay: '0.2s' }}>
-          <div className="ph">
-            <span className="pt">Aktívni klienti</span>
-            <button className="btn btn-ghost btn-xs">DETAIL <i className="fas fa-chevron-right"></i></button>
+        {/* Favorite Clients */}
+        <motion.section variants={item} className="panel-modern" style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.5rem' }}>
+           <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aktívni klienti</h3>
+            <button className="btn btn-ghost btn-sm" style={{ border: 'none', background: 'rgba(255,255,255,0.03)' }}>Detail list</button>
+          </header>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
+            {clients.slice(0, 6).map((c, i) => (
+                <motion.div 
+                    key={i}
+                    whileHover={{ scale: 1.02, background: 'rgba(10, 132, 255, 0.05)' }}
+                    style={{ 
+                        padding: '1rem', 
+                        background: 'rgba(255,255,255,0.015)', 
+                        borderRadius: '16px', 
+                        border: '1px solid var(--border)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                        gap: '0.75rem',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <div style={{ 
+                        width: 52, 
+                        height: 52, 
+                        borderRadius: '16px', 
+                        background: 'linear-gradient(135deg, var(--blue), var(--acid2))', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: '1.1rem',
+                        fontWeight: 900,
+                        color: '#fff',
+                        boxShadow: '0 4px 12px rgba(10, 132, 255, 0.2)'
+                    }}>
+                        {getInitials(c.fullName)}
+                    </div>
+                    <div style={{ width: '100%' }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.fullName}</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--muted)', marginTop: '2px' }}>KLIENT</div>
+                    </div>
+                </motion.div>
+            ))}
           </div>
-          <div className="pb">
-            {clients.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-                {clients.slice(0, 6).map((c, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid var(--border)' }}>
-                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,var(--blue),var(--acid2))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '0.75rem', color: '#000' }}>
-                      {getInitials(c.fullName)}
-                    </div>
-                    <div style={{ overflow: 'hidden' }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.fullName || '—'}</div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.email || '—'}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state" style={{ padding: '1.5rem' }}>
-                <i className="fas fa-users" style={{ opacity: 0.1 }}></i>
+
+          {clients.length === 0 && (
+              <div style={{ padding: '3rem', textAlign: 'center', opacity: 0.2 }}>
+                <i className="fas fa-user-clock" style={{ fontSize: '2rem', marginBottom: '1rem' }} />
                 <p>Zatiaľ žiadni klienti</p>
               </div>
-            )}
-            {clients.length > 6 && (
-              <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '1rem' }}>
-                Zobrazených 6 z {clients.length} klientov
-              </p>
-            )}
-          </div>
-        </div>
+          )}
+        </motion.section>
+
       </div>
-    </div>
+    </motion.div>
   );
 }
