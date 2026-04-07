@@ -24,6 +24,7 @@ export default function LandingPage() {
   const [rPhone, setRPhone] = useState('');
   const [rEmail, setREmail] = useState('');
   const [rPass, setRPass] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const [regMsg, setRegMsg] = useState({ text: '', type: '' });
 
   // Toast
@@ -64,6 +65,9 @@ export default function LandingPage() {
   const doLogin = async () => {
     if (!loginEmail) return setLoginMsg({ text: 'Zadaj email', type: 'err' });
     if (!loginPass) return setLoginMsg({ text: 'Zadaj heslo', type: 'err' });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(loginEmail)) return setLoginMsg({ text: 'Neplatný formát emailu', type: 'err' });
 
     setLoading(true);
     setLoginMsg({ text: '', type: '' });
@@ -108,6 +112,9 @@ export default function LandingPage() {
 
   const doRegister = async () => {
     if (!rName || !rEmail || !rPass) return setRegMsg({ text: 'Vyplň povinné polia', type: 'err' });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(rEmail)) return setRegMsg({ text: 'Neplatný formát emailu', type: 'err' });
 
     setLoading(true);
     setRegMsg({ text: '', type: '' });
@@ -231,7 +238,12 @@ export default function LandingPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <input className="form-input" type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="Tvoj email" autoComplete="email" />
-                  <input className="form-input" type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Tvoje heslo" onKeyDown={(e) => { if (e.key === 'Enter') doLogin(); }} />
+                  <div style={{ position: 'relative' }}>
+                    <input className="form-input" type={showPass ? "text" : "password"} value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Tvoje heslo" onKeyDown={(e) => { if (e.key === 'Enter') doLogin(); }} />
+                    <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>
+                      <i className={`fas fa-eye${showPass ? '-slash' : ''}`}></i>
+                    </button>
+                  </div>
                   <button className="btn btn-acid btn-block btn-lg" style={{ marginTop: '1rem' }} disabled={loading} onClick={doLogin}>
                     {loading ? 'Spracovávam...' : 'Prihlásiť sa'}
                   </button>
@@ -250,7 +262,12 @@ export default function LandingPage() {
                 >
                   <input className="form-input" type="text" value={rName} onChange={e => setRName(e.target.value)} placeholder="Meno a priezvisko" />
                   <input className="form-input" type="email" value={rEmail} onChange={e => setREmail(e.target.value)} placeholder="Tvoj email" />
-                  <input className="form-input" type="password" value={rPass} onChange={e => setRPass(e.target.value)} placeholder="Tvoje heslo" />
+                  <div style={{ position: 'relative' }}>
+                    <input className="form-input" type={showPass ? "text" : "password"} value={rPass} onChange={e => setRPass(e.target.value)} placeholder="Tvoje heslo" />
+                    <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>
+                      <i className={`fas fa-eye${showPass ? '-slash' : ''}`}></i>
+                    </button>
+                  </div>
                   <button className="btn btn-acid btn-block btn-lg" style={{ marginTop: '1rem' }} disabled={loading} onClick={doRegister}>
                     {loading ? 'Registrujem...' : 'Začať trénovať'}
                   </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { authenticatedFetch } from '../../utils/api';
+import { saveToSyncQueue, processSyncQueue, getSyncQueueCount } from '../../utils/syncService';
 import {
    Chart as ChartJS,
    CategoryScale, LinearScale,
@@ -83,6 +84,25 @@ function WorkoutTab({ user }) {
       loadPresets();
       loadWeeklyStats();
       loadExerciseTemplates();
+      
+      // Handle Offline Sync
+      const syncNow = () => {
+        processSyncQueue().then(res => {
+          if (res.count > 0) {
+             loadCalendarData();
+             loadWeeklyStats();
+          }
+        });
+      };
+      
+      window.addEventListener('online', syncNow);
+      const interval = setInterval(syncNow, 60000); // Check every minute
+      syncNow(); // Try right away
+      
+      return () => {
+        window.removeEventListener('online', syncNow);
+        clearInterval(interval);
+      };
    }, []);
 
    useEffect(() => {
@@ -347,7 +367,12 @@ function WorkoutTab({ user }) {
             const err = await res.text();
             alert('Chyba: ' + err);
          }
-      } catch (e) { console.error(e); alert('Chyba pri ukladaní'); }
+      } catch (e) {
+          console.error('[OFFLINE SAVE]', e);
+          saveToSyncQueue(payload);
+          alert('Práve si offline! 💪 Tréning sme bezpečne uložili do pamäte tvojho mobilu a odošle sa na server, akonáhle budeš mať internet.');
+          closeEditor();
+      }
    };
 
    // ---- Preset management ----
@@ -653,6 +678,31 @@ function WorkoutTab({ user }) {
             </div>
          ) : (
             <div className="workout-container-legacy animate-in">
+               {/* 🛒 Sync Notification Bar - Only show if pending sync items exist */}
+               {getSyncQueueCount() > 0 && (
+                  <div className="sync-banner animate-in" style={{ 
+                     background: 'rgba(255,255,255,0.02)', 
+                     padding: '0.8rem 1rem', 
+                     borderRadius: '12px', 
+                     border: '1px solid rgba(255,255,255,0.05)', 
+                     marginBottom: '1rem', 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     gap: '0.8rem',
+                     justifyContent: 'space-between'
+                  }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <i className="fas fa-satellite-dish" style={{ color: 'var(--acid)', fontSize: '0.8rem' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)' }}>
+                           Máš <span style={{ color: 'var(--acid)' }}>{getSyncQueueCount()}</span> tréningy čakajúce na synchronizáciu
+                        </span>
+                     </div>
+                     <button className="btn btn-ghost btn-xs" onClick={() => processSyncQueue().then(res => { if(res.count > 0) loadCalendarData(); })}>
+                        SKÚSIŤ SYNCHRONIZOVAŤ TERAZ
+                     </button>
+                  </div>
+               )}
+
                {/* 1. TOP SECTION: Calendar + Day Detail */}
                <div className="wd-top-grid">
                   {/* Left Column: Calendar Panel */}

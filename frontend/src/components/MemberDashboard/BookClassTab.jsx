@@ -189,9 +189,9 @@ export function BookClassTab({ setActiveTab }) {
             <div className="empty" style={{ padding: '4rem 2rem' }}><span className="spinner" /></div>
           ) : error ? (
             <div className="empty" style={{ padding: '4rem 2rem' }}>❌ {error}</div>
-          ) : classes.length === 0 ? (
+          ) : classes.filter(c => new Date(c.startTime) > new Date()).length === 0 ? (
             <div className="empty" style={{ padding: '4rem 2rem' }}><i className="fas fa-dumbbell" /><p>Žiadne dostupné lekcie</p></div>
-          ) : classes.map(c => {
+          ) : classes.filter(c => new Date(c.startTime) > new Date()).map(c => {
             const free     = (c.capacity || 0) - (c.booked || 0);
             const full     = c.isFull || free <= 0;
             const isSelected = selectedClass?.id === c.id;

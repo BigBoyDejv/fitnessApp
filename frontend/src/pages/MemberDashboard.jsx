@@ -27,7 +27,7 @@ const SIDEBAR_W = 255;
 
 const NAV_ITEMS = [
   { id: 'overview', icon: 'fa-home', label: 'Prehľad', section: 'Hlavné' },
-  { id: 'profile', icon: 'fa-user', label: 'Môj profil' },
+  { id: 'profile', icon: 'fa-user-cog', label: 'Nastavenia' },
   { id: 'notifications', icon: 'fa-bell', label: 'Notifikácie' },
   { id: 'membership', icon: 'fa-id-card', label: 'Moje členstvo', section: 'Členstvo' },
   { id: 'classes', icon: 'fa-calendar-alt', label: 'Moje lekcie', section: 'Tréning' },
@@ -47,7 +47,7 @@ export default function MemberDashboard() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState(localStorage.getItem('member_dashboard_active_tab') || 'overview');
+  const [activeTab, setActiveTab] = useState(sessionStorage.getItem('member_active_tab') || 'overview');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedSecs, setExpandedSecs] = useState({ training: true, club: false, profile: false });
@@ -108,14 +108,14 @@ export default function MemberDashboard() {
   const handleTabChange = (id, target = null) => {
     setActiveTab(id);
     setMsgTarget(target);
-    localStorage.setItem('member_dashboard_active_tab', id);
+    sessionStorage.setItem('member_active_tab', id);
     setSidebarOpen(false);
   };
 
   const logout = () => {
     localStorage.removeItem('fp_token');
     localStorage.removeItem('fp_user');
-    localStorage.removeItem('member_dashboard_active_tab');
+    sessionStorage.removeItem('member_active_tab');
     navigate('/');
   };
 
@@ -172,7 +172,7 @@ export default function MemberDashboard() {
       },
       {
         id: 'profile-grp', label: 'Osobné', section: 'group', icon: 'fa-user-circle', items: [
-          { id: 'profile', icon: 'fa-user-edit', label: 'Môj profil' },
+          { id: 'profile', icon: 'fa-user-cog', label: 'Nastavenia' },
           { id: 'messages', icon: 'fa-envelope', label: 'Správy' },
           { id: 'qr', icon: 'fa-qrcode', label: 'Môj QR kód' },
           { id: 'rules', icon: 'fa-shield-alt', label: 'Pravidlá fitness' },
@@ -185,7 +185,7 @@ export default function MemberDashboard() {
         {sections.map(sec => {
           if (sec.section === 'root') {
             return (
-              <button key={sec.id} className={`nav-item ${activeTab === sec.id ? 'active' : ''}`} onClick={() => { setActiveTab(sec.id); if (isMobile) setSidebarOpen(false); }}>
+              <button key={sec.id} className={`nav-item ${activeTab === sec.id ? 'active' : ''}`} onClick={() => handleTabChange(sec.id)}>
                 <i className={`fas ${sec.icon}`} /> <span>{sec.label}</span>
               </button>
             );

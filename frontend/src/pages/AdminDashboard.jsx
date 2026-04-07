@@ -17,10 +17,16 @@ import './AdminDashboard.css';
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(sessionStorage.getItem('admin_active_tab') || 'overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
   const [expandedSections, setExpandedSections] = useState({ prehlady: true, sprava: true, analytika: true, nastavenia: true });
+  
+  // Pull to refresh
+  const [pulling, setPulling] = useState(false);
+  const [pullDist, setPullDist] = useState(0);
+  const touchStart = React.useRef(0);
+  const maxPull = 80;
 
   useEffect(() => {
     // Auth check
@@ -36,6 +42,10 @@ export default function AdminDashboard() {
       }
     }
   }, [navigate]);
+
+  useEffect(() => {
+    sessionStorage.setItem('admin_active_tab', activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     const onResize = () => {
@@ -55,6 +65,25 @@ export default function AdminDashboard() {
 
   const toggleSection = (sec) => {
     setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
+  };
+
+  const handleTouchStart = (e) => {
+    if (!isMobile || window.scrollY > 0) return;
+    touchStart.current = e.touches[0].clientY;
+  };
+  const handleTouchMove = (e) => {
+    if (!isMobile || window.scrollY > 0) return;
+    const currentY = e.touches[0].clientY;
+    const dist = currentY - touchStart.current;
+    if (dist > 0) {
+      setPulling(true);
+      setPullDist(Math.min(dist * 0.5, maxPull));
+    }
+  };
+  const handleTouchEnd = () => {
+    if (pullDist >= maxPull - 10) window.location.reload();
+    setPulling(false);
+    setPullDist(0);
   };
 
   const dashboardSections = [
@@ -174,6 +203,9 @@ export default function AdminDashboard() {
       {/* ── Hlavná oblasť ──────────────────────────────────────────────── */}
       <main
         className="main"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         style={{
           marginLeft: isMobile ? 0 : '256px',
           flex: 1,
@@ -183,8 +215,20 @@ export default function AdminDashboard() {
           minWidth: 0,
           width: isMobile ? '100%' : 'calc(100% - 256px)',
           transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative'
         }}
       >
+        {isMobile && pulling && (
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: pullDist,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', zIndex: 999,
+            background: 'rgba(255,45,85,0.05)', borderBottom: '1px solid rgba(255,45,85,0.2)'
+          }}>
+            <i className={`fas fa-sync-alt ${pullDist >= maxPull - 10 ? 'fa-spin' : ''}`} style={{
+              color: 'var(--red)', opacity: pullDist/maxPull, transform: `rotate(${pullDist * 3}deg)`
+            }} />
+          </div>
+        )}
         <header className="topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
             {isMobile && (

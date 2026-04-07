@@ -5,6 +5,7 @@ import MemberDashboard from './pages/MemberDashboard';
 import TrainerDashboard from './pages/TrainerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ReceptionDashboard from './pages/ReceptionDashboard';
+import CookieConsent from './components/common/CookieConsent';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         {/* We will add other roles later: reception */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <CookieConsent />
     </BrowserRouter>
   );
 }

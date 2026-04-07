@@ -371,22 +371,36 @@ export default function MyClassesTab() {
                                 </div>
                             </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '0.4rem' }}>
+                          <div style={{ display: 'flex', gap: '0.6rem' }}>
                             <button 
                                 onClick={() => updateAttendance(p.userId, 'PRESENT')}
-                                className={`btn btn-sm ${p.status === 'PRESENT' ? 'btn-blue' : 'btn-ghost'}`} 
-                                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px' }}
-                                title="Prítomný"
+                                className="btn btn-sm"
+                                style={{ 
+                                  padding: '0.5rem 0.9rem', 
+                                  borderRadius: '10px',
+                                  background: p.status === 'PRESENT' ? 'var(--acid)' : 'rgba(255,255,255,0.03)',
+                                  color: p.status === 'PRESENT' ? '#000' : 'var(--muted)',
+                                  border: '1px solid currentColor',
+                                  fontWeight: 800,
+                                  fontSize: '0.65rem'
+                                }}
                             >
-                                <i className="fas fa-check" />
+                                <i className="fas fa-check" style={{ marginRight: '0.4rem' }} /> PRÍTOMNÝ
                             </button>
                             <button 
                                 onClick={() => updateAttendance(p.userId, 'ABSENT')}
-                                className={`btn btn-sm ${p.status === 'ABSENT' ? 'btn-red' : 'btn-ghost'}`} 
-                                style={{ padding: '0.4rem 0.8rem', borderRadius: '8px' }}
-                                title="Neprišiel"
+                                className="btn btn-sm"
+                                style={{ 
+                                  padding: '0.5rem 0.9rem', 
+                                  borderRadius: '10px',
+                                  background: p.status === 'ABSENT' ? 'var(--red)' : 'rgba(255,255,255,0.03)',
+                                  color: p.status === 'ABSENT' ? '#fff' : 'var(--muted)',
+                                  border: '1px solid currentColor',
+                                  fontWeight: 800,
+                                  fontSize: '0.65rem'
+                                }}
                             >
-                                <i className="fas fa-times" />
+                                <i className="fas fa-times" style={{ marginRight: '0.4rem' }} /> NO SHOW
                             </button>
                           </div>
                         </div>

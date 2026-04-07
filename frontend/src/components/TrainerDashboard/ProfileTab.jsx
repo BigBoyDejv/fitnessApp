@@ -1,233 +1,237 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
 export default function ProfileTab({ user, updateUser }) {
+  const [activeSubTab, setActiveSubTab] = useState('profile');
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Profile Edit Form state
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [specialization, setSpecialization] = useState('');
-  const [avatar, setAvatar] = useState('');
-  const [bio, setBio] = useState('');
   
-  const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
-  const [savingProfile, setSavingProfile] = useState(false);
-
-  // Password Edit Form state
+  // Form states
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editSpecialization, setEditSpecialization] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
+  const [editBio, setEditBio] = useState('');
+  
+  // Security
   const [curPass, setCurPass] = useState('');
   const [newPass, setNewPass] = useState('');
   const [newPass2, setNewPass2] = useState('');
-  
-  const [passMsg, setPassMsg] = useState({ text: '', type: '' });
-  const [savingPass, setSavingPass] = useState(false);
 
-  const loadProfile = async () => {
-    setLoading(true);
-    try {
-      const res = await authenticatedFetch('/api/auth/me');
-      const data = await res.json();
-      if (res.ok) {
-        setProfile(data);
-        setName(data.fullName || '');
-        setPhone(data.phone || '');
-        setSpecialization(data.specialization || '');
-        setAvatar(data.avatarUrl || '');
-        setBio(data.bio || '');
-
-        // Update local context
-        const u = JSON.parse(localStorage.getItem('fp_user') || '{}');
-        const upd = { ...u, ...data };
-        localStorage.setItem('fp_user', JSON.stringify(upd));
-        if (updateUser) updateUser(upd);
-      }
-    } catch (e) {
-      console.error('Failed to load profile:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [msg, setMsg] = useState({ text: '', type: '' });
 
   useEffect(() => {
     loadProfile();
   }, []);
 
-  const handleSaveProfile = async () => {
-    if (!name.trim()) {
-      setProfileMsg({ text: 'Meno je povinné', type: 'err' });
-      return;
-    }
+  const loadProfile = async () => {
+    setLoading(true);
+    try {
+      const res = await authenticatedFetch('/api/auth/me');
+      if (res.ok) {
+        const d = await res.json();
+        setProfile(d);
+        setEditName(d.fullName || '');
+        setEditPhone(d.phone || '');
+        setEditSpecialization(d.specialization || '');
+        setEditAvatar(d.avatarUrl || '');
+        setEditBio(d.bio || '');
+      }
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
 
-    setSavingProfile(true);
-    setProfileMsg({ text: '', type: '' });
-
+  const saveProfile = async () => {
+    if (!editName) return setMsg({ text: 'Meno je povinné', type: 'err' });
     try {
       const uid = user?.id || user?.userId;
       const res = await authenticatedFetch('/api/users/' + uid, {
         method: 'PUT',
-        body: JSON.stringify({
-          fullName: name.trim(),
-          phone: phone.trim(),
-          specialization: specialization.trim(),
-          avatarUrl: avatar.trim(),
-          bio: bio.trim()
-        })
+        body: JSON.stringify({ fullName: editName, phone: editPhone, specialization: editSpecialization, avatarUrl: editAvatar, bio: editBio })
       });
-
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.message || 'Chyba servera');
-      }
-
-      setProfileMsg({ text: 'Profil bol úspešne aktualizovaný!', type: 'ok' });
-      loadProfile(); // reload context
-
-      // fade out message after 3 seconds
-      setTimeout(() => setProfileMsg({ text: '', type: '' }), 3000);
-    } catch (e) {
-      setProfileMsg({ text: e.message, type: 'err' });
-    } finally {
-      setSavingProfile(false);
-    }
+      if (res.ok) {
+        setMsg({ text: 'Profil bol uložený!', type: 'ok' });
+        if (updateUser) updateUser({ ...user, fullName: editName, avatarUrl: editAvatar });
+        setTimeout(() => setMsg({ text: '', type: '' }), 3000);
+      } else { throw new Error('Chyba servera'); }
+    } catch (e) { setMsg({ text: e.message, type: 'err' }); }
   };
 
-  const handleChangePassword = async () => {
-    if (!curPass) return setPassMsg({ text: 'Zadaj aktuálne heslo', type: 'err' });
-    if (newPass.length < 6) return setPassMsg({ text: 'Nové heslo musí mať min. 6 znakov', type: 'err' });
-    if (newPass !== newPass2) return setPassMsg({ text: 'Heslá sa nezhodujú', type: 'err' });
-
-    setSavingPass(true);
-    setPassMsg({ text: '', type: '' });
+  const changePassword = async () => {
+    if (!curPass) return setMsg({ text: 'Zadaj aktuálne heslo', type: 'err' });
+    if (newPass.length < 6) return setMsg({ text: 'Nové heslo musí mať aspoň 6 znakov', type: 'err' });
+    if (newPass !== newPass2) return setMsg({ text: 'Nové heslá sa nezhodujú', type: 'err' });
 
     try {
       const uid = user?.id || user?.userId;
-      const res = await authenticatedFetch('/api/users/' + uid + '/password', {
+      const res = await authenticatedFetch(`/api/users/${uid}/password`, {
         method: 'PUT',
         body: JSON.stringify({ currentPassword: curPass, newPassword: newPass })
       });
-
-      if (!res.ok) {
+      if (res.ok) {
+        setMsg({ text: 'Heslo bolo úspešne zmenené!', type: 'ok' });
+        setCurPass(''); setNewPass(''); setNewPass2('');
+        setTimeout(() => setMsg({ text: '', type: '' }), 3000);
+      } else {
         const d = await res.json().catch(() => ({}));
         throw new Error(d.message || 'Chyba pri zmene hesla');
       }
-
-      setPassMsg({ text: 'Heslo bolo zmenené!', type: 'ok' });
-      setCurPass('');
-      setNewPass('');
-      setNewPass2('');
-      
-      setTimeout(() => setPassMsg({ text: '', type: '' }), 3000);
-    } catch (e) {
-      setPassMsg({ text: e.message, type: 'err' });
-    } finally {
-      setSavingPass(false);
-    }
+    } catch (e) { setMsg({ text: e.message, type: 'err' }); }
   };
 
-  if (loading) {
-    return (
-      <div className="empty-state">
-        <span className="spinner"></span>
-        <p>Načítavam tvoj profil...</p>
-      </div>
-    );
-  }
+  const initials = editName ? editName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
+
+  const menuItems = [
+    { id: 'profile', icon: 'fa-user', label: 'Profil' },
+    { id: 'security', icon: 'fa-shield-alt', label: 'Zabezpečenie' },
+    { id: 'notifications', icon: 'fa-bell', label: 'Notifikácie' },
+    { id: 'support', icon: 'fa-question-circle', label: 'Podpora' },
+  ];
+
+  if (loading) return <div className="ps active"><span className="spin"></span></div>;
 
   return (
-    <div>
-      {/* View purely the info */}
-      <div className="panel">
-        <div className="ph">
-          <span className="pt">Môj profil</span>
-          <span className="badge b-blue" style={{ textTransform: 'none', letterSpacing: 0, padding: '0.18rem 0.55rem' }}>GET /api/auth/me</span>
-        </div>
-        <div className="pb">
-          <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem 1rem' }}>
-            <div><div className="fl">Meno</div><div style={{ fontSize: '0.87rem' }}>{profile?.fullName || '—'}</div></div>
-            <div><div className="fl">Email</div><div style={{ fontSize: '0.87rem' }}>{profile?.email || '—'}</div></div>
-            <div><div className="fl">Telefón</div><div style={{ fontSize: '0.87rem' }}>{profile?.phone || '—'}</div></div>
-            <div><div className="fl">Rola</div><span className="badge b-blue">{profile?.role || 'trainer'}</span></div>
-            <div><div className="fl">Špecializácia</div><div style={{ fontSize: '0.87rem' }}>{profile?.specialization || '—'}</div></div>
-            <div><div className="fl">Registrovaný</div><div style={{ fontSize: '0.87rem' }}>{new Date(profile?.createdAt || Date.now()).toLocaleDateString('sk-SK')}</div></div>
+    <div className="profile-redesign animate-in" style={{ padding: '0.5rem' }}>
+      <header style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-d)', marginBottom: '0.4rem' }}>Nastavenia</h2>
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Spravuj svoju profesionálnu vizitku a účet</p>
+      </header>
+
+      <div className="settings-grid">
+        {/* Sidebar */}
+        <div className="panel profile-sidebar-wrapper" style={{ padding: '0.6rem', background: '#161d2b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', display: 'flex', flexDirection: 'column' }}>
+          {menuItems.map(item => (
+            <button 
+              key={item.id}
+              onClick={() => { setActiveSubTab(item.id); setMsg({ text: '', type: '' }); }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: '1rem',
+                padding: '1.1rem 1.2rem', background: activeSubTab === item.id ? 'rgba(10, 132, 255, 0.1)' : 'transparent',
+                border: 'none', borderRadius: '12px', color: activeSubTab === item.id ? 'var(--blue)' : 'var(--muted)',
+                cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left', fontWeight: activeSubTab === item.id ? 800 : 500,
+                position: 'relative', overflow: 'hidden'
+              }}
+            >
+              {activeSubTab === item.id && <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: '3px', background: 'var(--blue)', borderRadius: '0 4px 4px 0' }} />}
+              <i className={`fas ${item.icon}`} style={{ fontSize: '1rem', width: '20px' }}></i>
+              <span style={{ fontSize: '0.9rem' }}>{item.label}</span>
+              {activeSubTab === item.id && <i className="fas fa-chevron-right" style={{ marginLeft: 'auto', fontSize: '0.7rem', opacity: 0.5 }}></i>}
+            </button>
+          ))}
+          <div className="version-info" style={{ marginTop: '3rem', padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.03)' }}>
+            <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '0.5rem' }}>VERZIA</div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted)' }}>TrainerPro v1.8.4</div>
           </div>
+        </div>
+        
+        <div className="settings-content-wrapper">
+          {/* Profile Card */}
+          <div className="panel settings-profile-card" style={{ padding: 0, background: '#161d2b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: '120px', background: 'linear-gradient(135deg, #0f172a 30%, var(--blue) 100%)', opacity: 0.8 }}></div>
+            <div style={{ marginTop: '-60px', padding: '1.5rem', textAlign: 'center' }}>
+               <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <div style={{ width: '120px', height: '120px', borderRadius: '28px', background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', fontWeight: 900, color: '#fff', boxShadow: '0 15px 35px rgba(10, 132, 255, 0.3)', marginBottom: '1.5rem', border: '5px solid #161d2b', overflow: 'hidden' }}>
+                    {editAvatar ? <img src={editAvatar} alt="Tvoj Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+                  </div>
+                  <button style={{ position: 'absolute', bottom: '15px', right: '-5px', width: '36px', height: '36px', borderRadius: '10px', background: '#334155', border: '3px solid #161d2b', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <i className="fas fa-camera" style={{ fontSize: '0.8rem' }}></i>
+                  </button>
+               </div>
+               <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '0.3rem' }}>{editName || 'Tréner'}</h3>
+               <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '2rem' }}>{editSpecialization || 'Fitness Inštruktor'}</p>
+               
+               <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                     <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
+                        <i className="fas fa-certificate"></i>
+                     </div>
+                     <div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase' }}>CERTIFIKÁT</div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Overený Tréner</div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+          </div>
+
+          {/* Main Content Areas */}
+          <AnimatePresence mode="wait">
+            {activeSubTab === 'profile' && (
+              <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="panel settings-form-panel" style={{ padding: '2.5rem', background: '#161d2b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Profilové údaje</h3>
+                  <button onClick={saveProfile} className="btn" style={{ background: 'var(--blue)', color: '#fff', padding: '0.8rem 1.8rem', borderRadius: '12px', fontWeight: 800 }}>ULOŽIŤ</button>
+                </div>
+
+                <div className="profile-redesign-form-grid">
+                  <div className="fg">
+                    <label className="fl">Celé meno</label>
+                    <input className="fi" value={editName} onChange={e => setEditName(e.target.value)} />
+                  </div>
+                  <div className="fg">
+                    <label className="fl">Špecializácia</label>
+                    <input className="fi" value={editSpecialization} onChange={e => setEditSpecialization(e.target.value)} />
+                  </div>
+                  <div className="fg">
+                    <label className="fl">Telefón</label>
+                    <input className="fi" value={editPhone} onChange={e => setEditPhone(e.target.value)} />
+                  </div>
+                  <div className="fg">
+                    <label className="fl">Avatar URL</label>
+                    <input className="fi" value={editAvatar} onChange={e => setEditAvatar(e.target.value)} />
+                  </div>
+                </div>
+                <div className="fg">
+                  <label className="fl">Bio / O mne</label>
+                  <textarea className="fi" style={{ height: '100px' }} value={editBio} onChange={e => setEditBio(e.target.value)} />
+                </div>
+                {msg.text && <div className={`fm ${msg.type}`} style={{ borderRadius: '12px', marginTop: '1rem' }}>{msg.text}</div>}
+              </motion.div>
+            )}
+
+            {activeSubTab === 'security' && (
+              <motion.div key="security" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="panel settings-form-panel" style={{ padding: '2.5rem', background: '#161d2b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
+                   <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Zmena hesla</h3>
+                   <button onClick={changePassword} className="btn" style={{ background: 'var(--blue)', color: '#fff', padding: '0.8rem 1.8rem', borderRadius: '12px', fontWeight: 800 }}>ZMENIŤ HESLO</button>
+                 </div>
+                 
+                 <div className="profile-redesign-form-grid">
+                   <div className="fg" style={{ gridColumn: 'span 2' }}>
+                     <label className="fl">Aktuálne heslo</label>
+                     <input className="fi" type="password" value={curPass} onChange={e => setCurPass(e.target.value)} />
+                   </div>
+                   <div className="fg">
+                     <label className="fl">Nové heslo</label>
+                     <input className="fi" type="password" value={newPass} onChange={e => setNewPass(e.target.value)} />
+                   </div>
+                   <div className="fg">
+                     <label className="fl">Zopakovať nové heslo</label>
+                     <input className="fi" type="password" value={newPass2} onChange={e => setNewPass2(e.target.value)} />
+                   </div>
+                 </div>
+                 {msg.text && <div className={`fm ${msg.type}`} style={{ borderRadius: '12px', marginTop: '1rem' }}>{msg.text}</div>}
+              </motion.div>
+            )}
+
+            {activeSubTab === 'notifications' && (
+              <motion.div key="notif" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="panel settings-form-panel" style={{ padding: '2.5rem', textAlign: 'center' }}>
+                 <i className="fas fa-bell-slash" style={{ fontSize: '3rem', opacity: 0.2, marginBottom: '1rem', display: 'block' }}></i>
+                 <p style={{ color: 'var(--muted)' }}>Nastavenia notifikácií budú čoskoro dostupné.</p>
+              </motion.div>
+            )}
+
+            {activeSubTab === 'support' && (
+              <motion.div key="support" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="panel settings-form-panel" style={{ padding: '2.5rem', textAlign: 'center' }}>
+                 <i className="fas fa-headset" style={{ fontSize: '3rem', opacity: 0.2, marginBottom: '1rem', display: 'block' }}></i>
+                 <p style={{ color: 'var(--muted)' }}>Kontaktujte nás na support@fitnessapp.sk</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      <div className="grid-2">
-        {/* Profile Form */}
-        <div className="panel">
-          <div className="ph">
-            <span className="pt">Upraviť profil</span>
-            <span className="badge b-orange" style={{ textTransform: 'none', letterSpacing: 0, padding: '0.18rem 0.55rem' }}>PUT /api/users/[id]</span>
-          </div>
-          <div className="pb">
-            <div className="fg">
-              <label className="fl">Celé meno *</label>
-              <input className="fi" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Tvoje meno" />
-            </div>
-            <div className="fg">
-              <label className="fl">Telefón</label>
-              <input className="fi" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+421..." />
-            </div>
-            <div className="fg">
-              <label className="fl">Špecializácia</label>
-              <input className="fi" type="text" value={specialization} onChange={e => setSpecialization(e.target.value)} placeholder="napr. CrossFit, Kondičný tréning..." />
-            </div>
-            <div className="fg">
-              <label className="fl">URL avatara</label>
-              <input className="fi" type="url" value={avatar} onChange={e => setAvatar(e.target.value)} placeholder="https://..." />
-            </div>
-            <div className="fg">
-              <label className="fl">Bio / O mne</label>
-              <textarea className="fi" rows="3" value={bio} onChange={e => setBio(e.target.value)} placeholder="Napíš niečo o sebe, svojej filozofii trénovania..."></textarea>
-            </div>
-            
-            <button className="btn btn-blue btn-block" onClick={handleSaveProfile} disabled={savingProfile}>
-              {savingProfile ? <span className="spinner" style={{width:14,height:14}}></span> : <i className="fas fa-save"></i>} 
-              {savingProfile ? 'Ukladám...' : 'Uložiť zmeny'}
-            </button>
-            
-            {profileMsg.text && (
-              <div style={{ marginTop: '0.65rem', padding: '0.55rem 0.8rem', borderRadius: 3, fontSize: '0.78rem', background: profileMsg.type === 'err' ? 'rgba(255,45,85,0.08)' : 'rgba(200,255,0,0.07)', color: profileMsg.type === 'err' ? 'var(--red)' : 'var(--acid)', border: `1px solid ${profileMsg.type === 'err' ? 'rgba(255,45,85,0.2)' : 'rgba(200,255,0,0.18)'}` }}>
-                {profileMsg.text}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Password Form */}
-        <div className="panel">
-          <div className="ph">
-            <span className="pt">Zmena hesla</span>
-          </div>
-          <div className="pb">
-            <div className="fg">
-              <label className="fl">Aktuálne heslo *</label>
-              <input className="fi" type="password" value={curPass} onChange={e => setCurPass(e.target.value)} />
-            </div>
-            <div className="fg">
-              <label className="fl">Nové heslo * (min 6)</label>
-              <input className="fi" type="password" value={newPass} onChange={e => setNewPass(e.target.value)} />
-            </div>
-            <div className="fg">
-              <label className="fl">Potvrdiť nové heslo *</label>
-              <input className="fi" type="password" value={newPass2} onChange={e => setNewPass2(e.target.value)} />
-            </div>
-            
-            <button className="btn btn-ghost btn-block" onClick={handleChangePassword} disabled={savingPass}>
-              {savingPass ? <span className="spinner" style={{width:14,height:14}}></span> : <i className="fas fa-lock"></i>} 
-              {savingPass ? 'Mení sa...' : 'Zmeniť heslo'}
-            </button>
-            
-            {passMsg.text && (
-              <div style={{ marginTop: '0.65rem', padding: '0.55rem 0.8rem', borderRadius: 3, fontSize: '0.78rem', background: passMsg.type === 'err' ? 'rgba(255,45,85,0.08)' : 'rgba(200,255,0,0.07)', color: passMsg.type === 'err' ? 'var(--red)' : 'var(--acid)', border: `1px solid ${passMsg.type === 'err' ? 'rgba(255,45,85,0.2)' : 'rgba(200,255,0,0.18)'}` }}>
-                {passMsg.text}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

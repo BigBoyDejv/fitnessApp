@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
 const SK_DAYS = ['Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota', 'Nedeľa'];
@@ -10,6 +11,65 @@ export default function ScheduleTab() {
   const [offset, setOffset] = useState(0);
   const [selectedDayIdx, setSelectedDayIdx] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 850);
+
+  const [selectedItem, setSelectedItem] = useState(null); // { ...item, type: 'class'|'session' }
+  const [participants, setParticipants] = useState([]);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const openItem = async (item) => {
+    setSelectedItem(item);
+    if (item.itemType === 'session') {
+      setParticipants([{ userId: item.clientId, fullName: item.clientName, status: item.attendance || 'PENDING' }]);
+    } else {
+      setLoadingParticipants(true);
+      setParticipants([]);
+      try {
+        const res = await authenticatedFetch(`/api/classes/${item.id}/participants`);
+        if (res.ok) {
+          const data = await res.json();
+          setParticipants(data);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingParticipants(false);
+      }
+    }
+  };
+
+  const updateAttendance = async (userId, targetStatus) => {
+    try {
+      let res;
+      if (selectedItem.itemType === 'session') {
+        res = await authenticatedFetch(`/api/personal-sessions/${selectedItem.id}/attendance`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: targetStatus })
+        });
+      } else {
+        res = await authenticatedFetch(`/api/classes/${selectedItem.id}/attendance/${userId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: targetStatus })
+        });
+      }
+
+      if (res.ok) {
+        setParticipants(prev => prev.map(p => p.userId === userId ? { ...p, status: targetStatus } : p));
+        showToast('Účasť uložená');
+        if (selectedItem.itemType === 'session') {
+          setClasses(prev => prev.map(c => (c.itemType === 'session' && c.id === selectedItem.id) ? { ...c, attendance: targetStatus } : c));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Nastala chyba pri ukladaní');
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 850);
@@ -151,7 +211,7 @@ export default function ScheduleTab() {
                  const time = st.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
                  const isPassed = st < new Date();
                  return (
-                   <div key={`${c.itemType}-${c.id}`} className={`trainer-class-card-mobile animate-in ${c.itemType === 'session' ? 'session-card' : ''}`} style={{ 
+                   <div key={`${c.itemType}-${c.id}`} onClick={() => openItem(c)} className={`trainer-class-card-mobile animate-in ${c.itemType === 'session' ? 'session-card' : ''}`} style={{ 
                       padding: '1.25rem', 
                       borderRadius: '24px', 
                       display: 'flex', 
@@ -162,7 +222,8 @@ export default function ScheduleTab() {
                       opacity: isPassed ? 0.5 : 1,
                       animationDelay: `${idx * 0.1}s`,
                       position: 'relative',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      cursor: 'pointer'
                    }}>
                       <div style={{ 
                         fontSize: '1.2rem', 
@@ -234,7 +295,7 @@ export default function ScheduleTab() {
                            return (
                              <td key={i} style={{ border: '1px solid var(--border)', padding: '0.5rem', height: '100px', verticalAlign: 'top', background: 'rgba(255,255,255,0.01)' }}>
                                 {cellClasses.map(c => (
-                                  <div key={`${c.itemType}-${c.id}`} className={`trainer-class-tag glass highlight ${c.itemType === 'session' ? 'acid' : 'blue'}`} style={{ padding: '0.6rem 0.8rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, marginBottom: '0.4rem', cursor: 'pointer', transition: 'all 0.2s', border: c.itemType === 'session' ? '1px solid rgba(200,255,0,0.3)' : '1px solid transparent' }}>
+                                  <div key={`${c.itemType}-${c.id}`} onClick={() => openItem(c)} className={`trainer-class-tag glass highlight ${c.itemType === 'session' ? 'acid' : 'blue'}`} style={{ padding: '0.6rem 0.8rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, marginBottom: '0.4rem', cursor: 'pointer', transition: 'all 0.2s', border: c.itemType === 'session' ? '1px solid rgba(200,255,0,0.3)' : '1px solid transparent' }}>
                                      <div style={{ marginBottom: '2px' }}>{c.itemType === 'session' ? c.title : c.name}</div>
                                      <div style={{ opacity: 0.7, fontSize: '0.65rem' }}>
                                         {c.itemType === 'session' ? (
@@ -300,6 +361,116 @@ export default function ScheduleTab() {
            )}
         </div>
       </div>
+      <AnimatePresence>
+        {selectedItem && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <motion.div 
+               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+               onClick={() => setSelectedItem(null)}
+               style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }} 
+            />
+            <motion.div
+               initial={{ opacity: 0, scale: 0.95, y: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.95, y: 20 }}
+               style={{ 
+                 width: '100%', maxWidth: '480px', background: 'var(--surface)',
+                 border: '1px solid var(--border)', borderRadius: '32px', padding: '2rem', position: 'relative',
+                 boxShadow: '0 25px 60px rgba(0,0,0,0.6)', zIndex: 1001,
+                 overflow: 'hidden'
+               }}
+            >
+               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: selectedItem.itemType === 'session' ? 'var(--acid)' : 'var(--blue)' }} />
+               
+               <header style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>
+                      {selectedItem.itemType === 'session' ? 'SÚKROMNÝ TRÉNING' : 'SKUPINOVÁ LEKCIA'}
+                    </div>
+                    <h3 style={{ fontSize: '1.6rem', fontWeight: 950, fontFamily: 'var(--font-d)', lineHeight: 1.1 }}>{selectedItem.itemType === 'session' ? selectedItem.title : selectedItem.name}</h3>
+                    <div style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.4rem', fontWeight: 600 }}>
+                      <i className="far fa-clock" style={{ marginRight: '0.4rem' }} />
+                      {new Date(selectedItem.startTime).toLocaleTimeString('sk', { hour: '2-digit', minute: '2-digit' })} • {new Date(selectedItem.startTime).toLocaleDateString('sk-SK')}
+                    </div>
+                  </div>
+                  <button className="btn btn-ghost" onClick={() => setSelectedItem(null)} style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}>
+                    <i className="fas fa-times" />
+                  </button>
+               </header>
+
+               <div style={{ marginBottom: '1.2rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', marginBottom: '0.8rem', textTransform: 'uppercase' }}>
+                    SPRÁVA ÚČASTNÍKOV {selectedItem.itemType === 'class' && `(${participants.length})`}
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '0.4rem' }}>
+                    {loadingParticipants ? (
+                      <div style={{ padding: '2rem', textAlign: 'center' }}><span className="spinner" /></div>
+                    ) : participants.length > 0 ? (
+                      participants.map(p => (
+                        <div key={p.userId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                           <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{p.fullName}</div>
+                              <div style={{ fontSize: '0.6rem', fontWeight: 900, color: p.status === 'PRESENT' ? 'var(--acid)' : p.status === 'ABSENT' ? 'var(--red)' : 'var(--muted)', textTransform: 'uppercase' }}>
+                                {p.status === 'PRESENT' ? 'Prítomný' : p.status === 'ABSENT' ? 'No-show' : 'Čaká na potvrdenie'}
+                              </div>
+                           </div>
+                           <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button 
+                                onClick={() => updateAttendance(p.userId, 'PRESENT')}
+                                className="btn btn-sm"
+                                style={{ 
+                                  padding: '0.4rem 0.7rem', 
+                                  borderRadius: '8px',
+                                  background: p.status === 'PRESENT' ? 'var(--acid2)' : 'var(--surface2)',
+                                  color: p.status === 'PRESENT' ? '#000' : 'var(--muted)',
+                                  fontSize: '0.6rem',
+                                  fontWeight: 900
+                                }}
+                              >
+                                PRESENT
+                              </button>
+                              <button 
+                                onClick={() => updateAttendance(p.userId, 'ABSENT')}
+                                className="btn btn-sm"
+                                style={{ 
+                                  padding: '0.4rem 0.7rem', 
+                                  borderRadius: '8px',
+                                  background: p.status === 'ABSENT' ? 'var(--red)' : 'var(--surface2)',
+                                  color: p.status === 'ABSENT' ? '#fff' : 'var(--muted)',
+                                  fontSize: '0.6rem',
+                                  fontWeight: 900
+                                }}
+                              >
+                                NO SHOW
+                              </button>
+                           </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--muted)', fontSize: '0.85rem' }}>Žiadni účastníci</div>
+                    )}
+                  </div>
+               </div>
+
+               <button className="btn btn-blue btn-block" onClick={() => setSelectedItem(null)} style={{ height: '48px', borderRadius: '14px', fontWeight: 800 }}>HOTOVO</button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: 'var(--acid)', color: '#000', padding: '0.8rem 1.5rem', borderRadius: '50px', fontWeight: 900, zIndex: 2000, boxShadow: '0 10px 30px rgba(0,0,0,0.3)', pointerEvents: 'none', fontSize: '0.9rem', fontFamily: 'var(--font-d)' }}
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

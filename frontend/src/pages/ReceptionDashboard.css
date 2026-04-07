@@ -481,9 +481,17 @@
     transition: all 0.25s;
 }
 
-.reception-dashboard .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.reception-dashboard .hamburger.open span:nth-child(2) { opacity: 0; }
-.reception-dashboard .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.reception-dashboard .hamburger.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.reception-dashboard .hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.reception-dashboard .hamburger.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
 
 /* SIDEBAR OVERLAY */
 .reception-dashboard .sidebar-overlay {
@@ -549,7 +557,7 @@
     .reception-dashboard .grid-2 {
         grid-template-columns: 1fr;
     }
-    
+
     .reception-dashboard .topbar {
         padding: 0 1rem;
     }
@@ -569,7 +577,7 @@
     .reception-dashboard .kpi-val {
         font-size: 2.1rem;
     }
-    
+
     .reception-dashboard .kpi-card {
         padding: 1.4rem 1rem;
     }
@@ -611,6 +619,84 @@
         border-radius: 20px;
     }
 }
+
+/* ── Redesigned Settings Grid ────────────────────────── */
+.settings-grid {
+    display: flex;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.profile-sidebar-wrapper {
+    flex: 0 0 260px;
+    position: sticky;
+    top: 1.5rem;
+}
+
+.settings-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.settings-profile-card {
+    flex: 0 0 300px;
+}
+
+.settings-form-panel {
+    flex: 1 1 500px;
+}
+
+@media (max-width: 1100px) {
+    .settings-grid {
+        flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+        flex: 1 0 auto;
+        position: static;
+        width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .profile-sidebar-wrapper {
+         overflow-x: auto;
+         display: flex !important;
+         flex-direction: row !important;
+         padding: 0.2rem !important;
+         gap: 0.3rem !important;
+         border-radius: 12px !important;
+         background: rgba(22, 29, 43, 0.6) !important;
+         backdrop-filter: blur(10px);
+         margin-bottom: 1rem !important;
+         -webkit-overflow-scrolling: touch;
+    }
+    .profile-sidebar-wrapper button {
+        width: auto !important;
+        white-space: nowrap;
+        padding: 0.8rem 1.2rem !important;
+    }
+
+    .profile-sidebar-wrapper .version-info {
+        display: none;
+    }
+}
+
+.profile-redesign-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .profile-redesign-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 /* ────────────────────────────────────────────────────────────────────────
    KASA (CASHIER) LAYOUT
@@ -740,13 +826,41 @@
     border-radius: 2px;
 }
 
-.reception-dashboard .b-acid { background: rgba(200, 255, 0, 0.1); color: var(--acid); }
-.reception-dashboard .b-cyan { background: rgba(0, 255, 209, 0.1); color: var(--acid2); }
-.reception-dashboard .b-red { background: rgba(255, 45, 85, 0.1); color: var(--red); }
-.reception-dashboard .b-orange { background: rgba(255, 149, 0, 0.1); color: var(--orange); }
-.reception-dashboard .b-grey { background: rgba(255, 255, 255, 0.06); color: var(--muted); }
-.reception-dashboard .b-purple { background: rgba(191, 90, 242, 0.1); color: var(--purple); }
-.reception-dashboard .b-frozen { background: var(--frozen-bg); color: var(--frozen); border: 1px solid var(--frozen-border); }
+.reception-dashboard .b-acid {
+    background: rgba(200, 255, 0, 0.1);
+    color: var(--acid);
+}
+
+.reception-dashboard .b-cyan {
+    background: rgba(0, 255, 209, 0.1);
+    color: var(--acid2);
+}
+
+.reception-dashboard .b-red {
+    background: rgba(255, 45, 85, 0.1);
+    color: var(--red);
+}
+
+.reception-dashboard .b-orange {
+    background: rgba(255, 149, 0, 0.1);
+    color: var(--orange);
+}
+
+.reception-dashboard .b-grey {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+}
+
+.reception-dashboard .b-purple {
+    background: rgba(191, 90, 242, 0.1);
+    color: var(--purple);
+}
+
+.reception-dashboard .b-frozen {
+    background: var(--frozen-bg);
+    color: var(--frozen);
+    border: 1px solid var(--frozen-border);
+}
 
 /* DRAWERS */
 .reception-dashboard .drawer-overlay {
@@ -1295,63 +1409,64 @@
 ──────────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
-  /* Bottom dock specific styling for Reception */
-  .reception-dashboard .mobile-bottom-dock {
-    height: 72px !important;
-    bottom: 1rem !important;
-    left: 1rem !important;
-    right: 1rem !important;
-    border-radius: 24px !important;
-    background: rgba(10, 10, 15, 0.9) !important;
-    border: 1px solid rgba(191, 90, 242, 0.2) !important;
-    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7) !important;
-    display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important;
-    z-index: 999 !important;
-  }
 
-  /* Override radial spotlight to purple */
-  .reception-dashboard .mobile-bottom-dock .nav-spotlight {
-    background: radial-gradient(circle, rgba(191, 90, 242, 0.2) 0%, transparent 70%) !important;
-  }
+    /* Bottom dock specific styling for Reception */
+    .reception-dashboard .mobile-bottom-dock {
+        height: 72px !important;
+        bottom: 1rem !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        border-radius: 24px !important;
+        background: rgba(10, 10, 15, 0.9) !important;
+        border: 1px solid rgba(191, 90, 242, 0.2) !important;
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7) !important;
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        z-index: 999 !important;
+    }
 
-  /* Active state texts and icons purple */
-  .reception-dashboard .mobile-bottom-dock button.active i {
-    color: var(--purple) !important;
-    filter: drop-shadow(0 0 8px rgba(191, 90, 242, 0.6)) !important;
-  }
+    /* Override radial spotlight to purple */
+    .reception-dashboard .mobile-bottom-dock .nav-spotlight {
+        background: radial-gradient(circle, rgba(191, 90, 242, 0.2) 0%, transparent 70%) !important;
+    }
 
-  .reception-dashboard .mobile-bottom-dock button.active span {
-    color: var(--purple) !important;
-    font-weight: 900 !important;
-  }
+    /* Active state texts and icons purple */
+    .reception-dashboard .mobile-bottom-dock button.active i {
+        color: var(--purple) !important;
+        filter: drop-shadow(0 0 8px rgba(191, 90, 242, 0.6)) !important;
+    }
 
-  /* Final Purple Action Button Fix */
-  .reception-dashboard .mobile-bottom-dock .nav-action-btn i {
-    background: linear-gradient(135deg, #BF5AF2, #5E5CE6) !important;
-    background-image: linear-gradient(135deg, #BF5AF2, #5E5CE6) !important;
-    color: #ffffff !important;
-    box-shadow: 0 8px 30px rgba(191, 90, 242, 0.5) !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    width: 60px !important;
-    height: 60px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    transform: translateY(-10px) scale(1.1) !important;
-    margin-top: -8px !important;
-  }
+    .reception-dashboard .mobile-bottom-dock button.active span {
+        color: var(--purple) !important;
+        font-weight: 900 !important;
+    }
 
-  /* Resetting potential background on button itself */
-  .reception-dashboard .mobile-bottom-dock .nav-action-btn {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
+    /* Final Purple Action Button Fix */
+    .reception-dashboard .mobile-bottom-dock .nav-action-btn i {
+        background: linear-gradient(135deg, #BF5AF2, #5E5CE6) !important;
+        background-image: linear-gradient(135deg, #BF5AF2, #5E5CE6) !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 30px rgba(191, 90, 242, 0.5) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        width: 60px !important;
+        height: 60px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        transform: translateY(-10px) scale(1.1) !important;
+        margin-top: -8px !important;
+    }
 
-  .reception-dashboard .nav-indicator {
-    background: #BF5AF2 !important;
-    box-shadow: 0 0 15px #BF5AF2 !important;
-  }
+    /* Resetting potential background on button itself */
+    .reception-dashboard .mobile-bottom-dock .nav-action-btn {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .reception-dashboard .nav-indicator {
+        background: #BF5AF2 !important;
+        box-shadow: 0 0 15px #BF5AF2 !important;
+    }
 }

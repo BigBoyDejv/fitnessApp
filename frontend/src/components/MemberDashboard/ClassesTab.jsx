@@ -16,12 +16,22 @@ export default function ClassesTab({ setActiveTab }) {
 
   const loadMyClasses = async () => {
     try {
-      const res = await authenticatedFetch('/api/classes/my');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Chyba servera');
+      const [resC, resP] = await Promise.all([
+        authenticatedFetch('/api/classes/my'),
+        authenticatedFetch('/api/personal-sessions/my')
+      ]);
+
+      let combined = [];
+      if (resC.ok) {
+        const dataC = await resC.json();
+        if (Array.isArray(dataC)) combined = [...combined, ...dataC.map(c => ({ ...c, isPersonal: false, className: c.name }))];
+      }
+      if (resP.ok) {
+        const dataP = await resP.json();
+        if (Array.isArray(dataP)) combined = [...combined, ...dataP.map(p => ({ ...p, isPersonal: true, className: p.title, instructor: p.trainerName }))];
+      }
       
-      // Sort by date/time
-      const sorted = Array.isArray(data) ? data.sort((a,b) => new Date(a.startTime) - new Date(b.startTime)) : [];
+      const sorted = combined.sort((a,b) => new Date(a.startTime) - new Date(b.startTime));
       setClasses(sorted);
     } catch { setClasses([]); }
     finally { setLoading(false); }
@@ -100,19 +110,19 @@ export default function ClassesTab({ setActiveTab }) {
                           <div className="t-hour">{new Date(c.startTime).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</div>
                           <div className="t-dot" />
                        </div>
-                       <div className="t-content-card">
-                          <div className="t-header">
-                             <span className="t-tag">SKUPINOVÁ LEKCIA</span>
-                             <div className="t-status">{isPast ? 'UKONČENÁ' : 'AKTÍVNA'}</div>
-                          </div>
-                          <div className="t-main">
-                             <div className="t-title">{c.className || c.name}</div>
-                             <div className="t-info">
-                                <span><i className="fas fa-user-circle" /> {c.instructor || 'Tím Coach'}</span>
-                                <span className="sep">&bull;</span>
-                                <span><i className="fas fa-map-marker-alt" /> Sála 2</span>
-                             </div>
-                          </div>
+                        <div className="t-content-card">
+                           <div className="t-header">
+                              <span className={`t-tag ${c.isPersonal ? 'personal' : ''}`}>{c.isPersonal ? 'SÚKROMNÝ TRÉNING' : 'SKUPINOVÁ LEKCIA'}</span>
+                              <div className="t-status">{isPast ? 'UKONČENÁ' : 'AKTÍVNA'}</div>
+                           </div>
+                           <div className="t-main">
+                              <div className="t-title">{c.className}</div>
+                              <div className="t-info">
+                                 <span><i className="fas fa-user-circle" /> {c.instructor || 'Tím Coach'}</span>
+                                 <span className="sep">&bull;</span>
+                                 <span><i className="fas fa-map-marker-alt" /> {c.isPersonal ? 'Osobná zóna' : 'Sála 2'}</span>
+                              </div>
+                           </div>
                            {!isPast && (
                               <div className="t-actions">
                                  <button className="btn btn-red btn-sm" onClick={(e) => cancelClass(e, c.id)} disabled={loading}>

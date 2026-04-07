@@ -40,12 +40,24 @@ export default function OverviewTab({ user, setActiveTab }) {
 
    const loadMyClasses = async () => {
       try {
-         const res = await authenticatedFetch('/api/classes/my');
-         if (!res.ok) return;
-         const data = await res.json();
+         const [resC, resP] = await Promise.all([
+            authenticatedFetch('/api/classes/my'),
+            authenticatedFetch('/api/personal-sessions/my')
+         ]);
+
+         let combined = [];
+         if (resC.ok) {
+            const dataC = await resC.json();
+            if (Array.isArray(dataC)) combined = [...combined, ...dataC.map(c => ({ ...c, isPersonal: false }))];
+         }
+         if (resP.ok) {
+            const dataP = await resP.json();
+            if (Array.isArray(dataP)) combined = [...combined, ...dataP.map(p => ({ ...p, isPersonal: true, name: p.title, instructor: p.trainerName }))];
+         }
+
          const now = new Date();
-         setUpcomingClasses(Array.isArray(data) ? data.filter(c => new Date(c.startTime) >= now).sort((a, b) => new Date(a.startTime) - new Date(b.startTime)) : []);
-      } catch { }
+         setUpcomingClasses(combined.filter(c => new Date(c.startTime) >= now).sort((a, b) => new Date(a.startTime) - new Date(b.startTime)));
+      } catch (e) { console.error('Failed to load classes/sessions', e); }
    };
 
    const loadOccupancy = async () => {
@@ -206,9 +218,9 @@ export default function OverviewTab({ user, setActiveTab }) {
                                  </div>
                               </div>
                               <div className="c-meta">
-                                 <span><i className="fas fa-clock" /> 60M</span>
+                                 <span><i className="fas fa-clock" /> {c.isPersonal ? 'SÚKROMNÝ TRÉNING' : '60M'}</span>
                                  <span className="dot-sep">&bull;</span>
-                                 <span><i className="fas fa-map-marker-alt" /> SÁLA 1</span>
+                                 <span><i className="fas fa-map-marker-alt" /> {c.isPersonal ? 'FITNESS ZÓNA' : 'SÁLA 1'}</span>
                               </div>
                            </motion.div>
                         ))}

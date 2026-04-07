@@ -16,12 +16,45 @@ import "./ReceptionDashboard.css";
 
 export default function ReceptionDashboard() {
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(sessionStorage.getItem("reception_active_tab") || "overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clock, setClock] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
   const [expandedSections, setExpandedSections] = useState({ hlavne: true, operacie: true, ucet: true });
+  
+  // Pull to refresh
+  const [pulling, setPulling] = useState(false);
+  const [pullDist, setPullDist] = useState(0);
+  const touchStart = React.useRef(0);
+  const maxPull = 80;
   const navigate = useNavigate();
+
+  // Gesture Handlers
+  const handleTouchStart = (e) => {
+    if (window.scrollY === 0) {
+      touchStart.current = e.touches[0].clientY;
+      setPulling(true);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!pulling) return;
+    const currentY = e.touches[0].clientY;
+    const dist = currentY - touchStart.current;
+    if (dist > 0) {
+      setPullDist(Math.min(dist * 0.4, maxPull));
+      if (dist > 10) e.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDist >= maxPull - 10) {
+      window.location.reload();
+    }
+    setPulling(false);
+    setPullDist(0);
+  };
+
 
   useEffect(() => {
     const token = localStorage.getItem("fp_token");
@@ -55,6 +88,10 @@ export default function ReceptionDashboard() {
   }, [navigate]);
 
   useEffect(() => {
+    sessionStorage.setItem("reception_active_tab", activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
     const onResize = () => {
       const mobile = window.innerWidth <= 900;
       setIsMobile(mobile);
@@ -67,6 +104,7 @@ export default function ReceptionDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("fp_token");
     localStorage.removeItem("fp_user");
+    sessionStorage.removeItem("reception_active_tab");
     navigate("/");
   };
 
@@ -218,7 +256,24 @@ export default function ReceptionDashboard() {
       </aside>
 
       {/* ── Hlavná oblasť ──────────────────────────────────────────────── */}
-      <main className="main">
+      <main 
+        className="main"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ position: 'relative' }}
+      >
+        {isMobile && pulling && (
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: pullDist,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', zIndex: 999,
+            background: 'rgba(191, 90, 242, 0.05)', borderBottom: '1px solid rgba(191, 90, 242, 0.2)'
+          }}>
+            <i className={`fas fa-sync-alt ${pullDist >= maxPull - 10 ? 'fa-spin' : ''}`} style={{
+              color: 'var(--purple)', opacity: pullDist/maxPull, transform: `rotate(${pullDist * 3}deg)`
+            }} />
+          </div>
+        )}
         <header className="topbar">
           <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
             {isMobile && (

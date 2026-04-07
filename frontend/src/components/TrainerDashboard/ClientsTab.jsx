@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedFetch } from '../../utils/api';
 
-export default function ClientsTab() {
+export default function ClientsTab({ setActiveTab, setPreselectedClientId }) {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -23,6 +23,21 @@ export default function ClientsTab() {
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [drawerData, setDrawerData] = useState(null);
   const [drawerMembership, setDrawerMembership] = useState(null);
+
+  // Scheduling form state
+  const [sessionForm, setSessionForm] = useState({
+    title: '',
+    time: '',
+    duration: '60',
+    notes: ''
+  });
+  const [scheduling, setScheduling] = useState(false);
+
+  const getLocalTodayISO = () => {
+    const now = new Date();
+    const off = now.getTimezoneOffset() * 60000;
+    return new Date(now - off).toISOString().slice(0, 16);
+  };
 
   const loadClients = async () => {
     setLoading(true);
@@ -54,6 +69,18 @@ export default function ClientsTab() {
   const handleOpenPicker = () => {
     setPickerOpen(true);
     if (availableMembers.length === 0) loadAvailableMembers();
+  };
+
+  const handleOpenScheduling = (client) => {
+    if (!client) return;
+    setSchedulingClient(client);
+    setSessionForm({
+      title: '',
+      time: getLocalTodayISO(),
+      duration: '60',
+      notes: ''
+    });
+    setDrawerOpen(false);
   };
 
   const handleAddClient = async () => {
@@ -126,6 +153,44 @@ export default function ClientsTab() {
     }
   };
 
+  const submitSchedule = async () => {
+    if (!sessionForm.time) {
+      alert('Prosím vyber dátum a čas');
+      return;
+    }
+    setScheduling(true);
+    try {
+        const res = await authenticatedFetch('/api/personal-sessions', {
+            method: 'POST',
+            body: JSON.stringify({ 
+              clientId: schedulingClient.id, 
+              title: sessionForm.title || 'Súkromný tréning', 
+              startTime: sessionForm.time, 
+              durationMinutes: parseInt(sessionForm.duration), 
+              notes: sessionForm.notes 
+            })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+            setMsg({ text: `Tréning pre ${schedulingClient.fullName} bol úspešne naplánovaný!`, type: 'ok' });
+            setSchedulingClient(null);
+        } else {
+            alert(data.message || 'Chyba pri plánovaní');
+        }
+    } catch(e) { 
+      console.error(e);
+      alert('Nepodarilo sa spojiť so serverom');
+    } finally {
+      setScheduling(false);
+    }
+  };
+
+  const handleSendMessage = (client) => {
+    if (!client) return;
+    if (setPreselectedClientId) setPreselectedClientId(client.id);
+    if (setActiveTab) setActiveTab('messages');
+  };
+
   const filteredClients = clients.filter(c => 
     (c.fullName || '').toLowerCase().includes(search.toLowerCase()) || 
     (c.email || '').toLowerCase().includes(search.toLowerCase())
@@ -143,7 +208,7 @@ export default function ClientsTab() {
   };
 
   return (
-    <div className="animate-in" style={{ position: 'relative' }}>
+    <div className="animate-in" style={{ position: 'relative', minHeight: '100%' }}>
       
       {msg.text && (
          <div className={`fm ${msg.type} animate-in`} style={{ marginBottom: '1.5rem', borderRadius: '10px' }}>{msg.text}</div>
@@ -415,9 +480,18 @@ export default function ClientsTab() {
         </div>
         
         <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.8rem', background: 'var(--surface2)' }}>
+           <button 
+            className="btn btn-acid btn-block" 
+            onClick={() => handleSendMessage(drawerData)}
+            disabled={!drawerData}
+            style={{ borderRadius: '10px', height: '48px', fontWeight: 800, background: 'var(--acid)', color: '#000' }}
+          >
+            <i className="fas fa-comment-alt" style={{marginRight: '0.8rem'}}></i> POSLAŤ SPRÁVU
+          </button>
+          
           <button 
             className="btn btn-blue btn-block" 
-            onClick={() => { setSchedulingClient(drawerData); setDrawerOpen(false); }}
+            onClick={() => handleOpenScheduling(drawerData)}
             disabled={!drawerData}
             style={{ borderRadius: '10px', height: '48px', fontWeight: 800 }}
           >
@@ -439,8 +513,10 @@ export default function ClientsTab() {
         {schedulingClient && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
             <motion.div 
-               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-               onClick={() => setSchedulingClient(null)}
+               initial={{ opacity: 0 }} 
+               animate={{ opacity: 1 }} 
+               exit={{ opacity: 0 }}
+               onClick={() => !scheduling && setSchedulingClient(null)}
                style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }} 
             />
             <motion.div
@@ -448,29 +524,44 @@ export default function ClientsTab() {
                animate={{ opacity: 1, scale: 1, y: 0 }}
                exit={{ opacity: 0, scale: 0.9, y: 20 }}
                style={{ 
-                 width: '100%', maxWidth: '450px', background: 'rgba(30, 30, 35, 0.95)', backdropFilter: 'blur(20px)',
-                 border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem', position: 'relative'
+                 width: '100%', maxWidth: '450px', background: 'var(--surface)',
+                 border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem', position: 'relative',
+                 boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 1001
                }}
             >
-               <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Plánovanie tréningu</h3>
-               <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Pre klienta: <b>{schedulingClient.fullName}</b></p>
+               <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', fontFamily: 'var(--font-d)' }}>Plánovanie tréningu</h3>
+               <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '1.5rem', fontWeight: 600 }}>Pre klienta: <span style={{ color: 'var(--blue)' }}>{schedulingClient.fullName}</span></p>
                
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                   <div className="fg">
                     <label className="fl">Názov tréningu</label>
-                    <input className="fi" placeholder="napr. Silový tréning - Nohy" id="ps-title" />
+                    <input 
+                      className="fi" 
+                      placeholder="napr. Silový tréning - Nohy" 
+                      value={sessionForm.title} 
+                      onChange={(e) => setSessionForm({...sessionForm, title: e.target.value})}
+                    />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
                     <div className="fg">
                         <label className="fl">Dátum a čas</label>
-                        <input className="fi" type="datetime-local" id="ps-time" defaultValue={new Date().toISOString().slice(0, 16)} />
+                        <input 
+                          className="fi" 
+                          type="datetime-local" 
+                          value={sessionForm.time} 
+                          onChange={(e) => setSessionForm({...sessionForm, time: e.target.value})}
+                        />
                     </div>
                     <div className="fg">
                         <label className="fl">Trvanie</label>
-                        <select className="fi" id="ps-duration">
+                        <select 
+                          className="fi" 
+                          value={sessionForm.duration} 
+                          onChange={(e) => setSessionForm({...sessionForm, duration: e.target.value})}
+                        >
                             <option value="30">30 min</option>
                             <option value="45">45 min</option>
-                            <option value="60" selected>60 min</option>
+                            <option value="60">60 min</option>
                             <option value="90">90 min</option>
                             <option value="120">120 min</option>
                         </select>
@@ -478,36 +569,25 @@ export default function ClientsTab() {
                   </div>
                   <div className="fg">
                     <label className="fl">Súkromné poznámky</label>
-                    <textarea className="fi" style={{ height: '80px', resize: 'none' }} id="ps-notes" placeholder="Ciele tréningu, zranenia..." />
+                    <textarea 
+                      className="fi" 
+                      style={{ height: '80px', resize: 'none' }} 
+                      placeholder="Ciele tréningu, zranenia..." 
+                      value={sessionForm.notes} 
+                      onChange={(e) => setSessionForm({...sessionForm, notes: e.target.value})}
+                    />
                   </div>
                </div>
 
                <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
-                  <button className="btn btn-ghost btn-block" onClick={() => setSchedulingClient(null)}>ZRUŠIŤ</button>
-                  <button className="btn btn-blue btn-block" onClick={async () => {
-                    const title = document.getElementById('ps-title').value;
-                    const startTime = document.getElementById('ps-time').value;
-                    const duration = parseInt(document.getElementById('ps-duration').value);
-                    const notes = document.getElementById('ps-notes').value;
-
-                    try {
-                        const res = await authenticatedFetch('/api/personal-sessions', {
-                            method: 'POST',
-                            body: JSON.stringify({ clientId: schedulingClient.id, title, startTime, durationMinutes: duration, notes })
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                            setMsg({ text: `Tréning pre ${schedulingClient.fullName} bol úspešne naplánovaný!`, type: 'ok' });
-                            setSchedulingClient(null);
-                            // Možno obnoviť zoznam ak treba
-                        } else {
-                            alert(data.message || 'Chyba pri plánovaní');
-                        }
-                    } catch(e) { 
-                      console.error(e);
-                      alert('Nepodarilo sa spojiť so serverom');
-                    }
-                  }}>POTVRDIŤ</button>
+                  <button className="btn btn-ghost btn-block" disabled={scheduling} onClick={() => setSchedulingClient(null)}>ZRUŠIŤ</button>
+                  <button 
+                    className="btn btn-blue btn-block" 
+                    onClick={submitSchedule}
+                    disabled={scheduling}
+                  >
+                    {scheduling ? <span className="spinner" style={{width: 18, height: 18}}></span> : 'POTVRDIŤ'}
+                  </button>
                </div>
             </motion.div>
           </div>
