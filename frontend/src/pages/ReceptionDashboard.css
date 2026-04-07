@@ -612,6 +612,32 @@
     }
 }
 
+/* ────────────────────────────────────────────────────────────────────────
+   KASA (CASHIER) LAYOUT
+──────────────────────────────────────────────────────────────────────── */
+
+.reception-dashboard .kasa-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .reception-dashboard .kasa-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    /* On mobile, usually the cart should be visible or easily accessible.
+       By default, flex-direction column puts the left side (products) first.
+       We will keep this, but the user requested better mobile view. */
+    .reception-dashboard .kasa-left,
+    .reception-dashboard .kasa-right {
+        width: 100%;
+    }
+}
+
 
 
 /* CHECKIN TABS */
@@ -1264,3 +1290,68 @@
     justify-content: flex-end;
 }
 
+/* ────────────────────────────────────────────────────────────────────────
+   RECEPTION PURPLE NAVIGATION OVERRIDES
+──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  /* Bottom dock specific styling for Reception */
+  .reception-dashboard .mobile-bottom-dock {
+    height: 72px !important;
+    bottom: 1rem !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    border-radius: 24px !important;
+    background: rgba(10, 10, 15, 0.9) !important;
+    border: 1px solid rgba(191, 90, 242, 0.2) !important;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7) !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    z-index: 999 !important;
+  }
+
+  /* Override radial spotlight to purple */
+  .reception-dashboard .mobile-bottom-dock .nav-spotlight {
+    background: radial-gradient(circle, rgba(191, 90, 242, 0.2) 0%, transparent 70%) !important;
+  }
+
+  /* Active state texts and icons purple */
+  .reception-dashboard .mobile-bottom-dock button.active i {
+    color: var(--purple) !important;
+    filter: drop-shadow(0 0 8px rgba(191, 90, 242, 0.6)) !important;
+  }
+
+  .reception-dashboard .mobile-bottom-dock button.active span {
+    color: var(--purple) !important;
+    font-weight: 900 !important;
+  }
+
+  /* Final Purple Action Button Fix */
+  .reception-dashboard .mobile-bottom-dock .nav-action-btn i {
+    background: linear-gradient(135deg, #BF5AF2, #5E5CE6) !important;
+    background-image: linear-gradient(135deg, #BF5AF2, #5E5CE6) !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 30px rgba(191, 90, 242, 0.5) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    width: 60px !important;
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    transform: translateY(-10px) scale(1.1) !important;
+    margin-top: -8px !important;
+  }
+
+  /* Resetting potential background on button itself */
+  .reception-dashboard .mobile-bottom-dock .nav-action-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .reception-dashboard .nav-indicator {
+    background: #BF5AF2 !important;
+    box-shadow: 0 0 15px #BF5AF2 !important;
+  }
+}

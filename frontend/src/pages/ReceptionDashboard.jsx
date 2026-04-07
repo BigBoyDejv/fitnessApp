@@ -230,18 +230,44 @@ export default function ReceptionDashboard() {
             )}
             <div className="page-title">{pageTitles[activeTab]}</div>
           </div>
-          <div className="topbar-right">
+          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {isMobile && (
-              <button className="top-logout-btn" onClick={handleLogout} style={{ marginRight: '0.8rem' }}>
+              <button className="top-logout-btn" onClick={handleLogout}>
                 <i className="fas fa-sign-out-alt"></i>
               </button>
             )}
             <span style={{ fontFamily: "var(--font-d)", fontSize: "1.1rem", color: "var(--muted)" }}>
               {clock}
             </span>
-            <div className="reception-badge">
-              <i className="fas fa-concierge-bell"></i> recepcia
-            </div>
+            {!isMobile && (
+              <div className="reception-badge">
+                <i className="fas fa-concierge-bell"></i> recepcia
+              </div>
+            )}
+            <button 
+              className={`topbar-avatar ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: activeTab === 'profile' ? 'var(--purple)' : 'var(--surface3)',
+                border: activeTab === 'profile' ? '2px solid var(--purple)' : '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                overflow: 'hidden',
+                padding: 0,
+                boxShadow: activeTab === 'profile' ? '0 0 15px rgba(191, 90, 242, 0.4)' : 'none',
+                color: '#fff',
+                fontFamily: 'var(--font-d)',
+                fontWeight: 900
+              }}
+            >
+              {user.avatarUrl ? <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : getInitials(user.fullName)}
+            </button>
           </div>
         </header>
 
@@ -282,11 +308,11 @@ export default function ReceptionDashboard() {
               <i className="fas fa-users" />
               <span>ČLENOVIA</span>
             </button>
-            <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+            <button className={activeTab === 'music' ? 'active' : ''} onClick={() => setActiveTab('music')}>
               <div className="nav-indicator" />
               <div className="nav-spotlight" />
-              <i className="fas fa-user" />
-              <span>ÚČET</span>
+              <i className="fas fa-music" />
+              <span>HUDBA</span>
             </button>
           </nav>
         )}

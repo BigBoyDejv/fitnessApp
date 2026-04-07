@@ -8,7 +8,7 @@ export default function KasaTab() {
   const [cart, setCart] = useState([]);
   const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState("");
-  
+
   const [customName, setCustomName] = useState("");
   const [customPrice, setCustomPrice] = useState("");
 
@@ -143,7 +143,7 @@ export default function KasaTab() {
         const d = await res.json();
         throw new Error(d.message || "Chyba zúčtovania");
       }
-      
+
       showToast(`Platba úspešná (${method.toUpperCase()})`, "ok");
       setCart([]);
       setSelectedMember("");
@@ -180,26 +180,27 @@ export default function KasaTab() {
               <span className="pt">Katalóg položiek</span>
             </div>
             <div style={{ position: 'relative' }}>
-              <select className="fi" value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={{ paddingLeft: '2.5rem', borderRadius: '10px', height: '36px', fontSize: '0.75rem', width: '170px', background: 'rgba(255,255,255,0.02)' }}>
-                <option value="pop">🔥 Populárne</option>
-                <option value="name">🔤 Podľa názvu</option>
-                <option value="price">💰 Podľa ceny</option>
+              <select className="fi" value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={{ paddingLeft: '2.5rem', borderRadius: '10px', height: '36px', fontSize: '0.75rem', width: '180px', background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)', outline: 'none', cursor: 'pointer', appearance: 'none' }}>
+                <option value="pop" style={{ background: '#1a1a1e', color: '#fff', padding: '10px' }}>🔥 Populárne</option>
+                <option value="name" style={{ background: '#1a1a1e', color: '#fff', padding: '10px' }}>🔤 Podľa názvu</option>
+                <option value="price" style={{ background: '#1a1a1e', color: '#fff', padding: '10px' }}>💰 Podľa ceny</option>
               </select>
-              <i className="fas fa-sort" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--orange)', fontSize: '0.8rem' }}></i>
+              <i className="fas fa-sort" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--orange)', fontSize: '0.8rem', pointerEvents: 'none' }}></i>
+              <i className="fas fa-chevron-down" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: '0.7rem', pointerEvents: 'none' }}></i>
             </div>
           </div>
           <div className="pb" style={{ padding: '1.2rem' }}>
             <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.8rem', overflowX: 'auto', paddingBottom: '0.6rem', scrollbarWidth: 'none' }}>
               {["Všetky", ...new Set(products.map(p => p.category).filter(Boolean))].map(cat => (
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   key={cat}
                   onClick={() => setActiveCat(cat)}
-                  style={{ 
-                    padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid', 
-                    borderColor: activeCat === cat ? 'var(--orange)' : 'var(--border)', 
-                    background: activeCat === cat ? 'var(--orange)' : 'rgba(255,149,0,0.05)', 
+                  style={{
+                    padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid',
+                    borderColor: activeCat === cat ? 'var(--orange)' : 'var(--border)',
+                    background: activeCat === cat ? 'var(--orange)' : 'rgba(255,149,0,0.05)',
                     color: activeCat === cat ? '#000' : 'var(--muted)',
                     fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap'
                   }}
@@ -227,8 +228,8 @@ export default function KasaTab() {
                     const outOfStock = p.stock <= 0;
                     const salesCount = popStats[p.name] || 0;
                     return (
-                      <motion.div 
-                        key={p.id} 
+                      <motion.div
+                        key={p.id}
                         layout
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -236,8 +237,8 @@ export default function KasaTab() {
                         whileHover={!outOfStock ? { y: -5, boxShadow: '0 10px 25px rgba(255,149,0,0.15)' } : {}}
                         onClick={() => !outOfStock && addToCart(p)}
                         className="glass"
-                        style={{ 
-                          padding: '1.5rem 1rem', borderRadius: '20px', cursor: outOfStock ? 'not-allowed' : 'pointer', 
+                        style={{
+                          padding: '1.5rem 1rem', borderRadius: '20px', cursor: outOfStock ? 'not-allowed' : 'pointer',
                           textAlign: 'center', border: '1px solid var(--border)',
                           background: outOfStock ? 'rgba(0,0,0,0.4)' : 'rgba(255,149,0,0.01)',
                           position: 'relative', overflow: 'hidden'
@@ -259,7 +260,7 @@ export default function KasaTab() {
                         </div>
                         {!outOfStock && (
                           <div className="add-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(255,149,0,0.1)', opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}>
-                             <i className="fas fa-plus-circle" style={{ fontSize: '2rem', color: 'var(--orange)' }} />
+                            <i className="fas fa-plus-circle" style={{ fontSize: '2rem', color: 'var(--orange)' }} />
                           </div>
                         )}
                       </motion.div>
@@ -272,7 +273,7 @@ export default function KasaTab() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="panel glass-panel">
-          <div className="ph"><span className="pt"><i className="fas fa-pen-nib" style={{marginRight: '0.8rem'}} />Manuálna položka</span></div>
+          <div className="ph"><span className="pt"><i className="fas fa-pen-nib" style={{ marginRight: '0.8rem' }} />Manuálna položka</span></div>
           <div className="pb" style={{ padding: '1.2rem' }}>
             <div style={{ display: "flex", gap: "1rem" }}>
               <div style={{ flex: 1, position: 'relative' }}>
@@ -300,24 +301,24 @@ export default function KasaTab() {
             </div>
             <button className="btn btn-ghost btn-xs" onClick={() => setCart([])} disabled={cart.length === 0} style={{ borderRadius: '8px' }}>VYMAZAŤ</button>
           </div>
-          
+
           <div className="pb" style={{ flex: 1, padding: "1.5rem", overflowY: 'auto' }}>
             <AnimatePresence mode="popLayout">
               {cart.length === 0 ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.1 }}>
-                  <i className="fas fa-cart-arrow-down" style={{fontSize: '5rem', marginBottom: '1.5rem'}} />
+                  <i className="fas fa-cart-arrow-down" style={{ fontSize: '5rem', marginBottom: '1.5rem' }} />
                   <p style={{ fontWeight: 900, letterSpacing: '0.2em' }}>KOŠÍK JE PRÁZDNY</p>
                 </motion.div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                   {cart.map((c, i) => (
-                    <motion.div 
-                      key={i} 
+                    <motion.div
+                      key={i}
                       layout
                       initial={{ x: 20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       exit={{ x: -20, opacity: 0 }}
-                      className="glass" 
+                      className="glass"
                       style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.4rem', borderRadius: '16px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}
                     >
                       <div style={{ flex: 1 }}>
@@ -338,36 +339,37 @@ export default function KasaTab() {
               )}
             </AnimatePresence>
           </div>
-          
+
           <div className="cart-footer" style={{ borderTop: "1px solid var(--border)", padding: "1.8rem", background: "rgba(0,0,0,0.3)" }}>
             <div className="fg" style={{ marginBottom: "1.8rem" }}>
               <label className="fl" style={{ fontSize: "0.65rem", color: "var(--muted)", textTransform: "uppercase", letterSpacing: '0.15em', fontWeight: 900, marginBottom: '0.6rem' }}>Pripísať členovi (voliteľné)</label>
               <div style={{ position: 'relative' }}>
-                <i className="fas fa-user-tag" style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1 }}></i>
-                <select className="fi" value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)} style={{ paddingLeft: '3.2rem', borderRadius: '12px', height: '52px', border: '1px solid var(--border)' }}>
-                  <option value="">🛒 Anonymný nákup (Hotovosť / Karta)</option>
-                  {members.map(m => <option key={m.id} value={m.id}>{m.fullName} ({m.email})</option>)}
+                <i className="fas fa-user-tag" style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', zIndex: 1, pointerEvents: 'none' }}></i>
+                <select className="fi" value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)} style={{ paddingLeft: '3.2rem', borderRadius: '12px', height: '52px', border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--text)', outline: 'none', cursor: 'pointer', appearance: 'none', width: '100%' }}>
+                  <option value="" style={{ background: '#1a1a1e', color: '#fff' }}>🛒 Anonymný nákup (Hotovosť / Karta)</option>
+                  {members.map(m => <option key={m.id} value={m.id} style={{ background: '#1a1a1e', color: '#fff' }}>{m.fullName} ({m.email})</option>)}
                 </select>
+                <i className="fas fa-chevron-down" style={{ position: 'absolute', right: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', pointerEvents: 'none' }}></i>
               </div>
             </div>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
-               <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 900, marginBottom: '0.3rem' }}>Tržba dnes</div>
-                  <div style={{ fontFamily: "var(--font-d)", fontSize: "1.4rem", fontWeight: 950, color: "var(--orange)" }}>{(todaySales.totalEuros || 0).toFixed(2)} €</div>
-               </div>
-               <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 900, marginBottom: '0.3rem' }}>Celkom k úhrade</div>
-                  <div style={{ fontFamily: 'var(--font-d)', fontSize: '3rem', fontWeight: 950, color: 'var(--acid)', lineHeight: 0.9 }}>{cartEuros} €</div>
-               </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 900, marginBottom: '0.3rem' }}>Tržba dnes</div>
+                <div style={{ fontFamily: "var(--font-d)", fontSize: "1.4rem", fontWeight: 950, color: "var(--orange)" }}>{(todaySales.totalEuros || 0).toFixed(2)} €</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 900, marginBottom: '0.3rem' }}>Celkom k úhrade</div>
+                <div style={{ fontFamily: 'var(--font-d)', fontSize: '3rem', fontWeight: 950, color: 'var(--acid)', lineHeight: 0.9 }}>{cartEuros} €</div>
+              </div>
             </div>
-            
+
             <div style={{ display: "flex", gap: "1rem" }}>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="btn btn-acid btn-block" style={{ flex: 1, height: '60px', borderRadius: '16px', fontWeight: 950, fontSize: '1rem', letterSpacing: '0.05em' }} onClick={() => checkout("cash")} disabled={cart.length === 0}>
-                <i className="fas fa-coins" style={{marginRight: '0.8rem'}} /> HOTOVOSŤ
+                <i className="fas fa-coins" style={{ marginRight: '0.8rem' }} /> HOTOVOSŤ
               </motion.button>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="btn btn-purple btn-block" style={{ flex: 1, height: '60px', borderRadius: '16px', fontWeight: 950, fontSize: '1rem', letterSpacing: '0.05em' }} onClick={() => checkout("card")} disabled={cart.length === 0}>
-                <i className="fas fa-credit-card" style={{marginRight: '0.8rem'}} /> KARTOU
+                <i className="fas fa-credit-card" style={{ marginRight: '0.8rem' }} /> KARTOU
               </motion.button>
             </div>
           </div>
@@ -375,7 +377,7 @@ export default function KasaTab() {
 
         <motion.div variants={itemVariants} className="panel glass-panel">
           <div className="ph" style={{ borderBottom: '1px solid var(--border)' }}>
-            <span className="pt"><i className="fas fa-history" style={{marginRight: '0.8rem', color: 'var(--muted)'}} />Nedávne predaje</span>
+            <span className="pt"><i className="fas fa-history" style={{ marginRight: '0.8rem', color: 'var(--muted)' }} />Nedávne predaje</span>
           </div>
           <div className="pb" style={{ padding: '0.8rem' }}>
             <div style={{ maxHeight: "300px", overflowY: 'auto' }}>
@@ -384,15 +386,15 @@ export default function KasaTab() {
                   <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.85rem' }}>Dnes zatiaľ žiadne operácie</div>
                 ) : (
                   todaySales.items.slice().reverse().map((t, idx) => (
-                    <motion.div 
-                      key={idx} 
-                      initial={{ opacity: 0 }} 
-                      animate={{ opacity: 1 }} 
-                      className="glass" 
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="glass"
                       style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.8rem 1.2rem', borderRadius: '12px', marginBottom: '0.6rem', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}
                     >
                       <div style={{ fontSize: "0.8rem", fontWeight: 950, fontFamily: 'var(--font-d)', color: 'var(--muted)', width: '50px' }}>
-                        {new Date(t.createdAt).toLocaleTimeString("sk-SK", { hour: "2-digit", minute:"2-digit"})}
+                        {new Date(t.createdAt).toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit" })}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>{t.items.map(i => `${i.quantity}x ${i.productName || 'Položka'}`).join(", ")}</div>
