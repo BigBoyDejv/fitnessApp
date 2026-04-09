@@ -36,6 +36,6 @@ public class MembershipType {
     }
 
     public double getPriceEuros() {
-        return priceCents / 100.0;
+        return priceCents == null ? 0.0 : priceCents / 100.0;
     }
 }

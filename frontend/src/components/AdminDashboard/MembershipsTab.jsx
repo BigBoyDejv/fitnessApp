@@ -31,7 +31,7 @@ export default function MembershipsTab() {
       .catch(e => console.error(e));
 
     // Load membership types
-    authenticatedFetch('/api/memberships')
+    authenticatedFetch('/api/memberships/types')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -127,7 +127,9 @@ export default function MembershipsTab() {
           </div>
           <span className="pt">Správa členstiev a permanentiek</span>
         </div>
-        <span className="method m-post">API: ASSIGN_SUBSCRIPTION</span>
+        <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.5rem 0 0 3.2rem', fontWeight: 500, maxWidth: '600px', lineHeight: '1.4' }}>
+          Nástroj pre priraďovanie a aktualizáciu permanentiek. Vyberte člena, skontrolujte jeho stav a priraďte mu nový balík služieb.
+        </p>
       </div>
       <div className="pb">
         <div className="fg" style={{ position: 'relative' }}>
@@ -250,7 +252,7 @@ export default function MembershipsTab() {
               <select className="fi" value={selectedType} onChange={e => setSelectedType(e.target.value)} style={{ height: '52px', borderRadius: '10px' }}>
                 {membershipTypes.length === 0 && <option value="">— Načítavam... —</option>}
                 {membershipTypes.map(mt => (
-                  <option key={mt.id} value={mt.id}>{mt.name} · {mt.durationMonths} mes. · {mt.price} €</option>
+                  <option key={mt.id} value={mt.id}>{mt.name} · {mt.durationDays} dní · {(mt.priceCents/100).toFixed(2)} €</option>
                 ))}
               </select>
             </div>

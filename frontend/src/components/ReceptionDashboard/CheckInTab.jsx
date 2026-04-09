@@ -262,7 +262,9 @@ export default function CheckInTab() {
             </div>
             <span className="pt">Odbavenie vstupu</span>
           </div>
-          <span className="method m-purple" style={{ fontSize: '0.65rem' }}>SCANNER_ACTIVE</span>
+          <p style={{ fontSize: '0.82rem', color: 'var(--muted)', margin: '0.5rem 0 0 3.2rem', fontWeight: 500, lineHeight: '1.4' }}>
+            Hlavný terminál pre zaznamenávanie príchodov. Podporuje automatické skenovanie QR kódov alebo manuálne vyhľadávanie v databáze.
+          </p>
         </div>
         <div className="pb" style={{ padding: '1.2rem' }}>
           <div className="checkin-tabs" style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem', borderRadius: '14px', marginBottom: '1.5rem', display: 'flex', gap: '0.4rem', border: '1px solid var(--border)' }}>
@@ -453,6 +455,9 @@ export default function CheckInTab() {
             </div>
             <span className="pt">História dnes</span>
           </div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: '0.5rem 0 0 3.2rem', fontWeight: 500 }}>
+             Posledných 20 úspešných check-inov za dnešný deň.
+          </p>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <button className="btn btn-ghost btn-xs" onClick={(e) => { e.stopPropagation(); loadTodayCheckins(); }} style={{ borderRadius: '6px' }}>
               <i className="fas fa-sync-alt"></i>

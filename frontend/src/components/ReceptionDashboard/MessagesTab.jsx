@@ -92,7 +92,6 @@ export default function MessagesTab() {
             </div>
             <span className="pt">Nové oznámenie</span>
           </div>
-          <span className="method m-purple">BROADCAST_SYSTEM</span>
         </div>
         <div className="pb" style={{ padding: '2rem' }}>
           <div className="fg" style={{ marginBottom: '1.5rem' }}>

@@ -11,6 +11,7 @@ import ProfileTab from '../components/AdminDashboard/ProfileTab';
 import MessagesTab from '../components/AdminDashboard/MessagesTab';
 import InventoryTab from '../components/AdminDashboard/InventoryTab';
 import StatsTab from '../components/AdminDashboard/StatsTab';
+import MembershipSettingsTab from '../components/AdminDashboard/MembershipSettingsTab';
 
 import './AdminDashboard.css';
 
@@ -102,7 +103,8 @@ export default function AdminDashboard() {
       items: [
         { id: 'users', icon: 'fa-users', label: 'Profily' },
         { id: 'messages', icon: 'fa-envelope', label: 'Správy členom' },
-        { id: 'memberships', icon: 'fa-id-card', label: 'Predplatné' },
+        { id: 'memberships', icon: 'fa-id-card', label: 'Priradenie predplatného' },
+        { id: 'membership-settings', icon: 'fa-tags', label: 'Cenník' },
         { id: 'classes-admin', icon: 'fa-calendar-alt', label: 'Lekcie' },
         { id: 'create-class', icon: 'fa-plus-circle', label: 'Nová lekcia' },
       ]
@@ -270,8 +272,9 @@ export default function AdminDashboard() {
               {activeTab === 'messages' && <MessagesTab />}
               {activeTab === 'inventory' && <InventoryTab />}
               {activeTab === 'stats' && <StatsTab />}
+              {activeTab === 'membership-settings' && <MembershipSettingsTab />}
 
-              {!['overview', 'users', 'memberships', 'classes-admin', 'create-class', 'profile', 'messages', 'inventory', 'stats'].includes(activeTab) && (
+              {!['overview', 'users', 'memberships', 'membership-settings', 'classes-admin', 'create-class', 'profile', 'messages', 'inventory', 'stats'].includes(activeTab) && (
                 <div className="empty-state">
                   <i className="fas fa-tools"></i>
                   <p>Sekcia {pageTitle} bude čoskoro pridaná (migrácia z admin.html prebieha).</p>

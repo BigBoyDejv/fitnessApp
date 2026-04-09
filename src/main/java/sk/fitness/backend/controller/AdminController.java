@@ -4,10 +4,12 @@ import sk.fitness.backend.model.Membership;
 import sk.fitness.backend.model.MembershipType;
 import sk.fitness.backend.model.Product;
 import sk.fitness.backend.model.User;
+import sk.fitness.backend.model.Notification;
 import sk.fitness.backend.repository.MembershipRepository;
 import sk.fitness.backend.repository.MembershipTypeRepository;
 import sk.fitness.backend.repository.ProductRepository;
 import sk.fitness.backend.repository.UserRepository;
+import sk.fitness.backend.repository.NotificationRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,15 +27,18 @@ public class AdminController {
     private final MembershipRepository membershipRepository;
     private final MembershipTypeRepository membershipTypeRepository;
     private final ProductRepository productRepository;
+    private final NotificationRepository notificationRepository;
 
     public AdminController(UserRepository userRepository,
                            MembershipRepository membershipRepository,
                            MembershipTypeRepository membershipTypeRepository,
-                           ProductRepository productRepository) {
+                           ProductRepository productRepository,
+                           NotificationRepository notificationRepository) {
         this.userRepository = userRepository;
         this.membershipRepository = membershipRepository;
         this.membershipTypeRepository = membershipTypeRepository;
         this.productRepository = productRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     // ── GET /api/admin/users ── zoznam všetkých užívateľov ───────────────────
@@ -153,7 +158,6 @@ public class AdminController {
         ));
     }
 
-    // ── PUT /api/admin/memberships/cancel/{userId} ── zrušiť predplatné ──────
     @PutMapping("/memberships/cancel/{userId}")
     public ResponseEntity<?> cancelMembership(
             @PathVariable String userId,
@@ -169,6 +173,114 @@ public class AdminController {
         m.setStatus(Membership.MembershipStatus.cancelled);
         membershipRepository.save(m);
         return ResponseEntity.ok(Map.of("message", "Predplatné zrušené", "userId", userId));
+    }
+
+    @GetMapping("/plans-management")
+    public ResponseEntity<?> getAllMembershipTypes(@AuthenticationPrincipal UserDetails ud) {
+        if (ud == null) return ResponseEntity.status(401).build();
+        try {
+            // Check admin role directly from UserDetails if possible, 
+            // but for now we keep the safety check
+            if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+            
+            return ResponseEntity.ok(membershipTypeRepository.findAll());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Chyba na serveri: " + e.getMessage()));
+        }
+    }
+
+    // ── POST /api/admin/plans-management ── vytvoriť nový typ členstva ────────
+    @PostMapping("/plans-management")
+    public ResponseEntity<?> createMembershipType(
+            @RequestBody Map<String, Object> body,
+            @AuthenticationPrincipal UserDetails ud) {
+        if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+
+        try {
+            MembershipType type = new MembershipType();
+            
+            if (body.get("name") == null) return ResponseEntity.badRequest().body(Map.of("message", "Názov je povinný"));
+            type.setName(body.get("name").toString());
+            
+            type.setDescription(body.get("description") != null ? body.get("description").toString() : "");
+            
+            if (body.get("priceEuros") == null) return ResponseEntity.badRequest().body(Map.of("message", "Cena je povinná"));
+            double priceEuros = Double.parseDouble(body.get("priceEuros").toString());
+            type.setPriceCents((int) Math.round(priceEuros * 100));
+            
+            if (body.get("durationDays") == null) return ResponseEntity.badRequest().body(Map.of("message", "Trvanie je povinné"));
+            type.setDurationDays(Integer.parseInt(body.get("durationDays").toString()));
+            
+            type.setActive(true);
+            membershipTypeRepository.save(type);
+            return ResponseEntity.ok(type);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Chyba pri vytváraní: " + e.getMessage()));
+        }
+    }
+
+    // ── PUT /api/admin/plans-management/{id} ── editovať typ členstva ─────────
+    @PutMapping("/plans-management/{id}")
+    public ResponseEntity<?> updateMembershipType(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Object> body,
+            @AuthenticationPrincipal UserDetails ud) {
+        if (!isAdmin(ud)) return ResponseEntity.status(403).build();
+
+        try {
+            MembershipType type = membershipTypeRepository.findById(id).orElse(null);
+            if (type == null) return ResponseEntity.notFound().build();
+
+            if (body.containsKey("name") && body.get("name") != null) 
+                type.setName(body.get("name").toString());
+            
+            if (body.containsKey("description")) 
+                type.setDescription(body.get("description") != null ? body.get("description").toString() : "");
+
+            if (body.containsKey("priceEuros") && body.get("priceEuros") != null) {
+                double priceEuros = Double.parseDouble(body.get("priceEuros").toString());
+                int newPriceCents = (int) Math.round(priceEuros * 100);
+                
+                // Check if price changed
+                if (type.getPriceCents() == null || type.getPriceCents() != newPriceCents) {
+                    double oldPriceEuros = type.getPriceEuros();
+                    type.setPriceCents(newPriceCents);
+                    
+                    // Notify all users about price change
+                    List<User> allUsers = userRepository.findAll();
+                    List<Notification> notifications = new ArrayList<>();
+                    for (User u : allUsers) {
+                        if (Boolean.TRUE.equals(u.getIsActive())) {
+                            Notification n = new Notification();
+                            n.setUser(u);
+                            n.setType("admin_message");
+                            n.setTitle("Zmena cenníka");
+                            n.setMessage(String.format("Cena balíka '%s' bola zmenená z %.2f € na %.2f €.", 
+                                    type.getName(), oldPriceEuros, priceEuros));
+                            n.setSeverity("info");
+                            notifications.add(n);
+                        }
+                    }
+                    notificationRepository.saveAll(notifications);
+                }
+            }
+
+            if (body.containsKey("durationDays") && body.get("durationDays") != null) {
+                type.setDurationDays(Integer.parseInt(body.get("durationDays").toString()));
+            }
+
+            if (body.containsKey("active") && body.get("active") != null) {
+                type.setActive(Boolean.parseBoolean(body.get("active").toString()));
+            }
+
+            membershipTypeRepository.save(type);
+            return ResponseEntity.ok(type);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Chyba pri aktualizácii: " + e.getMessage()));
+        }
     }
 
     // ── Pomocné ───────────────────────────────────────────────────────────────

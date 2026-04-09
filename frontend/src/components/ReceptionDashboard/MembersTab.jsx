@@ -217,6 +217,9 @@ export default function MembersTab() {
             </div>
             <span className="pt">Databáza klientov</span>
           </div>
+          <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.5rem 0 0 3.2rem', fontWeight: 500, maxWidth: '600px', lineHeight: '1.4' }}>
+            Centrálny zoznam všetkých registrovaných členov. Umožňuje vyhľadávanie, filtrovanie podľa stavu a rýchly prístup k detailom profilu a histórii nákupov.
+          </p>
           <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
             <button className="btn btn-ghost btn-xs" onClick={(e) => { e.stopPropagation(); loadMembers(); }}>
               <i className="fas fa-sync-alt"></i>
@@ -324,9 +327,12 @@ export default function MembersTab() {
               </div>
               <span className="pt">Ochrana a prístup</span>
             </div>
-            <span className="method m-put">CONTROL_PANEL</span>
           </div>
           <div className="pb" style={{ padding: '1.5rem' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              <i className="fas fa-info-circle" style={{ color: 'var(--cyan)', marginRight: '0.5rem' }}></i>
+              Rýchle ovládanie prístupových práv. <strong>Zmrazenie</strong> zamedzí vstupu do priestorov fitka. <strong>Aktivácia</strong> prístup okamžite obnoví.
+            </p>
             <div className="fg" style={{ marginBottom: "1.2rem" }}>
               <label className="fl">Hľadaný užívateľ</label>
               <div style={{ position: 'relative' }}>
@@ -358,9 +364,12 @@ export default function MembersTab() {
               </div>
               <span className="pt">Nové predplatné</span>
             </div>
-            <span className="method m-purple">ASSIGN_KEY</span>
           </div>
           <div className="pb" style={{ padding: '1.5rem' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              <i className="fas fa-ticket-alt" style={{ color: 'var(--orange)', marginRight: '0.5rem' }}></i>
+              Modul pre predaj a priradenie vstupov. Vyberte klienta z databázy a zvoľte typ permanentky pre okamžitú aktualizáciu jeho konta.
+            </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
               <div className="fg">
                 <label className="fl">Klient</label>
@@ -492,6 +501,9 @@ export default function MembersTab() {
             </div>
 
             <div className="drawer-actions" style={{ padding: '1.5rem 2rem', background: 'var(--surface2)', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--muted)', textAlign: 'center', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Administratívne akcie s účtom
+              </div>
               {drawerUser && (
                  <button 
                    className={`btn ${drawerUser.active ? 'btn-red' : 'btn-cyan'} btn-block`} 

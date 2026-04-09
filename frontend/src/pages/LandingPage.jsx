@@ -13,6 +13,7 @@ export default function LandingPage() {
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [navOpen, setNavOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [membershipTypes, setMembershipTypes] = useState([]);
 
   // Login form states
   const [loginEmail, setLoginEmail] = useState('');
@@ -38,6 +39,14 @@ export default function LandingPage() {
     if (existingToken && existingUser) {
       redirectByRole(existingUser.role);
     }
+
+    // Fetch prices
+    fetch(`${API}/api/memberships/types`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setMembershipTypes(data);
+      })
+      .catch(err => console.error('Failed to fetch pricing:', err));
   }, []);
 
   const redirectByRole = (role) => {
@@ -141,8 +150,8 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page">
-      <SEO 
-        title="Najlepšie fitko v Košiciach" 
+      <SEO
+        title="Najlepšie fitko v Košiciach"
         description="Vstúp do sveta profesionálneho coachingu a špičkového vybavenia v Košiciach. Ponúkame osobný tréning, skupinové lekcie, CrossFit a mnoho iného."
       />
       <div className={`toast ${toast.type === 'ok' ? 't-ok' : 't-err'} ${toast.show ? 'show' : ''}`} id="toast">
@@ -363,46 +372,69 @@ export default function LandingPage() {
             <span className="section-label">Investuj do seba</span>
             <h2 className="section-title">CENNÍK ČLENSTVA</h2>
           </div>
-          <div className="price-grid">
-            <div className="price-card">
-              <div className="price-name">Študentske</div>
-              <p style={{ color: '#888', fontSize: '0.85rem' }}>Zľavnené pre študentov ISIC</p>
-              <div className="price-amount"><sup>€</sup>29<sub>/mes</sub></div>
-              <ul className="price-features" style={{ listStyle: 'none', padding: 0 }}>
-                <li><i className="fas fa-check"></i> Neobmedzený prístup 24/7</li>
-                <li><i className="fas fa-check"></i> QR vstupný kód</li>
-                <li style={{ opacity: 0.4 }}><i className="fas fa-times"></i> 4 skupinové lekcie / mes</li>
-                <li style={{ opacity: 0.4 }}><i className="fas fa-times"></i> Vstupná konzultácia</li>
-                <li style={{ opacity: 0.4 }}><i className="fas fa-times"></i> Osobný tréner</li>
-              </ul>
-              <button className="btn btn-ghost btn-block" style={{ marginTop: 'auto' }} onClick={focusRegister}>Začať</button>
-            </div>
-            <div className="price-card featured">
-              <div className="price-featured-tag">Najpopulárnejší</div>
-              <div className="price-name">Štandard</div>
-              <p style={{ color: 'rgba(0,0,0,0.6)', fontSize: '0.85rem' }}>Najpoužívanejšie členstvo</p>
-              <div className="price-amount"><sup>€</sup>49<sub>/mes</sub></div>
-              <ul className="price-features" style={{ listStyle: 'none', padding: 0 }}>
-                <li><i className="fas fa-check"></i> Neobmedzený prístup 24/7</li>
-                <li><i className="fas fa-check"></i> Neobmedzené skupinové lekcie</li>
-                <li><i className="fas fa-check"></i> 2× osobný tréner / mes</li>
-                <li><i className="fas fa-check"></i> QR vstupný kód</li>
-                <br />
-              </ul>
-              <button className="btn btn-acid btn-block" style={{ marginTop: 'auto', background: '#000', color: '#E0FF00' }} onClick={focusRegister}>Začať</button>
-            </div>
-            <div className="price-card">
-              <div className="price-name">Premium</div>
-              <p style={{ color: '#888', fontSize: '0.85rem' }}>Neobmedzený vstup + sauna</p>
-              <div className="price-amount"><sup>€</sup>79<sub>/mes</sub></div>
-              <ul className="price-features" style={{ listStyle: 'none', padding: 0 }}>
-                <li><i className="fas fa-check"></i> Všetko zo Standard</li>
-                <li><i className="fas fa-check"></i> 8× osobný tréner / mes</li>
-                <li><i className="fas fa-check"></i> Dedikovaný tréner</li>
-                <li><i className="fas fa-check"></i> Online coaching 24/7</li>
-              </ul>
-              <button className="btn btn-ghost btn-block" style={{ marginTop: 'auto' }} onClick={focusRegister}>Začať</button>
-            </div>
+          <div className="pricing-grid">
+            {membershipTypes.length > 0 ? (
+              membershipTypes.map((type, idx) => (
+                <div key={type.id} className={`price-card ${idx === 1 ? 'featured' : ''}`}>
+                  {idx === 1 && <div className="price-featured-tag">Najpopulárnejší</div>}
+                  <div className="price-name">{type.name}</div>
+                  <p style={{ color: idx === 1 ? 'rgba(0,0,0,0.6)' : '#888', fontSize: '0.85rem' }}>{type.description || 'Profesionálne členstvo'}</p>
+                  <div className="price-amount">
+                    <sup>€</sup>{(type.priceCents / 100).toFixed(0)}<sub>/{type.durationDays === 30 ? 'mes' : type.durationDays === 365 ? 'rok' : `${type.durationDays}d`}</sub>
+                  </div>
+                  <ul className="price-features" style={{ listStyle: 'none', padding: 0 }}>
+                    {type.name.toLowerCase().includes('študent') ? (
+                      <>
+                        <li><i className="fas fa-check"></i> Prístup cez pracovné dni</li>
+                        <li><i className="fas fa-check"></i> Vstup do 15:00</li>
+                        <li><i className="fas fa-check"></i> Skupinové lekcie</li>
+                        <li><i className="fas fa-check"></i> QR vstupný kód</li>
+                      </>
+                    ) : idx === 1 ? (
+                      <>
+                        <li><i className="fas fa-check"></i> Neobmedzený prístup 24/7</li>
+                        <li><i className="fas fa-check"></i> Neobmedzené skupinové lekcie</li>
+                        <li><i className="fas fa-check"></i> 2× osobný tréner / mes</li>
+                        <li><i className="fas fa-check"></i> QR vstupný kód</li>
+                      </>
+                    ) : (
+                      <>
+                        <li><i className="fas fa-check"></i> Všetky výhody zo Standard</li>
+                        <li><i className="fas fa-check"></i> 8× osobný tréner / mes</li>
+                        <li><i className="fas fa-check"></i> Dedikovaný tréner</li>
+                        <li><i className="fas fa-check"></i> Online coaching 24/7</li>
+                      </>
+                    )}
+                  </ul>
+                  <button 
+                    className={`btn ${idx === 1 ? 'btn-acid' : 'btn-ghost'} btn-block`} 
+                    style={{ marginTop: 'auto', ...(idx === 1 ? { background: '#000', color: '#E0FF00' } : {}) }} 
+                    onClick={focusRegister}
+                  >
+                    Začať
+                  </button>
+                </div>
+              ))
+            ) : (
+              // Fallback cards if API fails or is loading
+              <>
+                <div className="price-card">
+                  <div className="price-name">Študentské</div>
+                  <div className="price-amount"><sup>€</sup>29<sub>/mes</sub></div>
+                  <button className="btn btn-ghost btn-block" onClick={focusRegister}>Začať</button>
+                </div>
+                <div className="price-card featured">
+                  <div className="price-name">Štandard</div>
+                  <div className="price-amount"><sup>€</sup>49<sub>/mes</sub></div>
+                  <button className="btn btn-acid btn-block" style={{ background: '#000', color: '#E0FF00' }} onClick={focusRegister}>Začať</button>
+                </div>
+                <div className="price-card">
+                  <div className="price-name">Premium</div>
+                  <div className="price-amount"><sup>€</sup>79<sub>/mes</sub></div>
+                  <button className="btn btn-ghost btn-block" onClick={focusRegister}>Začať</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

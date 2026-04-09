@@ -84,6 +84,9 @@ export default function ClassesTab() {
             </div>
             <span className="pt">Harmonogram lekcií</span>
           </div>
+          <p style={{ fontSize: '0.82rem', color: 'var(--muted)', margin: '0.5rem 0 0 3.2rem', fontWeight: 500, lineHeight: '1.4' }}>
+             Sledujte obsadenosť lekcií v reálnom čase, spravujte zoznamy účastníkov a pridávajte nových členov na tréningy.
+          </p>
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
              <button className="btn btn-ghost btn-xs" onClick={loadClasses}><i className="fas fa-sync-alt"></i></button>
              <button 

@@ -181,6 +181,9 @@ export default function UsersTab() {
             </div>
             <span className="pt">Správa všetkých profilov</span>
           </div>
+          <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.5rem 0 0 3.2rem', fontWeight: 500, maxWidth: '600px', lineHeight: '1.4' }}>
+            Kompletný zoznam všetkých registrovaných osôb v systéme. Administrátor tu môže spravovať prístupové práva pre členov, trénerov aj recepciu.
+          </p>
           <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
             <button className="btn btn-ghost btn-xs" onClick={(e) => { e.stopPropagation(); loadUsers(); }}><i className="fas fa-sync-alt"></i> OBNOVIŤ</button>
             <motion.div 
@@ -315,9 +318,15 @@ export default function UsersTab() {
         <div className="panel animate-in" style={{ animationDelay: '0.1s' }}>
           <div className="ph">
             <span className="pt">Zmena oprávnení</span>
-            <span className="method m-put">API: UPDATE_ROLE</span>
           </div>
-          <div className="pb">
+          <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.5rem 0 0 1.5rem', fontWeight: 500, maxWidth: '600px', lineHeight: '1.4' }}>
+            Správa prístupových úrovní používateľov. Povýšenie člena na trénera alebo recepciu, prípadne pridanie admin práv.
+          </p>
+          <div className="pb" style={{ padding: '1.5rem' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+              <i className="fas fa-user-shield" style={{ color: 'var(--acid)', marginRight: '0.5rem' }}></i>
+              Administratívny nástroj pre zmenu rolí. Povýšenie člena na trénera alebo recepciu, prípadne pridanie admin práv.
+            </p>
             <div className="fg" style={{ position: 'relative' }}>
               <label className="fl">Vybraný používateľ</label>
               {!roleSelectedUser ? (
@@ -383,9 +392,12 @@ export default function UsersTab() {
         <div className="panel animate-in" style={{ animationDelay: '0.2s' }}>
           <div className="ph">
             <span className="pt">Stav systémového účtu</span>
-            <span className="method m-put">API: UPDATE_STATUS</span>
           </div>
-          <div className="pb">
+          <div className="pb" style={{ padding: '1.5rem' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+              <i className="fas fa-lock" style={{ color: 'var(--red)', marginRight: '0.5rem' }}></i>
+              Globálne ovládanie prihlasovania. Zmrazenie účtu okamžite zneplatní všetky prístupy používateľa do aplikácií.
+            </p>
             <div style={{ background: 'rgba(79, 195, 247, 0.05)', border: '1px solid rgba(79, 195, 247, 0.15)', borderRadius: '12px', padding: '1rem', fontSize: '0.78rem', color: 'var(--frozen)', display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '1.5rem' }}>
               <i className="fas fa-info-circle" style={{ marginTop: '0.2rem' }}></i>
               <div>

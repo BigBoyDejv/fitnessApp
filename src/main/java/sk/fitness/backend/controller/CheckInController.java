@@ -63,7 +63,18 @@ public class CheckInController {
 
     // ── POST /api/checkin/scan ────────────────────────────────────────────────
     @PostMapping("/scan")
-    public ResponseEntity<?> scan(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> scan(@RequestBody Map<String, String> body,
+                                  @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(401).build();
+
+        User caller = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        if (caller == null) return ResponseEntity.status(401).build();
+
+        if (!caller.getRole().equalsIgnoreCase("admin") &&
+                !caller.getRole().equalsIgnoreCase("reception")) {
+            return ResponseEntity.status(403).body("Nemáš oprávnenie na skenovanie");
+        }
+
         String userId = body.get("userId");
 
         // Ak je to plný QR string, extrahuj userId

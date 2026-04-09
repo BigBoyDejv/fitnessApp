@@ -1,0 +1,24 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< sk.fitness:backend >-------------------------
+[INFO] Building Bakalarka-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] Copying 8 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 70 source files with javac [debug parameters release 17] to target\classes
+[INFO] /C:/Users/david/Desktop/Bakalarka-backend/src/main/java/sk/fitness/backend/GenerateSecret.java: Some input files use or override a deprecated API.
+[INFO] /C:/Users/david/Desktop/Bakalarka-backend/src/main/java/sk/fitness/backend/GenerateSecret.java: Recompile with -Xlint:deprecation for details.
+[INFO] /C:/Users/david/Desktop/Bakalarka-backend/src/main/java/sk/fitness/backend/controller/WorkoutController.java: C:\Users\david\Desktop\Bakalarka-backend\src\main\java\sk\fitness\backend\controller\WorkoutController.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/david/Desktop/Bakalarka-backend/src/main/java/sk/fitness/backend/controller/WorkoutController.java: Recompile with -Xlint:unchecked for details.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  20.750 s
+[INFO] Finished at: 2026-04-09T14:07:47+02:00
+[INFO] ------------------------------------------------------------------------

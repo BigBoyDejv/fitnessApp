@@ -118,7 +118,6 @@ export default function CreateClassTab() {
               </div>
               <span className="pt">PLÁNOVANIE NOVEJ LEKCIE</span>
             </div>
-            <span className="method m-post" style={{fontSize:'0.7rem'}}>SCHEDULER_V2</span>
           </div>
           
           <div className="pb" style={{ padding: 'var(--responsive-padding, 2rem)' }}>
