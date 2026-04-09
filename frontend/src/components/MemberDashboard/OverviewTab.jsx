@@ -10,6 +10,16 @@ export default function OverviewTab({ user, setActiveTab }) {
    const [occupancy, setOccupancy] = useState({ percentage: 0, count: 0, maxCapacity: 80, label: 'Načítavam...' });
    const [loading, setLoading] = useState(true);
 
+   // Failsafe pre zobrazenie čakačky
+   const [forceWaitingIds, setForceWaitingIds] = useState(() => {
+      const saved = localStorage.getItem('waiting_ids');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+   });
+
+   useEffect(() => {
+      localStorage.setItem('waiting_ids', JSON.stringify([...forceWaitingIds]));
+   }, [forceWaitingIds]);
+
    useEffect(() => {
       Promise.all([loadMe(), loadMyClasses(), loadMembership(), loadStats(), loadOccupancy()]).finally(() => setLoading(false));
 
@@ -48,7 +58,15 @@ export default function OverviewTab({ user, setActiveTab }) {
          let combined = [];
          if (resC.ok) {
             const dataC = await resC.json();
-            if (Array.isArray(dataC)) combined = [...combined, ...dataC.map(c => ({ ...c, isPersonal: false }))];
+            if (Array.isArray(dataC)) {
+               combined = [...combined, ...dataC.map(c => ({ ...c, isPersonal: false }))];
+               // Čistenie failsafe: Vymažeme len ak backend POTVRDIL aspoň jeden stav
+               setForceWaitingIds(prev => {
+                  const next = new Set(prev);
+                  dataC.forEach(c => { if (c.isReserved || c.isWaiting) next.delete(String(c.id)); });
+                  return next;
+               });
+            }
          }
          if (resP.ok) {
             const dataP = await resP.json();
@@ -199,17 +217,27 @@ export default function OverviewTab({ user, setActiveTab }) {
                <div className="pb">
                   {upcomingClasses.length > 0 ? (
                      <div className="modern-class-cards">
-                        {upcomingClasses.slice(0, 3).map((c, idx) => (
-                           <motion.div
-                              key={c.id}
-                              className="o-class-card"
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: 0.1 * idx }}
-                           >
-                              <div className="card-top">
-                                 <div className="c-main-info">
-                                    <div className="c-name">{c.name}</div>
+                        {upcomingClasses.slice(0, 3).map((item, idx) => {
+                           const isWaiting = !item.isReserved && (item.isWaiting || forceWaitingIds.has(String(item.id))) && item.waitlistPosition && item.waitlistPosition > 0;
+                           const c = { ...item, isWaiting };
+                           return (
+                             <motion.div
+                                key={c.id}
+                                className={`o-class-card ${c.isWaiting ? 'waiting' : ''}`}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 * idx }}
+                             >
+                                <div className="card-top">
+                                   <div className="c-main-info">
+                                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                          <div className="c-name">{c.name}</div>
+                                          {c.isWaiting ? (
+                                             <span className="status-badge orange" style={{fontSize: '0.62rem', padding: '0.15rem 0.4rem'}}>VO FRONTE ({c.waitlistPosition}.)</span>
+                                          ) : ( (c.isReserved || item.isReserved) && (
+                                             <span className="status-badge green" style={{fontSize: '0.62rem', padding: '0.15rem 0.4rem', background: 'rgba(0, 255, 157, 0.1)', color: 'var(--acid)', border: '1px solid rgba(0, 255, 157, 0.2)'}}>AKTÍVNA</span>
+                                          ))}
+                                       </div>
                                     <div className="c-coach">s {c.instructor || 'Tímom'}</div>
                                  </div>
                                  <div className="c-date-time">
@@ -222,8 +250,9 @@ export default function OverviewTab({ user, setActiveTab }) {
                                  <span className="dot-sep">&bull;</span>
                                  <span><i className="fas fa-map-marker-alt" /> {c.isPersonal ? 'FITNESS ZÓNA' : 'SÁLA 1'}</span>
                               </div>
-                           </motion.div>
-                        ))}
+                            </motion.div>
+                          );
+                        })}
                         <button className="btn btn-ghost btn-block btn-sm" style={{ marginTop: '1rem', borderColor: 'rgba(255,255,255,0.1)' }} onClick={() => setActiveTab('classes')}>ZOBRAZIŤ CELÝ ROZVRH</button>
                      </div>
                   ) : (

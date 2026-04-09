@@ -92,6 +92,7 @@ export default function MyClassesTab() {
     switch(status) {
         case 'PRESENT': return { icon: 'fa-check-circle', color: 'var(--acid)', label: 'Prítomný' };
         case 'ABSENT': return { icon: 'fa-times-circle', color: 'var(--red)', label: 'Neprišiel' };
+        case 'WAITING': return { icon: 'fa-history', color: 'var(--orange)', label: 'Na čakačke' };
         default: return { icon: 'fa-clock', color: 'var(--muted)', label: 'Čaká' };
     }
   };

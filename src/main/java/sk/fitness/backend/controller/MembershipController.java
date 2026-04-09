@@ -44,7 +44,7 @@ public class MembershipController {
         if (user == null) return ResponseEntity.status(401).build();
 
         return membershipRepository
-                .findByUserIdAndStatus(user.getId(), Membership.MembershipStatus.active)
+                .findFirstByUserIdAndStatusOrderByCreatedAtDesc(user.getId(), Membership.MembershipStatus.active)
                 .map(m -> ResponseEntity.ok(toResponse(m)))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -91,6 +91,7 @@ public class MembershipController {
         m.setStartDate(LocalDate.now());
         m.setEndDate(LocalDate.now().plusDays(type.getDurationDays()));
         m.setStatus(Membership.MembershipStatus.active);
+        m.setAutoRenew(true); // Default zapnuté pri novom nákupe (opakovaná fakturácia)
         membershipRepository.save(m);
 
         return ResponseEntity.ok(toResponse(m));
@@ -105,7 +106,7 @@ public class MembershipController {
         if (user == null) return ResponseEntity.status(401).build();
 
         Optional<Membership> opt = membershipRepository
-                .findByUserIdAndStatus(user.getId(), Membership.MembershipStatus.active);
+                .findFirstByUserIdAndStatusOrderByCreatedAtDesc(user.getId(), Membership.MembershipStatus.active);
 
         if (opt.isEmpty() || !opt.get().isValid()) {
             return ResponseEntity.status(403).body(Map.of(
@@ -119,8 +120,31 @@ public class MembershipController {
                 "hasActiveMembership", true,
                 "membershipTypeName",  m.getMembershipType() != null ? m.getMembershipType().getName() : "—",
                 "endDate",             m.getEndDate().toString(),
-                "daysRemaining",       Math.max(0, LocalDate.now().until(m.getEndDate()).getDays())
+                "daysRemaining",       Math.max(0, LocalDate.now().until(m.getEndDate()).getDays()),
+                "autoRenew",           m.isAutoRenew()
         ));
+    }
+
+    // ── PATCH /api/memberships/{id}/auto-renew ───────────────────────────────
+    @PatchMapping("/{id}/auto-renew")
+    public ResponseEntity<?> toggleAutoRenew(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Boolean> body,
+            @AuthenticationPrincipal UserDetails ud) {
+        
+        User user = resolveUser(ud);
+        if (user == null) return ResponseEntity.status(401).build();
+
+        Membership m = membershipRepository.findById(id).orElse(null);
+        if (m == null || !m.getUser().getId().equals(user.getId()))
+            return ResponseEntity.status(404).body(Map.of("message", "Členstvo nenájdené"));
+
+        Boolean val = body.get("autoRenew");
+        if (val == null) return ResponseEntity.badRequest().build();
+
+        m.setAutoRenew(val);
+        membershipRepository.save(m);
+        return ResponseEntity.ok(Map.of("autoRenew", val));
     }
 
     // ── GET /api/admin/stats/memberships ──────────────────────────────────────
@@ -209,15 +233,17 @@ public class MembershipController {
 
     private Map<String, Object> toResponse(Membership m) {
         long daysLeft = LocalDate.now().until(m.getEndDate()).getDays();
-        return Map.of(
-                "id",                 m.getId().toString(),
-                "membershipTypeName", m.getMembershipType() != null ? m.getMembershipType().getName() : "—",
-                "priceEuros",         m.getMembershipType() != null ? m.getMembershipType().getPriceEuros() : 0.0,
-                "startDate",          m.getStartDate().toString(),
-                "endDate",            m.getEndDate().toString(),
-                "status",             m.getStatus().name(),
-                "isValid",            m.isValid(),
-                "daysRemaining",      Math.max(0, daysLeft)
-        );
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("id",                 m.getId().toString());
+        resp.put("membershipTypeName", m.getMembershipType() != null ? m.getMembershipType().getName() : "—");
+        resp.put("membershipType",     m.getMembershipType()); 
+        resp.put("priceEuros",         m.getMembershipType() != null ? m.getMembershipType().getPriceEuros() : 0.0);
+        resp.put("startDate",          m.getStartDate().toString());
+        resp.put("endDate",            m.getEndDate().toString());
+        resp.put("status",             m.getStatus().name());
+        resp.put("isValid",            m.isValid());
+        resp.put("daysRemaining",      Math.max(0, daysLeft));
+        resp.put("autoRenew",          m.isAutoRenew());
+        return resp;
     }
 }

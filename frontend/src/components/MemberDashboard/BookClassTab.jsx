@@ -5,11 +5,19 @@ import React, { useState, useEffect } from 'react';
 import { authenticatedFetch } from '../../utils/api';
 
 export function BookClassTab({ setActiveTab }) {
-  const [classes, setClasses]         = useState([]);
+  const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState(null);
-  const [bookMsg, setBookMsg]         = useState({ text: '', type: '' });
+  const [forceWaitingIds, setForceWaitingIds] = useState(() => {
+    const saved = localStorage.getItem('waiting_ids');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  useEffect(() => {
+    localStorage.setItem('waiting_ids', JSON.stringify([...forceWaitingIds]));
+  }, [forceWaitingIds]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [bookMsg, setBookMsg] = useState({ text: '', type: '' });
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -32,10 +40,31 @@ export function BookClassTab({ setActiveTab }) {
     if (!silent) setLoading(true);
     setError(null);
     try {
-      const res = await authenticatedFetch('/api/classes');
+      // Pridané ?t= pre obídenie browser cache
+      const res = await authenticatedFetch(`/api/classes?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setClasses(data);
+
+        // ČISTENIE FAILSAFE: Vymažeme ID len vtedy, ak už máme POTVRDENIE od backendu, 
+        // že o nás vie (či už ako o čakajúcom alebo rezervovanom).
+        setForceWaitingIds(prev => {
+          const next = new Set(prev);
+          data.forEach(c => {
+            // Ak backend už potvrdil jeden z týchto stavov, môžeme vymazať našu lokálnu vynútenú hodnotu
+            if (c.isWaiting || c.isReserved) {
+              next.delete(String(c.id));
+            }
+          });
+          return next;
+        });
+
+        // AKTUALIZÁCIA: Hlboké priradenie hodnôt pre istotu rerenderu
+        if (selectedClass) {
+          const fresh = data.find(c => String(c.id) === String(selectedClass.id));
+          if (fresh) setSelectedClass({ ...fresh });
+        }
+        return data;
       } else {
         setError('Nepodarilo sa načítať lekcie.');
       }
@@ -47,18 +76,32 @@ export function BookClassTab({ setActiveTab }) {
   };
 
   const bookClass = async (id) => {
+    const sId = String(id);
     setActionLoading(true);
     setBookMsg({ text: '', type: '' });
     try {
-      const res  = await authenticatedFetch(`/api/classes/${id}/book`, { method: 'POST' });
+      const res = await authenticatedFetch(`/api/classes/${id}/book`, { method: 'POST' });
       const text = await res.text();
       let d = {}; try { d = JSON.parse(text); } catch { d = { message: text || 'OK' }; }
-      if (!res.ok) throw new Error(d.message || 'Chyba servera');
-      setBookMsg({ text: '✓ Lekcia rezervovaná!', type: 'ok' });
-      await loadAllClasses();
-      // Aktualizuj vybraté
-      setSelectedClass(prev => prev ? { ...prev, isReserved: true, booked: (prev.booked || 0) + 1 } : null);
-      setTimeout(() => { if (setActiveTab) setActiveTab('classes'); }, 1500);
+
+      const target = classes.find(cl => String(cl.id) === sId);
+      const isActuallyFull = target ? (target.booked >= target.capacity) : false;
+
+      if (!res.ok) {
+        // Ak už je rezervovaný, hneď refreshneme, aby sa ukázal správny stav
+        if (d.message && d.message.includes('Už si rezervovaný')) {
+          await loadAllClasses(true);
+          return;
+        }
+        throw new Error(d.message || 'Chyba servera');
+      }
+
+      if (isActuallyFull) {
+        setForceWaitingIds(prev => new Set([...prev, sId]));
+      }
+
+      await loadAllClasses(true);
+      showToast(isActuallyFull ? 'Úspešne pridané na čakačku' : 'Rezervácia potvrdená!', 'ok');
     } catch (e) {
       setBookMsg({ text: e.message, type: 'err' });
     } finally {
@@ -71,23 +114,22 @@ export function BookClassTab({ setActiveTab }) {
       e.preventDefault();
       e.stopPropagation();
     }
-    
-    if (!id) return;
-    
-    if (!window.confirm('Naozaj zrušiť rezerváciu?')) return;
-    
+    const sId = String(id);
     setActionLoading(true);
     try {
-      const res = await authenticatedFetch(`/api/classes/${id}/cancel`, { method: 'DELETE' });
+      const res = await authenticatedFetch(`/api/classes/${id}/cancel`, { method: 'POST' });
       const text = await res.text();
-      console.log('CLIENT: Server response:', res.status, text);
-      
       if (res.ok) {
+        setForceWaitingIds(prev => {
+          const next = new Set(prev);
+          next.delete(sId);
+          return next;
+        });
         showToast('Rezervácia zrušená', 'ok');
         await loadAllClasses(true);
         setSelectedClass(null); // Zatvor detail
       } else {
-        const d = JSON.parse(text).catch(() => ({}));
+        let d = {}; try { d = JSON.parse(text); } catch { d = { message: text }; }
         showToast(d.message || 'Nepodarilo sa zrušiť rezerváciu.', 'err');
       }
     } catch (e) {
@@ -106,14 +148,16 @@ export function BookClassTab({ setActiveTab }) {
       </div>
     );
 
-    const c    = selectedClass;
+    const c = selectedClass;
+    // AK NEMÁ POZÍCIU (.), považujeme ho za aktívneho (prianie užívateľa)
+    const hasPosition = c.waitlistPosition && c.waitlistPosition > 0;
+    const isWaiting = !c.isReserved && hasPosition && (c.isWaiting || forceWaitingIds.has(String(c.id)));
     const free = (c.capacity || 0) - (c.booked || 0);
     const full = c.isFull || free <= 0;
-    const pct  = c.capacity ? Math.round((c.booked / c.capacity) * 100) : 0;
-    const barColor = pct >= 90 ? 'var(--red)' : pct >= 60 ? 'var(--orange)' : 'var(--acid)';
-    const dtStart  = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : '—';
-    const dtEnd    = c.endTime   ? new Date(c.endTime).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }) : '';
-    const dur      = c.durationMinutes ? `${c.durationMinutes} min` : '—';
+    const pct = c.capacity ? Math.round((c.booked / c.capacity) * 100) : 0;
+    const barColor = pct >= 90 ? '#ff4d4d' : pct >= 60 ? 'var(--orange)' : 'var(--acid)';
+    const dtStart = c.startTime ? new Date(c.startTime).toLocaleString('sk-SK', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : '—';
+    const dur = c.durationMinutes ? `${c.durationMinutes} min` : '—';
 
     return (
       <div className="class-detail-inner animate-in">
@@ -122,10 +166,11 @@ export function BookClassTab({ setActiveTab }) {
             <i className="fas fa-chevron-down" />
           </button>
         )}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.8rem', fontWeight: 950, marginBottom: '0.25rem', color: 'var(--text)' }}>{c.name || '—'}</div>
-          <div style={{ fontSize: '0.9rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             <i className="fas fa-user-tie" style={{color: 'var(--acid)'}} /> {c.instructor || 'Tím Fitness Pro'}
+        <div className="cd-header">
+          <h1 className="cd-title">{c.name || '—'}</h1>
+          <div className="cd-instructor">
+            <i className="fas fa-user-circle" />
+            <span>{c.instructor || 'Tím Fitness Pro'}</span>
           </div>
         </div>
 
@@ -145,13 +190,13 @@ export function BookClassTab({ setActiveTab }) {
           <div className="detail-stat-item">
             <div className="fl">KAPACITA</div>
             <div className="val">
-               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.8rem' }}>
-                 <span>{c.booked || 0} / {c.capacity || '?'}</span>
-                 <span style={{ color: barColor }}>{100 - pct}% voľné</span>
-               </div>
-               <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                 <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: '10px' }} />
-               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.8rem' }}>
+                <span>{c.booked || 0} / {c.capacity || '?'}</span>
+                <span style={{ color: barColor }}>{100 - pct}% voľné</span>
+              </div>
+              <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: '10px' }} />
+              </div>
             </div>
           </div>
         </div>
@@ -161,10 +206,35 @@ export function BookClassTab({ setActiveTab }) {
             <button className="btn btn-red btn-block btn-lg" onClick={(e) => cancelClass(e, c.id)} disabled={actionLoading}>
               {actionLoading ? <span className="spinner" /> : <><i className="fas fa-times-circle" /> ZRUŠIŤ MOJU REZERVÁCIU</>}
             </button>
+          ) : isWaiting ? (
+            <div className="waiting-info-detailed">
+              <div className="wi-header">
+                <i className="fas fa-hourglass-half fa-spin-slow" /> STE NA ČAKAČEJ LISTINE
+              </div>
+              <div className="wi-body">
+                <div className="wi-row">
+                  <span className="wi-label">Vaše poradie:</span>
+                  <span className="wi-value">{c.waitlistPosition}. miesto</span>
+                </div>
+                <div className="wi-row">
+                  <span className="wi-label">Celkovo na zozname:</span>
+                  <span className="wi-value">{c.waitlistCount || 1} ľudí</span>
+                </div>
+                <p className="wi-note">Akonáhle sa uvoľní miesto, systém vás automaticky prihlási.</p>
+              </div>
+              <button className="btn btn-orange-outline btn-block btn-lg" onClick={(e) => cancelClass(e, c.id)} disabled={actionLoading}>
+                {actionLoading ? <span className="spinner" /> : <><i className="fas fa-times-circle" /> ODÍSŤ Z FRONTY</>}
+              </button>
+            </div>
           ) : full ? (
-            <button className="btn btn-ghost btn-block btn-lg" disabled style={{ opacity: 0.5 }}>
-              <i className="fas fa-ban" /> LEKCIA JE OBSADENÁ
-            </button>
+            <div style={{ marginBottom: '1rem' }}>
+              <div className="waitlist-info">
+                <i className="fas fa-users" /> Aktuálne na čakačke: <strong>{c.waitlistCount || 0} ľudí</strong>
+              </div>
+              <button className="btn btn-acid-ghost btn-block btn-lg" onClick={() => bookClass(c.id)} disabled={actionLoading}>
+                {actionLoading ? <span className="spinner" /> : <><i className="fas fa-clock" /> VSTÚPIŤ DO ČAKAČKY</>}
+              </button>
+            </div>
           ) : (
             <button className="btn btn-acid btn-block btn-lg" onClick={() => bookClass(c.id)} disabled={actionLoading}>
               {actionLoading ? <span className="spinner" /> : <><i className="fas fa-plus-circle" /> REZERVOVAŤ MIESTO</>}
@@ -182,7 +252,7 @@ export function BookClassTab({ setActiveTab }) {
       <div className="panel list-panel">
         <div className="ph">
           <span className="pt">Dostupné lekcie</span>
-          <button className="btn btn-ghost btn-xs" onClick={() => loadAllClasses()} style={{padding: '0.5rem'}}><i className="fas fa-sync-alt" /></button>
+          <button className="btn btn-ghost btn-xs" onClick={() => loadAllClasses()} style={{ padding: '0.5rem' }}><i className="fas fa-sync-alt" /></button>
         </div>
         <div className="cl-scroller">
           {loading ? (
@@ -192,17 +262,17 @@ export function BookClassTab({ setActiveTab }) {
           ) : classes.filter(c => new Date(c.startTime) > new Date()).length === 0 ? (
             <div className="empty" style={{ padding: '4rem 2rem' }}><i className="fas fa-dumbbell" /><p>Žiadne dostupné lekcie</p></div>
           ) : classes.filter(c => new Date(c.startTime) > new Date()).map(c => {
-            const free     = (c.capacity || 0) - (c.booked || 0);
-            const full     = c.isFull || free <= 0;
+            const free = (c.capacity || 0) - (c.booked || 0);
+            const full = c.isFull || free <= 0;
             const isSelected = selectedClass?.id === c.id;
-            const dtObj    = new Date(c.startTime);
-            const timeStr  = dtObj.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-            const dateStr  = dtObj.toLocaleDateString('sk-SK', { weekday: 'short', day: '2-digit', month: 'short' });
+            const dtObj = new Date(c.startTime);
+            const timeStr = dtObj.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = dtObj.toLocaleDateString('sk-SK', { weekday: 'short', day: '2-digit', month: 'short' });
 
             return (
               <div
                 key={c.id}
-                className={`cl-row${isSelected ? ' cl-row-selected' : ''}`}
+                className={`cl-row${isSelected ? ' cl-row-selected' : ''}${(!c.isReserved && (c.waitlistPosition && c.waitlistPosition > 0) && (c.isWaiting || forceWaitingIds.has(String(c.id)))) ? ' cl-row-waiting' : ''}`}
                 onClick={() => { setSelectedClass(c); setBookMsg({ text: '', type: '' }); }}
               >
                 <div className="cl-row-time-box">
@@ -218,8 +288,9 @@ export function BookClassTab({ setActiveTab }) {
                 </div>
                 <div className="cl-row-status">
                   {c.isReserved ? <span className="badge b-acid">MOJA</span>
-                  : full        ? <span className="badge b-red">PLNÁ</span>
-                  :               <span className="badge b-cyan">{free} voľných</span>}
+                    : c.isWaiting ? <span className="badge b-orange">ČAKÁ SA ({c.waitlistPosition}.)</span>
+                      : full ? <span className="badge b-red">PLNÁ</span>
+                        : <span className="badge b-cyan">{free} voľných</span>}
                 </div>
               </div>
             );
@@ -238,7 +309,8 @@ export function BookClassTab({ setActiveTab }) {
 
       {toast && (
         <div className={`toast-message toast-${toast.type}`}>
-          {toast.type === 'ok' ? '✓' : '⚠'} {toast.msg}
+          <i className={toast.type === 'ok' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'} />
+          <span>{toast.msg}</span>
         </div>
       )}
     </div>

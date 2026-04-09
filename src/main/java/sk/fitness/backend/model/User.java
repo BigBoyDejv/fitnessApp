@@ -60,6 +60,9 @@ public class User {
     @Column(name = "specialization")
     private String specialization;
 
+    @Column(name = "no_show_count")
+    private Integer noShowCount = 0;
+
     @Column(name = "is_active")
     private Boolean isActive = true;
 

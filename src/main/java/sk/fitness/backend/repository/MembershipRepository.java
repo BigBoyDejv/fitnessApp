@@ -13,7 +13,8 @@ import java.util.UUID;
 
 public interface MembershipRepository extends JpaRepository<Membership, UUID> {
 
-    // Aktívne členstvo používateľa
+    // Aktívne členstvo používateľa (vezme najnovšie ak by nastala DUPLICITA)
+    Optional<Membership> findFirstByUserIdAndStatusOrderByCreatedAtDesc(UUID userId, MembershipStatus status);
     Optional<Membership> findByUserIdAndStatus(UUID userId, MembershipStatus status);
 
     // Celá história členstviev zoradená od najnovšej

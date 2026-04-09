@@ -36,6 +36,13 @@ public class Membership {
     @Column(name = "stripe_subscription_id")
     private String stripeSubscriptionId;
 
+    @Column(name = "auto_renew")
+    private Boolean autoRenew = false;
+
+    public Boolean isAutoRenew() {
+        return autoRenew != null && autoRenew;
+    }
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

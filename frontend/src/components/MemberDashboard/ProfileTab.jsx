@@ -20,6 +20,8 @@ export default function ProfileTab({ user, updateUser }) {
   const [newPass2, setNewPass2] = useState('');
   
   const [msg, setMsg] = useState({ text: '', type: '' });
+  const [autoRenew, setAutoRenew] = useState(false);
+  const [membership, setMembership] = useState(null);
 
   useEffect(() => {
     loadProfile();
@@ -44,6 +46,36 @@ export default function ProfileTab({ user, updateUser }) {
     } finally {
       setLoading(false);
     }
+    
+    // Load current membership for auto-renew status
+    try {
+      const resp = await authenticatedFetch('/api/memberships/my');
+      if (resp.ok) {
+        const ms = await resp.json();
+        const active = ms.find(m => m.status === 'active' || m.status === 'ACTIVE');
+        if (active) {
+          setMembership(active);
+          setAutoRenew(active.autoRenew || false);
+        }
+      }
+    } catch (e) { console.error('Membership load err:', e); }
+  };
+
+  const toggleAutoRenew = async () => {
+    if (!membership) return;
+    const newVal = !autoRenew;
+    setAutoRenew(newVal);
+    try {
+       // Obrazná implementácia - voláme backend pre zmenu auto-renew
+       const res = await authenticatedFetch(`/api/memberships/${membership.id}/auto-renew`, {
+         method: 'PATCH',
+         body: JSON.stringify({ autoRenew: newVal })
+       });
+       if (res.ok) {
+         setMsg({ text: `Automatické obnovenie ${newVal ? 'zapnuté' : 'vypnuté'}`, type: 'ok' });
+         setTimeout(() => setMsg({ text: '', type: '' }), 3000);
+       }
+    } catch (e) { console.error(e); }
   };
 
   const saveProfile = async () => {
@@ -269,16 +301,94 @@ export default function ProfileTab({ user, updateUser }) {
             </motion.div>
           )}
 
-          {!['profile', 'security'].includes(activeSubTab) && (
-            <motion.div 
-               key="empty"
-               className="panel" 
-               style={{ padding: '4rem', background: '#161d2b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', textAlign: 'center' }}
-            >
-               <i className="fas fa-tools" style={{ fontSize: '3rem', opacity: 0.1, marginBottom: '1.5rem' }}></i>
-               <h4 style={{ fontSize: '1.2rem', opacity: 0.5 }}>Táto sekcia je vo vývoji</h4>
-            </motion.div>
-          )}
+            {activeSubTab === 'payments' && (
+              <motion.div 
+                 key="payments"
+                 initial={{ opacity: 0, x: 20 }}
+                 animate={{ opacity: 1, x: 0 }}
+                 exit={{ opacity: 0, x: -20 }}
+                 className="panel settings-form-panel" 
+                 style={{ padding: '2.5rem', background: '#161d2b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px' }}
+              >
+                <div style={{ marginBottom: '2.5rem' }}>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '0.4rem' }}>Správa platieb</h3>
+                  <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Nastavenia predplatného a opakovaných faktúr</p>
+                </div>
+
+                {membership ? (
+                  <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '20px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ width: '50px', height: '50px', borderRadius: '15px', background: 'var(--acid)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                          <i className="fas fa-crown"></i>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{membership.membershipType?.name || 'Aktívne členstvo'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Platné do: {membership.endDate}</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--acid)' }}>
+                          {(membership.membershipType?.priceCents / 100).toFixed(2)} €
+                        </div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>MESAČNE</div>
+                      </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <div style={{ fontWeight: 800, marginBottom: '0.2rem' }}>Opakované platby (Stripe)</div>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', maxWidth: '300px' }}>
+                              Vaše predplatné sa automaticky obnoví 24 hodín pred vypršaním.
+                            </p>
+                          </div>
+                          
+                          <label className="switch-wrapper" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                            <div 
+                              onClick={toggleAutoRenew}
+                              style={{ 
+                                width: '50px', height: '26px', background: autoRenew ? 'var(--acid)' : '#334155', 
+                                borderRadius: '15px', position: 'relative', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
+                              }}
+                            >
+                              <div style={{ 
+                                position: 'absolute', top: '3px', left: autoRenew ? '27px' : '3px', 
+                                width: '20px', height: '20px', background: '#fff', borderRadius: '50%',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                              }} />
+                            </div>
+                          </label>
+                       </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
+                     <i className="fas fa-credit-card" style={{ fontSize: '2rem', marginBottom: '1rem' }}></i>
+                     <p>Momentálne nemáte žiadne aktívne predplatné pre správu platieb.</p>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '2rem', padding: '1.2rem', background: 'rgba(56, 189, 248, 0.05)', borderRadius: '16px', border: '1px solid rgba(56, 189, 248, 0.1)', display: 'flex', gap: '1rem' }}>
+                    <i className="fas fa-info-circle" style={{ color: '#38bdf8', marginTop: '0.2rem' }}></i>
+                    <p style={{ fontSize: '0.8rem', color: '#bae6fd', lineHeight: 1.5 }}>
+                      <strong>Poznámka:</strong> Pre zmenu bankovej karty alebo históriu faktúr budete presmerovaní na Stripe Customer Portal.
+                    </p>
+                </div>
+              </motion.div>
+            )}
+
+            {!['profile', 'security', 'payments'].includes(activeSubTab) && (
+              <motion.div 
+                 key="empty"
+                 className="panel" 
+                 style={{ padding: '4rem', background: '#161d2b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', textAlign: 'center' }}
+              >
+                 <i className="fas fa-tools" style={{ fontSize: '3rem', opacity: 0.1, marginBottom: '1.5rem' }}></i>
+                 <h4 style={{ fontSize: '1.2rem', opacity: 0.5 }}>Táto sekcia je vo vývoji</h4>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>

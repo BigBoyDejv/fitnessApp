@@ -90,7 +90,7 @@ public class TrainerAndStatsController {
         if (user == null) return ResponseEntity.status(401).build();
 
         UUID uid = user.getId();
-        long totalBookings = gymClassRepository.findByReservations_User(user).size();
+        long totalBookings = gymClassRepository.findMyClasses(user).size();
         long totalCheckins = checkInRepository.countByUserId(uid);
 
         Map<String, Object> stats = new HashMap<>();
