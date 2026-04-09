@@ -813,7 +813,7 @@ h4 {
 }
 
 .mobile-bottom-dock button.active {
-    color: var(--acid);
+    color: var(--nav-color, var(--acid));
 }
 
 .mobile-bottom-dock button.active span {
@@ -827,9 +827,9 @@ h4 {
     transform: translateX(-50%) scaleX(0);
     width: 28px;
     height: 3px;
-    background: var(--acid);
+    background: var(--nav-color, var(--acid));
     border-radius: 0 0 4px 4px;
-    box-shadow: 0 1px 12px var(--acid);
+    box-shadow: 0 1px 12px var(--nav-color, var(--acid));
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     opacity: 0;
 }
@@ -845,7 +845,7 @@ h4 {
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at top, rgba(200, 255, 0, 0.12), transparent 70%);
+    background: radial-gradient(circle at top, var(--nav-spotlight-color, rgba(200, 255, 0, 0.12)), transparent 70%);
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
@@ -865,14 +865,14 @@ h4 {
 .nav-action-btn i {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, var(--acid), var(--acid2));
+    background: var(--nav-btn-gradient, linear-gradient(135deg, var(--acid), var(--acid2)));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #000;
     font-size: 1.5rem;
-    box-shadow: 0 8px 30px rgba(200, 255, 0, 0.3);
+    box-shadow: 0 8px 30px var(--nav-btn-shadow, rgba(200, 255, 0, 0.3));
     border: 2px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s;
 }

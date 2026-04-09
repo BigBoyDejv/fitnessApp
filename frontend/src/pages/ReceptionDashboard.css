@@ -26,6 +26,12 @@
     display: flex;
     min-height: 100vh;
     width: 100%;
+
+    /* Mobile Nav Colors */
+    --nav-color: var(--purple);
+    --nav-spotlight-color: rgba(191, 90, 242, 0.12);
+    --nav-btn-gradient: linear-gradient(135deg, var(--purple), var(--blue));
+    --nav-btn-shadow: rgba(191, 90, 242, 0.3);
 }
 
 .reception-dashboard * {
